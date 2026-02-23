@@ -1,0 +1,30 @@
+.navbar{
+    display: flex;
+}
+
+.actions{
+    display: flex;
+    gap: 10px;
+}
+
+.create-btn{
+    background: black;
+    color: white;
+    font-family: Satoshi;
+    font-size: 16px;
+    font-weight: 600;
+    width: 204px;
+    height: 45px;
+    border-radius: 5px;
+}
+
+.lgn-btn{
+    background: white;
+    color: black;
+    font-family: Satoshi;
+    font-size: 16px;
+    font-weight: 600;
+    width: 140px;
+    height: 45px;
+    border-radius: 5px;
+}

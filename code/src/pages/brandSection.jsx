@@ -11,6 +11,7 @@ import meet from "../assets/landing-brands/meet.svg";
 import photos from "../assets/landing-brands/photos.svg";
 import search from "../assets/landing-brands/search.svg";
 import shopping from "../assets/landing-brands/shopping.svg";
+import project_logo from "../assets/logo.jpeg";
 
 const logos = [
   assistent,
@@ -32,27 +33,66 @@ function BrandSection() {
 
   return (
     <>
-      <div className="brands">
-        <div className="section-brands">
-          <p>Most famous brands around the world has connected</p>
-        </div>
-        {Array.from({ length: columns }).map((_, columnIndex) => (
-          <div key={columnIndex} className="brands-wrapper">
-            <div className="brands-track">
-              {[...logos, ...logos].map((logo, i) => (
-                <img key={i} src={logo} alt="brand" className="logoPreview" />
-              ))}
-            </div>
+      <div className="brand-section">
+        <div className="brands">
+          <div className="section-brands">
+            <p>Most famous brands around the world has connected</p>
           </div>
-        ))}
-      </div>
-      <div className="des">
-            <div className="companies" style={{fontWeight: "600", fontSize: "25px"}}>For Companies
-              
-                <p>This is the testing paragraph desctiption for comapnies section </p>
+          {Array.from({ length: columns }).map((_, columnIndex) => (
+            <div key={columnIndex} className="brands-wrapper">
+              <div className="brands-track">
+                {[...logos, ...logos].map((logo, i) => (
+                  <img key={i} src={logo} alt="brand" className="logoPreview" />
+                ))}
+              </div>
             </div>
-              
-            <div className="charities" style={{fontWeight: "600", fontSize: "25px"}}>For Charities</div>
+          ))}
+        </div>
+        <table className="info-table">
+          <thead>
+            <tr>
+              <th>For Companies</th>
+              <th>For Charities</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                This is the testing paragraph description for companies section.
+                This is the testing paragraph description for companies section.
+                This is the testing paragraph description for companies section.
+                This is the testing paragraph description for companies section.
+                This is the testing paragraph description for companies section.
+              </td>
+              <td>
+                This is the testing paragraph description for companies section.
+                This is the testing paragraph description for companies section.
+                This is the testing paragraph description for companies section.
+                This is the testing paragraph description for companies section.
+                This is the testing paragraph description for companies section.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div className="project-Merch">
+          <div
+            className="project-left"
+            style={{
+              fontFamily: "poppins",
+              fontWeight: "600",
+              fontSize: "30px",
+            }}
+          >
+            Merch4Change
+          </div>
+          <div className="project-right">
+            <img
+              src={project_logo}
+              alt="project logo"
+              className="project-logo"
+            />
+          </div>
+        </div>
       </div>
     </>
   );

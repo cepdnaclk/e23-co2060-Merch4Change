@@ -1,4 +1,5 @@
 import "./landing.css";
+import Navbar from "../components/Navbar";
 import BrandSection from "./brandSection";
 
 function LandingPage({ onNavigate }) {
@@ -14,6 +15,7 @@ function LandingPage({ onNavigate }) {
 
     return (
     <>
+        <Navbar/>
         <div className="landing-page">
             <div className="title1">
                 <h1 style={{fontSize: "40px", textAlign: "left",fontWeight: 600, fontFamily: "Poppins",background: "linear-gradient(90deg, #0f2027, #345864, #547e90)",
