@@ -28,3 +28,15 @@
     height: 45px;
     border-radius: 5px;
 }
+
+.landing-btn-secondary {
+    background-color: transparent;
+    color: rgb(0, 0, 0);
+    border: 2px solid rgb(0, 0, 0);
+}
+
+.landing-btn-secondary:hover {
+    transform: translateY(-3px);
+    background-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}

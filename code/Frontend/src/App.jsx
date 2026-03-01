@@ -3,6 +3,7 @@ import LandingPage from "./pages/landing/LandingPage";
 import SelectSignUp from "./pages/selectsignup/SelectSignUp";
 import LoginPage from "./pages/login/LoginPage"; 
 import OrgSignupPage from "./pages/signup/OrgSignupPage";
+import MessagingInterface from "./components/messagingInterface";
 
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
       {page === 'login' && <LoginPage onNavigate={navigate} />}
       {page === 'selectsignup' && <SelectSignUp onNavigate={navigate} />}
       {page === 'organizationsignup' && <OrgSignupPage onNavigate={navigate} />}
+      {page === 'messaging' && <MessagingInterface onNavigate={navigate} />}
       
     </>
   );
