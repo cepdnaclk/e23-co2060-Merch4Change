@@ -1,5 +1,5 @@
 import "./LandingPage.css";
-import Navbar from "../../components/Navbar";
+import Navbar from "../../components/Navbar/Navbar";
 import BrandSection from "./BrandSection";
 
 function LandingPage({ onNavigate }) {
