@@ -97,7 +97,8 @@
   padding-top: 8px;
   border-top: 1px solid #eee;
   display: flex;
-  justify-content: space-around;
+  justify-content: left;
+  gap: 30px;
 }
 
 .post-actions button {
@@ -112,4 +113,17 @@
 .post-actions button:hover {
   color: #1877f2;
   transform: scale(1.05);
+}
+
+.post-svgs{
+  max-width: 20px;
+  max-height: 20px;
+}
+
+.post-icons{
+  display: flex;
+}
+
+.post-icons p{
+  margin: 0;
 }

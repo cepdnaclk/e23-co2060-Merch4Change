@@ -2,10 +2,16 @@ import { useEffect, useRef, useState } from "react"
 import "./Post.css"
 import test from "../../assets/test.jpg"
 import postImage from "../../assets/icon.png"
+import shop from "../../assets/post_icons/shop.svg"
+import heart from "../../assets/post_icons/heart.svg"
+import redheart from "../../assets/post_icons/red-heart.svg"
+import comments from "../../assets/post_icons/comments.svg"
+import share from "../../assets/post_icons/share.svg"
 
 function Post() {
   const postRef = useRef(null)
   const [showDetails, setShowDetails] = useState(false)
+  const [like, setLike] = useState(false)
 
   useEffect(() => {
     let timer
@@ -15,7 +21,7 @@ function Post() {
         if (entry.isIntersecting) {
           timer = setTimeout(() => {
             setShowDetails(true)
-          }, 1000)   // 1 second stop → show details
+          }, 3000)   // 3 second stop → show details
         } else {
           clearTimeout(timer)
           setShowDetails(false)
@@ -59,9 +65,29 @@ function Post() {
       </div>
 
       <div className="post-actions">
-        <button>❤️ Like</button>
-        <button>💬 Comment</button>
-        <button>↗ Share</button>
+        <div className="post-icons">
+          <button><img src={shop} alt="shop" className="post-svgs" /></button>
+        </div>
+
+        <div className="post-icons">
+          <button onClick={() => setLike(!like)}>
+            {like ? (
+              <img src={redheart} alt="red-hearto-icon" className="post-svgs" />
+            ) : (
+              <img src={heart} alt="heart-icon" className="post-svgs" />
+            )}
+          </button>
+          <p className="count">100</p>
+        </div>
+
+        <div className="post-icons">
+          <button><img src={comments} alt="comment-icon" className="post-svgs" /></button>
+          <p className="count">100</p>
+        </div>
+
+        <div className="post-icons">
+          <button><img src={share} alt="share-icon" className="post-svgs" /></button>
+        </div>
       </div>
 
     </div>
