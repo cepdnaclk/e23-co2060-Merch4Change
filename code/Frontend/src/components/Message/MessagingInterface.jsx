@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import "./MessagingInterface.css";
-import Navbar from "./Navbar";
+import Navbar from "../Navbar/Navbar";
+
 import {
     ensureGuestUserSession,
 	getActiveUser,

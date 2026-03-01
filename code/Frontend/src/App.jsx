@@ -3,7 +3,7 @@ import LandingPage from "./pages/landing/LandingPage";
 import SelectSignUp from "./pages/selectsignup/SelectSignUp";
 import LoginPage from "./pages/login/LoginPage"; 
 import OrgSignupPage from "./pages/signup/OrgSignupPage";
-import MessagingInterface from "./components/messagingInterface";
+import MessagingInterface from "./components/Message/MessagingInterface";
 
 
 function App() {
