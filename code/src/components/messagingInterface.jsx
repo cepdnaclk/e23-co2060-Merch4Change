@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import "./messagingInterface.css";
+import Navbar from "./Navbar";
 import {
     ensureGuestUserSession,
 	getActiveUser,
@@ -74,10 +75,12 @@ function MessagingInterface({ onNavigate }) {
 
 	if (!activeUser) return null;
 
-	return (
-        
+	return (	
+        <>
+			<Navbar onNavigate={onNavigate}/>
 		<div className="messaging-shell">
             
+
 			<aside className="messaging-sidebar">
 				<h3>Signed in as</h3>
 				<p className="active-user-name">{activeUser.name}</p>
@@ -135,7 +138,7 @@ function MessagingInterface({ onNavigate }) {
 			</section>
             
 		</div>
-        
+    </>
 	);
 }
 

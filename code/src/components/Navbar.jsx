@@ -1,11 +1,25 @@
 import "./Navbar.css";
 import icon from "../assets/icon.png"
 
-function Navbar() {
+function Navbar({ onNavigate }) {
+  const handleLogoClick = () => {
+    if (typeof onNavigate === "function") {
+      onNavigate("landing");
+      return;
+    }
+
+    try {
+      localStorage.setItem("page", "landing");
+    } catch (e) {
+      
+    }
+    window.location.reload();
+  };
+
   return (
     <>
       <nav className="navbar">
-        <div className="logo">
+        <div className="logo" onClick={handleLogoClick} style={{cursor: "pointer"}}>
             <img src={icon} width={50} style={{borderRadius: 10}}/>
         </div>
 
