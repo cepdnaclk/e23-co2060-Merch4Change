@@ -2,18 +2,22 @@ import "./Navbar.css";
 import icon from "../assets/icon.png"
 
 function Navbar({ onNavigate }) {
-  const handleLogoClick = () => {
+  const goToPage = (page) => {
     if (typeof onNavigate === "function") {
-      onNavigate("landing");
+      onNavigate(page);
       return;
     }
 
     try {
-      localStorage.setItem("page", "landing");
+      localStorage.setItem("page", page);
     } catch (e) {
       
     }
     window.location.reload();
+  };
+
+  const handleLogoClick = () => {
+    goToPage("landing");
   };
 
   return (
@@ -25,8 +29,9 @@ function Navbar({ onNavigate }) {
 
         <div className="Navbar">
           <div className="actions">
-            <button className="lgn-btn">Log In</button>
-            <button className="create-btn">Create an Account</button>
+            <button onClick={() => goToPage('login')} className="lgn-btn" >Log In</button>
+            <button onClick={() => goToPage('selectsignup')} className="create-btn">Create an Account</button>
+            <button onClick={() => goToPage('messaging')} className="landing-btn landing-btn-secondary">Chat</button>
           </div>
         </div>
         
