@@ -27,9 +27,7 @@ function OrgSignupPage({ onNavigate }) {
             return;
         }
         console.log('Organization signup data:', formData);
-        // TODO: Submit to backend
         alert('Organization signup submitted!');
-        // Reset form
         setFormData({
             orgName: '',
             email: '',
@@ -50,7 +48,7 @@ function OrgSignupPage({ onNavigate }) {
     };
 
     return (
-        <>
+        <div className="org-signup-container">
             <div className="org-nav-bar">
                 <button onClick={goHome}>LOGO</button>
             </div>
@@ -147,7 +145,7 @@ function OrgSignupPage({ onNavigate }) {
                     </button>
                 </form>
             </div>
-        </>
+        </div>
     );
 }
 

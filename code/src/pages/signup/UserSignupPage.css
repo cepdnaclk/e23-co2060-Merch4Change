@@ -1,8 +1,7 @@
-/* Import a modern font */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 
-/* Container with animated purple gradient */
-.org-signup-container {
+/* Container */
+.user-signup-container {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -20,7 +19,7 @@
 }
 
 /* Navbar */
-.org-nav-bar {
+.user-nav-bar {
     width: 100%;
     padding: 20px;
     display: flex;
@@ -30,7 +29,7 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.org-nav-bar button {
+.user-nav-bar button {
     background: none;
     border: none;
     font-size: 20px;
@@ -41,13 +40,13 @@
     transition: transform 0.2s ease, color 0.3s ease;
 }
 
-.org-nav-bar button:hover {
+.user-nav-bar button:hover {
     transform: scale(1.1);
     color: #a18cd1;
 }
 
-/* Form container */
-.org-signup-form-container {
+/* Form Container */
+.user-signup-form-container {
     position: relative;
     max-width: 600px;
     width: 90%;
@@ -60,12 +59,12 @@
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.org-signup-form-container:hover {
+.user-signup-form-container:hover {
     transform: translateY(-5px);
     box-shadow: 0 15px 45px rgba(142, 68, 173, 0.3);
 }
 
-.org-signup-form-container h1 {
+.user-signup-form-container h1 {
     font-size: 42px;
     font-weight: 700;
     text-align: center;
@@ -73,27 +72,26 @@
     margin-bottom: 30px;
 }
 
-/* Form fields */
-.org-form {
+/* Form */
+.user-form {
     display: flex;
     flex-direction: column;
     gap: 28px;
 }
 
-/* Form group layout */
-.org-form-group {
+.user-form-group {
     display: flex;
     flex-direction: column;
     gap: 14px;
 }
 
-.org-form-group label {
+.user-form-group label {
     font-weight: 600;
-    color: #333;
     font-size: 14px;
+    color: #333;
 }
 
-.org-form-group input {
+.user-form-group input {
     padding: 14px;
     border-radius: 8px;
     border: 2px solid #ddd;
@@ -102,18 +100,14 @@
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.org-form-group input:focus {
+.user-form-group input:focus {
     outline: none;
     border-color: #8e44ad;
     box-shadow: 0 0 10px rgba(142, 68, 173, 0.4);
 }
 
-.org-form-group input::placeholder {
-    color: #999;
-}
-
-/* Submit button */
-.org-submit-btn {
+/* Submit Button */
+.user-submit-btn {
     padding: 16px 24px;
     font-size: 16px;
     font-weight: bold;
@@ -126,29 +120,8 @@
     transition: transform 0.2s ease, box-shadow 0.3s ease, background 0.3s ease;
 }
 
-.org-submit-btn:hover {
+.user-submit-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(142, 68, 173, 0.4);
     background: linear-gradient(90deg, #a18cd1, #8e44ad);
-}
-
-.org-submit-btn:active {
-    transform: translateY(0);
-}
-
-/* Responsive */
-@media (max-width: 600px) {
-    .org-signup-form-container {
-        margin: 20px;
-        padding: 20px;
-    }
-
-    .org-signup-form-container h1 {
-        font-size: 32px;
-        margin-bottom: 20px;
-    }
-
-    .org-form {
-        gap: 24px;
-    }
 }
