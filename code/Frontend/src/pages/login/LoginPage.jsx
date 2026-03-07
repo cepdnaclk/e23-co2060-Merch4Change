@@ -1,8 +1,10 @@
 import { useState } from "react";
 import "./LoginPage.css";
 import Navbar from "../../components/Navbar/Navbar";
+import { useNavigate } from "react-router-dom";
 
-function LoginPage({ onNavigate }) {
+function LoginPage() {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         email: '',
         password: ''
@@ -72,7 +74,7 @@ function LoginPage({ onNavigate }) {
                     </div>
 
                     <div className="login-signup-prompt">
-                        <p>Don't have an account? <span onClick={() => goToPage('selectsignup')} className="signup-link">Sign up here</span></p>
+                        <p>Don't have an account? <span onClick={() => navigate('/signup')} className="signup-link">Sign up here</span></p>
                     </div>
                 </div>
             </div>
