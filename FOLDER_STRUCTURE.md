@@ -2,6 +2,7 @@
 
 src/
 
+# components 
 components/
 Reusable UI components.
 
@@ -10,6 +11,7 @@ Sidebar.jsx
 Navbar.jsx
 ProductCard.jsx
 
+# pages
 pages/
 Main application pages.
 
@@ -18,6 +20,7 @@ Home.jsx
 Profile.jsx
 Shop.jsx
 
+# assets
 assets/
 Images, icons, and static files.
 global images:
@@ -29,6 +32,7 @@ Example:
 logo.png
 test.jpg
 
+# services
 services/
 API communication.
 
@@ -36,6 +40,7 @@ Example:
 authService.js
 productService.js
 
+# custom hooks
 hooks/
 Custom React hooks.
 
