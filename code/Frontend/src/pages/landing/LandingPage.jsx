@@ -1,17 +1,11 @@
+import { useNavigate } from "react-router-dom";
 import "./LandingPage.css";
 import Navbar from "../../components/Navbar/Navbar";
 import BrandSection from "./BrandSection";
 
-function LandingPage({ onNavigate }) {
+function LandingPage() {
 
-    // Function to handle navigation to pages
-    const goToPage = (page) => {
-        if (typeof onNavigate === 'function') {
-            onNavigate(page);
-        } else {
-            window.location.href = `/${page}`;
-        }
-    }
+    const navigate = useNavigate();
 
     return (
     <>
@@ -29,8 +23,8 @@ function LandingPage({ onNavigate }) {
             </div>
 
             <div className="landing-buttons-container">
-                <button onClick={() => goToPage('login')} className="landing-btn landing-btn-primary">Login</button>
-                <button onClick={() => goToPage('selectsignup')} className="landing-btn landing-btn-secondary">Sign Up</button>
+                <button onClick={() => navigate('/login')} className="landing-btn landing-btn-primary">Login</button>
+                <button onClick={() => navigate('/selectsignup')} className="landing-btn landing-btn-secondary">Sign Up</button>
             </div>
         </div>
         <BrandSection/>

@@ -1,21 +1,16 @@
+import { useNavigate } from "react-router-dom";
 import "./SelectSignUp.css"
 
 const isMobile = window.innerWidth < 768;
 
-function SelectSignUp({ onNavigate }) {
-    const goToPage = (page) => {
-        if (typeof onNavigate === 'function') {
-            onNavigate(page);
-        } else {
-            window.location.href = `/${page}`;
-        }
-    }
+function SelectSignUp() {
+    const navigate = useNavigate();
 
     return ( 
         <>
         <div className="nav-bar">
-            <button onClick={() => goToPage('landing')}> LOGO </button>
-            <button onClick={() => goToPage('login')} className="login">Log In</button>
+            <button onClick={() => navigate('/')}> LOGO </button>
+            <button onClick={() => navigate('/login')} className="login">Log In</button>
         </div>
         <div className="heading">
             <div className="main-heading">
@@ -27,7 +22,7 @@ function SelectSignUp({ onNavigate }) {
         </div>
 
         <div className="selection">
-            <div className="section1" onClick={() => goToPage('organizationsignup')} style={{cursor: 'pointer'}}>
+            <div className="section1" onClick={() => navigate('/orgsignup')} style={{cursor: 'pointer'}}>
                 {isMobile? <h3 style={{fontFamily: "Satoshi", fontSize:"25px"}}>As an organization</h3>
                 :<h3 style={{fontFamily: "Satoshi", fontSize:"30px"}}>Create account as a Organization</h3>
                 }

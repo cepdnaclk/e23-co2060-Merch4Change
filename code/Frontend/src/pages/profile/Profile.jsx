@@ -1,6 +1,6 @@
-import "./profile.css";
-import test from "../assets/test.jpg";
-import Sidebar from "../components/sidebar/Sidebar.jsx";
+import "./Profile.css";
+import test from "../../assets/test.jpg";
+import Sidebar from "../../components/Sidebar/Sidebar";
 
 function Profile() {
     return (
