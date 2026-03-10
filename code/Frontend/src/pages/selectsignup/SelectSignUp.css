@@ -4,6 +4,9 @@
   font-weight: normal;
   font-style: normal;
 }
+.main{
+    display: flex;
+}
 
 .heading {
   margin-left: 50px;
