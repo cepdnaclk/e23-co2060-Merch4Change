@@ -8,7 +8,7 @@ import {
 	getContacts,
 	getConversation,
 	sendMessageAndComputeReply,
-} from "../services/messagingService";
+} from "../../services/messagingService";
 
 function MessagingInterface({ onNavigate }) {
 	{/*

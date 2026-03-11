@@ -1,8 +1,8 @@
-import "./Profile.css";
+import "./UserProfile.css";
 import test from "../../assets/test.jpg";
 import Sidebar from "../../components/Sidebar/Sidebar";
 
-function Profile() {
+function UserProfile() {
     return (
         <>
             <Sidebar />
@@ -58,4 +58,4 @@ function Profile() {
     );
 }
 
-export default Profile;
+export default UserProfile;

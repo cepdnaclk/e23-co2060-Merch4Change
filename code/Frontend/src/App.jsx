@@ -1,12 +1,15 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import LandingPage from "./pages/landing/LandingPage";
-import SelectSignUp from "./pages/selectsignup/SelectSignUp";
-import LoginPage from "./pages/login/LoginPage";
+import LandingPage from "./pages/Landing/LandingPage";
+import SelectSignUp from "./pages/SelectSignUp/SelectSignUp";
+import LoginPage from "./pages/Login/LoginPage";
 import MessagingInterface from "./components/Message/MessagingInterface";
 import Home from "./pages/Home/Home";
-import Profile from "./pages/profile/Profile";
-import OrgSignupPage from "./pages/signup/OrgSignupPage";
+import UserProfile from "./pages/UserProfile/UserProfile";
+import OrgSignupPage from "./pages/SignUp/OrgSignupPage";
 import Settings from "./pages/Settings/Settings";
+import OrgProfile from "./pages/OrgProfile/OrgProfile";
+import OrgCommunities from "./pages/OrgCommunities/OrgCommunities";
+import OrgProjects from "./pages/OrgProjects/OrgProjects";
 
 function App() {
     return (
@@ -26,7 +29,11 @@ function App() {
                 <Route path="/settings" element={<Settings />} />
 
                 {/* Dynamic Route: Perfect for Social Media Profiles */}
-                <Route path="/profile/:username" element={<Profile />} />
+                <Route path="/profile/:username" element={<UserProfile />} />
+                {/* Dynamic Route: Perfect for Charity Profiles */}
+                <Route path="/organization/:username" element={<OrgProfile />} />
+                <Route path="/organization/:username/projects" element={<OrgProjects />} />
+                <Route path="/organization/:username/communities" element={<OrgCommunities />} />
 
                 {/* Fallback: Redirect any unknown URL to landing */}
                 <Route path="*" element={<Navigate to="/" />} />
