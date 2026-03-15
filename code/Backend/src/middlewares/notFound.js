@@ -1,8 +1,12 @@
+import { errorResponse } from "../utils/apiResponse.js";
+
 const notFound = (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: `Route not found: ${req.method} ${req.originalUrl}`,
-  });
+  return errorResponse(
+    res,
+    404,
+    `Route not found: ${req.method} ${req.originalUrl}`,
+    "ROUTE_NOT_FOUND",
+  );
 };
 
 export default notFound;
