@@ -1,16 +1,9 @@
-<<<<<<< HEAD:code/Frontend/src/pages/UserProfile/UserProfile.jsx
+import { useEffect, useState } from "react";
 import "./UserProfile.css";
 import test from "../../assets/test.jpg";
 import Sidebar from "../../components/Sidebar/Sidebar";
 
 function UserProfile() {
-=======
-import { useEffect, useState } from "react";
-import "./Profile.css";
-import test from "../../assets/test.jpg";
-import Sidebar from "../../components/Sidebar/Sidebar";
-
-function Profile() {
     const [profileData, setProfileData] = useState(null);
 
     useEffect(() => {
@@ -26,7 +19,6 @@ function Profile() {
             .catch(() => {});
     }, []);
 
->>>>>>> backend:code/Frontend/src/pages/profile/Profile.jsx
     return (
         <>
             <Sidebar />

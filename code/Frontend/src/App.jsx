@@ -12,6 +12,12 @@ import OrgProfile from "./pages/OrgProfile/OrgProfile";
 import OrgCommunities from "./pages/OrgCommunities/OrgCommunities";
 import OrgProjects from "./pages/OrgProjects/OrgProjects";
 import PublicLayout from "./components/PublicLayout/PublicLayout";
+import FAQ from "./pages/FAQ/FAQ";
+import HelpAndSupport from "./pages/HelpAndSupport/HelpAndSupport";
+import Contact from "./pages/HelpAndSupport/Contact";
+import OurStory from "./pages/About/OurStory";
+import Mission from "./pages/About/Mission";
+import Team from "./pages/About/Team";
 
 function App() {
     return (
@@ -26,6 +32,12 @@ function App() {
                     <Route path="/signup" element={<SelectSignUp />} />
                     <Route path="/signup/orgsignup" element={<OrgSignupPage />} />
                     <Route path="/signup/usersignup" element={<UserSignupPage />} />
+                    <Route path="/faq" element={<FAQ />} />
+                    <Route path="/help" element={<HelpAndSupport />} />
+                    <Route path="/help/contact" element={<Contact />} />
+                    <Route path="/about/story" element={<OurStory />} />
+                    <Route path="/about/mission" element={<Mission />} />
+                    <Route path="/about/team" element={<Team />} />
                 </Route>
         
                 {/* Private/App Routes */}

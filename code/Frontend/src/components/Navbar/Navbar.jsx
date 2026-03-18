@@ -15,17 +15,17 @@ const navDropdowns = [
   {
     label: "About",
     items: [
-      { label: "Project Idea", target: "/#services" },
-      { label: "Why Merch4Change", target: "/#services" },
-      { label: "Partner Network", target: "/#brand-network" },
+      { label: "Our Story", target: "/about/story" },
+      { label: "Our Mission", target: "/about/mission" },
+      { label: "Meet the Team", target: "/about/team" },
     ],
   },
   {
     label: "Help & Support",
     items: [
-      { label: "Getting Started", target: "/#support-start" },
-      { label: "FAQs", target: "/#support-faq" },
-      { label: "Contact Support", target: "/#support-contact" },
+      { label: "Help Center", target: "/help" },
+      { label: "FAQs", target: "/faq" },
+      { label: "Contact Us", target: "/help/contact" },
     ],
   },
 ];

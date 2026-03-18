@@ -29,20 +29,6 @@ function OrgSignupPage({ onNavigate }) {
             alert('Passwords do not match');
             return;
         }
-<<<<<<< HEAD
-        console.log('Organization signup data:', formData);
-        // TODO: Submit to backend
-        alert('Organization signup submitted!');
-        setFormData({
-            orgName: '',
-            email: '',
-            password: '',
-            confirmPassword: '',
-            phone: '',
-            address: '',
-            website: ''
-        });
-=======
         try {
             const response = await fetch('http://localhost:5000/api/v1/profiles/organization', {
                 method: 'POST',
@@ -69,7 +55,6 @@ function OrgSignupPage({ onNavigate }) {
         } catch (err) {
             alert('Network error. Please try again.');
         }
->>>>>>> backend
     };
 
     const goHome = () => {
