@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import "./LandingPage.css";
 import BrandSection from "./BrandSection";
+import Footer from "../../components/Footer/Footer";
 
 function LandingPage() {
 
@@ -26,6 +27,7 @@ function LandingPage() {
             </div>
         </div>
         <BrandSection/>
+        <Footer />
     </>
     );
 }
