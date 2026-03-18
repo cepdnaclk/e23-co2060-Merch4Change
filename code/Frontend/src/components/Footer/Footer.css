@@ -1,4 +1,6 @@
 .footer-container {
+  position: relative;
+  z-index: 5;
   background-color: #0f2027;
   color: #fff;
   padding: 60px 5% 20px;

@@ -20,7 +20,7 @@ function Contact() {
               <span className="detail-icon">📍</span>
               <div>
                 <h4>Headquarters</h4>
-                <p>123 Impact Way, Colombo, Sri Lanka</p>
+                <p>Sri Lanka</p>
               </div>
             </div>
             
@@ -47,12 +47,12 @@ function Contact() {
           <form className="contact-form" onSubmit={handleSubmit}>
             <div className="form-group">
               <label>Full Name</label>
-              <input type="text" placeholder="John Doe" required />
+              <input type="text" placeholder="Jagath Hemantha" required />
             </div>
             
             <div className="form-group">
               <label>Email Address</label>
-              <input type="email" placeholder="john@example.com" required />
+              <input type="email" placeholder="jagath@example.com" required />
             </div>
             
             <div className="form-group">

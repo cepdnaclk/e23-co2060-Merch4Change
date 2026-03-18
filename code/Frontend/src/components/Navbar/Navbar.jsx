@@ -17,7 +17,7 @@ const navDropdowns = [
     items: [
       { label: "Our Story", target: "/about/story" },
       { label: "Our Mission", target: "/about/mission" },
-      { label: "Meet the Team", target: "/about/team" },
+      { label: "Team Antigravity", target: "/about/team" },
     ],
   },
   {
