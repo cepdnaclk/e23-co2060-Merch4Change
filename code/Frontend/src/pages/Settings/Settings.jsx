@@ -7,7 +7,7 @@ const Settings = ({ onNavigate }) => {
 
       <div style={{ marginTop: "20px" }}>
         <h3>Account</h3>
-        <ul>
+        <ul> 
           <li>Password</li>
           <li>Security</li>
           <li>Personal Details</li>
@@ -18,7 +18,7 @@ const Settings = ({ onNavigate }) => {
         <h3>Privacy</h3>
         <ul>
           <li>Account Privacy</li>
-          <li>Blocked Users</li>
+          <li>Blocked Users</li>` `
           <li>Close Friends</li>
         </ul>
       </div>
