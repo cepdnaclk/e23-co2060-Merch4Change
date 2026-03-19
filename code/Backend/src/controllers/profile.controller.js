@@ -16,8 +16,9 @@ const createToken = (userId) => {
 
 export const createOrganizationProfile = asyncHandler(async (req, res) => {
   const { orgName, email, password, phone, address, website } = req.body;
+  const normalizedEmail = String(email).toLowerCase().trim();
 
-  const existingUser = await User.findOne({ email });
+  const existingUser = await User.findOne({ email: normalizedEmail });
 
   if (existingUser) {
     throw new AppError("Email is already in use.", 409, "EMAIL_ALREADY_IN_USE");
@@ -27,7 +28,7 @@ export const createOrganizationProfile = asyncHandler(async (req, res) => {
 
   const createdUser = await User.create({
     fullName: orgName,
-    email,
+    email: normalizedEmail,
     password: hashedPassword,
     accountType: "organization",
   });

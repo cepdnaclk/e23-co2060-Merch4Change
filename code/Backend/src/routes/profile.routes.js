@@ -8,11 +8,13 @@ import { validateOrganizationProfileCreateBody } from "../validators/profile.val
 const router = Router();
 
 router.post(
-  "/organization",
+  "/signup/organization",
   validateRequest({ body: validateOrganizationProfileCreateBody }),
   createOrganizationProfile,
 );
 
-router.get("/organization", protect, getOrganizationProfile);
+router.post("/login", protect, getOrganizationProfile);
+
+//router.get("/login", protect, getOrganizationProfile);
 
 export default router;
