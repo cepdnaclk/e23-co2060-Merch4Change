@@ -86,7 +86,11 @@ function Navbar() {
               <button
                 type="button"
                 className={`nav-dropdown-trigger ${openMenu === dropdown.label ? "is-open" : ""}`}
-                onClick={() => setOpenMenu(openMenu === dropdown.label ? null : dropdown.label)}
+                onClick={() =>
+                  setOpenMenu(
+                    openMenu === dropdown.label ? null : dropdown.label,
+                  )
+                }
                 aria-expanded={openMenu === dropdown.label}
               >
                 {dropdown.label}
@@ -112,13 +116,17 @@ function Navbar() {
         </div>
 
         <div className="navbar-actions">
-        {showLoginButton && (
-          <button onClick={() => navigate("/login")} className="lgn-btn">Log In</button>
-        )}
+          {showLoginButton && (
+            <button onClick={() => navigate("/login")} className="lgn-btn">
+              Log In
+            </button>
+          )}
 
-        {showSignUpButton && (
-          <button onClick={() => navigate("/signup")} className="create-btn">Sign Up</button>
-        )}
+          {showSignUpButton && (
+            <button onClick={() => navigate("/signup")} className="create-btn">
+              Sign Up
+            </button>
+          )}
         </div>
       </div>
     </nav>

@@ -1,12 +1,9 @@
-import "./Feed.css"
-import Post from "../Post/Post"
+import "./Feed.css";
+import Post from "../Post/Post";
 
 function Feed() {
   return (
     <div className="feed">
-
-      
-
       {/* Posts */}
       <div className="posts">
         <Post />
@@ -24,9 +21,8 @@ function Feed() {
         <Post />
         <Post />
       </div>
-
     </div>
-  )
+  );
 }
 
-export default Feed
+export default Feed;
