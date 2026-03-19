@@ -1,7 +1,7 @@
-.brand-section{
+.brand-section {
   position: relative;
   z-index: 2;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   margin-top: -48px;
   padding-bottom: 64px;
   background: white;
@@ -25,7 +25,7 @@
   gap: 40px;
   padding: 5px 60px;
   align-items: center;
-  margin-bottom: 40px; 
+  margin-bottom: 40px;
 }
 
 .brands-track {
@@ -85,29 +85,29 @@
 
 .info-table th:last-child,
 .info-table td:last-child {
-  border-right:rgba(0, 0, 0, 0.15);
+  border-right: rgba(0, 0, 0, 0.15);
 }
 
-.project-Merch{
-    display: flex;
-    margin-left: 100px;
-    margin-right: 100px;
-    justify-content: space-around;
-    align-items: center;
-    gap: 40px;
+.project-Merch {
+  display: flex;
+  margin-left: 100px;
+  margin-right: 100px;
+  justify-content: space-around;
+  align-items: center;
+  gap: 40px;
 }
 
-.project-left{
-    display: flex;
-    flex-direction: column;
-    max-width: 560px;
+.project-left {
+  display: flex;
+  flex-direction: column;
+  max-width: 560px;
 }
 
-.project-logo{
-    max-width: 400px;
-    width: 100%;
-    border: 1px solid black;
-    border-radius: 18px;
+.project-logo {
+  max-width: 400px;
+  width: 100%;
+  border: 1px solid black;
+  border-radius: 18px;
 }
 
 .content-section {

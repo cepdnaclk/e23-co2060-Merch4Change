@@ -3,33 +3,33 @@ import { useEffect } from "react";
 import Navbar from "../Navbar/Navbar";
 
 function PublicLayout() {
-    const location = useLocation();
+  const location = useLocation();
 
-    useEffect(() => {
-        if (!location.hash) {
-            if (location.pathname === "/") {
-                window.scrollTo({ top: 0, behavior: "smooth" });
-            }
-            return;
-        }
+  useEffect(() => {
+    if (!location.hash) {
+      if (location.pathname === "/") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      return;
+    }
 
-        const elementId = location.hash.replace("#", "");
+    const elementId = location.hash.replace("#", "");
 
-        requestAnimationFrame(() => {
-            const target = document.getElementById(elementId);
+    requestAnimationFrame(() => {
+      const target = document.getElementById(elementId);
 
-            if (target) {
-                target.scrollIntoView({ behavior: "smooth", block: "start" });
-            }
-        });
-    }, [location.pathname, location.hash]);
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+  }, [location.pathname, location.hash]);
 
-    return (
-        <>
-            <Navbar />
-            <Outlet />
-        </>
-    );
+  return (
+    <>
+      <Navbar />
+      <Outlet />
+    </>
+  );
 }
 
 export default PublicLayout;
