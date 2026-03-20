@@ -8,10 +8,6 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint .",
-<<<<<<< HEAD
-=======
-    "preview": "vite preview",
->>>>>>> main
     "lint:fix": "eslint . --fix",
     "format": "prettier --write ."
   },
