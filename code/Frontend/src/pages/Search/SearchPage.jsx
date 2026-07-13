@@ -7,13 +7,6 @@ import SearchResultItem from "../../components/TopNavbar/search/SearchResultItem
 import { searchAll } from "../../api/searchService";
 import "./SearchPage.css";
 
-const PAGES = [
-  { title: "Donate", path: "/donations", desc: "Make a donation" },
-  { title: "Login", path: "/login", desc: "Sign in to your account" },
-  { title: "Register", path: "/signup/usersignup", desc: "Create an account" },
-  { title: "My Orders", path: "/orders", desc: "Your purchases" },
-];
-
 export default function SearchPage() {
   const { query, setQuery, results, loading } = useSearch();
   const navigate = useNavigate();
@@ -28,6 +21,7 @@ export default function SearchPage() {
   });
 
   const [suggestions, setSuggestions] = useState([]);
+  const [filter, setFilter] = useState("all");
 
   useEffect(() => {
     if (recentSearches.length === 0) {
@@ -67,11 +61,14 @@ export default function SearchPage() {
       else navigate("/under-construction");
     }
     else if (category === "products") navigate("/marketplace");
-    else if (category === "pages") navigate(item.path);
-  }
-
   const anyResults = results && (results.users?.length || results.charities?.length || results.projects?.length || results.products?.length);
-  const pageMatches = PAGES.filter(p => query && p.title.toLowerCase().includes(query.toLowerCase()));
+
+  const showUsers = (filter === "all" || filter === "users") && results?.users?.length > 0;
+  const showCharities = (filter === "all" || filter === "charities") && results?.charities?.length > 0;
+  const showProjects = (filter === "all" || filter === "projects") && results?.projects?.length > 0;
+  const showProducts = (filter === "all" || filter === "products") && results?.products?.length > 0;
+
+  const anyVisibleResults = showUsers || showCharities || showProjects || showProducts;
 
   return (
     <div className={`luminous-app`}>
@@ -92,6 +89,29 @@ export default function SearchPage() {
                  />
                  {loading && <Loader2 className="search-page-spinner" size={20} color="#888" />}
                </div>
+
+               {query.length >= 2 && results && (
+                 <div className="search-page-filters" style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '16px', flexWrap: 'wrap' }}>
+                   {['all', 'users', 'charities', 'projects', 'products'].map(f => (
+                     <button
+                       key={f}
+                       onClick={() => setFilter(f)}
+                       style={{
+                         padding: '6px 12px',
+                         borderRadius: '20px',
+                         border: '1px solid #f0f0f0',
+                         background: filter === f ? '#4A24E1' : 'white',
+                         color: filter === f ? 'white' : '#666',
+                         cursor: 'pointer',
+                         textTransform: 'capitalize',
+                         fontSize: '13px'
+                       }}
+                     >
+                       {f}
+                     </button>
+                   ))}
+                 </div>
+               )}
             </div>
 
             <div className="search-page-results-wrapper">
@@ -101,9 +121,9 @@ export default function SearchPage() {
                     <div className="search-page-spinner-large"><Loader2 size={32} color="#4A24E1" /></div>
                     <p>Searching...</p>
                   </div>
-                ) : anyResults || pageMatches.length > 0 ? (
+                ) : anyVisibleResults ? (
                   <div className="search-page-results-list">
-                    {results.users && results.users.length > 0 && (
+                    {showUsers && (
                       <div className="search-page-section">
                         <div className="search-page-section-header">USERS</div>
                         <div className="search-page-grid">
@@ -116,7 +136,7 @@ export default function SearchPage() {
                       </div>
                     )}
 
-                    {results.charities && results.charities.length > 0 && (
+                    {showCharities && (
                       <div className="search-page-section">
                         <div className="search-page-section-header">CHARITIES</div>
                         <div className="search-page-grid">
@@ -129,7 +149,7 @@ export default function SearchPage() {
                       </div>
                     )}
 
-                    {results.projects && results.projects.length > 0 && (
+                    {showProjects && (
                       <div className="search-page-section">
                         <div className="search-page-section-header">PROJECTS</div>
                         <div className="search-page-grid">
@@ -142,7 +162,7 @@ export default function SearchPage() {
                       </div>
                     )}
 
-                    {results.products && results.products.length > 0 && (
+                    {showProducts && (
                       <div className="search-page-section">
                         <div className="search-page-section-header">PRODUCTS</div>
                         <div className="search-page-grid">
@@ -154,25 +174,12 @@ export default function SearchPage() {
                         </div>
                       </div>
                     )}
-
-                    {pageMatches.length > 0 && (
-                      <div className="search-page-section">
-                        <div className="search-page-section-header">PAGES</div>
-                        <div className="search-page-grid">
-                          {pageMatches.map((pg) => (
-                            <div key={`pg-${pg.path}`} className="search-page-result-card" onClick={() => handleSelect({ category: 'pages', item: pg })}>
-                              <SearchResultItem item={{ title: pg.title, desc: pg.desc }} category="pages" query={query} />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
                   </div>
                 ) : (
                   <div className="search-page-empty">
                     <div className="search-page-empty-icon">🔍</div>
                     <h3>No results for "{query}"</h3>
-                    <p>Try searching for a charity, project, or product.</p>
+                    <p>{filter !== "all" ? `No results found in ${filter}.` : "Try searching for a charity, project, or product."}</p>
                   </div>
                 )
               ) : recentSearches.length > 0 ? (
