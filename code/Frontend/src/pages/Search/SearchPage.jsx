@@ -61,6 +61,8 @@ export default function SearchPage() {
       else navigate("/under-construction");
     }
     else if (category === "products") navigate("/marketplace");
+  }
+
   const anyResults = results && (results.users?.length || results.charities?.length || results.projects?.length || results.products?.length);
 
   const showUsers = (filter === "all" || filter === "users") && results?.users?.length > 0;
