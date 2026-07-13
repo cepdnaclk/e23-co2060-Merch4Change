@@ -12,11 +12,28 @@ const escapeRegex = (s = "") => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 export const searchAll = asyncHandler(async (req, res) => {
   const q = String(req.query.q || "").trim();
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 8;
+  const skip = (page - 1) * limit;
+
   if (q.length < 2) throw new AppError("Query must be at least 2 characters.", 400, "VALIDATION_ERROR");
 
   const cleanedQuery = q.startsWith("@") ? q.substring(1) : q;
-  const cleanedRegex = new RegExp(escapeRegex(cleanedQuery), "i");
-  const regex = new RegExp(escapeRegex(q), "i"); // keep original regex for non-user queries
+
+  const createFuzzyRegex = (str) => {
+    if (str.length < 3) return new RegExp(escapeRegex(str), "i");
+    const parts = [escapeRegex(str)];
+    const len = Math.min(str.length, 12);
+    for (let i = 0; i < len; i++) {
+      const dropped = str.substring(0, i) + str.substring(i + 1);
+      if (dropped.length >= 2) parts.push(escapeRegex(dropped));
+      parts.push(escapeRegex(str.substring(0, i)) + "." + escapeRegex(str.substring(i + 1)));
+    }
+    return new RegExp(parts.join("|"), "i");
+  };
+
+  const cleanedRegex = createFuzzyRegex(cleanedQuery);
+  const regex = createFuzzyRegex(q);
   const isAdmin = !!(req.user && req.user.role === "admin");
 
   // run queries in parallel
@@ -39,34 +56,49 @@ export const searchAll = asyncHandler(async (req, res) => {
   const userPromise = User.find({
     $or: userFilters,
   })
-    .limit(4)
+    .skip(skip)
+    .limit(limit + 1)
     .select("firstName lastName userName email role");
 
   const charitiesPromise = Charity.find({
     $or: [{ publicName: regex }, { contactEmail: regex }],
     ...(isAdmin ? {} : { verificationStatus: "verified" }),
   })
-    .limit(4)
+    .skip(skip)
+    .limit(limit + 1)
     .select("publicName contactEmail website ownerUserId");
 
   const projectsPromise = Project.find({
     $or: [{ title: regex }, { description: regex }],
   })
-    .limit(4)
+    .skip(skip)
+    .limit(limit + 1)
     .select("title charityId collectedAmount goalAmount");
 
   const productsPromise = Product.find({
     $or: [{ name: regex }, { description: regex }],
   })
-    .limit(4)
+    .skip(skip)
+    .limit(limit + 1)
     .select("name price brandId");
 
-  const [users, charities, projects, products] = await Promise.all([
+  const [rawUsers, rawCharities, rawProjects, rawProducts] = await Promise.all([
     userPromise,
     charitiesPromise,
     projectsPromise,
     productsPromise,
   ]);
+
+  const hasMore =
+    rawUsers.length > limit ||
+    rawCharities.length > limit ||
+    rawProjects.length > limit ||
+    rawProducts.length > limit;
+
+  const users = rawUsers.slice(0, limit);
+  const charities = rawCharities.slice(0, limit);
+  const projects = rawProjects.slice(0, limit);
+  const products = rawProducts.slice(0, limit);
 
   // compute totalRaised for charities (sum donations)
   const charityIds = (charities || []).map((c) => c._id);
@@ -168,7 +200,7 @@ export const searchAll = asyncHandler(async (req, res) => {
     totalCount: (shapedUsers.length + shapedCharities.length + shapedProjects.length + shapedProducts.length),
   };
 
-  return successResponse(res, 200, "Search results fetched.", { query: q, results });
+  return successResponse(res, 200, "Search results fetched.", { query: q, hasMore, results });
 });
 
 export default { searchAll };
