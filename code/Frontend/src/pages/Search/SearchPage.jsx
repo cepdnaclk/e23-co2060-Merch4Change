@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import { useSearch } from "../../hooks/useSearch";
@@ -8,8 +8,20 @@ import { searchAll } from "../../api/searchService";
 import "./SearchPage.css";
 
 export default function SearchPage() {
-  const { query, setQuery, results, loading } = useSearch();
+  const { query, setQuery, results, loading, hasMore, loadMore } = useSearch();
   const navigate = useNavigate();
+
+  const observer = useRef();
+  const lastElementRef = useCallback(node => {
+    if (loading) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        loadMore();
+      }
+    });
+    if (node) observer.current.observe(node);
+  }, [loading, hasMore, loadMore]);
 
   const [recentSearches, setRecentSearches] = useState(() => {
     try {
@@ -228,6 +240,12 @@ export default function SearchPage() {
                             </div>
                           ))}
                         </div>
+                      </div>
+                    )}
+
+                    {hasMore && (
+                      <div ref={lastElementRef} style={{ textAlign: "center", padding: "20px 0", gridColumn: "1 / -1" }}>
+                        <Loader2 size={24} color="#4A24E1" className="search-page-spinner-large" style={{ margin: "0 auto" }} />
                       </div>
                     )}
                   </div>
