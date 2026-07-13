@@ -17,7 +17,24 @@ export default function SearchPage() {
   const { query, setQuery, results, loading } = useSearch();
   const navigate = useNavigate();
 
+  const [recentSearches, setRecentSearches] = useState(() => {
+    try {
+      const saved = localStorage.getItem("m4c_recent_searches");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
   function handleSelect({ category, item }) {
+    const searchEntry = { category, item, id: item.id || item.title || item.userName || Math.random().toString() };
+    setRecentSearches(prev => {
+      const filtered = prev.filter(s => s.id !== searchEntry.id);
+      const next = [searchEntry, ...filtered].slice(0, 10);
+      localStorage.setItem("m4c_recent_searches", JSON.stringify(next));
+      return next;
+    });
+
     if (category === "users") {
       if (item.userName) navigate(`/profile/${item.userName}`);
       else navigate("/profile/me");
@@ -139,6 +156,19 @@ export default function SearchPage() {
                     <p>Try searching for a charity, project, or product.</p>
                   </div>
                 )
+              ) : recentSearches.length > 0 ? (
+                <div className="search-page-results-list">
+                  <div className="search-page-section">
+                    <div className="search-page-section-header">RECENT SEARCHES</div>
+                    <div className="search-page-grid">
+                      {recentSearches.map((rs, idx) => (
+                        <div key={`rs-${rs.id}-${idx}`} className="search-page-result-card" onClick={() => handleSelect({ category: rs.category, item: rs.item })}>
+                          <SearchResultItem item={rs.item} category={rs.category} query="" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               ) : null}
             </div>
           </div>
