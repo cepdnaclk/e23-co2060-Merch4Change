@@ -15,8 +15,21 @@ export const searchAll = asyncHandler(async (req, res) => {
   if (q.length < 2) throw new AppError("Query must be at least 2 characters.", 400, "VALIDATION_ERROR");
 
   const cleanedQuery = q.startsWith("@") ? q.substring(1) : q;
-  const cleanedRegex = new RegExp(escapeRegex(cleanedQuery), "i");
-  const regex = new RegExp(escapeRegex(q), "i"); // keep original regex for non-user queries
+
+  const createFuzzyRegex = (str) => {
+    if (str.length < 3) return new RegExp(escapeRegex(str), "i");
+    const parts = [escapeRegex(str)];
+    const len = Math.min(str.length, 12);
+    for (let i = 0; i < len; i++) {
+      const dropped = str.substring(0, i) + str.substring(i + 1);
+      if (dropped.length >= 2) parts.push(escapeRegex(dropped));
+      parts.push(escapeRegex(str.substring(0, i)) + "." + escapeRegex(str.substring(i + 1)));
+    }
+    return new RegExp(parts.join("|"), "i");
+  };
+
+  const cleanedRegex = createFuzzyRegex(cleanedQuery);
+  const regex = createFuzzyRegex(q);
   const isAdmin = !!(req.user && req.user.role === "admin");
 
   // run queries in parallel
