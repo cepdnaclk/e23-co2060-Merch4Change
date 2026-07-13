@@ -16,21 +16,30 @@ export function useSearch() {
       return;
     }
 
+    const abortController = new AbortController();
+
     const timer = setTimeout(async () => {
       setLoading(true);
       setError(null);
       try {
-        const { data } = await searchAll(query);
+        const { data } = await searchAll(query, { signal: abortController.signal });
         setResults(data.data.results);
         setOpen(true);
       } catch (err) {
-        setError(err);
+        if (err.name !== "CanceledError" && err.message !== "canceled") {
+          setError(err);
+        }
       } finally {
-        setLoading(false);
+        if (!abortController.signal.aborted) {
+          setLoading(false);
+        }
       }
-    }, 300);
+    }, 400);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      abortController.abort();
+    };
   }, [query]);
 
   return { query, setQuery, results, loading, error, open, setOpen };
