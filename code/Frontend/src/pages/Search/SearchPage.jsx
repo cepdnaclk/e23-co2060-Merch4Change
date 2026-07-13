@@ -22,6 +22,33 @@ export default function SearchPage() {
 
   const [suggestions, setSuggestions] = useState([]);
   const [filter, setFilter] = useState("all");
+  const [prediction, setPrediction] = useState("");
+
+  useEffect(() => {
+    if (!query || query.length < 2 || !results) {
+      setPrediction("");
+      return;
+    }
+
+    const lowerQuery = query.toLowerCase();
+    let match = "";
+    
+    if (results.charities?.length && results.charities[0].name.toLowerCase().startsWith(lowerQuery)) {
+      match = results.charities[0].name;
+    } else if (results.projects?.length && results.projects[0].name.toLowerCase().startsWith(lowerQuery)) {
+      match = results.projects[0].name;
+    } else if (results.products?.length && results.products[0].name.toLowerCase().startsWith(lowerQuery)) {
+      match = results.products[0].name;
+    } else if (results.users?.length && results.users[0].userName.toLowerCase().startsWith(lowerQuery)) {
+      match = results.users[0].userName;
+    }
+
+    if (match) {
+      setPrediction(query + match.substring(query.length));
+    } else {
+      setPrediction("");
+    }
+  }, [query, results]);
 
   useEffect(() => {
     if (recentSearches.length === 0) {
@@ -63,6 +90,13 @@ export default function SearchPage() {
     else if (category === "products") navigate("/marketplace");
   }
 
+  function handleKeyDown(e) {
+    if ((e.key === "Tab" || e.key === "ArrowRight") && prediction && prediction.toLowerCase().startsWith(query.toLowerCase()) && prediction !== query) {
+      e.preventDefault();
+      setQuery(prediction);
+    }
+  }
+
   const anyResults = results && (results.users?.length || results.charities?.length || results.projects?.length || results.products?.length);
 
   const showUsers = (filter === "all" || filter === "users") && results?.users?.length > 0;
@@ -80,16 +114,36 @@ export default function SearchPage() {
           <div className="search-page-container">
             <div className="search-page-header">
                <div className="search-page-input-wrapper">
-                 <Search className="search-page-icon" size={15} color="#888" />
+                 <Search className="search-page-icon" size={15} color="#888" style={{ zIndex: 2 }} />
+                 
+                 {prediction && prediction.toLowerCase().startsWith(query.toLowerCase()) && prediction !== query && (
+                   <input
+                     className="search-page-input"
+                     style={{
+                       position: 'absolute',
+                       top: 0,
+                       left: 0,
+                       color: '#ccc',
+                       background: 'transparent',
+                       zIndex: 0,
+                       pointerEvents: 'none'
+                     }}
+                     value={prediction}
+                     readOnly
+                   />
+                 )}
+
                  <input 
                    type="text" 
                    className="search-page-input"
                    placeholder="Search causes, charities, projects, people..."
                    value={query}
                    onChange={(e) => setQuery(e.target.value)}
+                   onKeyDown={handleKeyDown}
                    autoFocus
+                   style={{ background: 'transparent', zIndex: 1, position: 'relative' }}
                  />
-                 {loading && <Loader2 className="search-page-spinner" size={20} color="#888" />}
+                 {loading && <Loader2 className="search-page-spinner" size={20} color="#888" style={{ zIndex: 2 }} />}
                </div>
 
                {query.length >= 2 && results && (
