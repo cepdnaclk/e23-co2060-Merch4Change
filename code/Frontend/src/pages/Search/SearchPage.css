@@ -14,9 +14,11 @@
   display: flex;
   align-items: center;
   background: white;
-  border-radius: 12px;
+  border-radius: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   transition: box-shadow 0.2s ease, transform 0.2s ease;
+  max-width: 500px;
+  margin: 0 auto;
 }
 
 .search-page-input-wrapper:focus-within {
@@ -26,13 +28,13 @@
 
 .search-page-icon {
   position: absolute;
-  left: 20px;
+  left: 16px;
 }
 
 .search-page-input {
   width: 100%;
-  padding: 20px 20px 20px 56px;
-  font-size: 18px;
+  padding: 10px 16px 10px 48px;
+  font-size: 16px;
   font-family: 'DM Sans', sans-serif;
   border: 1px solid transparent;
   border-radius: 12px;
@@ -85,10 +87,11 @@
   transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
 }
 
-.search-page-result-card:hover {
+.search-page-result-card:hover,
+.search-page-result-card.selected {
   transform: translateY(-2px);
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
-  border-color: #e4e4e4;
+  border-color: #4A24E1;
 }
 
 /* Ensure the SearchResultItem inherits clean padding since it's inside a card now */
