@@ -87,10 +87,11 @@
   transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
 }
 
-.search-page-result-card:hover {
+.search-page-result-card:hover,
+.search-page-result-card.selected {
   transform: translateY(-2px);
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
-  border-color: #e4e4e4;
+  border-color: #4A24E1;
 }
 
 /* Ensure the SearchResultItem inherits clean padding since it's inside a card now */
