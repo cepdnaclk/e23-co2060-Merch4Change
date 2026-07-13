@@ -4,6 +4,7 @@ import Sidebar from "../../components/Sidebar/Sidebar";
 import { useSearch } from "../../hooks/useSearch";
 import { Search, Loader2 } from "lucide-react";
 import SearchResultItem from "../../components/TopNavbar/search/SearchResultItem";
+import { searchAll } from "../../api/searchService";
 import "./SearchPage.css";
 
 const PAGES = [
@@ -25,6 +26,24 @@ export default function SearchPage() {
       return [];
     }
   });
+
+  const [suggestions, setSuggestions] = useState([]);
+
+  useEffect(() => {
+    if (recentSearches.length === 0) {
+      // Fetch some generic results to use as random suggestions
+      searchAll("a")
+        .then((res) => {
+          if (res.data?.data?.results?.users) {
+            const users = res.data.data.results.users;
+            // Shuffle and pick 3
+            const shuffled = [...users].sort(() => 0.5 - Math.random());
+            setSuggestions(shuffled.slice(0, 3).map((u) => ({ category: "users", item: u })));
+          }
+        })
+        .catch(() => {});
+    }
+  }, [recentSearches.length]);
 
   function handleSelect({ category, item }) {
     const searchEntry = { category, item, id: item.id || item.title || item.userName || Math.random().toString() };
@@ -169,7 +188,24 @@ export default function SearchPage() {
                     </div>
                   </div>
                 </div>
-              ) : null}
+              ) : suggestions.length > 0 ? (
+                <div className="search-page-results-list">
+                  <div className="search-page-section">
+                    <div className="search-page-section-header">SUGGESTED FOR YOU</div>
+                    <div className="search-page-grid">
+                      {suggestions.map((sug, idx) => (
+                        <div key={`sug-${sug.item.id || idx}`} className="search-page-result-card" onClick={() => handleSelect({ category: sug.category, item: sug.item })}>
+                          <SearchResultItem item={sug.item} category={sug.category} query="" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="search-page-empty">
+                  <p style={{ color: "#888", marginTop: "40px" }}>No recent searches</p>
+                </div>
+              )}
             </div>
           </div>
         </main>
