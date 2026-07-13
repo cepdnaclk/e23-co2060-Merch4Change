@@ -178,7 +178,18 @@ export default function SearchPage() {
               ) : recentSearches.length > 0 ? (
                 <div className="search-page-results-list">
                   <div className="search-page-section">
-                    <div className="search-page-section-header">RECENT SEARCHES</div>
+                    <div className="search-page-section-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span>RECENT SEARCHES</span>
+                      <button
+                        onClick={() => {
+                          setRecentSearches([]);
+                          localStorage.removeItem("m4c_recent_searches");
+                        }}
+                        style={{ background: "none", border: "none", color: "#4A24E1", cursor: "pointer", fontSize: "13px", fontWeight: "bold", padding: 0 }}
+                      >
+                        Clear All
+                      </button>
+                    </div>
                     <div className="search-page-grid">
                       {recentSearches.map((rs, idx) => (
                         <div key={`rs-${rs.id}-${idx}`} className="search-page-result-card" onClick={() => handleSelect({ category: rs.category, item: rs.item })}>
