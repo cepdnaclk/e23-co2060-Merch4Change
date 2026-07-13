@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import TopNavbar from "../../components/TopNavbar/TopNavbar";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import ConversationList from "./components/ConversationList";
 import ChatWindow from "./components/ChatWindow";
@@ -268,14 +267,6 @@ function MessagingPage() {
 
   return (
     <div className={`luminous-app ${isSidebarCollapsed ? "sidebar-collapsed" : ""}`}>
-      <TopNavbar
-        isSidebarCollapsed={isSidebarCollapsed}
-        setIsSidebarCollapsed={setIsSidebarCollapsed}
-        profileData={profileData}
-        activeTab="messages"
-        onTabChange={handleTabChange}
-      />
-
       <div className="lum-layout">
         <Sidebar profileData={profileData} setIsSidebarCollapsed={setIsSidebarCollapsed} />
 
