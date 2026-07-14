@@ -223,14 +223,16 @@ e23-co2060-Merch4Change/
 │   │       │   ├── Message/      # Messaging interface
 │   │       │   ├── Sidebar/      # Navigation sidebars
 │   │       │   └── PublicLayout/ # Layouts for public pages
+│   │       ├── context/          # Context API Providers
+│   │       ├── hooks/            # Custom React hooks (e.g., useSearch)
 │   │       ├── pages/            # Main application pages
 │   │       │   ├── Home/         # User dashboard and feed
+│   │       │   ├── Landing/      # Public landing page
 │   │       │   ├── Marketplace/  # Product browsing and buying
+│   │       │   ├── Search/       # Advanced global search
 │   │       │   ├── Settings/     # User profile settings
 │   │       │   ├── SignUp/       # Multi-step authentication flow
-│   │       │   ├── UserProfile/  # Public and private user profiles
-│   │       │   └── Landing/      # Public landing page
-│   │       ├── context/          # Context API Providers
+│   │       │   └── UserProfile/  # Public and private user profiles
 │   │       ├── App.jsx           # Main application routing
 │   │       ├── index.css         # Global styles
 │   │       └── main.jsx          # React entry point

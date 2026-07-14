@@ -10,18 +10,20 @@
   --color-accent: #4a24e1;
 
   display: flex;
-  height: calc(100vh - 75px);
+  height: 100vh;
   min-height: 600px;
   overflow: hidden;
   font-family: 'DM Sans', sans-serif;
   background: var(--color-background-primary);
-  border-radius: 16px;
-  border: 0.5px solid var(--color-border-tertiary);
 }
 
 .messaging-main-content {
   max-width: none !important;
-  padding: 0 16px !important;
+  padding: 0 !important;
+}
+
+.lum-layout.messaging-layout {
+  padding-bottom: 0 !important;
 }
 
 .messaging-empty-state-shell {
@@ -388,7 +390,8 @@
   flex-shrink: 0;
 }
 .msg-bubble {
-  max-width: 65%;
+  max-width: 600px;
+  width: max-content;
   padding: 10px 14px;
   border-radius: 16px;
   font-size: 14px;
@@ -397,6 +400,8 @@
   background: var(--color-background-tertiary);
   border-radius: 16px 16px 16px 4px;
   font-family: 'Inter', sans-serif;
+  word-break: break-word;
+  white-space: pre-wrap;
 }
 .msg-row.mine .msg-bubble {
   background: var(--color-accent);
@@ -421,6 +426,7 @@
 .msg-col {
   display: flex;
   flex-direction: column;
+  max-width: 85%;
 }
 .msg-row.mine .msg-col {
   align-items: flex-end;
