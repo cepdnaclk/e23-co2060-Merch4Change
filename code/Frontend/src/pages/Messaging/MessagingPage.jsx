@@ -21,6 +21,7 @@ function MessagingPage() {
   const [messages, setMessages] = useState([]);
   const [activeContactId, setActiveContactId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isConvListCollapsed, setIsConvListCollapsed] = useState(false);
   const [profileData, setProfileData] = useState({
     firstName: "Guest",
     lastName: "User",
@@ -301,6 +302,8 @@ function MessagingPage() {
                 onSelect={handleSelectConversation}
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}
+                isCollapsed={isConvListCollapsed}
+                onToggleCollapse={() => setIsConvListCollapsed(!isConvListCollapsed)}
               />
               <div className="mc-container">
                 {error && <div className="up-loading" style={{ minHeight: 0 }}><p>{error}</p></div>}
@@ -313,6 +316,8 @@ function MessagingPage() {
                     activeContact={activeContact}
                     messages={messages}
                     onSendMessage={handleSendMessage}
+                    isConvListCollapsed={isConvListCollapsed}
+                    onToggleConvList={() => setIsConvListCollapsed(!isConvListCollapsed)}
                   />
                 )}
               </div>

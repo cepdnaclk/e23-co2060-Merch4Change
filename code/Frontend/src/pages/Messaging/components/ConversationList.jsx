@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, ChevronLeft } from 'lucide-react';
 
-function ConversationList({ conversations, activeId, onSelect, searchQuery, setSearchQuery }) {
+function ConversationList({ conversations, activeId, onSelect, searchQuery, setSearchQuery, isCollapsed, onToggleCollapse }) {
   const [activeTab, setActiveTab] = useState('all');
 
   const filteredConversations = conversations.filter((c) => {
@@ -10,10 +10,17 @@ function ConversationList({ conversations, activeId, onSelect, searchQuery, setS
     return matchTab && matchSearch;
   });
 
+  if (isCollapsed) return null;
+
   return (
     <div className="ml">
       <div className="ml-header">
-        <div className="ml-title">Messages</div>
+        <div className="ml-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          Messages
+          <button onClick={onToggleCollapse} className="mc-hbtn" style={{ border: 'none', background: 'transparent' }} title="Collapse sidebar">
+            <ChevronLeft size={18} />
+          </button>
+        </div>
         <div className="ml-search">
           <Search size={16} />
           <input
