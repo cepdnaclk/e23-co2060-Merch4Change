@@ -267,7 +267,7 @@ function MessagingPage() {
 
   return (
     <div className={`luminous-app ${isSidebarCollapsed ? "sidebar-collapsed" : ""}`}>
-      <div className="lum-layout">
+      <div className="lum-layout messaging-layout">
         <Sidebar profileData={profileData} setIsSidebarCollapsed={setIsSidebarCollapsed} />
 
         <main className="lum-main-content messaging-main-content">
