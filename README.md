@@ -36,7 +36,7 @@ A full-stack web platform that bridges **brands**, **charities**, and **communit
 
 ## 🌟 About the Project
 
-**Merch4Change** is a responsive web platform built for the **Dev{thon} 3.0** competition by Team Antigravity (DEV-0207) from the University of Peradeniya, and continued as a 2nd Year Project (2YP) for CO2060.
+**Merch4Change** is a responsive web platform built by Team Antigravity from the University of Peradeniya  as a 2nd Year Project (2YP) for CO2060.
 
 The platform solves three real problems:
 
