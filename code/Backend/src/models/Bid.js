@@ -19,6 +19,12 @@ const bidSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+    status: {
+      type: String,
+      enum: ["active", "outbid", "won", "refunded"],
+      default: "active",
+      index: true,
+    },
   },
   {
     timestamps: { createdAt: true, updatedAt: false },
@@ -26,6 +32,7 @@ const bidSchema = new mongoose.Schema(
   },
 );
 
+bidSchema.index({ auctionId: 1, createdAt: -1 });
 const Bid = mongoose.model("Bid", bidSchema);
 
 export default Bid;
