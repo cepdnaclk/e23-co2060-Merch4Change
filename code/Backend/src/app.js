@@ -29,6 +29,7 @@ import { logInfo, sanitizeUrlForLog } from "./utils/logger.js";
 import charityRoutes from "./routes/charity.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
+import auctionRoutes from "./routes/auction.routes.js";
 
 
 const app = express();
@@ -96,6 +97,7 @@ app.use("/api/donations", dashboardDonationsRoutes);
 app.use("/api/v1/charities", charityRoutes);
 app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/notifications", notificationRoutes);
+app.use("/api/v1/auctions", auctionRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
