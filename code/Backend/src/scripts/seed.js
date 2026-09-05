@@ -7,7 +7,6 @@ import Charity from "../models/Charity.js";
 import Product from "../models/Product.js";
 import Project from "../models/Project.js";
 import Donation from "../models/Donation.js";
-import UserDonation from "../models/UserDonation.js";
 import Order from "../models/Order.js";
 import CoinTransaction from "../models/CoinTransaction.js";
 
@@ -94,7 +93,6 @@ async function seed() {
     await Product.deleteMany({});
     await Project.deleteMany({});
     await Donation.deleteMany({});
-    await UserDonation.deleteMany({});
     await Order.deleteMany({});
     await CoinTransaction.deleteMany({});
     console.log("Existing data cleared.");
@@ -343,19 +341,17 @@ async function seed() {
       const project = createdProjects[item.userIndex % createdProjects.length];
 
       // Add a primary large donation
-      await Donation.create({
+      const donation = await Donation.create({
         donorUserId: donor._id,
         charityId: charity._id,
         charityProjectId: project._id,
         coinAmount: item.coins,
+        status: "completed",
       });
 
-      await UserDonation.create({
-        user: donor._id,
-        charity: charity.publicName,
-        project: project.title,
-        amount: item.coins,
-        status: "completed",
+      // Update project collected amount
+      await Project.findByIdAndUpdate(project._id, {
+        $inc: { collectedAmount: item.coins },
       });
 
       await CoinTransaction.create({
@@ -363,6 +359,7 @@ async function seed() {
         type: "donate",
         amount: item.coins,
         refType: "donation",
+        refId: donation._id,
       });
     }
     console.log(`✅ Seeded realistic donor rankings.`);

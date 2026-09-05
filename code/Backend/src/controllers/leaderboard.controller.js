@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import Donation from "../models/Donation.js";
-import UserDonation from "../models/UserDonation.js";
 import User from "../models/User.js";
 import Brand from "../models/Brand.js";
 import Order from "../models/Order.js";
@@ -45,68 +44,36 @@ export const getDonorLeaderboard = asyncHandler(async (req, res) => {
   const limit = Math.min(Number(req.query.limit) || 20, 100);
   const timeFilter = getTimeframeFilter(timeframe);
 
-  // Aggregate from both Donation and UserDonation collections
-  const [standardDonations, legacyDonations] = await Promise.all([
-    Donation.aggregate([
-      { $match: { ...timeFilter } },
-      {
-        $group: {
-          _id: "$donorUserId",
-          totalCoins: { $sum: "$coinAmount" },
-          donationCount: { $sum: 1 },
-          lastDonatedAt: { $max: "$createdAt" },
-        },
+  const rankedDonors = await Donation.aggregate([
+    { $match: { status: "completed", ...timeFilter } },
+    {
+      $group: {
+        _id: "$donorUserId",
+        totalCoins: { $sum: "$coinAmount" },
+        donationCount: { $sum: 1 },
+        lastDonatedAt: { $max: "$createdAt" },
       },
-    ]),
-    UserDonation.aggregate([
-      { $match: { status: "completed", ...timeFilter } },
-      {
-        $group: {
-          _id: "$user",
-          totalCoins: { $sum: "$amount" },
-          donationCount: { $sum: 1 },
-          lastDonatedAt: { $max: "$createdAt" },
-        },
-      },
-    ]),
+    },
+    { $sort: { totalCoins: -1 } },
+    { $limit: limit },
   ]);
 
-  // Merge donation records by user ID
-  const userMap = new Map();
-
-  for (const item of [...standardDonations, ...legacyDonations]) {
-    if (!item._id) continue;
-    const userIdStr = item._id.toString();
-    if (!userMap.has(userIdStr)) {
-      userMap.set(userIdStr, {
-        userId: item._id,
-        totalCoins: item.totalCoins,
-        donationCount: item.donationCount,
-        lastDonatedAt: item.lastDonatedAt,
-      });
-    } else {
-      const existing = userMap.get(userIdStr);
-      existing.totalCoins += item.totalCoins;
-      existing.donationCount += item.donationCount;
-      if (item.lastDonatedAt > existing.lastDonatedAt) {
-        existing.lastDonatedAt = item.lastDonatedAt;
-      }
-    }
-  }
-
-  const mergedDonors = Array.from(userMap.values())
-    .sort((a, b) => b.totalCoins - a.totalCoins)
-    .slice(0, limit);
+  const donorList = rankedDonors.map((item) => ({
+    userId: item._id,
+    totalCoins: item.totalCoins,
+    donationCount: item.donationCount,
+    lastDonatedAt: item.lastDonatedAt,
+  }));
 
   // Populate user profile info
-  const userIds = mergedDonors.map((d) => d.userId);
+  const userIds = donorList.map((d) => d.userId);
   const users = await User.find({ _id: { $in: userIds } })
     .select("firstName lastName userName profileImageUrl role isVerified")
     .lean();
 
   const userDetailMap = new Map(users.map((u) => [u._id.toString(), u]));
 
-  const leaderboard = mergedDonors
+  const leaderboard = donorList
     .map((item, index) => {
       const user = userDetailMap.get(item.userId.toString());
       if (!user) return null;
@@ -246,18 +213,16 @@ export const getCompanyLeaderboard = asyncHandler(async (req, res) => {
  * Returns aggregate platform community statistics.
  */
 export const getLeaderboardStats = asyncHandler(async (req, res) => {
-  const [standardTotal, legacyTotal, totalDonorsCount, verifiedCharitiesCount] = await Promise.all([
-    Donation.aggregate([{ $group: { _id: null, total: { $sum: "$coinAmount" } } }]),
-    UserDonation.aggregate([
+  const [standardTotal, totalDonorsCount, verifiedCharitiesCount] = await Promise.all([
+    Donation.aggregate([
       { $match: { status: "completed" } },
-      { $group: { _id: null, total: { $sum: "$amount" } } },
+      { $group: { _id: null, total: { $sum: "$coinAmount" } } },
     ]),
     User.countDocuments({ role: "user" }),
     User.countDocuments({ role: "charity" }),
   ]);
 
-  const totalCoinsDonated =
-    (standardTotal[0]?.total || 0) + (legacyTotal[0]?.total || 0);
+  const totalCoinsDonated = standardTotal[0]?.total || 0;
 
   return successResponse(res, 200, "Leaderboard stats fetched successfully.", {
     totalCoinsDonated,
