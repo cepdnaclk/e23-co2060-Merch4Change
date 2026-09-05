@@ -16,6 +16,7 @@ import DonationModal from "../../components/donations/DonationModal";
 import { MapPin, X } from "lucide-react";
 import { getUserProducts } from "../../api/productsService";
 import CreateProductModal from "../../components/CreateProductModal/CreateProductModal";
+import TopCustomers from "../../components/TopCustomers/TopCustomers";
 
 const hqIcon = new L.Icon({
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
@@ -66,6 +67,30 @@ function UserProfile() {
   const [products, setProducts] = useState([]);
   const [isProductsLoading, setIsProductsLoading] = useState(false);
   const [createProductModalOpen, setCreateProductModalOpen] = useState(false);
+  const [viewerCoins, setViewerCoins] = useState(0);
+
+  useEffect(() => {
+    if (!token) return;
+    apiClient.get("/api/v1/profile/me/coins")
+      .then((res) => {
+        if (res.data?.success && typeof res.data.data?.coinBalance === "number") {
+          setViewerCoins(res.data.data.coinBalance);
+        }
+      })
+      .catch(() => {});
+  }, [token]);
+
+  const handleDonationCommitted = (spentCoins, remainingCoins) => {
+    setViewerCoins((prev) => {
+      const next = typeof remainingCoins === "number" ? remainingCoins : Math.max(0, prev - spentCoins);
+      return next;
+    });
+    // Also if viewing own profile, update profileData.coinBalance
+    setProfileData((prev) => {
+      if (!prev) return prev;
+      return { ...prev, coinBalance: typeof remainingCoins === "number" ? remainingCoins : Math.max(0, (prev.coinBalance || 0) - spentCoins) };
+    });
+  };
 
   useEffect(() => {
     if (profileData?.accountType === "organization" && profileData?.country && !hqPos) {
@@ -356,10 +381,6 @@ function UserProfile() {
   const isOrganization = profileData?.accountType === "organization";
   const verificationStatus = profileData?.verificationStatus || "unsubmitted";
 
-  const handleDonationCommitted = (spentCoins, remainingCoins) => {
-    // If we wanted to update current user's coin balance visually here
-  };
-
   return (
     <div className={`luminous-app ${isSidebarCollapsed ? "sidebar-collapsed" : ""}`}>
       <div className="lum-layout">
@@ -402,6 +423,7 @@ function UserProfile() {
               isOrganization={isOrganization}
               verificationStatus={verificationStatus}
               onDonateClick={() => setDonationModalOpen(true)}
+              onViewCustomersClick={() => setActiveTab('TOP CUSTOMERS')}
               badges={[]}
             />
 
@@ -479,7 +501,7 @@ function UserProfile() {
             <ProfileTabs 
               activeTab={activeTab} 
               onTabChange={setActiveTab} 
-              tabs={profileData?.accountType === 'organization' ? ['POSTS', 'PROJECTS'] : ['POSTS', 'PRODUCTS']}
+              tabs={profileData?.accountType === 'organization' ? ['POSTS', 'PROJECTS', 'TOP CUSTOMERS'] : ['POSTS', 'PRODUCTS', 'TOP CUSTOMERS']}
             />
           </div>
           
@@ -598,6 +620,13 @@ function UserProfile() {
                 </div>
               </div>
             )}
+
+            {activeTab === 'TOP CUSTOMERS' && (
+              <TopCustomers 
+                username={profileData?.userName || username} 
+                sellerName={profileData?.firstName || profileData?.userName} 
+              />
+            )}
           </div>
         </main>
       </div>
@@ -646,7 +675,7 @@ function UserProfile() {
           initialProject={selectedProject}
           initialCharityId={verificationStatus === 'verified' ? profileData.id : ""}
           initialCharityName={profileData.firstName || profileData.userName}
-          availableCoins={currentUser?.coinBalance || 0}
+          availableCoins={viewerCoins}
           onDonationCommitted={handleDonationCommitted}
         />
       )}

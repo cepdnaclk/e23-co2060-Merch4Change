@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { X, Coins, Sparkles } from "lucide-react";
 import { createVerifiedDonation } from "../../api/donationsService";
 import { listVerifiedCharities } from "../../services/charityApi";
+import apiClient from "../../api/apiClient";
 import "./DonationModal.css";
 
 function DonationModal({
@@ -23,6 +24,13 @@ function DonationModal({
   const [loading, setLoading] = useState(false);
   const [loadingCharities, setLoadingCharities] = useState(false);
   const [error, setError] = useState(null);
+  const [currentAvailableCoins, setCurrentAvailableCoins] = useState(availableCoins || 0);
+
+  useEffect(() => {
+    if (typeof availableCoins === "number" && availableCoins > 0) {
+      setCurrentAvailableCoins(availableCoins);
+    }
+  }, [availableCoins]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -33,6 +41,15 @@ function DonationModal({
     setCustomAmount("");
     setError(null);
     setLoadingCharities(true);
+
+    // Fetch fresh user coin balance
+    apiClient.get("/api/v1/profile/me/coins")
+      .then((res) => {
+        if (res.data?.success && typeof res.data.data?.coinBalance === "number") {
+          setCurrentAvailableCoins(res.data.data.coinBalance);
+        }
+      })
+      .catch(() => {});
 
     listVerifiedCharities()
       .then((response) => {
@@ -73,8 +90,8 @@ function DonationModal({
       setError({ field: "amount", message: "Amount must be at least 1 coin." });
       return;
     }
-    if (finalAmount > availableCoins) {
-      setError({ field: "amount", message: "Insufficient balance for this donation." });
+    if (finalAmount > currentAvailableCoins) {
+      setError({ field: "amount", message: `Insufficient balance (${currentAvailableCoins} coins available).` });
       return;
     }
 
@@ -83,6 +100,12 @@ function DonationModal({
       const response = await createVerifiedDonation({ charityId, coinAmount: finalAmount });
       const selectedCharity = charities.find((item) => item._id === charityId);
       const remainingCoins = response?.data?.data?.coinBalance;
+
+      if (typeof remainingCoins === "number") {
+        setCurrentAvailableCoins(remainingCoins);
+      } else {
+        setCurrentAvailableCoins((prev) => Math.max(0, prev - finalAmount));
+      }
 
       if (typeof onDonationCommitted === "function") {
         onDonationCommitted(finalAmount, remainingCoins);
@@ -115,7 +138,7 @@ function DonationModal({
           </div>
           <div className="balance-info">
             <span className="balance-label">Your Wallet</span>
-            <span className="balance-value">{Number(availableCoins).toLocaleString()} Coins</span>
+            <span className="balance-value">{Number(currentAvailableCoins).toLocaleString()} Coins</span>
           </div>
           <Sparkles size={20} className="ml-auto opacity-40" />
         </div>

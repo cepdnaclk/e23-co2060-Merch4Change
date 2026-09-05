@@ -128,6 +128,8 @@ export const verifyRegisterOtp = asyncHandler(async (req, res) => {
       userName: newUser.userName,
       email: newUser.email,
       accountType: newUser.accountType,
+      role: newUser.role,
+      coinBalance: newUser.coinBalance ?? 0,
     },
   });
 });

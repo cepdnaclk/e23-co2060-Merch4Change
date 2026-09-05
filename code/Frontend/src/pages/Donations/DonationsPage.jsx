@@ -5,8 +5,9 @@ import DonationModal from "../../components/donations/DonationModal";
 import "../Home/Home.css";
 import "./Donations.css";
 import { listVerifiedCharities, listDonationProjects } from "../../services/charityApi";
-import { Search, ArrowRight, ShieldCheck, Heart, Leaf, BookOpen, Stethoscope, Droplets, ChevronRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Search, ArrowRight, ShieldCheck, Heart, Leaf, BookOpen, Stethoscope, Droplets, ChevronRight, Trophy, Flame } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
+import LeaderboardSection from "../../components/Leaderboard/LeaderboardSection";
 
 const CATEGORY_META = {
   health: { tag: "Health", TagIcon: Stethoscope, tagColor: "#0c4a6e", tagBg: "#E0F2FE" },
@@ -129,6 +130,9 @@ function ProjectCard({ p, onDonate }) {
 import apiClient from "../../api/apiClient";
 
 export default function DonationsPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") === "leaderboard" ? "leaderboard" : "causes";
+  const [activeSection, setActiveSection] = useState(initialTab); // "causes" | "leaderboard"
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [profileData, setProfileData] = useState({});
   const [charities, setCharities] = useState([]);
@@ -141,6 +145,24 @@ export default function DonationsPage() {
   const [prefilledProject, setPrefilledProject] = useState("");
   const [successMsg, setSuccessMsg] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam === "leaderboard" && activeSection !== "leaderboard") {
+      setActiveSection("leaderboard");
+    } else if (tabParam !== "leaderboard" && activeSection === "leaderboard" && !tabParam) {
+      setActiveSection("causes");
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (section) => {
+    setActiveSection(section);
+    if (section === "leaderboard") {
+      setSearchParams({ tab: "leaderboard" });
+    } else {
+      setSearchParams({});
+    }
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -257,41 +279,99 @@ export default function DonationsPage() {
             </div>
           )}
 
-          <div style={{ padding: "48px 40px 80px" }}>
+          <div style={{ padding: "32px 40px 80px" }}>
 
-            {/* ── TOP CHARITIES ─────────────────────────────────────── */}
-            <div style={{ marginBottom: "64px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "32px" }}>
-                <div>
-                  <div style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "12px", fontWeight: 600, color: "#D4820A", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>Featured</div>
-                  <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: "28px", color: "#1A1A1A", margin: 0 }}>Top Charities</h2>
-                </div>
-                <button style={{ display: "flex", alignItems: "center", gap: "6px", background: "transparent", border: "none", cursor: "pointer", fontFamily: "'DM Sans',sans-serif", fontSize: "14px", color: "#D4820A", fontWeight: 500 }}>
-                  View all <ArrowRight size={14} />
+            {/* ── SECTION SWITCHER TABS ─────────────────────────────────── */}
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: "40px" }}>
+              <div style={{ display: "inline-flex", background: "#EAE5DC", padding: "5px", borderRadius: "16px", gap: "6px" }}>
+                <button
+                  onClick={() => handleTabChange("causes")}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "10px 24px",
+                    borderRadius: "12px",
+                    border: "none",
+                    fontFamily: "'DM Sans',sans-serif",
+                    fontSize: "14px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    background: activeSection === "causes" ? "#ffffff" : "transparent",
+                    color: activeSection === "causes" ? "#0D6B5E" : "#6B6560",
+                    boxShadow: activeSection === "causes" ? "0 4px 12px rgba(0,0,0,0.06)" : "none",
+                  }}
+                >
+                  <Heart size={16} />
+                  <span>Causes & Projects</span>
+                </button>
+
+                <button
+                  onClick={() => handleTabChange("leaderboard")}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "10px 24px",
+                    borderRadius: "12px",
+                    border: "none",
+                    fontFamily: "'DM Sans',sans-serif",
+                    fontSize: "14px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    background: activeSection === "leaderboard" ? "#ffffff" : "transparent",
+                    color: activeSection === "leaderboard" ? "#D4820A" : "#6B6560",
+                    boxShadow: activeSection === "leaderboard" ? "0 4px 12px rgba(0,0,0,0.06)" : "none",
+                  }}
+                >
+                  <Trophy size={16} />
+                  <span>🏆 Community Leaderboards</span>
                 </button>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px,1fr))", gap: "24px" }}>
-                {loading ? (
-                  <p style={{ gridColumn: "1/-1", fontFamily: "'DM Sans',sans-serif", color: "#6B6560", fontSize: "14px" }}>Loading verified charities...</p>
-                ) : filtered.map(c => <CharityCard key={c.id} c={c} onSelect={openModal} />)}
-                {!loading && !filtered.length && <p style={{ gridColumn: "1/-1", fontFamily: "'DM Sans',sans-serif", color: "#6B6560", fontSize: "14px" }}>No verified charities found.</p>}
-              </div>
             </div>
 
-            {/* ── ONGOING PROJECTS ──────────────────────────────────── */}
-            <div style={{ marginBottom: "64px" }}>
-              <div style={{ marginBottom: "32px" }}>
-                <div style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "12px", fontWeight: 600, color: "#D4820A", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>Needs Funding</div>
-                <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: "28px", color: "#1A1A1A", margin: "0 0 6px" }}>Ongoing Projects</h2>
-                <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "14px", color: "#6B6560", margin: 0 }}>Specific infrastructure initiatives requiring immediate support.</p>
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(400px,1fr))", gap: "20px" }}>
-                {loading ? (
-                  <p style={{ gridColumn: "1/-1", fontFamily: "'DM Sans',sans-serif", color: "#6B6560", fontSize: "14px" }}>Loading projects...</p>
-                ) : projects.map(p => <ProjectCard key={p.id} p={p} onDonate={openModal} />)}
-                {!loading && !projects.length && <p style={{ gridColumn: "1/-1", fontFamily: "'DM Sans',sans-serif", color: "#6B6560", fontSize: "14px" }}>No active projects from verified charities yet.</p>}
-              </div>
-            </div>
+            {/* ── RENDER ACTIVE SECTION ─────────────────────────────────── */}
+            {activeSection === "leaderboard" ? (
+              <LeaderboardSection />
+            ) : (
+              <>
+                {/* ── TOP CHARITIES ─────────────────────────────────────── */}
+                <div style={{ marginBottom: "64px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "32px" }}>
+                    <div>
+                      <div style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "12px", fontWeight: 600, color: "#D4820A", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>Featured</div>
+                      <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: "28px", color: "#1A1A1A", margin: 0 }}>Top Charities</h2>
+                    </div>
+                    <button style={{ display: "flex", alignItems: "center", gap: "6px", background: "transparent", border: "none", cursor: "pointer", fontFamily: "'DM Sans',sans-serif", fontSize: "14px", color: "#D4820A", fontWeight: 500 }}>
+                      View all <ArrowRight size={14} />
+                    </button>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px,1fr))", gap: "24px" }}>
+                    {loading ? (
+                      <p style={{ gridColumn: "1/-1", fontFamily: "'DM Sans',sans-serif", color: "#6B6560", fontSize: "14px" }}>Loading verified charities...</p>
+                    ) : filtered.map(c => <CharityCard key={c.id} c={c} onSelect={openModal} />)}
+                    {!loading && !filtered.length && <p style={{ gridColumn: "1/-1", fontFamily: "'DM Sans',sans-serif", color: "#6B6560", fontSize: "14px" }}>No verified charities found.</p>}
+                  </div>
+                </div>
+
+                {/* ── ONGOING PROJECTS ──────────────────────────────────── */}
+                <div style={{ marginBottom: "64px" }}>
+                  <div style={{ marginBottom: "32px" }}>
+                    <div style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "12px", fontWeight: 600, color: "#D4820A", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>Needs Funding</div>
+                    <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: "28px", color: "#1A1A1A", margin: "0 0 6px" }}>Ongoing Projects</h2>
+                    <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "14px", color: "#6B6560", margin: 0 }}>Specific infrastructure initiatives requiring immediate support.</p>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(400px,1fr))", gap: "20px" }}>
+                    {loading ? (
+                      <p style={{ gridColumn: "1/-1", fontFamily: "'DM Sans',sans-serif", color: "#6B6560", fontSize: "14px" }}>Loading projects...</p>
+                    ) : projects.map(p => <ProjectCard key={p.id} p={p} onDonate={openModal} />)}
+                    {!loading && !projects.length && <p style={{ gridColumn: "1/-1", fontFamily: "'DM Sans',sans-serif", color: "#6B6560", fontSize: "14px" }}>No active projects from verified charities yet.</p>}
+                  </div>
+                </div>
+              </>
+            )}
 
             {/* ── TRUST SECTION ─────────────────────────────────────── */}
             <div style={{ background: "linear-gradient(135deg, #052e22 0%, #0D6B5E 100%)", borderRadius: "24px", padding: "56px 40px", textAlign: "center", position: "relative", overflow: "hidden" }}>
