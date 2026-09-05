@@ -29,7 +29,7 @@ test("env module provides development defaults", () => {
   assert.equal(parsed.port, 5000);
   assert.equal(parsed.frontendUrl, "http://localhost:5173");
   assert.equal(parsed.jwtSecret, "dev-secret-change-me");
-  assert.equal(parsed.jwtExpiresIn, "7d");
+  assert.equal(parsed.jwtExpiresIn, "15m");
 });
 
 test("env module throws in production when required vars are missing", () => {

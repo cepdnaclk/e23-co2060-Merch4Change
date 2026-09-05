@@ -2,7 +2,7 @@ import React from 'react';
 import './ProfileHeader.css';
 import userImage from '../../../assets/user.svg';
 import verifiedIcon from '../../../assets/verified_icon.png';
-import { BarChart2, Link2, MapPin, CalendarDays, Pencil, ImagePlus, MessageSquare, Heart, BadgeCheck } from 'lucide-react';
+import { BarChart2, Link2, MapPin, CalendarDays, Pencil, ImagePlus, MessageSquare, Heart, BadgeCheck, Users } from 'lucide-react';
 
 function capitalize(str) {
   if (!str) return '';
@@ -30,8 +30,10 @@ function ProfileHeader({
   onFollowClick = () => {},
   onMessageClick = () => {},
   isOrganization = false,
+  projectsCount = undefined,
   verificationStatus = null,
   onDonateClick = () => {},
+  onViewCustomersClick = () => {},
   badges = []
 }) {
   const fullName = `${capitalize(profileData?.firstName)} ${capitalize(profileData?.lastName)}`.trim() || 'Anonymous';
@@ -81,6 +83,16 @@ function ProfileHeader({
               <Pencil size={16} />
             </button>
           )}
+          <button 
+            className="ph-btn-secondary" 
+            onClick={onViewCustomersClick}
+            title={isOrganization ? "View Top Donors" : "View Top Customers"}
+            type="button"
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <Users size={14} />
+            {isOrganization ? "Top Donors" : "Top Customers"}
+          </button>
           {isOwnProfile && (
             <button className="ph-btn-primary">
               <BarChart2 size={14} />
@@ -197,7 +209,7 @@ function ProfileHeader({
           </div>
           {profileData?.accountType === 'organization' && (
             <div className="ph-stat-item">
-              <strong>{profileData?.projectsCount || 0}</strong> <span>projects</span>
+              <strong>{projectsCount !== undefined ? projectsCount : (profileData?.projectsCount || 0)}</strong> <span>projects</span>
             </div>
           )}
         </div>

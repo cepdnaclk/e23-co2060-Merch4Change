@@ -13,6 +13,8 @@ import Product from "../../src/models/Product.js";
 import OrganizationProfile from "../../src/models/OrganizationProfile.js";
 import User from "../../src/models/User.js";
 
+import mongoose from "mongoose";
+
 let server;
 let baseUrl;
 
@@ -57,6 +59,7 @@ const restoreMocks = () => {
 };
 
 before(async () => {
+  await mongoose.connect(env.mongodbUri || "mongodb://127.0.0.1:27017/merch4change");
   server = await new Promise((resolve) => {
     const started = app.listen(0, () => resolve(started));
   });
@@ -67,6 +70,7 @@ before(async () => {
 
 after(async () => {
   restoreMocks();
+  await mongoose.disconnect();
   await new Promise((resolve) => server.close(resolve));
 });
 
@@ -91,16 +95,12 @@ test("POST /api/v1/auth/register returns validation error when accountType is mi
   assert.equal(payload.error.code, "VALIDATION_ERROR");
 });
 
-test("POST /api/v1/auth/register creates an individual profile", async () => {
+test("POST /api/v1/auth/register creates an individual profile and sends OTP", async () => {
   restoreMocks();
 
   bcrypt.hash = async () => "hashed-pass";
   jwt.sign = () => "register-token";
   User.findOne = async () => null;
-  User.create = async (data) => ({
-    _id: "user-1",
-    ...data,
-  });
 
   const response = await fetch(`${baseUrl}/api/v1/auth/register`, {
     method: "POST",
@@ -116,33 +116,18 @@ test("POST /api/v1/auth/register creates an individual profile", async () => {
   });
   const payload = await response.json();
 
-  assert.equal(response.status, 201);
+  assert.equal(response.status, 200);
   assert.equal(payload.success, true);
-  assert.equal(payload.data.token, "register-token");
-  assert.equal(payload.data.user.userName, "jane");
-  assert.equal(payload.data.user.email, "jane@example.com");
+  assert.match(payload.message, /Verification code sent/i);
 });
 
-test("POST /api/v1/auth/register creates an organization profile", async () => {
+test("POST /api/v1/auth/register creates an organization profile and sends OTP", async () => {
   restoreMocks();
 
   bcrypt.hash = async () => "hashed-pass";
   jwt.sign = () => "org-register-token";
   User.findOne = async () => null;
   OrganizationProfile.findOne = async () => null;
-  User.create = async (data) => ({
-    _id: "org-user-1",
-    ...data,
-  });
-  OrganizationProfile.create = async (data) => ({
-    _id: "org-profile-1",
-    createdAt: "2026-04-13T00:00:00.000Z",
-    ...data,
-  });
-  Brand.create = async (data) => ({
-    _id: "brand-org-1",
-    ...data,
-  });
 
   const response = await fetch(`${baseUrl}/api/v1/auth/register`, {
     method: "POST",
@@ -151,20 +136,17 @@ test("POST /api/v1/auth/register creates an organization profile", async () => {
       orgName: "Green Earth Foundation",
       email: "ORG@EXAMPLE.COM",
       password: "Pass1234",
-      phone: "+1 555 123 4567",
-      address: "12 Charity Avenue",
+      phone: "+1 555 000 2222",
+      address: "456 Green Way",
       website: "https://greenearth.org",
       accountType: "organization",
     }),
   });
   const payload = await response.json();
 
-  assert.equal(response.status, 201);
+  assert.equal(response.status, 200);
   assert.equal(payload.success, true);
-  assert.equal(payload.data.token, "org-register-token");
-  assert.equal(payload.data.user.accountType, "organization");
-  assert.equal(payload.data.user.email, "org@example.com");
-  assert.equal(payload.data.profile.orgName, "Green Earth Foundation");
+  assert.match(payload.message, /Verification code sent/i);
 });
 
 test("POST /api/v1/auth/login returns auth payload for valid credentials", async () => {
@@ -177,6 +159,7 @@ test("POST /api/v1/auth/login returns auth payload for valid credentials", async
       email: "jane@example.com",
       password: "stored-hash",
       accountType: "organization",
+      isActive: true,
     }),
   });
   bcrypt.compare = async () => true;
@@ -194,7 +177,7 @@ test("POST /api/v1/auth/login returns auth payload for valid credentials", async
 
   assert.equal(response.status, 200);
   assert.equal(payload.success, true);
-  assert.equal(payload.data.token, "login-token");
+  assert.equal(payload.data.accessToken, "login-token");
   assert.equal(payload.data.loginType, "organization");
   assert.equal(payload.data.user.userName, "jane");
 });

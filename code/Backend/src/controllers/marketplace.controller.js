@@ -25,6 +25,9 @@ const resolveBrandForUser = async (user) => {
 };
 
 const ensureProductOwnership = async (product, user) => {
+  if (product.ownerUserId && String(product.ownerUserId) === String(user._id)) {
+    return;
+  }
   const brand = await Brand.findById(product.brandId);
   if (!brand || String(brand.ownerUserId) !== String(user._id)) {
     throw new AppError("You do not have permission to manage this product.", 403, "FORBIDDEN");
@@ -56,6 +59,7 @@ export const createProduct = asyncHandler(async (req, res) => {
   const product = await Product.create({
     ...req.body,
     brandId: brand._id,
+    ownerUserId: req.user._id,
   });
 
   return successResponse(res, 201, "Product created successfully.", {
@@ -136,10 +140,9 @@ export const checkout = asyncHandler(async (req, res) => {
     coinsEarned,
   });
 
-  // UPDATED: Increment salesCount and update coinBalance
+  // Update buyer coinBalance
   await User.findByIdAndUpdate(req.user._id, { 
     $inc: { 
-      salesCount: 1,
       coinBalance: coinsEarned 
     } 
   });
@@ -171,10 +174,18 @@ export const checkout = asyncHandler(async (req, res) => {
   for (const requestedItem of requestedItems) {
     const product = await Product.findById(requestedItem.productId);
     if (product) {
-      const brand = await Brand.findById(product.brandId);
-      if (brand && brand.ownerUserId && mongoose.Types.ObjectId.isValid(brand.ownerUserId)) {
+      let sellerUserId = product.ownerUserId;
+      if (!sellerUserId && product.brandId) {
+        const brand = await Brand.findById(product.brandId);
+        sellerUserId = brand?.ownerUserId;
+      }
+      if (sellerUserId && mongoose.Types.ObjectId.isValid(sellerUserId)) {
+        await User.findByIdAndUpdate(sellerUserId, {
+          $inc: { salesCount: Number(requestedItem.quantity) || 1 },
+        });
+
         await Notification.create({
-          userId: brand.ownerUserId,
+          userId: sellerUserId,
           type: "order",
           message: `You have received a new order for "${product.name}" (Qty: ${requestedItem.quantity}) from ${buyerName}!`,
           isRead: false,
@@ -190,7 +201,7 @@ export const checkout = asyncHandler(async (req, res) => {
 });
 
 export const listMyOrders = asyncHandler(async (req, res) => {
-  const orders = await Order.find({ userId: req.user._id });
+  const orders = await Order.find({ userId: req.user._id }).sort({ createdAt: -1 });
 
   return successResponse(res, 200, "Orders fetched successfully.", {
     orders,

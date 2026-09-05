@@ -1,4 +1,6 @@
 import Charity from "../models/Charity.js";
+import Donation from "../models/Donation.js";
+import Project from "../models/Project.js";
 import AppError from "../utils/appError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { successResponse } from "../utils/apiResponse.js";
@@ -82,12 +84,46 @@ export const listVerifiedCharities = asyncHandler(async (req, res) => {
       .populate("ownerUserId", "userName")
       .skip(skip)
       .limit(Number(limit))
-      .sort({ verifiedAt: -1 }),
+      .sort({ verifiedAt: -1 })
+      .lean(),
     Charity.countDocuments(filter),
   ]);
 
+  const charityIds = items.map((c) => c._id);
+
+  // Aggregate completed donations and project goals for each charity
+  const [donationTotals, projectTotals] = await Promise.all([
+    Donation.aggregate([
+      { $match: { charityId: { $in: charityIds }, status: "completed" } },
+      { $group: { _id: "$charityId", totalRaised: { $sum: "$coinAmount" }, count: { $sum: 1 } } },
+    ]),
+    Project.aggregate([
+      { $match: { charityId: { $in: charityIds }, status: "active" } },
+      { $group: { _id: "$charityId", totalGoal: { $sum: "$goalAmount" }, totalCollected: { $sum: "$collectedAmount" } } },
+    ]),
+  ]);
+
+  const donationMap = new Map(donationTotals.map((d) => [d._id.toString(), d]));
+  const projectMap = new Map(projectTotals.map((p) => [p._id.toString(), p]));
+
+  const enrichedItems = items.map((c) => {
+    const dInfo = donationMap.get(c._id.toString());
+    const pInfo = projectMap.get(c._id.toString());
+    const totalRaised = dInfo?.totalRaised || pInfo?.totalCollected || 0;
+    const totalGoal = pInfo?.totalGoal || 10000;
+    const percent = totalGoal > 0 ? Math.min(100, Math.round((totalRaised / totalGoal) * 100)) : 0;
+
+    return {
+      ...c,
+      totalRaised,
+      totalGoal,
+      percent,
+      donationsCount: dInfo?.count || 0,
+    };
+  });
+
   return successResponse(res, 200, "Verified charities fetched successfully.", {
-    items,
+    items: enrichedItems,
     total,
     page: Number(page),
   });

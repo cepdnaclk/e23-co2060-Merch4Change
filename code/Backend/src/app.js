@@ -20,7 +20,6 @@ import brandRoutes from "./routes/brand.routes.js";
 import homeBannerRoutes from "./routes/homeBanner.routes.js";
 import messagesRoutes from "./routes/messages.routes.js";
 import donationRoutes from "./routes/donation.routes.js";
-import dashboardDonationsRoutes from "./routes/donations.js";
 import orgRoutes from "./routes/org.routes.js";
 import postRoutes from "./routes/post.routes.js";
 import storyRoutes from "./routes/story.routes.js";
@@ -30,6 +29,7 @@ import charityRoutes from "./routes/charity.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
 import auctionRoutes from "./routes/auction.routes.js";
+import leaderboardRoutes from "./routes/leaderboard.routes.js";
 
 
 const app = express();
@@ -93,11 +93,11 @@ app.use("/api/v1/home-banners", homeBannerRoutes);
 app.use("/api/v1/messages", messagesRoutes);
 app.use("/api/v1/donations", donationRoutes);
 app.use("/api/v1/orgs", orgRoutes);
-app.use("/api/donations", dashboardDonationsRoutes);
 app.use("/api/v1/charities", charityRoutes);
 app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/notifications", notificationRoutes);
 app.use("/api/v1/auctions", auctionRoutes);
+app.use("/api/v1/leaderboards", leaderboardRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

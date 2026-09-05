@@ -29,6 +29,7 @@ import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute/AdminRoute";
 import Marketplace from "./pages/Marketplace/Marketplace";
 import DonationsPage from "./pages/Donations/DonationsPage";
+import DonatePage from "./pages/Donate/DonatePage";
 import UnderConstruction from "./components/UnderConstruction/UnderConstruction";
 // this is for mock test while building - Notification Drop Down
 import NotificationDropDown from "./components/Notifications/NotificationDropDown";
@@ -39,6 +40,7 @@ import CharityQueue from "./pages/Admin/CharityVerification/CharityQueue";
 import CharityReview from "./pages/Admin/CharityVerification/CharityReview";
 import NotificationPage from "./pages/Notification/Notification";
 import SearchPage from "./pages/Search/SearchPage";
+import AllDonorsPage from "./pages/AllDonors/AllDonorsPage";
 
 
 function App() {
@@ -76,6 +78,7 @@ function App() {
           <Route path="/profile/:username" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/donations" element={<ProtectedRoute><DonationsPage /></ProtectedRoute>} />
+          <Route path="/donate" element={<ProtectedRoute><DonatePage /></ProtectedRoute>} />
           <Route path="/under-construction" element={<ProtectedRoute><UnderConstruction /></ProtectedRoute>} />
           <Route path="/notification" element={<ProtectedRoute><NotificationPage /></ProtectedRoute>} />
           <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
@@ -86,6 +89,10 @@ function App() {
 
           {/* Dynamic Route: Perfect for Social Media Profiles */}
           <Route path="/profile/:username" element={<UserProfile />} />
+          <Route
+            path="/profile/:username/donors"
+            element={<ProtectedRoute><AllDonorsPage /></ProtectedRoute>}
+          />
           <Route
             path="/profile/:username/projects"
             element={<OrgProjects />}
