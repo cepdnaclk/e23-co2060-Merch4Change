@@ -2,31 +2,32 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 
-import { createMockResponse, nextTick } from "../helpers/http.js";
-import Brand from "../../../src/models/Brand.js";
+import { createMockResponse } from "../helpers/http.js";
 import OrganizationProfile from "../../../src/models/OrganizationProfile.js";
+import PendingUser from "../../../src/models/PendingUser.js";
 import User from "../../../src/models/User.js";
 import { createOrganizationProfile, createUserProfile } from "../../../src/constructors/profile.creator.js";
 
-test("createUserProfile creates a user and returns auth payload", async () => {
+test("createUserProfile creates a pending user and sends OTP", async () => {
   const originalHash = bcrypt.hash;
-  const originalSign = jwt.sign;
   const originalFindOne = User.findOne;
-  const originalCreate = User.create;
+  const originalDeleteOne = PendingUser.deleteOne;
+  const originalCreate = PendingUser.create;
 
   const findQueries = [];
+  let createdPendingUser;
+
   bcrypt.hash = async () => "hashed-pass";
-  jwt.sign = () => "signed-token";
   User.findOne = async (query) => {
     findQueries.push(query);
     return null;
   };
-  User.create = async (payload) => ({
-    _id: "u1",
-    ...payload,
-  });
+  PendingUser.deleteOne = async () => ({ deletedCount: 1 });
+  PendingUser.create = async (payload) => {
+    createdPendingUser = payload;
+    return { _id: "p1", ...payload };
+  };
 
   const req = {
     body: {
@@ -38,25 +39,21 @@ test("createUserProfile creates a user and returns auth payload", async () => {
     },
   };
   const res = createMockResponse();
-  let nextArg;
 
   try {
-    createUserProfile(req, res, (error) => {
-      nextArg = error;
-    });
-    await nextTick();
+    await createUserProfile(req, res);
   } finally {
     bcrypt.hash = originalHash;
-    jwt.sign = originalSign;
     User.findOne = originalFindOne;
-    User.create = originalCreate;
+    PendingUser.deleteOne = originalDeleteOne;
+    PendingUser.create = originalCreate;
   }
 
-  assert.equal(nextArg, undefined);
-  assert.equal(res.statusCode, 201);
+  assert.equal(res.statusCode, 200);
   assert.equal(res.payload.success, true);
-  assert.equal(res.payload.data.token, "signed-token");
-  assert.equal(res.payload.data.user.userName, "jane");
+  assert.equal(createdPendingUser.email, "jane@example.com");
+  assert.equal(createdPendingUser.userName, "jane");
+  assert.equal(createdPendingUser.accountType, "individual");
   assert.deepEqual(findQueries, [{ email: "jane@example.com" }, { userName: "jane" }]);
 });
 
@@ -84,34 +81,33 @@ test("createUserProfile rejects duplicate username", async () => {
     },
   };
   const res = createMockResponse();
-  let nextArg;
 
   try {
-    createUserProfile(req, res, (error) => {
-      nextArg = error;
-    });
-    await nextTick();
+    await assert.rejects(
+      () => createUserProfile(req, res),
+      (err) => {
+        assert.equal(err.name, "AppError");
+        assert.equal(err.code, "USERNAME_ALREADY_IN_USE");
+        return true;
+      }
+    );
   } finally {
     User.findOne = originalFindOne;
   }
-
-  assert.equal(nextArg.name, "AppError");
-  assert.equal(nextArg.code, "USERNAME_ALREADY_IN_USE");
 });
 
-test("createOrganizationProfile creates a user and organization profile", async () => {
+test("createOrganizationProfile creates a pending organization user and sends OTP", async () => {
   const originalHash = bcrypt.hash;
-  const originalSign = jwt.sign;
-  const originalFindOne = User.findOne;
-  const originalUserCreate = User.create;
+  const originalUserFindOne = User.findOne;
   const originalOrgFindOne = OrganizationProfile.findOne;
-  const originalOrgCreate = OrganizationProfile.create;
-  const originalBrandCreate = Brand.create;
+  const originalPendingDelete = PendingUser.deleteOne;
+  const originalPendingCreate = PendingUser.create;
 
   const userQueries = [];
   const orgQueries = [];
+  let createdPendingOrg;
+
   bcrypt.hash = async () => "hashed-pass";
-  jwt.sign = () => "signed-token";
   User.findOne = async (query) => {
     userQueries.push(query);
     return null;
@@ -120,19 +116,11 @@ test("createOrganizationProfile creates a user and organization profile", async 
     orgQueries.push(query);
     return null;
   };
-  User.create = async (payload) => ({
-    _id: "u2",
-    ...payload,
-  });
-  OrganizationProfile.create = async (payload) => ({
-    _id: "p1",
-    createdAt: "2026-04-13T00:00:00.000Z",
-    ...payload,
-  });
-  Brand.create = async (payload) => ({
-    _id: "brand-1",
-    ...payload,
-  });
+  PendingUser.deleteOne = async () => ({ deletedCount: 1 });
+  PendingUser.create = async (payload) => {
+    createdPendingOrg = payload;
+    return { _id: "p2", ...payload };
+  };
 
   const req = {
     body: {
@@ -145,30 +133,24 @@ test("createOrganizationProfile creates a user and organization profile", async 
     },
   };
   const res = createMockResponse();
-  let nextArg;
 
   try {
-    createOrganizationProfile(req, res, (error) => {
-      nextArg = error;
-    });
-    await nextTick();
+    await createOrganizationProfile(req, res);
   } finally {
     bcrypt.hash = originalHash;
-    jwt.sign = originalSign;
-    User.findOne = originalFindOne;
-    User.create = originalUserCreate;
+    User.findOne = originalUserFindOne;
     OrganizationProfile.findOne = originalOrgFindOne;
-    OrganizationProfile.create = originalOrgCreate;
-    Brand.create = originalBrandCreate;
+    PendingUser.deleteOne = originalPendingDelete;
+    PendingUser.create = originalPendingCreate;
   }
 
-  assert.equal(nextArg, undefined);
-  assert.equal(res.statusCode, 201);
+  assert.equal(res.statusCode, 200);
   assert.equal(res.payload.success, true);
-  assert.equal(res.payload.data.token, "signed-token");
-  assert.equal(res.payload.data.user.userName, "charityorg");
-  assert.equal(res.payload.data.profile.orgName, "Charity Org");
-  assert.deepEqual(userQueries, [{ email: "org@example.com" }]);
+  assert.equal(createdPendingOrg.email, "org@example.com");
+  assert.equal(createdPendingOrg.userName, "charityorg");
+  assert.equal(createdPendingOrg.accountType, "organization");
+  assert.equal(createdPendingOrg.profileData.orgName, "Charity Org");
+  assert.deepEqual(userQueries, [{ email: "org@example.com" }, { userName: "charityorg" }]);
   assert.deepEqual(orgQueries, [{ orgName: "Charity Org" }]);
 });
 
@@ -190,18 +172,18 @@ test("createOrganizationProfile rejects duplicate organization name", async () =
     },
   };
   const res = createMockResponse();
-  let nextArg;
 
   try {
-    createOrganizationProfile(req, res, (error) => {
-      nextArg = error;
-    });
-    await nextTick();
+    await assert.rejects(
+      () => createOrganizationProfile(req, res),
+      (err) => {
+        assert.equal(err.name, "AppError");
+        assert.equal(err.code, "ORGNAME_ALREADY_IN_USE");
+        return true;
+      }
+    );
   } finally {
     User.findOne = originalFindOne;
     OrganizationProfile.findOne = originalOrgFindOne;
   }
-
-  assert.equal(nextArg.name, "AppError");
-  assert.equal(nextArg.code, "ORGNAME_ALREADY_IN_USE");
 });
