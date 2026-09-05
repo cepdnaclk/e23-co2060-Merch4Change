@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import TopNavbar from "../../components/TopNavbar/TopNavbar";
 import Sidebar from "../../components/Sidebar/Sidebar";
-import DonationModal from "../../components/donations/DonationModal";
 import "../Home/Home.css";
 import "./Donations.css";
 import { listVerifiedCharities, listDonationProjects } from "../../services/charityApi";
 import { Search, ArrowRight, ShieldCheck, Heart, Leaf, BookOpen, Stethoscope, Droplets, ChevronRight, Trophy, Flame } from "lucide-react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import LeaderboardSection from "../../components/Leaderboard/LeaderboardSection";
 
 const CATEGORY_META = {
@@ -39,15 +38,15 @@ const mapCharityCard = (charity) => {
 };
 
 const mapProjectCard = (project) => ({
-  id: project.id,
+  id: project.id || project._id,
   charityId: project.charityId,
   charityName: project.charityName,
   Icon: Droplets,
   name: project.title,
   desc: project.description,
-  raised: project.collectedAmount * 100,
-  goal: project.goalAmount * 100,
-  img: "https://images.unsplash.com/photo-1541848756149-e3843fcbbde0?w=400&q=80",
+  raised: project.collectedAmount || 0,
+  goal: project.goalAmount || 1,
+  img: project.imageUrl || project.charityLogo || "https://images.unsplash.com/photo-1541848756149-e3843fcbbde0?w=400&q=80",
 });
 
 const pct = (r, g) => Math.round((r / g) * 100);
@@ -194,24 +193,26 @@ export default function DonationsPage() {
     fetchDonationData();
   }, []);
 
-  const openModal = (charity = null, project = "") => {
+  const handleDonateNavigation = (charity = null, project = "") => {
+    const params = new URLSearchParams();
     if (charity && typeof charity === "object") {
-      setPrefilledCharityId(charity.charityId || charity.id || "");
-      setPrefilledCharityName(charity.name || "");
-    } else {
-      setPrefilledCharityId("");
-      setPrefilledCharityName(typeof charity === "string" ? charity : "");
+      if (charity.charityId || charity.id) params.set("charityId", charity.charityId || charity.id);
+      if (charity.name) params.set("charityName", charity.name);
+    } else if (typeof charity === "string" && charity) {
+      params.set("charityName", charity);
     }
-    setPrefilledProject(typeof project === "object" ? project.name : project || "");
-    setModalOpen(true);
-  };
-  const handleSuccess = (name) => { setModalOpen(false); setSuccessMsg(`✓ Donation successful! Thank you for supporting ${name}.`); setTimeout(() => setSuccessMsg(null), 5000); };
-  const handleDonationCommitted = (spentCoins, remainingCoins) => {
-    setProfileData((prev) => {
-      const current = Number(prev?.coinBalance ?? 0);
-      const nextBalance = typeof remainingCoins === "number" ? remainingCoins : Math.max(0, current - spentCoins);
-      return { ...prev, coinBalance: nextBalance };
-    });
+
+    if (project && typeof project === "object") {
+      if (project.id || project._id) params.set("projectId", project.id || project._id);
+      if (project.name || project.title) params.set("projectName", project.name || project.title);
+      if (project.goal) params.set("goal", project.goal);
+      if (project.raised) params.set("collected", project.raised);
+    } else if (typeof project === "string" && project) {
+      params.set("projectName", project);
+    }
+
+    const qs = params.toString();
+    navigate(qs ? `/donate?${qs}` : "/donate");
   };
 
   const filtered = charities.filter((c) =>
@@ -258,7 +259,7 @@ export default function DonationsPage() {
                 <Search size={18} color="#6B6560" style={{ flexShrink: 0 }} />
                 <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search for causes, charities, or projects..."
                   style={{ flex: 1, background: "transparent", border: "none", outline: "none", fontFamily: "'DM Sans',sans-serif", fontSize: "14px", color: "#1A1A1A", padding: "10px 0" }} />
-                <button onClick={() => openModal()}
+                <button onClick={() => handleDonateNavigation()}
                   style={{ background: "#D4820A", color: "#fff", fontFamily: "'DM Sans',sans-serif", fontSize: "14px", fontWeight: 500, padding: "12px 24px", borderRadius: "12px", border: "none", cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0 }}
                   onMouseEnter={e => e.target.style.background = "#be7509"} onMouseLeave={e => e.target.style.background = "#D4820A"}>
                   Donate Now
@@ -351,7 +352,7 @@ export default function DonationsPage() {
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px,1fr))", gap: "24px" }}>
                     {loading ? (
                       <p style={{ gridColumn: "1/-1", fontFamily: "'DM Sans',sans-serif", color: "#6B6560", fontSize: "14px" }}>Loading verified charities...</p>
-                    ) : filtered.map(c => <CharityCard key={c.id} c={c} onSelect={openModal} />)}
+                    ) : filtered.map(c => <CharityCard key={c.id} c={c} onSelect={handleDonateNavigation} />)}
                     {!loading && !filtered.length && <p style={{ gridColumn: "1/-1", fontFamily: "'DM Sans',sans-serif", color: "#6B6560", fontSize: "14px" }}>No verified charities found.</p>}
                   </div>
                 </div>
@@ -366,7 +367,7 @@ export default function DonationsPage() {
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(400px,1fr))", gap: "20px" }}>
                     {loading ? (
                       <p style={{ gridColumn: "1/-1", fontFamily: "'DM Sans',sans-serif", color: "#6B6560", fontSize: "14px" }}>Loading projects...</p>
-                    ) : projects.map(p => <ProjectCard key={p.id} p={p} onDonate={openModal} />)}
+                    ) : projects.map(p => <ProjectCard key={p.id} p={p} onDonate={handleDonateNavigation} />)}
                     {!loading && !projects.length && <p style={{ gridColumn: "1/-1", fontFamily: "'DM Sans',sans-serif", color: "#6B6560", fontSize: "14px" }}>No active projects from verified charities yet.</p>}
                   </div>
                 </div>
@@ -416,17 +417,6 @@ export default function DonationsPage() {
           </footer>
         </main>
       </div>
-
-      <DonationModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onSuccess={handleSuccess}
-        initialProject={prefilledProject}
-        initialCharityId={prefilledCharityId}
-        initialCharityName={prefilledCharityName}
-        availableCoins={Number(profileData?.coinBalance ?? 0)}
-        onDonationCommitted={handleDonationCommitted}
-      />
     </div>
   );
 }

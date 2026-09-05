@@ -29,6 +29,7 @@ import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute/AdminRoute";
 import Marketplace from "./pages/Marketplace/Marketplace";
 import DonationsPage from "./pages/Donations/DonationsPage";
+import DonatePage from "./pages/Donate/DonatePage";
 import UnderConstruction from "./components/UnderConstruction/UnderConstruction";
 // this is for mock test while building - Notification Drop Down
 import NotificationDropDown from "./components/Notifications/NotificationDropDown";
@@ -76,6 +77,7 @@ function App() {
           <Route path="/profile/:username" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/donations" element={<ProtectedRoute><DonationsPage /></ProtectedRoute>} />
+          <Route path="/donate" element={<ProtectedRoute><DonatePage /></ProtectedRoute>} />
           <Route path="/under-construction" element={<ProtectedRoute><UnderConstruction /></ProtectedRoute>} />
           <Route path="/notification" element={<ProtectedRoute><NotificationPage /></ProtectedRoute>} />
           <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />

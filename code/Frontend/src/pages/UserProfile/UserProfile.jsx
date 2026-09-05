@@ -12,7 +12,6 @@ import PostGrid from "./PostGrid/PostGrid";
 import { MapContainer, TileLayer, CircleMarker, Popup, Marker } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import DonationModal from "../../components/donations/DonationModal";
 import { MapPin, X } from "lucide-react";
 import { getUserProducts } from "../../api/productsService";
 import CreateProductModal from "../../components/CreateProductModal/CreateProductModal";
@@ -422,7 +421,7 @@ function UserProfile() {
               onMessageClick={handleMessageClick}
               isOrganization={isOrganization}
               verificationStatus={verificationStatus}
-              onDonateClick={() => setDonationModalOpen(true)}
+              onDonateClick={() => navigate(`/donate?charityId=${profileData.charityId || profileData.id || ""}&charityName=${encodeURIComponent(profileData.firstName || profileData.userName || "")}`)}
               onViewCustomersClick={() => setActiveTab('TOP CUSTOMERS')}
               badges={[]}
             />
@@ -600,8 +599,9 @@ function UserProfile() {
                           <button 
                             className="btn-donate-action"
                             onClick={() => {
-                              setSelectedProject(project.title);
-                              setDonationModalOpen(true);
+                              navigate(
+                                `/donate?charityId=${profileData.charityId || profileData.id || ""}&charityName=${encodeURIComponent(profileData.firstName || profileData.userName || "")}&projectId=${project._id || project.id || ""}&projectName=${encodeURIComponent(project.title || "")}&goal=${project.goalAmount || 0}&collected=${project.collectedAmount || 0}`
+                              );
                             }}
                           >
                             Support Project
@@ -662,22 +662,6 @@ function UserProfile() {
             </div>
           </div>
         </div>
-      )}
-
-      {isOrganization && (
-        <DonationModal
-          isOpen={donationModalOpen}
-          onClose={() => setDonationModalOpen(false)}
-          onSuccess={(name) => {
-            setDonationModalOpen(false);
-            alert(`Thank you for donating to ${name}!`);
-          }}
-          initialProject={selectedProject}
-          initialCharityId={verificationStatus === 'verified' ? profileData.id : ""}
-          initialCharityName={profileData.firstName || profileData.userName}
-          availableCoins={viewerCoins}
-          onDonationCommitted={handleDonationCommitted}
-        />
       )}
     </div>
   );

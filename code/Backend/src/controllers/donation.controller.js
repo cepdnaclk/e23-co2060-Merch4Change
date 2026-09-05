@@ -12,18 +12,33 @@ import { successResponse } from "../utils/apiResponse.js";
  * Make a coin donation to a verified charity / cause project
  */
 export const createDonation = asyncHandler(async (req, res) => {
-  const { charityId, charityProjectId, coinAmount: rawAmount, amount } = req.body;
+  let { charityId, charityProjectId, coinAmount: rawAmount, amount } = req.body;
   const parsedAmount = Number.parseInt(rawAmount ?? amount, 10);
-
-  if (!charityId) {
-    throw new AppError("charityId is required.", 400, "VALIDATION_ERROR", [
-      { section: "body", message: "charityId is required" },
-    ]);
-  }
 
   if (!Number.isInteger(parsedAmount) || parsedAmount < 1) {
     throw new AppError("Donation amount must be at least 1 coin.", 400, "VALIDATION_ERROR", [
       { section: "body", message: "coinAmount must be at least 1" },
+    ]);
+  }
+
+  let resolvedProjectId = null;
+  if (charityProjectId) {
+    const project = await Project.findOne({
+      _id: charityProjectId,
+      status: "active",
+    });
+    if (!project) {
+      throw new AppError("Active project not found.", 404, "PROJECT_NOT_FOUND");
+    }
+    resolvedProjectId = project._id;
+    if (!charityId) {
+      charityId = project.charityId;
+    }
+  }
+
+  if (!charityId) {
+    throw new AppError("charityId or charityProjectId is required.", 400, "VALIDATION_ERROR", [
+      { section: "body", message: "charityId or charityProjectId is required" },
     ]);
   }
 
@@ -33,19 +48,6 @@ export const createDonation = asyncHandler(async (req, res) => {
   }
   if (charity.verificationStatus !== "verified") {
     throw new AppError("Donations are only accepted for verified charities.", 403, "CHARITY_NOT_VERIFIED");
-  }
-
-  let resolvedProjectId = null;
-  if (charityProjectId) {
-    const project = await Project.findOne({
-      _id: charityProjectId,
-      charityId: charity._id,
-      status: "active",
-    });
-    if (!project) {
-      throw new AppError("Active project not found for this charity.", 404, "PROJECT_NOT_FOUND");
-    }
-    resolvedProjectId = project._id;
   }
 
   // Atomically check and decrement coin balance
