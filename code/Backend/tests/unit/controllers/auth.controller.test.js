@@ -4,27 +4,26 @@ import assert from "node:assert/strict";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-import { createMockResponse, nextTick } from "../helpers/http.js";
+import { createMockResponse } from "../helpers/http.js";
+import PendingUser from "../../../src/models/PendingUser.js";
 import User from "../../../src/models/User.js";
 import { login, register } from "../../../src/controllers/auth.controller.js";
 
-test("register creates user and returns auth payload", async () => {
+test("register creates pending user and dispatches OTP", async () => {
   const originalHash = bcrypt.hash;
-  const originalSign = jwt.sign;
   const originalFindOne = User.findOne;
-  const originalCreate = User.create;
+  const originalDeleteOne = PendingUser.deleteOne;
+  const originalCreate = PendingUser.create;
+
+  let createdPendingUser;
 
   bcrypt.hash = async () => "hashed-pass";
-  jwt.sign = () => "signed-token";
   User.findOne = async () => null;
-  User.create = async () => ({
-    _id: "u1",
-    firstName: "Jane",
-    lastName: "Doe",
-    userName: "jane",
-    email: "jane@example.com",
-    accountType: "individual",
-  });
+  PendingUser.deleteOne = async () => ({ deletedCount: 1 });
+  PendingUser.create = async (payload) => {
+    createdPendingUser = payload;
+    return { _id: "u1", ...payload };
+  };
 
   const req = {
     body: {
@@ -37,25 +36,20 @@ test("register creates user and returns auth payload", async () => {
     },
   };
   const res = createMockResponse();
-  let nextArg;
 
   try {
-    register(req, res, (error) => {
-      nextArg = error;
-    });
-    await nextTick();
+    await register(req, res);
   } finally {
     bcrypt.hash = originalHash;
-    jwt.sign = originalSign;
     User.findOne = originalFindOne;
-    User.create = originalCreate;
+    PendingUser.deleteOne = originalDeleteOne;
+    PendingUser.create = originalCreate;
   }
 
-  assert.equal(nextArg, undefined);
-  assert.equal(res.statusCode, 201);
+  assert.equal(res.statusCode, 200);
   assert.equal(res.payload.success, true);
-  assert.equal(res.payload.data.token, "signed-token");
-  assert.equal(res.payload.data.user.userName, "jane");
+  assert.equal(createdPendingUser.email, "jane@example.com");
+  assert.equal(createdPendingUser.userName, "jane");
 });
 
 test("register rejects duplicate email", async () => {
@@ -73,19 +67,19 @@ test("register rejects duplicate email", async () => {
     },
   };
   const res = createMockResponse();
-  let nextArg;
 
   try {
-    register(req, res, (error) => {
-      nextArg = error;
-    });
-    await nextTick();
+    await assert.rejects(
+      () => register(req, res),
+      (err) => {
+        assert.equal(err.name, "AppError");
+        assert.equal(err.code, "EMAIL_ALREADY_IN_USE");
+        return true;
+      }
+    );
   } finally {
     User.findOne = originalFindOne;
   }
-
-  assert.equal(nextArg.name, "AppError");
-  assert.equal(nextArg.code, "EMAIL_ALREADY_IN_USE");
 });
 
 test("login returns INVALID_CREDENTIALS when user does not exist", async () => {
@@ -101,19 +95,19 @@ test("login returns INVALID_CREDENTIALS when user does not exist", async () => {
     },
   };
   const res = createMockResponse();
-  let nextArg;
 
   try {
-    login(req, res, (error) => {
-      nextArg = error;
-    });
-    await nextTick();
+    await assert.rejects(
+      () => login(req, res),
+      (err) => {
+        assert.equal(err.name, "AppError");
+        assert.equal(err.code, "INVALID_CREDENTIALS");
+        return true;
+      }
+    );
   } finally {
     User.findOne = originalFindOne;
   }
-
-  assert.equal(nextArg.name, "AppError");
-  assert.equal(nextArg.code, "INVALID_CREDENTIALS");
 });
 
 test("login returns INVALID_CREDENTIALS when password mismatch", async () => {
@@ -137,20 +131,20 @@ test("login returns INVALID_CREDENTIALS when password mismatch", async () => {
     },
   };
   const res = createMockResponse();
-  let nextArg;
 
   try {
-    login(req, res, (error) => {
-      nextArg = error;
-    });
-    await nextTick();
+    await assert.rejects(
+      () => login(req, res),
+      (err) => {
+        assert.equal(err.name, "AppError");
+        assert.equal(err.code, "INVALID_CREDENTIALS");
+        return true;
+      }
+    );
   } finally {
     User.findOne = originalFindOne;
     bcrypt.compare = originalCompare;
   }
-
-  assert.equal(nextArg.name, "AppError");
-  assert.equal(nextArg.code, "INVALID_CREDENTIALS");
 });
 
 test("login rejects unsupported account type", async () => {
@@ -174,20 +168,20 @@ test("login rejects unsupported account type", async () => {
     },
   };
   const res = createMockResponse();
-  let nextArg;
 
   try {
-    login(req, res, (error) => {
-      nextArg = error;
-    });
-    await nextTick();
+    await assert.rejects(
+      () => login(req, res),
+      (err) => {
+        assert.equal(err.name, "AppError");
+        assert.equal(err.code, "INVALID_ACCOUNT_TYPE");
+        return true;
+      }
+    );
   } finally {
     User.findOne = originalFindOne;
     bcrypt.compare = originalCompare;
   }
-
-  assert.equal(nextArg.name, "AppError");
-  assert.equal(nextArg.code, "INVALID_ACCOUNT_TYPE");
 });
 
 test("login returns token payload when credentials are valid", async () => {
@@ -203,6 +197,7 @@ test("login returns token payload when credentials are valid", async () => {
       password: "hash",
       accountType: "organization",
       isActive: true,
+      coinBalance: 120,
     }),
   });
   bcrypt.compare = async () => true;
@@ -215,22 +210,17 @@ test("login returns token payload when credentials are valid", async () => {
     },
   };
   const res = createMockResponse();
-  let nextArg;
 
   try {
-    login(req, res, (error) => {
-      nextArg = error;
-    });
-    await nextTick();
+    await login(req, res);
   } finally {
     User.findOne = originalFindOne;
     bcrypt.compare = originalCompare;
     jwt.sign = originalSign;
   }
 
-  assert.equal(nextArg, undefined);
   assert.equal(res.statusCode, 200);
-  assert.equal(res.payload.data.token, "jwt-token");
+  assert.equal(res.payload.data.accessToken, "jwt-token");
   assert.equal(res.payload.data.loginType, "organization");
+  assert.equal(res.cookies.refreshToken?.value, "jwt-token");
 });
-

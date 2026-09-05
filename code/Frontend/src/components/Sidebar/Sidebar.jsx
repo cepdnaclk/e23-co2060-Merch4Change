@@ -17,6 +17,8 @@ import {
   Heart,
   ShieldCheck,
   ClipboardList,
+  Trophy,
+  Users,
 } from "lucide-react";
 
 function Sidebar({ profileData, setIsSidebarCollapsed, onPostCreated }) {
@@ -133,6 +135,13 @@ function Sidebar({ profileData, setIsSidebarCollapsed, onPostCreated }) {
           onClick={() => handleSelectOption(5)}
         >
           <div className="lum-nav-icon"><Heart size={20} /></div> <span className="lum-nav-text">Donations</span>
+        </NavLink>
+        <NavLink
+          to="/donations?tab=leaderboard"
+          className="lum-nav-item"
+          onClick={() => handleSelectOption('leaderboard')}
+        >
+          <div className="lum-nav-icon"><Trophy size={20} /></div> <span className="lum-nav-text">Leaderboard</span>
         </NavLink>
         {isAdmin && (
           <NavLink

@@ -7,6 +7,7 @@ interface User {
     email: string;
     accountType: string;
     role?: string;
+    coinBalance?: number;
     createdAt?: string;
     profileImageUrl?: string;
 }

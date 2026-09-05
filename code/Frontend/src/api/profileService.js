@@ -14,3 +14,9 @@ export const unfollowUser = async (username) => {
   const response = await apiClient.post(`/api/v1/profile/${username}/unfollow`);
   return response.data;
 };
+
+export const getTopCustomers = async (username) => {
+  const response = await apiClient.get(`/api/v1/profile/${username}/top-customers`);
+  return response.data;
+};
+

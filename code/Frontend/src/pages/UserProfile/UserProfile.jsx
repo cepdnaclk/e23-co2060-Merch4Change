@@ -12,10 +12,10 @@ import PostGrid from "./PostGrid/PostGrid";
 import { MapContainer, TileLayer, CircleMarker, Popup, Marker } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import DonationModal from "../../components/donations/DonationModal";
 import { MapPin, X } from "lucide-react";
 import { getUserProducts } from "../../api/productsService";
 import CreateProductModal from "../../components/CreateProductModal/CreateProductModal";
+import TopCustomers from "../../components/TopCustomers/TopCustomers";
 
 const hqIcon = new L.Icon({
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
@@ -66,6 +66,30 @@ function UserProfile() {
   const [products, setProducts] = useState([]);
   const [isProductsLoading, setIsProductsLoading] = useState(false);
   const [createProductModalOpen, setCreateProductModalOpen] = useState(false);
+  const [viewerCoins, setViewerCoins] = useState(0);
+
+  useEffect(() => {
+    if (!token) return;
+    apiClient.get("/api/v1/profile/me/coins")
+      .then((res) => {
+        if (res.data?.success && typeof res.data.data?.coinBalance === "number") {
+          setViewerCoins(res.data.data.coinBalance);
+        }
+      })
+      .catch(() => {});
+  }, [token]);
+
+  const handleDonationCommitted = (spentCoins, remainingCoins) => {
+    setViewerCoins((prev) => {
+      const next = typeof remainingCoins === "number" ? remainingCoins : Math.max(0, prev - spentCoins);
+      return next;
+    });
+    // Also if viewing own profile, update profileData.coinBalance
+    setProfileData((prev) => {
+      if (!prev) return prev;
+      return { ...prev, coinBalance: typeof remainingCoins === "number" ? remainingCoins : Math.max(0, (prev.coinBalance || 0) - spentCoins) };
+    });
+  };
 
   useEffect(() => {
     if (profileData?.accountType === "organization" && profileData?.country && !hqPos) {
@@ -356,10 +380,6 @@ function UserProfile() {
   const isOrganization = profileData?.accountType === "organization";
   const verificationStatus = profileData?.verificationStatus || "unsubmitted";
 
-  const handleDonationCommitted = (spentCoins, remainingCoins) => {
-    // If we wanted to update current user's coin balance visually here
-  };
-
   return (
     <div className={`luminous-app ${isSidebarCollapsed ? "sidebar-collapsed" : ""}`}>
       <div className="lum-layout">
@@ -400,8 +420,10 @@ function UserProfile() {
               onFollowClick={handleFollowClick}
               onMessageClick={handleMessageClick}
               isOrganization={isOrganization}
+              projectsCount={orgProjects?.length ?? profileData?.projectsCount ?? 0}
               verificationStatus={verificationStatus}
-              onDonateClick={() => setDonationModalOpen(true)}
+              onDonateClick={() => navigate(`/donate?charityId=${profileData?.charityId || profileData?.id || ""}&charityName=${encodeURIComponent(profileData?.firstName || profileData?.userName || "")}`)}
+              onViewCustomersClick={() => setActiveTab(isOrganization ? 'TOP DONORS' : 'TOP CUSTOMERS')}
               badges={[]}
             />
 
@@ -443,7 +465,7 @@ function UserProfile() {
                   <div className="up-edit-card up-edit-fields">
                     <div className="up-edit-card-title">Profile details</div>
                     <label className="up-edit-field">
-                      <span>Username</span>
+                       <span>Username</span>
                       <input value={editForm.userName} onChange={handleFieldChange("userName")} />
                     </label>
                     <label className="up-edit-field">
@@ -479,7 +501,7 @@ function UserProfile() {
             <ProfileTabs 
               activeTab={activeTab} 
               onTabChange={setActiveTab} 
-              tabs={profileData?.accountType === 'organization' ? ['POSTS', 'PROJECTS'] : ['POSTS', 'PRODUCTS']}
+              tabs={isOrganization ? ['POSTS', 'PROJECTS', 'TOP DONORS'] : ['POSTS', 'PRODUCTS', 'TOP CUSTOMERS']}
             />
           </div>
           
@@ -578,8 +600,9 @@ function UserProfile() {
                           <button 
                             className="btn-donate-action"
                             onClick={() => {
-                              setSelectedProject(project.title);
-                              setDonationModalOpen(true);
+                              navigate(
+                                `/donate?charityId=${profileData.charityId || profileData.id || ""}&charityName=${encodeURIComponent(profileData.firstName || profileData.userName || "")}&projectId=${project._id || project.id || ""}&projectName=${encodeURIComponent(project.title || "")}&goal=${project.goalAmount || 0}&collected=${project.collectedAmount || 0}`
+                              );
                             }}
                           >
                             Support Project
@@ -597,6 +620,14 @@ function UserProfile() {
                   )}
                 </div>
               </div>
+            )}
+
+            {(activeTab === 'TOP CUSTOMERS' || activeTab === 'TOP DONORS') && (
+              <TopCustomers 
+                username={profileData?.userName || username} 
+                sellerName={profileData?.firstName || profileData?.userName} 
+                isOrganization={isOrganization}
+              />
             )}
           </div>
         </main>
@@ -633,22 +664,6 @@ function UserProfile() {
             </div>
           </div>
         </div>
-      )}
-
-      {isOrganization && (
-        <DonationModal
-          isOpen={donationModalOpen}
-          onClose={() => setDonationModalOpen(false)}
-          onSuccess={(name) => {
-            setDonationModalOpen(false);
-            alert(`Thank you for donating to ${name}!`);
-          }}
-          initialProject={selectedProject}
-          initialCharityId={verificationStatus === 'verified' ? profileData.id : ""}
-          initialCharityName={profileData.firstName || profileData.userName}
-          availableCoins={currentUser?.coinBalance || 0}
-          onDonationCommitted={handleDonationCommitted}
-        />
       )}
     </div>
   );
