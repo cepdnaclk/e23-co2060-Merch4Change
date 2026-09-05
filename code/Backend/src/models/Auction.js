@@ -12,11 +12,16 @@ const auctionSchema = new mongoose.Schema(
       type: Number,
       required: true,
       min: 0,
-    },
+    },  
     currentPrice: {
       type: Number,
       required: true,
       min: 0,
+    },
+    currentBidder: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",     
+      default: null,
     },
     startTime: {
       type: Date,
@@ -25,6 +30,7 @@ const auctionSchema = new mongoose.Schema(
     endTime: {
       type: Date,
       required: true,
+      index: true,
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -34,12 +40,18 @@ const auctionSchema = new mongoose.Schema(
     },
     status: {
       type: String,
+      enum: ["scheduled", "active", "ended", "cancelled"],
+      default: "scheduled",
+    },
+    bidIncrement:{
+      type: Number,
       required: true,
-      trim: true,
+      default: 10,
+      min: 1,
     },
   },
   {
-    timestamps: false,
+    timestamps: true,
     versionKey: false,
   },
 );
