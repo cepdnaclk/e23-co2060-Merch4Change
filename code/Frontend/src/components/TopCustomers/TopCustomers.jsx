@@ -11,6 +11,7 @@ import {
   Heart,
   Sparkles,
   Flame,
+  ArrowRight,
 } from "lucide-react";
 
 export default function TopCustomers({ username, sellerName, isOrganization }) {
@@ -247,6 +248,30 @@ export default function TopCustomers({ username, sellerName, isOrganization }) {
               );
             })}
           </div>
+        </div>
+      )}
+
+      {/* ── CHECK ALL DONORS CTA (BETWEEN RANKINGS & RECENT DONATIONS) ── */}
+      {isDonorMode && (
+        <div className="tc-all-donors-banner">
+          <div className="tc-all-donors-info">
+            <div className="tc-all-donors-icon">
+              <Users size={22} color="#0D6B5E" />
+            </div>
+            <div>
+              <h4 className="tc-all-donors-title">Community Donors Directory</h4>
+              <p className="tc-all-donors-sub">
+                Explore the complete list of {data?.totalDonorsCount || supporters.length} supporters, see their contribution history, and find your own donor rank.
+              </p>
+            </div>
+          </div>
+          <Link
+            to={`/profile/${encodeURIComponent(username)}/donors`}
+            className="tc-all-donors-btn"
+          >
+            <span>Check All Donors</span>
+            <ArrowRight size={16} />
+          </Link>
         </div>
       )}
 

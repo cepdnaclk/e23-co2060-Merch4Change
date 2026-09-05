@@ -14,8 +14,36 @@ import mongoose from "mongoose";
 import AppError from "../utils/appError.js";
 
 export const me = asyncHandler(async (req, res) => {
+  const userObj = req.user.toObject ? req.user.toObject() : { ...req.user };
+  if (mongoose.connection?.readyState === 1 && (req.user.accountType === "organization" || req.user.role === "charity")) {
+    const charity = await Charity.findOne({ ownerUserId: req.user._id });
+    const possibleCharityIds = [req.user._id];
+    if (charity?._id) possibleCharityIds.push(charity._id);
+    const projectsCount = await Project.countDocuments({
+      $or: [
+        { charityId: { $in: possibleCharityIds } },
+        ...(charity?._id ? [{ charityId: charity._id }] : []),
+      ],
+      status: { $in: ["active", "completed", "done", "ongoing"] },
+    });
+    userObj.projectsCount = projectsCount;
+    if (charity) {
+      userObj.charityId = charity._id;
+      userObj.charity = charity;
+    }
+  }
+
+  if (mongoose.connection?.readyState === 1 && req.user._id && mongoose.isValidObjectId(req.user._id)) {
+    const [followersCount, followingCount] = await Promise.all([
+      Follow.countDocuments({ followingId: req.user._id }),
+      Follow.countDocuments({ followerId: req.user._id }),
+    ]);
+    userObj.followersCount = followersCount;
+    userObj.followingCount = followingCount;
+  }
+
   return successResponse(res, 200, "Current user fetched successfully.", {
-    user: req.user,
+    user: userObj,
   });
 });
 
@@ -111,10 +139,30 @@ export const getProfileByUsername = asyncHandler(async (req, res) => {
   }
 
   const userObj = user.toObject ? user.toObject() : { ...user };
+  if (userObj.accountType === "organization" || userObj.role === "charity" || charity) {
+    const possibleCharityIds = [user._id];
+    if (charity?._id) possibleCharityIds.push(charity._id);
+    const projectsCount = await Project.countDocuments({
+      $or: [
+        { charityId: { $in: possibleCharityIds } },
+        ...(charity?._id ? [{ charityId: charity._id }] : []),
+      ],
+      status: { $in: ["active", "completed", "done", "ongoing"] },
+    });
+    userObj.projectsCount = projectsCount;
+  }
+
   if (charity) {
     userObj.charityId = charity._id;
     userObj.charity = charity;
   }
+
+  const [followersCount, followingCount] = await Promise.all([
+    Follow.countDocuments({ followingId: user._id }),
+    Follow.countDocuments({ followerId: user._id }),
+  ]);
+  userObj.followersCount = followersCount;
+  userObj.followingCount = followingCount;
 
   return successResponse(res, 200, "User profile fetched successfully.", {
     user: userObj,
@@ -125,7 +173,12 @@ export const getProfileByUsername = asyncHandler(async (req, res) => {
 export const followUser = asyncHandler(async (req, res) => {
   const { username } = req.params;
 
-  const userToFollow = await User.findOne({ userName: username });
+  const userToFollow = await User.findOne({
+    $or: [
+      { userName: { $regex: new RegExp(`^${username}$`, "i") } },
+      ...(mongoose.isValidObjectId(username) ? [{ _id: username }] : []),
+    ],
+  });
   if (!userToFollow) {
     throw new AppError("User not found.", 404, "USER_NOT_FOUND");
   }
@@ -149,6 +202,9 @@ export const followUser = asyncHandler(async (req, res) => {
     followingId: userToFollow._id,
   });
 
+  await User.findByIdAndUpdate(userToFollow._id, { $inc: { followersCount: 1 } });
+  await User.findByIdAndUpdate(req.user._id, { $inc: { followingCount: 1 } });
+
   if (mongoose.Types.ObjectId.isValid(userToFollow._id)) {
     const followerName = req.user.firstName && req.user.lastName
       ? `${req.user.firstName} ${req.user.lastName}`.trim()
@@ -167,15 +223,25 @@ export const followUser = asyncHandler(async (req, res) => {
 export const unfollowUser = asyncHandler(async (req, res) => {
   const { username } = req.params;
 
-  const userToUnfollow = await User.findOne({ userName: username });
+  const userToUnfollow = await User.findOne({
+    $or: [
+      { userName: { $regex: new RegExp(`^${username}$`, "i") } },
+      ...(mongoose.isValidObjectId(username) ? [{ _id: username }] : []),
+    ],
+  });
   if (!userToUnfollow) {
     throw new AppError("User not found.", 404, "USER_NOT_FOUND");
   }
 
-  await Follow.findOneAndDelete({
+  const deleted = await Follow.findOneAndDelete({
     followerId: req.user._id,
     followingId: userToUnfollow._id,
   });
+
+  if (deleted) {
+    await User.findByIdAndUpdate(userToUnfollow._id, { $inc: { followersCount: -1 } });
+    await User.findByIdAndUpdate(req.user._id, { $inc: { followingCount: -1 } });
+  }
 
   return successResponse(res, 200, "Successfully unfollowed user.", { isFollowing: false });
 });
@@ -311,9 +377,15 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
       return successResponse(res, 200, "Top donors fetched successfully.", {
         type: "donors",
         entity: {
+          id: charity?._id || targetUser?._id,
           userName: targetUser?.userName || username,
           name: charity?.publicName || (targetUser?.firstName ? `${targetUser.firstName} ${targetUser.lastName}`.trim() : targetUser?.userName || username),
           accountType: "organization",
+          logoUrl: charity?.logoUrl || targetUser?.profileImageUrl || "",
+          description: charity?.description || targetUser?.profileBio || "",
+          category: charity?.category || "other",
+          country: charity?.country || "",
+          isVerified: true,
         },
         topSupporters: [],
         topDonors: [],
@@ -470,9 +542,15 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
     return successResponse(res, 200, "Top donors fetched successfully.", {
       type: "donors",
       entity: {
+        id: charity?._id || targetUser?._id,
         userName: targetUser?.userName || username,
         name: charity?.publicName || (targetUser?.firstName ? `${targetUser.firstName} ${targetUser.lastName}`.trim() : targetUser?.userName || username),
         accountType: "organization",
+        logoUrl: charity?.logoUrl || targetUser?.profileImageUrl || "",
+        description: charity?.description || targetUser?.profileBio || "",
+        category: charity?.category || "other",
+        country: charity?.country || "",
+        isVerified: true,
       },
       topSupporters: sortedDonors,
       topDonors: sortedDonors,
@@ -522,7 +600,7 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
 
   // 3. Find paid orders containing these products
   const orders = await Order.find({
-    status: "paid",
+    status: { $in: ["paid", "shipped", "completed"] },
     "items.productId": { $in: productIds },
   })
     .select("userId items totalAmount createdAt")

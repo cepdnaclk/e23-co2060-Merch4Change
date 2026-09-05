@@ -420,8 +420,9 @@ function UserProfile() {
               onFollowClick={handleFollowClick}
               onMessageClick={handleMessageClick}
               isOrganization={isOrganization}
+              projectsCount={orgProjects?.length ?? profileData?.projectsCount ?? 0}
               verificationStatus={verificationStatus}
-              onDonateClick={() => navigate(`/donate?charityId=${profileData.charityId || profileData.id || ""}&charityName=${encodeURIComponent(profileData.firstName || profileData.userName || "")}`)}
+              onDonateClick={() => navigate(`/donate?charityId=${profileData?.charityId || profileData?.id || ""}&charityName=${encodeURIComponent(profileData?.firstName || profileData?.userName || "")}`)}
               onViewCustomersClick={() => setActiveTab(isOrganization ? 'TOP DONORS' : 'TOP CUSTOMERS')}
               badges={[]}
             />

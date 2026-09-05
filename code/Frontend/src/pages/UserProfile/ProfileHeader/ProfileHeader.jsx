@@ -30,6 +30,7 @@ function ProfileHeader({
   onFollowClick = () => {},
   onMessageClick = () => {},
   isOrganization = false,
+  projectsCount = undefined,
   verificationStatus = null,
   onDonateClick = () => {},
   onViewCustomersClick = () => {},
@@ -208,7 +209,7 @@ function ProfileHeader({
           </div>
           {profileData?.accountType === 'organization' && (
             <div className="ph-stat-item">
-              <strong>{profileData?.projectsCount || 0}</strong> <span>projects</span>
+              <strong>{projectsCount !== undefined ? projectsCount : (profileData?.projectsCount || 0)}</strong> <span>projects</span>
             </div>
           )}
         </div>

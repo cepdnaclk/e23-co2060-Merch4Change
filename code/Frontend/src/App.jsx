@@ -40,6 +40,7 @@ import CharityQueue from "./pages/Admin/CharityVerification/CharityQueue";
 import CharityReview from "./pages/Admin/CharityVerification/CharityReview";
 import NotificationPage from "./pages/Notification/Notification";
 import SearchPage from "./pages/Search/SearchPage";
+import AllDonorsPage from "./pages/AllDonors/AllDonorsPage";
 
 
 function App() {
@@ -88,6 +89,10 @@ function App() {
 
           {/* Dynamic Route: Perfect for Social Media Profiles */}
           <Route path="/profile/:username" element={<UserProfile />} />
+          <Route
+            path="/profile/:username/donors"
+            element={<ProtectedRoute><AllDonorsPage /></ProtectedRoute>}
+          />
           <Route
             path="/profile/:username/projects"
             element={<OrgProjects />}

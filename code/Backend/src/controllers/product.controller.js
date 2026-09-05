@@ -34,14 +34,55 @@ export const createProduct = async (req, res) => {
 export const getUserProducts = async (req, res) => {
   try {
     const { username } = req.params;
+    const cleanParam = decodeURIComponent(username || "").trim();
+    const alphanumericOnly = cleanParam.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const fuzzyPattern = cleanParam.replace(/[-_]/g, "[\\s-_]*");
+    const fuzzyRegex = new RegExp(`^${fuzzyPattern}$`, "i");
+
     const User = (await import("../models/User.js")).default;
+    const mongoose = (await import("mongoose")).default;
     
-    const user = await User.findOne({ userName: username });
+    let user = await User.findOne({
+      $or: [
+        { userName: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
+        { userName: { $regex: new RegExp(`^${alphanumericOnly}$`, "i") } },
+        { userName: { $regex: fuzzyRegex } },
+        { firstName: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
+        { firstName: { $regex: fuzzyRegex } },
+        ...(mongoose.isValidObjectId(cleanParam) ? [{ _id: cleanParam }] : []),
+      ],
+    });
+
+    if (!user) {
+      const Brand = (await import("../models/Brand.js")).default;
+      const brand = await Brand.findOne({
+        $or: [
+          { brandName: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
+          { brandName: { $regex: fuzzyRegex } },
+          { slug: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
+          ...(mongoose.isValidObjectId(cleanParam) ? [{ _id: cleanParam }, { ownerUserId: cleanParam }] : []),
+        ],
+      });
+      if (brand?.ownerUserId) {
+        user = await User.findById(brand.ownerUserId);
+      }
+    }
+
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    const products = await Product.find({ ownerUserId: user._id })
+    const Brand = (await import("../models/Brand.js")).default;
+    const brands = await Brand.find({ ownerUserId: user._id });
+    const brandIds = brands.map((b) => b._id);
+
+    const products = await Product.find({
+      $or: [
+        { ownerUserId: user._id },
+        ...(brandIds.length > 0 ? [{ brandId: { $in: brandIds } }] : []),
+      ],
+    })
+      .populate("brandId", "brandName logoUrl slug")
       .populate("ownerUserId", "firstName lastName userName profileImageUrl")
       .sort({ createdAt: -1 });
 
