@@ -298,3 +298,123 @@
 @keyframes tcSpin {
   to { transform: rotate(360deg); }
 }
+
+/* Donation History Stream Section */
+.tc-history-section {
+  margin-top: 36px;
+  background: #ffffff;
+  border: 1px solid #E5E0D8;
+  border-radius: 20px;
+  padding: 24px 28px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+}
+
+.tc-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #F0ECE4;
+}
+
+.tc-history-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 20px;
+  color: #1A1A1A;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.tc-history-badge {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0D6B5E;
+  background: #E1F5EE;
+  padding: 4px 10px;
+  border-radius: 14px;
+}
+
+.tc-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tc-history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: #FAF7F2;
+  border-radius: 14px;
+  border: 1px solid #F0ECE4;
+  transition: all 0.2s ease;
+}
+
+.tc-history-item:hover {
+  background: #F5EFE6;
+  border-color: #E2DAD0;
+}
+
+.tc-history-donor {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tc-history-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid #FFFFFF;
+}
+
+.tc-history-donor-name {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1A1A1A;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tc-history-donor-name:hover {
+  color: #0D6B5E;
+}
+
+.tc-history-project-name {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  color: #8C827A;
+  margin-top: 2px;
+}
+
+.tc-history-right {
+  text-align: right;
+}
+
+.tc-history-coins {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #D4820A;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.tc-history-time {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  color: #A09890;
+  margin-top: 2px;
+}
+

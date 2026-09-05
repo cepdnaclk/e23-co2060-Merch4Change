@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Charity from "../models/Charity.js";
 import CoinTransaction from "../models/CoinTransaction.js";
 import Donation from "../models/Donation.js";
@@ -22,11 +23,23 @@ export const createDonation = asyncHandler(async (req, res) => {
   }
 
   let resolvedProjectId = null;
+  let project = null;
   if (charityProjectId) {
-    const project = await Project.findOne({
-      _id: charityProjectId,
-      status: "active",
-    });
+    try {
+      project = await Project.findOne({
+        _id: charityProjectId,
+        status: "active",
+      });
+    } catch {
+      project = null;
+    }
+    if (!project) {
+      try {
+        project = await Project.findById(charityProjectId);
+      } catch {
+        project = null;
+      }
+    }
     if (!project) {
       throw new AppError("Active project not found.", 404, "PROJECT_NOT_FOUND");
     }
@@ -36,13 +49,44 @@ export const createDonation = asyncHandler(async (req, res) => {
     }
   }
 
+  if (!charityId && project?.charityId) {
+    charityId = project.charityId;
+  }
+
   if (!charityId) {
     throw new AppError("charityId or charityProjectId is required.", 400, "VALIDATION_ERROR", [
       { section: "body", message: "charityId or charityProjectId is required" },
     ]);
   }
 
-  const charity = await Charity.findById(charityId);
+  let charity = null;
+  try {
+    charity = await Charity.findById(charityId);
+  } catch {
+    charity = null;
+  }
+  if (!charity) {
+    try {
+      charity = await Charity.findOne({ ownerUserId: charityId });
+    } catch {
+      charity = null;
+    }
+  }
+  if (!charity && project?.charityId) {
+    try {
+      charity = await Charity.findById(project.charityId);
+    } catch {
+      charity = null;
+    }
+    if (!charity) {
+      try {
+        charity = await Charity.findOne({ ownerUserId: project.charityId });
+      } catch {
+        charity = null;
+      }
+    }
+  }
+
   if (!charity) {
     throw new AppError("Charity not found.", 404, "CHARITY_NOT_FOUND");
   }
@@ -203,9 +247,42 @@ export const listCharities = asyncHandler(async (req, res) => {
   const charities = await Charity.find({ verificationStatus: "verified" })
     .select("publicName description logoUrl website category ownerUserId")
     .populate("ownerUserId", "userName")
-    .sort({ verifiedAt: -1 });
+    .sort({ verifiedAt: -1 })
+    .lean();
 
-  return successResponse(res, 200, "Charities fetched successfully.", { charities });
+  const charityIds = charities.map((c) => c._id);
+
+  const [donationTotals, projectTotals] = await Promise.all([
+    Donation.aggregate([
+      { $match: { charityId: { $in: charityIds }, status: "completed" } },
+      { $group: { _id: "$charityId", totalRaised: { $sum: "$coinAmount" }, count: { $sum: 1 } } },
+    ]),
+    Project.aggregate([
+      { $match: { charityId: { $in: charityIds }, status: "active" } },
+      { $group: { _id: "$charityId", totalGoal: { $sum: "$goalAmount" }, totalCollected: { $sum: "$collectedAmount" } } },
+    ]),
+  ]);
+
+  const donationMap = new Map(donationTotals.map((d) => [d._id.toString(), d]));
+  const projectMap = new Map(projectTotals.map((p) => [p._id.toString(), p]));
+
+  const enriched = charities.map((c) => {
+    const dInfo = donationMap.get(c._id.toString());
+    const pInfo = projectMap.get(c._id.toString());
+    const totalRaised = dInfo?.totalRaised || pInfo?.totalCollected || 0;
+    const totalGoal = pInfo?.totalGoal || 10000;
+    const percent = totalGoal > 0 ? Math.min(100, Math.round((totalRaised / totalGoal) * 100)) : 0;
+
+    return {
+      ...c,
+      totalRaised,
+      totalGoal,
+      percent,
+      donationsCount: dInfo?.count || 0,
+    };
+  });
+
+  return successResponse(res, 200, "Charities fetched successfully.", { charities: enriched });
 });
 
 /**

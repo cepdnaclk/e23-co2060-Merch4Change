@@ -19,6 +19,10 @@ const CATEGORY_META = {
 
 const mapCharityCard = (charity) => {
   const meta = CATEGORY_META[charity.category] || CATEGORY_META.other;
+  const raised = charity.totalRaised || charity.raised || 0;
+  const goal = charity.totalGoal || charity.goal || 10000;
+  const percent = charity.percent !== undefined ? charity.percent : (goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0);
+
   return {
     id: charity._id,
     charityId: charity._id,
@@ -29,9 +33,9 @@ const mapCharityCard = (charity) => {
     tagBg: meta.tagBg,
     name: charity.publicName,
     desc: charity.description || "Verified charity on Merch4Change.",
-    raised: 0,
-    goal: 1,
-    percent: 0,
+    raised,
+    goal,
+    percent,
     gradient: "linear-gradient(135deg, #064e3b 0%, #059669 100%)",
     img: charity.logoUrl || "https://images.unsplash.com/photo-1469571480202-8bcc9fd2f3a7?w=800&q=80",
   };

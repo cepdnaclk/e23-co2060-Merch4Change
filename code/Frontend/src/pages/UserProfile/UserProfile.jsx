@@ -422,7 +422,7 @@ function UserProfile() {
               isOrganization={isOrganization}
               verificationStatus={verificationStatus}
               onDonateClick={() => navigate(`/donate?charityId=${profileData.charityId || profileData.id || ""}&charityName=${encodeURIComponent(profileData.firstName || profileData.userName || "")}`)}
-              onViewCustomersClick={() => setActiveTab('TOP CUSTOMERS')}
+              onViewCustomersClick={() => setActiveTab(isOrganization ? 'TOP DONORS' : 'TOP CUSTOMERS')}
               badges={[]}
             />
 
@@ -464,7 +464,7 @@ function UserProfile() {
                   <div className="up-edit-card up-edit-fields">
                     <div className="up-edit-card-title">Profile details</div>
                     <label className="up-edit-field">
-                      <span>Username</span>
+                       <span>Username</span>
                       <input value={editForm.userName} onChange={handleFieldChange("userName")} />
                     </label>
                     <label className="up-edit-field">
@@ -500,7 +500,7 @@ function UserProfile() {
             <ProfileTabs 
               activeTab={activeTab} 
               onTabChange={setActiveTab} 
-              tabs={profileData?.accountType === 'organization' ? ['POSTS', 'PROJECTS', 'TOP CUSTOMERS'] : ['POSTS', 'PRODUCTS', 'TOP CUSTOMERS']}
+              tabs={isOrganization ? ['POSTS', 'PROJECTS', 'TOP DONORS'] : ['POSTS', 'PRODUCTS', 'TOP CUSTOMERS']}
             />
           </div>
           
@@ -621,10 +621,11 @@ function UserProfile() {
               </div>
             )}
 
-            {activeTab === 'TOP CUSTOMERS' && (
+            {(activeTab === 'TOP CUSTOMERS' || activeTab === 'TOP DONORS') && (
               <TopCustomers 
                 username={profileData?.userName || username} 
                 sellerName={profileData?.firstName || profileData?.userName} 
+                isOrganization={isOrganization}
               />
             )}
           </div>

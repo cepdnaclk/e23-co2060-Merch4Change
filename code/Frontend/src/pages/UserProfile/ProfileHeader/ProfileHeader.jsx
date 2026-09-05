@@ -85,12 +85,12 @@ function ProfileHeader({
           <button 
             className="ph-btn-secondary" 
             onClick={onViewCustomersClick}
-            title="View Top Customers"
+            title={isOrganization ? "View Top Donors" : "View Top Customers"}
             type="button"
             style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
           >
             <Users size={14} />
-            Top Customers
+            {isOrganization ? "Top Donors" : "Top Customers"}
           </button>
           {isOwnProfile && (
             <button className="ph-btn-primary">
