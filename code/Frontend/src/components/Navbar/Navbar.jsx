@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
 import "./Navbar.css";
+import BrandLogo from "../BrandLogo/BrandLogo";
 
 function Navbar({ scrolled = false }) {
   const navigate = useNavigate();
@@ -49,7 +50,7 @@ function Navbar({ scrolled = false }) {
           onClick={() => handleNavigation("/")}
           aria-label="Merch4Change"
         >
-          <div className="lp-navbar-icon">M</div>
+          <BrandLogo size={34} className="lp-navbar-icon" />
           <span className="lp-navbar-text">Merch4Change</span>
         </button>
 

@@ -1,0 +1,47 @@
+/* ============================================================================
+   MERCH4CHANGE — COMMON BRAND LOGO STYLES
+   ============================================================================ */
+
+.m4c-brand-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #4a24e1;
+  color: #ffffff;
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-weight: 700;
+  line-height: 1;
+  user-select: none;
+  flex-shrink: 0;
+  overflow: hidden;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  vertical-align: middle;
+}
+
+.m4c-brand-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.m4c-brand-logo-text {
+  display: block;
+  transform: translateY(-0.5px);
+  color: #ffffff;
+}
+
+.m4c-brand-logo-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.m4c-brand-logo-name {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #111111;
+  letter-spacing: -0.01em;
+}

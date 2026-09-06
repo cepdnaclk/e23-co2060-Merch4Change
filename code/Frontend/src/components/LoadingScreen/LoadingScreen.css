@@ -1,0 +1,308 @@
+/* ============================================
+   MERCH4CHANGE — MAIN LOADING SCREEN (OPTION 1)
+   ============================================ */
+
+.m4c-loader-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  user-select: none;
+}
+
+.m4c-loader-fullscreen {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 99999;
+  background: radial-gradient(circle at 50% 35%, #ffffff 0%, #faf8ff 45%, #f2efff 100%);
+  overflow: hidden;
+}
+
+.m4c-loader-inline {
+  position: relative;
+  width: 100%;
+  min-height: 380px;
+  padding: 40px 16px;
+  background: transparent;
+}
+
+/* Ambient dynamic background halo */
+.m4c-loader-ambient-glow {
+  position: absolute;
+  width: 440px;
+  height: 440px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(74, 36, 225, 0.12) 0%, rgba(139, 92, 246, 0.05) 55%, transparent 70%);
+  filter: blur(55px);
+  pointer-events: none;
+  animation: m4c-ambient-float 6s ease-in-out infinite alternate;
+}
+
+/* Central Card */
+.m4c-loader-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 460px;
+  width: 90%;
+  padding: 24px;
+  z-index: 2;
+}
+
+/* Logo badge with pulsing rings */
+.m4c-loader-badge-wrapper {
+  position: relative;
+  width: 86px;
+  height: 86px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.m4c-loader-pulse-ring {
+  position: absolute;
+  inset: -8px;
+  border-radius: 28px;
+  border: 1.5px solid rgba(74, 36, 225, 0.35);
+  animation: m4c-pulse 2.8s cubic-bezier(0.25, 0.8, 0.25, 1) infinite;
+  pointer-events: none;
+}
+
+.m4c-loader-pulse-ring.delay {
+  animation-delay: 1.4s;
+}
+
+.m4c-loader-logo-frame {
+  width: 76px;
+  height: 76px;
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow:
+    0 16px 36px -10px rgba(74, 36, 225, 0.24),
+    0 4px 12px rgba(0, 0, 0, 0.04),
+    0 0 0 1px rgba(74, 36, 225, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  position: relative;
+  z-index: 2;
+  animation: m4c-float 4.2s ease-in-out infinite;
+}
+
+.m4c-loader-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+.m4c-loader-fallback-monogram {
+  font-family: 'DM Serif Display', serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: #4a24e1;
+}
+
+/* Floating sparkle icon */
+.m4c-loader-sparkle-pill {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4a24e1 0%, #8b5cf6 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(74, 36, 225, 0.4);
+  z-index: 3;
+  animation: m4c-sparkle-bounce 3s ease-in-out infinite;
+}
+
+.m4c-sparkle-icon {
+  animation: m4c-spin-subtle 7s linear infinite;
+}
+
+/* Brand text section */
+.m4c-loader-brand-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.m4c-loader-title {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 28px;
+  font-weight: 600;
+  color: #17152d;
+  letter-spacing: -0.02em;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.m4c-loader-subtext {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #6366f1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* Shimmer Progress Track */
+.m4c-loader-progress-track {
+  width: 190px;
+  height: 3.5px;
+  background: rgba(74, 36, 225, 0.12);
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 28px 0 22px 0;
+  position: relative;
+}
+
+.m4c-loader-progress-shimmer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 45%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #4a24e1, #8b5cf6, #ec4899);
+  box-shadow: 0 0 10px rgba(124, 58, 237, 0.5);
+  animation: m4c-progress 1.6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+/* Tip / Impact Story Area */
+.m4c-loader-tip-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  max-width: 360px;
+}
+
+.m4c-loader-tip-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.m4c-heart-icon {
+  color: #8b5cf6;
+  flex-shrink: 0;
+  fill: rgba(139, 92, 246, 0.18);
+}
+
+.m4c-loader-tip-text {
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: #4b5563;
+  margin: 0;
+  font-weight: 450;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.m4c-loader-tip-text.fade-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.m4c-loader-tip-text.fade-out {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+/* Dots */
+.m4c-loader-tip-indicators {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.m4c-tip-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #d8d4f7;
+  transition: all 0.3s ease;
+}
+
+.m4c-tip-dot.active {
+  width: 14px;
+  border-radius: 4px;
+  background: #4a24e1;
+}
+
+/* ============================================
+   KEYFRAME ANIMATIONS
+   ============================================ */
+
+@keyframes m4c-pulse {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(1.45);
+    opacity: 0;
+  }
+}
+
+@keyframes m4c-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes m4c-sparkle-bounce {
+  0%, 100% {
+    transform: scale(1) translateY(0);
+  }
+  50% {
+    transform: scale(1.1) translateY(-2px);
+  }
+}
+
+@keyframes m4c-spin-subtle {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes m4c-progress {
+  0% {
+    left: -45%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes m4c-ambient-float {
+  0% {
+    transform: translate(-15px, -15px) scale(0.96);
+  }
+  100% {
+    transform: translate(15px, 15px) scale(1.05);
+  }
+}

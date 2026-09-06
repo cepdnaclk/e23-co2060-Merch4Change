@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LandingPage.css";
+import BrandLogo from "../../components/BrandLogo/BrandLogo";
 import {
   ShoppingBag,
   Heart,
@@ -399,7 +400,7 @@ function LandingPage() {
           <div className="lp-footer-columns">
             <div className="lp-footer-col-1">
               <div className="lp-footer-brand">
-                <div className="lp-footer-icon">M</div>
+                <BrandLogo size={34} className="lp-footer-icon" />
                 <span className="lp-footer-name">Merch4Change</span>
               </div>
               <p className="lp-footer-tagline">
