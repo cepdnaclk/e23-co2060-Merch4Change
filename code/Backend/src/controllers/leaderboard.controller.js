@@ -206,13 +206,10 @@ export const getCompanyLeaderboard = asyncHandler(async (req, res) => {
         impactCoinsGenerated: 0,
       };
 
-      // Factor in user salesCount if available for baseline impact
-      const userSales = brand.ownerUserId?.salesCount || 0;
-      const effectiveUnitsSold = Math.max(stats.totalUnitsSold, userSales);
-      const effectiveImpactCoins = Math.max(
-        stats.impactCoinsGenerated,
-        Math.floor(effectiveUnitsSold * 25)
-      );
+      const totalRevenue = stats.totalRevenue;
+      const unitsSold = stats.totalUnitsSold;
+      const impactCoinsGenerated = stats.impactCoinsGenerated;
+      const impactScore = Math.round(impactCoinsGenerated * 1.5 + unitsSold * 10);
 
       return {
         brandId: brand._id,
@@ -222,10 +219,10 @@ export const getCompanyLeaderboard = asyncHandler(async (req, res) => {
         description: brand.description || "",
         ownerUserName: brand.ownerUserId?.userName || "",
         isVerified: brand.ownerUserId?.isVerified || false,
-        totalRevenue: stats.totalRevenue,
-        unitsSold: effectiveUnitsSold,
-        impactCoinsGenerated: effectiveImpactCoins,
-        impactScore: Math.round(effectiveImpactCoins * 1.5 + effectiveUnitsSold * 10),
+        totalRevenue,
+        unitsSold,
+        impactCoinsGenerated,
+        impactScore,
       };
     })
     .sort(

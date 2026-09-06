@@ -252,8 +252,9 @@ test("getCompanyLeaderboard includes paid, shipped, and completed orders in bran
     assert.equal(company.totalRevenue, 600);
     // 2 + 2 = 4
     assert.equal(company.unitsSold, 4);
-    // Math.max(Math.floor(600 / 10), Math.floor(4 * 25)) = Math.max(60, 100) = 100
-    assert.equal(company.impactCoinsGenerated, 100);
+    // Math.floor(600 / 10) = 60 (strictly from real orders, no fabricated salesCount multiplier)
+    assert.equal(company.impactCoinsGenerated, 60);
+    assert.equal(company.impactScore, 130);
   } finally {
     Brand.find = originalBrandFind;
     Product.find = originalProductFind;
