@@ -19,7 +19,7 @@ function TopNavbar({
   const navigate = useNavigate();
   const location = useLocation();
   const { accessToken, logout } = useAuth();
-  const isDonations = location.pathname.startsWith("/donations");
+  const isDonations = location.pathname.startsWith("/donations") || location.pathname.startsWith("/leaderboard");
   const themeClass = isDonations ? "lum-topbar--teal" : "lum-topbar--purple";
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);

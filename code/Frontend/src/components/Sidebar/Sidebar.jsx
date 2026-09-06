@@ -137,8 +137,8 @@ function Sidebar({ profileData, setIsSidebarCollapsed, onPostCreated }) {
           <div className="lum-nav-icon"><Heart size={20} /></div> <span className="lum-nav-text">Donations</span>
         </NavLink>
         <NavLink
-          to="/donations?tab=leaderboard"
-          className="lum-nav-item"
+          to="/leaderboard"
+          className={({ isActive }) => (isActive ? "lum-nav-item active" : "lum-nav-item")}
           onClick={() => handleSelectOption('leaderboard')}
         >
           <div className="lum-nav-icon"><Trophy size={20} /></div> <span className="lum-nav-text">Leaderboard</span>

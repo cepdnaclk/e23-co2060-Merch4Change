@@ -296,7 +296,7 @@ export const listDonationProjects = asyncHandler(async (req, res) => {
     charityId: { $in: verifiedCharityIds },
     status: "active",
   })
-    .populate({ path: "charityId", select: "publicName logoUrl" })
+    .populate({ path: "charityId", select: "publicName logoUrl category" })
     .sort({ createdAt: -1 });
 
   return successResponse(res, 200, "Projects fetched successfully.", {
@@ -305,6 +305,7 @@ export const listDonationProjects = asyncHandler(async (req, res) => {
       charityId: project.charityId?._id,
       charityName: project.charityId?.publicName,
       charityLogo: project.charityId?.logoUrl,
+      category: project.charityId?.category || "other",
       title: project.title,
       description: project.description,
       goalAmount: project.goalAmount,
