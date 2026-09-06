@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useMemo, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Search,
   Rocket,
@@ -15,7 +15,13 @@ import {
   HelpCircle,
   Mail,
   ExternalLink,
+  BookOpen,
+  Lock,
+  Hammer,
+  Clock,
 } from "lucide-react";
+import { HELP_ARTICLES } from "./helpArticlesData";
+import ArticleModal from "./components/ArticleModal";
 import "./HelpAndSupport.css";
 
 const CATEGORIES = [
@@ -36,7 +42,7 @@ const CATEGORIES = [
     filter: "shopping",
   },
   {
-    id: "causes-donations",
+    id: "causes-impact",
     icon: Heart,
     title: "Causes & Impact",
     desc: "How funds reach NGOs, real-time donation tracking, and earning Impact Coins.",
@@ -116,49 +122,68 @@ const FAQ_ITEMS = [
 
 const FILTER_PILLS = [
   { id: "all", label: "All Topics" },
-  { id: "shopping", label: "Shopping & Orders" },
-  { id: "donations", label: "Donations & Impact" },
-  { id: "verification", label: "NGO Verification" },
-  { id: "account", label: "Account & Security" },
+  { id: "getting-started", label: "Getting Started (6)" },
+  { id: "orders-shipping", label: "Orders & Shipping (9)" },
+  { id: "causes-impact", label: "Causes & Impact (8)" },
+  { id: "charity-verification", label: "NGO Verification (5)" },
+  { id: "account-security", label: "Account & Security (4)" },
 ];
 
 export default function HelpAndSupport() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState("all");
-  const [openFaqId, setOpenFaqId] = useState(1); // first FAQ open by default
+  const [selectedCategory, setSelectedCategory] = useState("getting-started");
+  const [selectedArticle, setSelectedArticle] = useState(null);
+  const [openFaqId, setOpenFaqId] = useState(1);
+
+  // Sync article selection from URL if present (?article=slug)
+  useEffect(() => {
+    const articleSlug = searchParams.get("article");
+    if (articleSlug) {
+      const found = HELP_ARTICLES.find((a) => a.id === articleSlug);
+      if (found) {
+        setSelectedArticle(found);
+      }
+    }
+  }, [searchParams]);
+
+  const handleOpenArticle = (article) => {
+    setSelectedArticle(article);
+    setSearchParams({ article: article.id });
+  };
+
+  const handleCloseArticle = () => {
+    setSelectedArticle(null);
+    setSearchParams({});
+  };
 
   const toggleFaq = (id) => {
     setOpenFaqId((prev) => (prev === id ? null : id));
   };
 
-  // Filter FAQs based on search and selected filter pill
-  const filteredFaqs = useMemo(() => {
-    return FAQ_ITEMS.filter((item) => {
-      const matchesFilter =
-        activeFilter === "all" || item.category === activeFilter;
-      const query = searchQuery.toLowerCase().trim();
-      const matchesSearch =
-        !query ||
-        item.question.toLowerCase().includes(query) ||
-        item.answer.toLowerCase().includes(query);
-      return matchesFilter && matchesSearch;
-    });
-  }, [searchQuery, activeFilter]);
-
-  // Filter Categories based on search
-  const filteredCategories = useMemo(() => {
-    if (!searchQuery.trim()) return CATEGORIES;
+  // Filter Articles based on search or category
+  const filteredArticles = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
-    return CATEGORIES.filter(
-      (cat) =>
-        cat.title.toLowerCase().includes(query) ||
-        cat.desc.toLowerCase().includes(query)
-    );
-  }, [searchQuery]);
+    if (query) {
+      return HELP_ARTICLES.filter(
+        (a) =>
+          a.title.toLowerCase().includes(query) ||
+          a.summary.toLowerCase().includes(query) ||
+          a.categoryTitle.toLowerCase().includes(query)
+      );
+    }
+    if (selectedCategory === "all") return HELP_ARTICLES;
+    return HELP_ARTICLES.filter((a) => a.category === selectedCategory);
+  }, [searchQuery, selectedCategory]);
 
   return (
     <div className="help-page">
+      {/* Article Reader Modal */}
+      {selectedArticle && (
+        <ArticleModal article={selectedArticle} onClose={handleCloseArticle} />
+      )}
+
       {/* ─────────────────────────────────────────────────────────────────
           1. HERO & REAL-TIME SEARCH
          ───────────────────────────────────────────────────────────────── */}
@@ -172,8 +197,8 @@ export default function HelpAndSupport() {
 
           <h1 className="help-hero-title">How can we help you today?</h1>
           <p className="help-hero-sub">
-            Search our knowledge base, explore our step-by-step guides, or connect
-            directly with our support team.
+            Browse our 32 step-by-step guides, check verified answers, or reach
+            out directly to our team in Sri Lanka.
           </p>
 
           {/* Search bar */}
@@ -182,7 +207,7 @@ export default function HelpAndSupport() {
             <input
               type="text"
               className="help-search-input"
-              placeholder="Search questions, order help, verification guides..."
+              placeholder="Search all 32 guides, shipping questions, verification..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               aria-label="Search help articles"
@@ -204,8 +229,14 @@ export default function HelpAndSupport() {
               <button
                 key={pill.id}
                 type="button"
-                className={`help-pill ${activeFilter === pill.id ? "active" : ""}`}
-                onClick={() => setActiveFilter(pill.id)}
+                className={`help-pill ${selectedCategory === pill.id ? "active" : ""}`}
+                onClick={() => {
+                  setSelectedCategory(pill.id);
+                  setSearchQuery("");
+                  document
+                    .getElementById("articles-directory")
+                    ?.scrollIntoView({ behavior: "smooth" });
+                }}
               >
                 {pill.label}
               </button>
@@ -221,23 +252,28 @@ export default function HelpAndSupport() {
         <section className="help-section">
           <div className="help-section-title-wrap">
             <span className="help-section-eyebrow">Browse by Category</span>
-            <h2 className="help-section-heading">Support Topics</h2>
+            <h2 className="help-section-heading">Knowledge Base Topics</h2>
+            <p className="help-section-sub">
+              Click any topic to explore its full guide directory.
+            </p>
           </div>
 
           <div className="help-categories-grid">
-            {filteredCategories.map((cat) => {
+            {CATEGORIES.map((cat) => {
               const Icon = cat.icon;
+              const isSelected = selectedCategory === cat.id && !searchQuery;
               return (
                 <div
                   key={cat.id}
-                  className="help-category-card"
+                  className={`help-category-card ${isSelected ? "selected" : ""}`}
                   onClick={() => {
                     if (cat.link) {
                       navigate(cat.link);
-                    } else if (cat.filter) {
-                      setActiveFilter(cat.filter);
+                    } else {
+                      setSelectedCategory(cat.id);
+                      setSearchQuery("");
                       document
-                        .getElementById("faqs-section")
+                        .getElementById("articles-directory")
                         ?.scrollIntoView({ behavior: "smooth" });
                     }
                   }}
@@ -255,7 +291,7 @@ export default function HelpAndSupport() {
                   <p className="help-card-desc">{cat.desc}</p>
 
                   <div className="help-card-action">
-                    <span>{cat.link ? "Contact agent" : "View questions"}</span>
+                    <span>{cat.link ? "Contact agent" : "View articles"}</span>
                     <ArrowRight size={14} className="help-arrow-icon" />
                   </div>
                 </div>
@@ -265,7 +301,94 @@ export default function HelpAndSupport() {
         </section>
 
         {/* ─────────────────────────────────────────────────────────────────
-            3. HOW IT WORKS SECTION (RETAINED & ELEVATED)
+            3. ARTICLES DIRECTORY SECTION (32 FULL ARTICLES)
+           ───────────────────────────────────────────────────────────────── */}
+        <section id="articles-directory" className="help-section">
+          <div className="help-section-title-wrap">
+            <span className="help-section-eyebrow">
+              {searchQuery ? "Search Results" : "Guide Directory"}
+            </span>
+            <h2 className="help-section-heading">
+              {searchQuery
+                ? `Results for "${searchQuery}" (${filteredArticles.length} guides)`
+                : selectedCategory === "all"
+                  ? "All Knowledge Base Articles (32 Guides)"
+                  : `${
+                      CATEGORIES.find((c) => c.id === selectedCategory)?.title ||
+                      "Category"
+                    } Guides (${filteredArticles.length})`}
+            </h2>
+            <p className="help-section-sub">
+              Click any article below to read full step-by-step instructions.
+            </p>
+          </div>
+
+          {filteredArticles.length > 0 ? (
+            <div className="help-articles-grid">
+              {filteredArticles.map((article) => (
+                <div
+                  key={article.id}
+                  className="help-article-card"
+                  onClick={() => handleOpenArticle(article)}
+                  tabIndex={0}
+                  role="button"
+                >
+                  <div className="help-article-card-header">
+                    <span className="article-category-tag">
+                      {article.categoryTitle}
+                    </span>
+                    <span className="article-read-badge">
+                      <Clock size={12} />
+                      {article.readTime}
+                    </span>
+                  </div>
+
+                  <h3 className="help-article-title">{article.title}</h3>
+                  <p className="help-article-summary">{article.summary}</p>
+
+                  <div className="help-article-badges-row">
+                    {article.requiresAuth && (
+                      <span className="article-badge auth" title="Requires login for live data">
+                        <Lock size={11} />
+                        <span>Auth Required</span>
+                      </span>
+                    )}
+                    {article.isUnderConstruction && (
+                      <span className="article-badge construction" title="In active development">
+                        <Hammer size={11} />
+                        <span>Under Construction</span>
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="help-article-read-link">
+                    <span>Read guide</span>
+                    <ArrowRight size={13} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="help-faq-empty">
+              <HelpCircle size={36} className="help-empty-icon" />
+              <h3>No matching articles found</h3>
+              <p>Try searching with another keyword or explore all categories.</p>
+              <button
+                type="button"
+                className="help-reset-btn"
+                onClick={() => {
+                  setSearchQuery("");
+                  setSelectedCategory("getting-started");
+                }}
+              >
+                Reset Filter
+              </button>
+            </div>
+          )}
+        </section>
+
+        {/* ─────────────────────────────────────────────────────────────────
+            4. HOW IT WORKS SECTION (RETAINED & ELEVATED)
            ───────────────────────────────────────────────────────────────── */}
         <section id="how-it-works" className="help-how-it-works">
           <div className="help-section-title-wrap text-center">
@@ -329,70 +452,50 @@ export default function HelpAndSupport() {
         </section>
 
         {/* ─────────────────────────────────────────────────────────────────
-            4. INTERACTIVE FAQ ACCORDION
+            5. INTERACTIVE FAQ ACCORDION
            ───────────────────────────────────────────────────────────────── */}
         <section id="faqs-section" className="help-section">
           <div className="help-section-title-wrap">
             <span className="help-section-eyebrow">Quick Answers</span>
             <h2 className="help-section-heading">Frequently Asked Questions</h2>
             <p className="help-section-sub">
-              {searchQuery
-                ? `Showing results for "${searchQuery}"`
-                : "Answers to our most common shopper and organization inquiries."}
+              Common questions answered instantly.
             </p>
           </div>
 
-          {filteredFaqs.length > 0 ? (
-            <div className="help-faq-accordion">
-              {filteredFaqs.map((faq) => {
-                const isOpen = openFaqId === faq.id;
-                return (
-                  <div
-                    key={faq.id}
-                    className={`help-faq-item ${isOpen ? "open" : ""}`}
+          <div className="help-faq-accordion">
+            {FAQ_ITEMS.map((faq) => {
+              const isOpen = openFaqId === faq.id;
+              return (
+                <div
+                  key={faq.id}
+                  className={`help-faq-item ${isOpen ? "open" : ""}`}
+                >
+                  <button
+                    type="button"
+                    className="help-faq-trigger"
+                    onClick={() => toggleFaq(faq.id)}
+                    aria-expanded={isOpen}
                   >
-                    <button
-                      type="button"
-                      className="help-faq-trigger"
-                      onClick={() => toggleFaq(faq.id)}
-                      aria-expanded={isOpen}
-                    >
-                      <span className="help-faq-q">{faq.question}</span>
-                      <ChevronDown
-                        size={18}
-                        className={`help-faq-icon ${isOpen ? "rotated" : ""}`}
-                      />
-                    </button>
-                    {isOpen && (
-                      <div className="help-faq-answer">
-                        <p>{faq.answer}</p>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="help-faq-empty">
-              <HelpCircle size={36} className="help-empty-icon" />
-              <h3>No matching questions found</h3>
-              <p>Try refining your search or reach out directly to our team.</p>
-              <button
-                type="button"
-                className="help-reset-btn"
-                onClick={() => {
-                  setSearchQuery("");
-                  setActiveFilter("all");
-                }}
-              >
-                Clear Search & Filters
-              </button>
-            </div>
-          )}
+                    <span className="help-faq-q">{faq.question}</span>
+                    <ChevronDown
+                      size={18}
+                      className={`help-faq-icon ${isOpen ? "rotated" : ""}`}
+                    />
+                  </button>
+                  {isOpen && (
+                    <div className="help-faq-answer">
+                      <p>{faq.answer}</p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </section>
 
         {/* ─────────────────────────────────────────────────────────────────
-            5. SUPPORT ESCALATION CARD
+            6. SUPPORT ESCALATION BANNER
            ───────────────────────────────────────────────────────────────── */}
         <section className="help-contact-banner">
           <div className="help-contact-inner">
