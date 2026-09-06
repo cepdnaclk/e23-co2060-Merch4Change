@@ -124,13 +124,13 @@ test("getCharityLeaderboard returns ranked charities with categories and coins",
       _id: "charityA",
       totalCoins: 4500,
       donationCount: 20,
-      distinctDonors: ["u1", "u2", "u3"],
+      donorCount: 3,
     },
     {
       _id: "charityB",
       totalCoins: 2100,
       donationCount: 10,
-      distinctDonors: ["u1", "u4"],
+      donorCount: 2,
     },
   ];
 
@@ -328,13 +328,13 @@ test("getCharityLeaderboard deterministically breaks ties using donorCount, dona
       _id: "charityA",
       totalCoins: 1000,
       donationCount: 10,
-      distinctDonors: ["u1", "u2", "u3", "u4", "u5"],
+      donorCount: 5,
     },
     {
       _id: "charityB",
       totalCoins: 1000,
       donationCount: 10,
-      distinctDonors: ["u1", "u2"],
+      donorCount: 2,
     },
   ];
 

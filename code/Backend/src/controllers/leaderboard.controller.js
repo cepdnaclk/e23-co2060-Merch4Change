@@ -57,12 +57,12 @@ export const parseLimit = (queryVal, defaultVal = 20, maxVal = 100) => {
 };
 
 /**
- * Safely parses and normalizes query page to a valid positive integer >= 1.
+ * Safely parses and normalizes query page to a valid positive integer >= 1, capped at maxVal.
  */
-export const parsePage = (queryVal, defaultVal = 1) => {
+export const parsePage = (queryVal, defaultVal = 1, maxVal = 1000) => {
   const parsed = Number.parseInt(queryVal, 10);
   if (Number.isNaN(parsed) || parsed < 1) return defaultVal;
-  return parsed;
+  return Math.min(parsed, maxVal);
 };
 
 /**
@@ -313,15 +313,34 @@ export const getCharityLeaderboard = asyncHandler(async (req, res) => {
     });
   }
 
-  // 2. Aggregate donations per charity within timeframe
+  // 2. Aggregate donations per charity within timeframe.
+  // Two-stage pipeline avoids $addToSet materialising a large donor-ID array in memory:
+  //   Stage 1: deduplicate (charityId, donorUserId) pairs
+  //   Stage 2: group by charityId, summing totals and counting unique donors with $sum:1
   const charityDonations = await Donation.aggregate([
-    { $match: { status: "completed", ...timeFilter } },
+    {
+      $match: {
+        status: "completed",
+        donorUserId: { $ne: null },
+        charityId: { $ne: null },
+        ...timeFilter,
+      },
+    },
+    // Stage 1 – collapse duplicate (charity, donor) pairs so each donor counts once per charity
     {
       $group: {
-        _id: "$charityId",
+        _id: { charityId: "$charityId", donorId: "$donorUserId" },
         totalCoins: { $sum: "$coinAmount" },
         donationCount: { $sum: 1 },
-        distinctDonors: { $addToSet: "$donorUserId" },
+      },
+    },
+    // Stage 2 – roll up to charity level; each doc from stage 1 is one unique donor
+    {
+      $group: {
+        _id: "$_id.charityId",
+        totalCoins: { $sum: "$totalCoins" },
+        donationCount: { $sum: "$donationCount" },
+        donorCount: { $sum: 1 },
       },
     },
   ]);
@@ -332,7 +351,7 @@ export const getCharityLeaderboard = asyncHandler(async (req, res) => {
       donationStatsMap.set(item._id.toString(), {
         totalCoins: item.totalCoins || 0,
         donationCount: item.donationCount || 0,
-        donorCount: Array.isArray(item.distinctDonors) ? item.distinctDonors.length : 0,
+        donorCount: item.donorCount || 0,
       });
     }
   }

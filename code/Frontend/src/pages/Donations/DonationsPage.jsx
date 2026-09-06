@@ -149,7 +149,7 @@ export default function DonationsPage() {
   const initialTab = searchParams.get("tab") === "leaderboard" ? "leaderboard" : "causes";
   const [activeSection, setActiveSection] = useState(initialTab); // "causes" | "leaderboard"
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
-  const [profileData, setProfileData] = useState({});
+  const [profileData, setProfileData] = useState(null);
   const [charities, setCharities] = useState([]);
   const [projects, setProjects] = useState([]);
   const [stats, setStats] = useState({ totalDonated: 0, charityCount: 0 });

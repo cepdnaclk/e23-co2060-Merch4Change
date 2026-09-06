@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
 import {
   getDonorLeaderboard,
@@ -140,8 +140,10 @@ export default function LeaderboardSection({ profileData: propProfileData = null
     (activeType === "charities" && selectedCategory !== "all")
   );
 
-  // Find user entry in current leaderboard view
-  const isMatchUser = (entry) => {
+  // Find user entry in current leaderboard view.
+  // useCallback ensures a fresh function reference whenever identity values change,
+  // preventing a stale closure when isMatchUser is consumed inside useMemo.
+  const isMatchUser = useCallback((entry) => {
     if (!entry) return false;
     if (activeType === "companies") {
       const idMatch = currentUserId && (
@@ -165,13 +167,14 @@ export default function LeaderboardSection({ profileData: propProfileData = null
     const idMatch = currentUserId && String(entry.userId) === String(currentUserId);
     const usernameMatch = currentUserName && entry.userName && entry.userName.toLowerCase() === currentUserName;
     return Boolean(idMatch || usernameMatch);
-  };
+  }, [activeType, currentUserId, currentUserName]);
 
-  // Find user entry in current leaderboard view
+  // Find user entry in current leaderboard view.
+  // isMatchUser is in the dep array so this re-derives when identity changes.
   const currentUserEntry = useMemo(() => {
     if (!leaderboardData.length) return null;
     return leaderboardData.find(isMatchUser);
-  }, [leaderboardData, activeType, currentUserId, currentUserName]);
+  }, [leaderboardData, isMatchUser]);
 
   const performScrollToUser = () => {
     if (currentUserRef.current) {
