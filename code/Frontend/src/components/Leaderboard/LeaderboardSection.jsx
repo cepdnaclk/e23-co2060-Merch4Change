@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import {
   getDonorLeaderboard,
   getCompanyLeaderboard,
+  getCharityLeaderboard,
   getLeaderboardStats,
 } from "../../api/leaderboardService";
 import apiClient from "../../api/apiClient";
@@ -28,10 +29,11 @@ export default function LeaderboardSection() {
   const [profileData, setProfileData] = useState(null);
   const currentUserRef = useRef(null);
 
-  const [activeType, setActiveType] = useState("donors"); // "donors" | "companies"
+  const [activeType, setActiveType] = useState("donors"); // "donors" | "companies" | "charities"
   const [timeframe, setTimeframe] = useState("all_time"); // "all_time" | "month" | "week"
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTier, setSelectedTier] = useState("all"); // "all" | "diamond" | "platinum" | "gold" | "silver" | "bronze"
+  const [selectedCategory, setSelectedCategory] = useState("all"); // "all" | "health" | "education" | ...
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -40,11 +42,13 @@ export default function LeaderboardSection() {
     setActiveType(type);
     setSearchQuery("");
     setSelectedTier("all");
+    setSelectedCategory("all");
   };
 
   const resetFilters = () => {
     setSearchQuery("");
     setSelectedTier("all");
+    setSelectedCategory("all");
   };
 
   // Fetch logged in profile details
@@ -69,7 +73,7 @@ export default function LeaderboardSection() {
   const currentUserId = profileData?._id || profileData?.id || authUser?.id || authUser?._id || null;
   const currentUserName = (profileData?.userName || authUser?.userName || "").toLowerCase();
 
-  // Filtered leaderboard dataset according to search and tier
+  // Filtered leaderboard dataset according to search, tier, and category
   const filteredData = useMemo(() => {
     let list = [...leaderboardData];
 
@@ -81,6 +85,14 @@ export default function LeaderboardSection() {
             (item.brandName && item.brandName.toLowerCase().includes(q)) ||
             (item.ownerUserName && item.ownerUserName.toLowerCase().includes(q)) ||
             (item.slug && item.slug.toLowerCase().includes(q))
+          );
+        } else if (activeType === "charities") {
+          return (
+            (item.name && item.name.toLowerCase().includes(q)) ||
+            (item.userName && item.userName.toLowerCase().includes(q)) ||
+            (item.categoryLabel && item.categoryLabel.toLowerCase().includes(q)) ||
+            (item.category && item.category.toLowerCase().includes(q)) ||
+            (item.description && item.description.toLowerCase().includes(q))
           );
         } else {
           return (
@@ -97,11 +109,19 @@ export default function LeaderboardSection() {
       );
     }
 
+    if (activeType === "charities" && selectedCategory !== "all") {
+      list = list.filter(
+        (item) => (item.category || "").toLowerCase() === selectedCategory.toLowerCase()
+      );
+    }
+
     return list;
-  }, [leaderboardData, searchQuery, selectedTier, activeType]);
+  }, [leaderboardData, searchQuery, selectedTier, selectedCategory, activeType]);
 
   const isFiltered = Boolean(
-    searchQuery.trim() || (activeType === "donors" && selectedTier !== "all")
+    searchQuery.trim() ||
+    (activeType === "donors" && selectedTier !== "all") ||
+    (activeType === "charities" && selectedCategory !== "all")
   );
 
   // Find user entry in current leaderboard view
@@ -110,6 +130,8 @@ export default function LeaderboardSection() {
     return leaderboardData.find((entry) => {
       if (activeType === "companies") {
         return Boolean(currentUserName && entry.ownerUserName && entry.ownerUserName.toLowerCase() === currentUserName);
+      } else if (activeType === "charities") {
+        return Boolean(currentUserName && entry.userName && entry.userName.toLowerCase() === currentUserName);
       } else {
         const idMatch = currentUserId && String(entry.userId) === String(currentUserId);
         const usernameMatch = currentUserName && entry.userName && entry.userName.toLowerCase() === currentUserName;
@@ -124,6 +146,8 @@ export default function LeaderboardSection() {
       const userInFiltered = filteredData.some((entry) => {
         if (activeType === "companies") {
           return Boolean(currentUserName && entry.ownerUserName && entry.ownerUserName.toLowerCase() === currentUserName);
+        } else if (activeType === "charities") {
+          return Boolean(currentUserName && entry.userName && entry.userName.toLowerCase() === currentUserName);
         } else {
           const idMatch = currentUserId && String(entry.userId) === String(currentUserId);
           const usernameMatch = currentUserName && entry.userName && entry.userName.toLowerCase() === currentUserName;
@@ -161,10 +185,14 @@ export default function LeaderboardSection() {
   // Load leaderboard whenever activeType or timeframe changes
   useEffect(() => {
     setLoading(true);
-    const fetchLeaderboard =
-      activeType === "donors"
-        ? getDonorLeaderboard(timeframe)
-        : getCompanyLeaderboard(timeframe);
+    let fetchLeaderboard;
+    if (activeType === "donors") {
+      fetchLeaderboard = getDonorLeaderboard(timeframe);
+    } else if (activeType === "companies") {
+      fetchLeaderboard = getCompanyLeaderboard(timeframe);
+    } else {
+      fetchLeaderboard = getCharityLeaderboard(timeframe);
+    }
 
     fetchLeaderboard
       .then((res) => {
@@ -232,7 +260,7 @@ export default function LeaderboardSection() {
 
       {/* Controls & Filter Bar */}
       <div className="lb-controls-bar">
-        {/* Toggle between Donors and Companies */}
+        {/* Toggle between Donors, Companies, and Charities */}
         <div className="lb-toggle-group">
           <button
             className={`lb-toggle-btn ${activeType === "donors" ? "active" : ""}`}
@@ -247,6 +275,13 @@ export default function LeaderboardSection() {
           >
             <Building2 size={16} />
             <span>Companies & Brands</span>
+          </button>
+          <button
+            className={`lb-toggle-btn ${activeType === "charities" ? "active" : ""}`}
+            onClick={() => handleTypeChange("charities")}
+          >
+            <HeartHandshake size={16} />
+            <span>Top Charities & Causes</span>
           </button>
         </div>
 
@@ -276,7 +311,7 @@ export default function LeaderboardSection() {
         </div>
       </div>
 
-      {/* Search & Tier Filter Bar */}
+      {/* Search & Tier/Category Filter Bar */}
       <div className="lb-filter-panel">
         <div className="lb-search-input-wrap">
           <Search size={17} className="lb-search-icon" />
@@ -286,6 +321,8 @@ export default function LeaderboardSection() {
             placeholder={
               activeType === "companies"
                 ? "Search brands by name, @handle, or slug..."
+                : activeType === "charities"
+                ? "Search charities by name, cause, or @username..."
                 : "Search community donors by name or @username..."
             }
             value={searchQuery}
@@ -326,6 +363,31 @@ export default function LeaderboardSection() {
             ))}
           </div>
         )}
+
+        {activeType === "charities" && (
+          <div className="lb-tier-filter-pills">
+            <span className="lb-tier-filter-label">Cause:</span>
+            {[
+              { id: "all", label: "All Causes", icon: "" },
+              { id: "health", label: "Health", icon: "🩺" },
+              { id: "education", label: "Education", icon: "📚" },
+              { id: "environment", label: "Nature", icon: "🌱" },
+              { id: "humanitarian", label: "Humanitarian", icon: "❤️" },
+              { id: "animal", label: "Animal", icon: "🐾" },
+              { id: "other", label: "Community", icon: "🛡️" },
+            ].map((cat) => (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`lb-tier-pill ${selectedCategory.toLowerCase() === cat.id.toLowerCase() ? "active" : ""}`}
+              >
+                {cat.icon && <span>{cat.icon}</span>}
+                <span>{cat.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Current User Standing Callout (when logged in and not loading) */}
@@ -339,7 +401,12 @@ export default function LeaderboardSection() {
               <div className="lb-standing-info">
                 <div className="lb-standing-title-wrap">
                   <span className="lb-standing-tag">
-                    <Sparkles size={13} /> {activeType === "companies" ? "Your Brand Standing" : "Your Global Standing"}
+                    <Sparkles size={13} />{" "}
+                    {activeType === "companies"
+                      ? "Your Brand Standing"
+                      : activeType === "charities"
+                      ? "Your Charity Standing"
+                      : "Your Global Standing"}
                   </span>
                   {activeType === "donors" && currentUserEntry.tier && (
                     <span
@@ -354,6 +421,19 @@ export default function LeaderboardSection() {
                       <span>{currentUserEntry.tier} Donor</span>
                     </span>
                   )}
+                  {activeType === "charities" && (
+                    <span
+                      className="lb-podium-tier-pill"
+                      style={{
+                        backgroundColor: "#E1F5EE",
+                        color: "#0D6B5E",
+                        margin: 0,
+                      }}
+                    >
+                      <span>{currentUserEntry.categoryIcon || "🛡️"}</span>
+                      <span>{currentUserEntry.categoryLabel || "Verified Charity"}</span>
+                    </span>
+                  )}
                 </div>
                 <h3>
                   You are ranked <strong>#{currentUserEntry.rank}</strong> out of {leaderboardData.length} on the leaderboard!
@@ -361,6 +441,8 @@ export default function LeaderboardSection() {
                 <p>
                   {activeType === "companies"
                     ? `Your brand has generated ${(currentUserEntry.impactCoinsGenerated || 0).toLocaleString()} coins across ${currentUserEntry.unitsSold || 0} products sold.`
+                    : activeType === "charities"
+                    ? `Your charity has received ${(currentUserEntry.totalCoins || 0).toLocaleString()} coins from ${currentUserEntry.donorCount || 0} supporters across ${currentUserEntry.donationCount || 0} donations.`
                     : `You've donated ${(currentUserEntry.totalCoins || 0).toLocaleString()} coins across ${currentUserEntry.donationCount || 0} contribution${currentUserEntry.donationCount === 1 ? "" : "s"}.`}
                 </p>
               </div>
@@ -380,23 +462,27 @@ export default function LeaderboardSection() {
                 <h3>
                   {activeType === "companies"
                     ? "Your brand isn't ranked on the leaderboard yet"
+                    : activeType === "charities"
+                    ? "Verified Charities & Causes Leaderboard"
                     : "You're not ranked on the global leaderboard yet"}
                 </h3>
                 <p>
                   {activeType === "companies"
                     ? "List impact products and sell merchandise to generate impact coins and claim your brand's spot!"
+                    : activeType === "charities"
+                    ? "Support verified organizations and help real-world causes rise to the top of community impact rankings!"
                     : "Donate coins to verified charity projects to earn donor rank and claim your spot among top community donors!"}
                 </p>
               </div>
             </div>
-            {activeType === "donors" ? (
-              <Link to="/donations?tab=projects" className="lb-standing-cta-btn">
-                <Heart size={15} />
-                <span>Make a Donation</span>
-              </Link>
-            ) : (
+            {activeType === "companies" ? (
               <Link to="/marketplace" className="lb-standing-cta-btn">
                 <span>Explore Marketplace</span>
+              </Link>
+            ) : (
+              <Link to="/donate" className="lb-standing-cta-btn">
+                <Heart size={15} />
+                <span>{activeType === "charities" ? "Support a Cause" : "Make a Donation"}</span>
               </Link>
             )}
           </div>
@@ -418,10 +504,11 @@ export default function LeaderboardSection() {
         filteredData.length === 0 ? (
           <div className="lb-empty-box">
             <Users size={44} style={{ color: "#B5ACA4", marginBottom: "14px" }} />
-            <h3>No matching {activeType === "companies" ? "brands" : "donors"} found</h3>
+            <h3>No matching {activeType === "companies" ? "brands" : activeType === "charities" ? "charities" : "donors"} found</h3>
             <p>
               No rankings match your current search &ldquo;{searchQuery}&rdquo;
-              {selectedTier !== "all" ? ` or tier &ldquo;${selectedTier}&rdquo;` : ""}.
+              {activeType === "donors" && selectedTier !== "all" ? ` or tier &ldquo;${selectedTier}&rdquo;` : ""}
+              {activeType === "charities" && selectedCategory !== "all" ? ` or cause &ldquo;${selectedCategory}&rdquo;` : ""}.
             </p>
             <button
               onClick={resetFilters}
@@ -435,9 +522,10 @@ export default function LeaderboardSection() {
           <>
             <div className="lb-filter-results-info">
               <span>
-                Showing <strong>{filteredData.length}</strong> matching {activeType === "companies" ? "brand" : "donor"}{filteredData.length === 1 ? "" : "s"}
+                Showing <strong>{filteredData.length}</strong> matching {activeType === "companies" ? "brand" : activeType === "charities" ? "charit" : "donor"}{filteredData.length === 1 ? (activeType === "charities" ? "y" : "") : (activeType === "charities" ? "ies" : "s")}
                 {searchQuery && <> for &ldquo;<strong>{searchQuery}</strong>&rdquo;</>}
-                {selectedTier !== "all" && <> in <strong>{selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)} Tier</strong></>}
+                {activeType === "donors" && selectedTier !== "all" && <> in <strong>{selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)} Tier</strong></>}
+                {activeType === "charities" && selectedCategory !== "all" && <> in <strong>{selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Cause</strong></>}
               </span>
               <button
                 onClick={resetFilters}
@@ -451,6 +539,7 @@ export default function LeaderboardSection() {
             <LeaderboardTable
               rows={filteredData}
               isCompanyView={activeType === "companies"}
+              isCharityView={activeType === "charities"}
               currentUserId={currentUserId}
               currentUserName={currentUserName}
               currentUserRef={currentUserRef}
@@ -463,6 +552,7 @@ export default function LeaderboardSection() {
           <LeaderboardPodium
             topThree={topThree}
             isCompanyView={activeType === "companies"}
+            isCharityView={activeType === "charities"}
             currentUserId={currentUserId}
             currentUserName={currentUserName}
             currentUserRef={currentUserRef}
@@ -472,6 +562,7 @@ export default function LeaderboardSection() {
           <LeaderboardTable
             rows={remainingRows}
             isCompanyView={activeType === "companies"}
+            isCharityView={activeType === "charities"}
             currentUserId={currentUserId}
             currentUserName={currentUserName}
             currentUserRef={currentUserRef}

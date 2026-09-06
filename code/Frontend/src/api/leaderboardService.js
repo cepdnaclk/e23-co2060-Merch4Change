@@ -25,9 +25,22 @@ export const getCompanyLeaderboard = async (timeframe = "all_time", limit = 20) 
 };
 
 /**
+ * Fetch ranked charities & causes by impact coins raised.
+ * @param {string} timeframe - "all_time" | "month" | "week"
+ * @param {number} limit - max number of rows to return
+ */
+export const getCharityLeaderboard = async (timeframe = "all_time", limit = 20) => {
+  const response = await apiClient.get("/api/v1/leaderboards/charities", {
+    params: { timeframe, limit },
+  });
+  return response.data;
+};
+
+/**
  * Fetch platform community aggregate metrics.
  */
 export const getLeaderboardStats = async () => {
   const response = await apiClient.get("/api/v1/leaderboards/stats");
   return response.data;
 };
+

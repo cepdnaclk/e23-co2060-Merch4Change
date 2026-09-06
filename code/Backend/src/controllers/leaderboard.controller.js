@@ -210,6 +210,110 @@ export const getCompanyLeaderboard = asyncHandler(async (req, res) => {
 });
 
 /**
+ * GET /api/v1/leaderboards/charities
+ * Returns ranked list of verified charities & causes by impact coins raised and supporters.
+ */
+export const getCharityLeaderboard = asyncHandler(async (req, res) => {
+  const timeframe = req.query.timeframe || "all_time";
+  const limit = Math.min(Number(req.query.limit) || 20, 100);
+  const timeFilter = getTimeframeFilter(timeframe);
+
+  // 1. Fetch all verified charities
+  const charities = await Charity.find({ verificationStatus: "verified" })
+    .populate("ownerUserId", "userName profileImageUrl isVerified")
+    .lean();
+
+  if (!charities || charities.length === 0) {
+    return successResponse(res, 200, "Charity leaderboard fetched successfully.", {
+      timeframe,
+      leaderboard: [],
+    });
+  }
+
+  // 2. Aggregate donations per charity within timeframe
+  const charityDonations = await Donation.aggregate([
+    { $match: { status: "completed", ...timeFilter } },
+    {
+      $group: {
+        _id: "$charityId",
+        totalCoins: { $sum: "$coinAmount" },
+        donationCount: { $sum: 1 },
+        distinctDonors: { $addToSet: "$donorUserId" },
+      },
+    },
+  ]);
+
+  const donationStatsMap = new Map();
+  for (const item of charityDonations) {
+    if (item._id) {
+      donationStatsMap.set(item._id.toString(), {
+        totalCoins: item.totalCoins || 0,
+        donationCount: item.donationCount || 0,
+        donorCount: Array.isArray(item.distinctDonors) ? item.distinctDonors.length : 0,
+      });
+    }
+  }
+
+  const categoryLabels = {
+    health: "Health & Medical",
+    education: "Education & Literacy",
+    environment: "Nature & Environment",
+    humanitarian: "Humanitarian Aid",
+    animal: "Animal Welfare",
+    other: "Community & Charity",
+  };
+
+  const categoryIcons = {
+    health: "🩺",
+    education: "📚",
+    environment: "🌱",
+    humanitarian: "❤️",
+    animal: "🐾",
+    other: "🛡️",
+  };
+
+  // 3. Build ranked charity leaderboard
+  const rankedCharities = charities
+    .map((charity) => {
+      const stats =
+        donationStatsMap.get(charity._id.toString()) ||
+        donationStatsMap.get(charity.ownerUserId?._id?.toString() || charity.ownerUserId?.toString()) || {
+          totalCoins: 0,
+          donationCount: 0,
+          donorCount: 0,
+        };
+
+      const category = (charity.category || "other").toLowerCase();
+
+      return {
+        charityId: charity._id,
+        name: charity.publicName,
+        userName: charity.ownerUserId?.userName || "",
+        logoUrl: charity.logoUrl || charity.ownerUserId?.profileImageUrl || "",
+        description: charity.description || "",
+        category,
+        categoryLabel: categoryLabels[category] || "Verified Charity",
+        categoryIcon: categoryIcons[category] || "🛡️",
+        isVerified: true,
+        totalCoins: stats.totalCoins,
+        donationCount: stats.donationCount,
+        donorCount: stats.donorCount,
+      };
+    })
+    .sort((a, b) => b.totalCoins - a.totalCoins || b.donorCount - a.donorCount)
+    .slice(0, limit)
+    .map((charity, index) => ({
+      rank: index + 1,
+      ...charity,
+    }));
+
+  return successResponse(res, 200, "Charity leaderboard fetched successfully.", {
+    timeframe,
+    leaderboard: rankedCharities,
+  });
+});
+
+/**
  * GET /api/v1/leaderboards/stats
  * Returns aggregate platform community statistics.
  */
