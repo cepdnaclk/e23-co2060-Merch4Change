@@ -24,6 +24,17 @@ import {
   Search,
 } from "lucide-react";
 
+const ENTITY_LABELS = {
+  donors: { singular: "donor", plural: "donors" },
+  companies: { singular: "brand", plural: "brands" },
+  charities: { singular: "charity", plural: "charities" },
+};
+
+const getEntityLabel = (type, count) => {
+  const entity = ENTITY_LABELS[type] || ENTITY_LABELS.donors;
+  return count === 1 ? entity.singular : entity.plural;
+};
+
 export default function LeaderboardSection() {
   const { user: authUser } = useAuth();
   const [profileData, setProfileData] = useState(null);
@@ -540,7 +551,7 @@ export default function LeaderboardSection() {
         filteredData.length === 0 ? (
           <div className="lb-empty-box">
             <Users size={44} style={{ color: "#B5ACA4", marginBottom: "14px" }} />
-            <h3>No matching {activeType === "companies" ? "brands" : activeType === "charities" ? "charities" : "donors"} found</h3>
+            <h3>No matching {getEntityLabel(activeType, 0)} found</h3>
             <p>
               No rankings match your current search &ldquo;{searchQuery}&rdquo;
               {activeType === "donors" && selectedTier !== "all" ? ` or tier &ldquo;${selectedTier}&rdquo;` : ""}
@@ -558,7 +569,7 @@ export default function LeaderboardSection() {
           <>
             <div className="lb-filter-results-info">
               <span>
-                Showing <strong>{filteredData.length}</strong> matching {activeType === "companies" ? "brand" : activeType === "charities" ? "charit" : "donor"}{filteredData.length === 1 ? (activeType === "charities" ? "y" : "") : (activeType === "charities" ? "ies" : "s")}
+                Showing <strong>{filteredData.length}</strong> matching {getEntityLabel(activeType, filteredData.length)}
                 {searchQuery && <> for &ldquo;<strong>{searchQuery}</strong>&rdquo;</>}
                 {activeType === "donors" && selectedTier !== "all" && <> in <strong>{selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)} Tier</strong></>}
                 {activeType === "charities" && selectedCategory !== "all" && <> in <strong>{selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Cause</strong></>}
