@@ -46,7 +46,7 @@ export const getDonorLeaderboard = asyncHandler(async (req, res) => {
   const timeFilter = getTimeframeFilter(timeframe);
 
   const rankedDonors = await Donation.aggregate([
-    { $match: { status: "completed", ...timeFilter } },
+    { $match: { status: "completed", donorUserId: { $ne: null }, ...timeFilter } },
     {
       $group: {
         _id: "$donorUserId",
@@ -75,19 +75,22 @@ export const getDonorLeaderboard = asyncHandler(async (req, res) => {
   const userDetailMap = new Map(users.map((u) => [u._id.toString(), u]));
 
   const leaderboard = donorList
-    .map((item, index) => {
-      const user = userDetailMap.get(item.userId.toString());
+    .map((item) => {
+      const user = item.userId ? userDetailMap.get(item.userId.toString()) : null;
       if (!user) return null;
-
+      return { item, user };
+    })
+    .filter(Boolean)
+    .map(({ item, user }, index) => {
       const tierInfo = getDonorTier(item.totalCoins);
       const name = user.firstName && user.lastName
         ? `${user.firstName} ${user.lastName}`.trim()
-        : user.userName;
+        : user.userName || `Donor #${index + 1}`;
 
       return {
         rank: index + 1,
         userId: user._id,
-        userName: user.userName,
+        userName: user.userName || "",
         name,
         profileImageUrl: user.profileImageUrl || "",
         isVerified: user.isVerified || false,
@@ -99,8 +102,7 @@ export const getDonorLeaderboard = asyncHandler(async (req, res) => {
         tierBg: tierInfo.bg,
         tierIcon: tierInfo.icon,
       };
-    })
-    .filter(Boolean);
+    });
 
   return successResponse(res, 200, "Donor leaderboard fetched successfully.", {
     timeframe,
