@@ -329,3 +329,29 @@ test("getCharityLeaderboard deterministically breaks ties using donorCount, dona
     Donation.aggregate = originalAggregate;
   }
 });
+
+test("Donation and Order schemas define compound indexes for leaderboard performance", () => {
+  const donationIndexes = Donation.schema.indexes().map(([spec]) => spec);
+  assert.ok(
+    donationIndexes.some((f) => f.status === 1 && f.createdAt === -1),
+    "Donation should index { status: 1, createdAt: -1 }"
+  );
+  assert.ok(
+    donationIndexes.some((f) => f.status === 1 && f.donorUserId === 1 && f.coinAmount === 1),
+    "Donation should index { status: 1, donorUserId: 1, coinAmount: 1 }"
+  );
+  assert.ok(
+    donationIndexes.some((f) => f.status === 1 && f.charityId === 1 && f.coinAmount === 1),
+    "Donation should index { status: 1, charityId: 1, coinAmount: 1 }"
+  );
+
+  const orderIndexes = Order.schema.indexes().map(([spec]) => spec);
+  assert.ok(
+    orderIndexes.some((f) => f.status === 1 && f.createdAt === -1),
+    "Order should index { status: 1, createdAt: -1 }"
+  );
+  assert.ok(
+    orderIndexes.some((f) => f["items.productId"] === 1 && f.status === 1 && f.createdAt === -1),
+    "Order should index { 'items.productId': 1, status: 1, createdAt: -1 }"
+  );
+});

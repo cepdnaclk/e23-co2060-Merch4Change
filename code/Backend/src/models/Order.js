@@ -71,6 +71,11 @@ const orderSchema = new mongoose.Schema(
   },
 );
 
+// Compound indexes for leaderboard aggregations, customer rankings, and marketplace queries
+orderSchema.index({ status: 1, createdAt: -1 });
+orderSchema.index({ "items.productId": 1, status: 1, createdAt: -1 });
+orderSchema.index({ userId: 1, createdAt: -1 });
+
 const Order = mongoose.model("Order", orderSchema);
 
 export default Order;
