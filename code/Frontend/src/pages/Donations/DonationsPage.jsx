@@ -382,7 +382,7 @@ export default function DonationsPage() {
 
             {/* ── RENDER ACTIVE SECTION ─────────────────────────────────── */}
             {activeSection === "leaderboard" ? (
-              <LeaderboardSection />
+              <LeaderboardSection profileData={profileData || authUser} />
             ) : (
               <>
                 {/* ── CAUSES CATEGORY FILTER PILLS ── */}

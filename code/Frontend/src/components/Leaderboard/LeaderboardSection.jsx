@@ -35,9 +35,9 @@ const getEntityLabel = (type, count) => {
   return count === 1 ? entity.singular : entity.plural;
 };
 
-export default function LeaderboardSection() {
+export default function LeaderboardSection({ profileData: propProfileData = null }) {
   const { user: authUser } = useAuth();
-  const [profileData, setProfileData] = useState(null);
+  const [profileData, setProfileData] = useState(propProfileData);
   const currentUserRef = useRef(null);
 
   const [activeType, setActiveType] = useState("donors"); // "donors" | "companies" | "charities"
@@ -63,8 +63,12 @@ export default function LeaderboardSection() {
     setSelectedCategory("all");
   };
 
-  // Fetch logged in profile details
+  // Sync or fetch logged in profile details
   useEffect(() => {
+    if (propProfileData) {
+      setProfileData(propProfileData);
+      return;
+    }
     if (!authUser) {
       setProfileData(null);
       return;
@@ -79,7 +83,7 @@ export default function LeaderboardSection() {
       .catch(() => {
         setProfileData(authUser);
       });
-  }, [authUser]);
+  }, [authUser, propProfileData]);
 
   // Determine current user match IDs
   const currentUserId = profileData?._id || profileData?.id || authUser?.id || authUser?._id || null;
@@ -230,6 +234,7 @@ export default function LeaderboardSection() {
 
   // Load leaderboard whenever activeType or timeframe changes
   useEffect(() => {
+    let isCancelled = false;
     setLoading(true);
     let fetchLeaderboard;
     if (activeType === "donors") {
@@ -242,17 +247,29 @@ export default function LeaderboardSection() {
 
     fetchLeaderboard
       .then((res) => {
-        if (res.success && res.data?.leaderboard) {
-          setLeaderboardData(res.data.leaderboard);
-        } else {
-          setLeaderboardData([]);
+        if (!isCancelled) {
+          if (res.success && res.data?.leaderboard) {
+            setLeaderboardData(res.data.leaderboard);
+          } else {
+            setLeaderboardData([]);
+          }
         }
       })
       .catch((err) => {
-        console.error("Error fetching leaderboard:", err);
-        setLeaderboardData([]);
+        if (!isCancelled) {
+          console.error("Error fetching leaderboard:", err);
+          setLeaderboardData([]);
+        }
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!isCancelled) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      isCancelled = true;
+    };
   }, [activeType, timeframe]);
 
   const topThree = leaderboardData.slice(0, 3);

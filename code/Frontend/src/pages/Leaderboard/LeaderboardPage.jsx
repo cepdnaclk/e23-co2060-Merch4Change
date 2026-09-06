@@ -156,7 +156,7 @@ export default function LeaderboardPage() {
             </div>
 
             {/* ── LEADERBOARD SECTION COMPONENT ── */}
-            <LeaderboardSection />
+            <LeaderboardSection profileData={profileData || authUser} />
           </div>
         </main>
       </div>
