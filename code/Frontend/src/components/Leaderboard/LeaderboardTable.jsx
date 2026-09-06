@@ -56,7 +56,9 @@ export default function LeaderboardTable({
               ref={isCurrentUser ? currentUserRef : null}
               className={`lb-table-row ${isCurrentUser ? "is-current-user" : ""}`}
             >
-              <div className="lb-row-rank">#{row.rank}</div>
+              <div className="lb-row-rank">
+                {row.rank === 1 ? "👑 #1" : row.rank === 2 ? "🥈 #2" : row.rank === 3 ? "🥉 #3" : `#${row.rank}`}
+              </div>
 
               <div className="lb-row-user">
                 <img src={avatar} alt={title} className="lb-row-avatar" />

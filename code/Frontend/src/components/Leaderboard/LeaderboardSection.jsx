@@ -20,6 +20,7 @@ import {
   HeartHandshake,
   Heart,
   ChevronRight,
+  Search,
 } from "lucide-react";
 
 export default function LeaderboardSection() {
@@ -29,9 +30,22 @@ export default function LeaderboardSection() {
 
   const [activeType, setActiveType] = useState("donors"); // "donors" | "companies"
   const [timeframe, setTimeframe] = useState("all_time"); // "all_time" | "month" | "week"
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTier, setSelectedTier] = useState("all"); // "all" | "diamond" | "platinum" | "gold" | "silver" | "bronze"
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const handleTypeChange = (type) => {
+    setActiveType(type);
+    setSearchQuery("");
+    setSelectedTier("all");
+  };
+
+  const resetFilters = () => {
+    setSearchQuery("");
+    setSelectedTier("all");
+  };
 
   // Fetch logged in profile details
   useEffect(() => {
@@ -55,6 +69,41 @@ export default function LeaderboardSection() {
   const currentUserId = profileData?._id || profileData?.id || authUser?.id || authUser?._id || null;
   const currentUserName = (profileData?.userName || authUser?.userName || "").toLowerCase();
 
+  // Filtered leaderboard dataset according to search and tier
+  const filteredData = useMemo(() => {
+    let list = [...leaderboardData];
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      list = list.filter((item) => {
+        if (activeType === "companies") {
+          return (
+            (item.brandName && item.brandName.toLowerCase().includes(q)) ||
+            (item.ownerUserName && item.ownerUserName.toLowerCase().includes(q)) ||
+            (item.slug && item.slug.toLowerCase().includes(q))
+          );
+        } else {
+          return (
+            (item.name && item.name.toLowerCase().includes(q)) ||
+            (item.userName && item.userName.toLowerCase().includes(q))
+          );
+        }
+      });
+    }
+
+    if (activeType === "donors" && selectedTier !== "all") {
+      list = list.filter(
+        (item) => (item.tier || "").toLowerCase() === selectedTier.toLowerCase()
+      );
+    }
+
+    return list;
+  }, [leaderboardData, searchQuery, selectedTier, activeType]);
+
+  const isFiltered = Boolean(
+    searchQuery.trim() || (activeType === "donors" && selectedTier !== "all")
+  );
+
   // Find user entry in current leaderboard view
   const currentUserEntry = useMemo(() => {
     if (!leaderboardData.length) return null;
@@ -70,13 +119,32 @@ export default function LeaderboardSection() {
   }, [leaderboardData, activeType, currentUserId, currentUserName]);
 
   const scrollToMyPosition = () => {
-    if (currentUserRef.current) {
-      currentUserRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
-      currentUserRef.current.classList.add("pulse-highlight");
-      setTimeout(() => {
-        currentUserRef.current?.classList.remove("pulse-highlight");
-      }, 2500);
+    if (isFiltered) {
+      // Check if current user is in filteredData; if not, reset filters first
+      const userInFiltered = filteredData.some((entry) => {
+        if (activeType === "companies") {
+          return Boolean(currentUserName && entry.ownerUserName && entry.ownerUserName.toLowerCase() === currentUserName);
+        } else {
+          const idMatch = currentUserId && String(entry.userId) === String(currentUserId);
+          const usernameMatch = currentUserName && entry.userName && entry.userName.toLowerCase() === currentUserName;
+          return idMatch || usernameMatch;
+        }
+      });
+
+      if (!userInFiltered) {
+        resetFilters();
+      }
     }
+
+    setTimeout(() => {
+      if (currentUserRef.current) {
+        currentUserRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+        currentUserRef.current.classList.add("pulse-highlight");
+        setTimeout(() => {
+          currentUserRef.current?.classList.remove("pulse-highlight");
+        }, 2500);
+      }
+    }, 100);
   };
 
   // Load stats once
@@ -168,14 +236,14 @@ export default function LeaderboardSection() {
         <div className="lb-toggle-group">
           <button
             className={`lb-toggle-btn ${activeType === "donors" ? "active" : ""}`}
-            onClick={() => setActiveType("donors")}
+            onClick={() => handleTypeChange("donors")}
           >
             <Users size={16} />
             <span>Community Donors</span>
           </button>
           <button
             className={`lb-toggle-btn ${activeType === "companies" ? "active" : ""}`}
-            onClick={() => setActiveType("companies")}
+            onClick={() => handleTypeChange("companies")}
           >
             <Building2 size={16} />
             <span>Companies & Brands</span>
@@ -206,6 +274,58 @@ export default function LeaderboardSection() {
             This Week
           </button>
         </div>
+      </div>
+
+      {/* Search & Tier Filter Bar */}
+      <div className="lb-filter-panel">
+        <div className="lb-search-input-wrap">
+          <Search size={17} className="lb-search-icon" />
+          <input
+            type="text"
+            className="lb-search-input"
+            placeholder={
+              activeType === "companies"
+                ? "Search brands by name, @handle, or slug..."
+                : "Search community donors by name or @username..."
+            }
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="lb-search-clear-btn"
+              title="Clear search"
+              type="button"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        {activeType === "donors" && (
+          <div className="lb-tier-filter-pills">
+            <span className="lb-tier-filter-label">Tier:</span>
+            {[
+              { id: "all", label: "All Tiers", icon: "" },
+              { id: "diamond", label: "Diamond", icon: "💎" },
+              { id: "platinum", label: "Platinum", icon: "👑" },
+              { id: "gold", label: "Gold", icon: "🥇" },
+              { id: "silver", label: "Silver", icon: "🥈" },
+              { id: "bronze", label: "Bronze", icon: "🥉" },
+            ].map((tier) => (
+              <button
+                key={tier.id}
+                type="button"
+                onClick={() => setSelectedTier(tier.id)}
+                className={`lb-tier-pill ${selectedTier.toLowerCase() === tier.id.toLowerCase() ? "active" : ""}`}
+              >
+                {tier.icon && <span>{tier.icon}</span>}
+                <span>{tier.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Current User Standing Callout (when logged in and not loading) */}
@@ -294,6 +414,49 @@ export default function LeaderboardSection() {
             Be the first to donate coins or buy impact merchandise to climb the rankings!
           </p>
         </div>
+      ) : isFiltered ? (
+        filteredData.length === 0 ? (
+          <div className="lb-empty-box">
+            <Users size={44} style={{ color: "#B5ACA4", marginBottom: "14px" }} />
+            <h3>No matching {activeType === "companies" ? "brands" : "donors"} found</h3>
+            <p>
+              No rankings match your current search &ldquo;{searchQuery}&rdquo;
+              {selectedTier !== "all" ? ` or tier &ldquo;${selectedTier}&rdquo;` : ""}.
+            </p>
+            <button
+              onClick={resetFilters}
+              className="lb-reset-filters-btn"
+              type="button"
+            >
+              Clear Filters
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="lb-filter-results-info">
+              <span>
+                Showing <strong>{filteredData.length}</strong> matching {activeType === "companies" ? "brand" : "donor"}{filteredData.length === 1 ? "" : "s"}
+                {searchQuery && <> for &ldquo;<strong>{searchQuery}</strong>&rdquo;</>}
+                {selectedTier !== "all" && <> in <strong>{selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)} Tier</strong></>}
+              </span>
+              <button
+                onClick={resetFilters}
+                className="lb-clear-filter-text-btn"
+                type="button"
+              >
+                Reset filters
+              </button>
+            </div>
+
+            <LeaderboardTable
+              rows={filteredData}
+              isCompanyView={activeType === "companies"}
+              currentUserId={currentUserId}
+              currentUserName={currentUserName}
+              currentUserRef={currentUserRef}
+            />
+          </>
+        )
       ) : (
         <>
           {/* Top 3 Podium */}
