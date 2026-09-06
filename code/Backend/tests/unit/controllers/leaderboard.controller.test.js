@@ -26,15 +26,20 @@ const createResponseMock = () => {
 
 test("getLeaderboardStats returns aggregated stats with distinct donors and verified charities", async () => {
   const originalAggregate = Donation.aggregate;
-  const originalDistinct = Donation.distinct;
   const originalCharityCount = Charity.countDocuments;
   const originalBrandCount = Brand.countDocuments;
 
-  Donation.aggregate = async () => [{ _id: null, total: 3850 }];
-  Donation.distinct = async (field, query) => {
-    assert.equal(field, "donorUserId");
-    assert.deepEqual(query, { status: "completed" });
-    return ["user1", "user2", "user3"];
+  Donation.aggregate = async (pipeline) => {
+    const isDistinctPipeline = pipeline.some((stage) => stage.$group && stage.$group._id === "$donorUserId");
+    if (isDistinctPipeline) {
+      assert.deepEqual(pipeline[0].$match, { status: "completed", donorUserId: { $ne: null } });
+      assert.deepEqual(pipeline[1].$group, { _id: "$donorUserId" });
+      assert.deepEqual(pipeline[2].$count, "count");
+      return [{ count: 3 }];
+    }
+    assert.deepEqual(pipeline[0].$match, { status: "completed" });
+    assert.deepEqual(pipeline[1].$group, { _id: null, total: { $sum: "$coinAmount" } });
+    return [{ _id: null, total: 3850 }];
   };
   Charity.countDocuments = async (query) => {
     assert.deepEqual(query, { verificationStatus: "verified" });
@@ -57,7 +62,33 @@ test("getLeaderboardStats returns aggregated stats with distinct donors and veri
     assert.equal(res.payload.data.platformImpactRate, "100%");
   } finally {
     Donation.aggregate = originalAggregate;
-    Donation.distinct = originalDistinct;
+    Charity.countDocuments = originalCharityCount;
+    Brand.countDocuments = originalBrandCount;
+  }
+});
+
+test("getLeaderboardStats handles empty database results gracefully", async () => {
+  const originalAggregate = Donation.aggregate;
+  const originalCharityCount = Charity.countDocuments;
+  const originalBrandCount = Brand.countDocuments;
+
+  Donation.aggregate = async () => [];
+  Charity.countDocuments = async () => 0;
+  Brand.countDocuments = async () => 0;
+
+  const req = {};
+  const res = createResponseMock();
+
+  try {
+    await getLeaderboardStats(req, res);
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.payload.data.totalCoinsDonated, 0);
+    assert.equal(res.payload.data.totalCommunityDonors, 0);
+    assert.equal(res.payload.data.verifiedCharitiesSupported, 0);
+    assert.equal(res.payload.data.totalPartnerBrands, 0);
+  } finally {
+    Donation.aggregate = originalAggregate;
     Charity.countDocuments = originalCharityCount;
     Brand.countDocuments = originalBrandCount;
   }
