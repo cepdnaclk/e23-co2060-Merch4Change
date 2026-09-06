@@ -37,6 +37,7 @@ export default function LeaderboardSection() {
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [shouldScrollToUser, setShouldScrollToUser] = useState(false);
 
   const handleTypeChange = (type) => {
     setActiveType(type);
@@ -140,6 +141,18 @@ export default function LeaderboardSection() {
     });
   }, [leaderboardData, activeType, currentUserId, currentUserName]);
 
+  const performScrollToUser = () => {
+    if (currentUserRef.current) {
+      currentUserRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      currentUserRef.current.classList.add("pulse-highlight");
+      setTimeout(() => {
+        currentUserRef.current?.classList.remove("pulse-highlight");
+      }, 2500);
+      return true;
+    }
+    return false;
+  };
+
   const scrollToMyPosition = () => {
     if (isFiltered) {
       // Check if current user is in filteredData; if not, reset filters first
@@ -157,19 +170,34 @@ export default function LeaderboardSection() {
 
       if (!userInFiltered) {
         resetFilters();
+        setShouldScrollToUser(true);
+        return;
       }
     }
 
-    setTimeout(() => {
-      if (currentUserRef.current) {
-        currentUserRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
-        currentUserRef.current.classList.add("pulse-highlight");
-        setTimeout(() => {
-          currentUserRef.current?.classList.remove("pulse-highlight");
-        }, 2500);
-      }
-    }, 100);
+    if (!performScrollToUser()) {
+      setShouldScrollToUser(true);
+    }
   };
+
+  // Reactively scroll to user once DOM is updated and rendered
+  useEffect(() => {
+    if (!shouldScrollToUser) return;
+
+    if (currentUserRef.current) {
+      const rafId = requestAnimationFrame(() => {
+        if (currentUserRef.current) {
+          currentUserRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+          currentUserRef.current.classList.add("pulse-highlight");
+          setTimeout(() => {
+            currentUserRef.current?.classList.remove("pulse-highlight");
+          }, 2500);
+        }
+      });
+      setShouldScrollToUser(false);
+      return () => cancelAnimationFrame(rafId);
+    }
+  }, [shouldScrollToUser, filteredData]);
 
   // Load stats once
   useEffect(() => {
