@@ -151,18 +151,16 @@ export default function DonationsPage() {
 
   useEffect(() => {
     const tabParam = searchParams.get("tab");
-    if (tabParam === "leaderboard" && activeSection !== "leaderboard") {
-      setActiveSection("leaderboard");
-    } else if (tabParam !== "leaderboard" && activeSection === "leaderboard" && !tabParam) {
-      setActiveSection("causes");
+    if (tabParam === "leaderboard") {
+      navigate("/leaderboard", { replace: true });
     }
-  }, [searchParams]);
+  }, [searchParams, navigate]);
 
   const handleTabChange = (section) => {
-    setActiveSection(section);
     if (section === "leaderboard") {
-      setSearchParams({ tab: "leaderboard" });
+      navigate("/leaderboard");
     } else {
+      setActiveSection("causes");
       setSearchParams({});
     }
   };

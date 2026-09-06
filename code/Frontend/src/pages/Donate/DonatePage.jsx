@@ -303,7 +303,7 @@ export default function DonatePage() {
                     Donate to Another Project
                   </button>
                   <button
-                    onClick={() => navigate("/donations?tab=leaderboard")}
+                    onClick={() => navigate("/leaderboard")}
                     style={{
                       background: "transparent",
                       color: "#D4820A",
