@@ -107,7 +107,8 @@ export default function AllDonorsPage() {
     }
 
     if (selectedTier !== "all") {
-      list = list.filter((s) => (s.tier || "").toLowerCase() === selectedTier.toLowerCase());
+      const targetTier = selectedTier.toLowerCase();
+      list = list.filter((s) => (s.tier || "").toLowerCase().includes(targetTier));
     }
 
     if (sortBy === "coins") {

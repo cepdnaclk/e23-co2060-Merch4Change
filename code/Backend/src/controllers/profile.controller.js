@@ -474,11 +474,12 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
       }
     }
 
-    const getDonorTier = (rank, totalCoins) => {
-      if (rank === 1 || totalCoins >= 5000) return { title: "Diamond Philanthropist", icon: "💎", color: "#D97706", bg: "#FEF3C7" };
-      if (rank === 2 || totalCoins >= 2000) return { title: "Platinum Benefactor", icon: "👑", color: "#4B5563", bg: "#F3F4F6" };
-      if (rank === 3 || totalCoins >= 500) return { title: "Gold Supporter", icon: "🥇", color: "#92400E", bg: "#FEF3C7" };
-      return { title: "Impact Hero", icon: "🎖️", color: "#0D6B5E", bg: "#E1F5EE" };
+    const getDonorTier = (totalCoins) => {
+      if (totalCoins >= 5000) return { tier: "Diamond", title: "Diamond Donor", icon: "💎", color: "#60A5FA", bg: "#EFF6FF" };
+      if (totalCoins >= 2000) return { tier: "Platinum", title: "Platinum Donor", icon: "👑", color: "#A855F7", bg: "#FAF5FF" };
+      if (totalCoins >= 500) return { tier: "Gold", title: "Gold Donor", icon: "🥇", color: "#D97706", bg: "#FFFBEB" };
+      if (totalCoins >= 100) return { tier: "Silver", title: "Silver Donor", icon: "🥈", color: "#4B5563", bg: "#F3F4F6" };
+      return { tier: "Bronze", title: "Bronze Donor", icon: "🥉", color: "#92400E", bg: "#FEF3C7" };
     };
 
     const sortedDonors = Array.from(donorMap.values())
@@ -486,7 +487,7 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
       .map((item, index) => {
         const u = item.user || {};
         const rank = index + 1;
-        const tier = getDonorTier(rank, item.totalCoinsDonated);
+        const tier = getDonorTier(item.totalCoinsDonated);
         const name = u.firstName && u.lastName ? `${u.firstName} ${u.lastName}`.trim() : (u.userName || `Donor #${rank}`);
 
         return {
@@ -502,7 +503,8 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
           lastDonatedAt: item.lastDonatedAt,
           firstDonatedAt: item.firstDonatedAt,
           recentDonations: item.history,
-          tier: tier.title,
+          tier: tier.tier,
+          tierTitle: tier.title,
           tierIcon: tier.icon,
           tierColor: tier.color,
           tierBg: tier.bg,
@@ -706,4 +708,6 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
     totalCustomersCount: sortedCustomers.length,
     totalRevenueFromCustomers: totalRevenue,
   });
-});
+});
+
+export const getTopDonors = getTopCustomers;
