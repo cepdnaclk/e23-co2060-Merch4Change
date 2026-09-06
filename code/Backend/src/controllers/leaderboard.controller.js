@@ -140,7 +140,10 @@ export const getCompanyLeaderboard = asyncHandler(async (req, res) => {
   const productToBrandMap = new Map(products.map((p) => [p._id.toString(), p.brandId.toString()]));
 
   // 3. Aggregate orders within timeframe
-  const orders = await Order.find({ status: "paid", ...timeFilter })
+  const orders = await Order.find({
+    status: { $in: ["paid", "shipped", "completed"] },
+    ...timeFilter,
+  })
     .select("items totalAmount coinsEarned")
     .lean();
 

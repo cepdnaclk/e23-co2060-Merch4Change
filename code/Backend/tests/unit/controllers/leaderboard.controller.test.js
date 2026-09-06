@@ -1,9 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { getLeaderboardStats, getCharityLeaderboard, getDonorLeaderboard } from "../../../src/controllers/leaderboard.controller.js";
+import { getLeaderboardStats, getCharityLeaderboard, getDonorLeaderboard, getCompanyLeaderboard } from "../../../src/controllers/leaderboard.controller.js";
 import Charity from "../../../src/models/Charity.js";
 import Donation from "../../../src/models/Donation.js";
 import User from "../../../src/models/User.js";
+import Brand from "../../../src/models/Brand.js";
+import Product from "../../../src/models/Product.js";
+import Order from "../../../src/models/Order.js";
 
 const createResponseMock = () => {
   const res = {
@@ -188,5 +191,84 @@ test("getDonorLeaderboard assigns contiguous ranks starting from 1 even when top
   } finally {
     Donation.aggregate = originalAggregate;
     User.find = originalUserFind;
+  }
+});
+
+test("getCompanyLeaderboard includes paid, shipped, and completed orders in brand impact and revenue", async () => {
+  const originalBrandFind = Brand.find;
+  const originalProductFind = Product.find;
+  const originalOrderFind = Order.find;
+
+  let capturedOrderFilter = null;
+
+  Brand.find = () => ({
+    populate: () => ({
+      lean: async () => [
+        {
+          _id: "b1",
+          brandName: "Eco Threads",
+          slug: "eco-threads",
+          ownerUserId: { userName: "ecothreads", isVerified: true, salesCount: 0 },
+        },
+      ],
+    }),
+  });
+
+  Product.find = () => ({
+    select: () => ({
+      lean: async () => [
+        { _id: "prod1", brandId: "b1", price: 100 },
+        { _id: "prod2", brandId: "b1", price: 200 },
+      ],
+    }),
+  });
+
+  Order.find = (filter) => {
+    capturedOrderFilter = filter;
+    return {
+      select: () => ({
+        lean: async () => [
+          {
+            status: "paid",
+            items: [{ productId: "prod1", unitPrice: 100, quantity: 1 }],
+          },
+          {
+            status: "shipped",
+            items: [{ productId: "prod2", unitPrice: 200, quantity: 2 }],
+          },
+          {
+            status: "completed",
+            items: [{ productId: "prod1", unitPrice: 100, quantity: 1 }],
+          },
+        ],
+      }),
+    };
+  };
+
+  const req = { query: { timeframe: "all_time", limit: "10" } };
+  const res = createResponseMock();
+
+  try {
+    await getCompanyLeaderboard(req, res);
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.payload.success, true);
+    assert.deepEqual(capturedOrderFilter.status, { $in: ["paid", "shipped", "completed"] });
+
+    const leaderboard = res.payload.data.leaderboard;
+    assert.equal(leaderboard.length, 1);
+    const company = leaderboard[0];
+    assert.equal(company.rank, 1);
+    assert.equal(company.brandName, "Eco Threads");
+    // 100*1 + 200*2 + 100*1 = 600
+    assert.equal(company.totalRevenue, 600);
+    // 1 + 2 + 1 = 4
+    assert.equal(company.unitsSold, 4);
+    // Math.max(Math.floor(600 / 10), Math.floor(4 * 25)) = Math.max(60, 100) = 100
+    assert.equal(company.impactCoinsGenerated, 100);
+  } finally {
+    Brand.find = originalBrandFind;
+    Product.find = originalProductFind;
+    Order.find = originalOrderFind;
   }
 });
