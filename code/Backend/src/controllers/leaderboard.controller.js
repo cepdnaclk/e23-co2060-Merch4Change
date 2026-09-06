@@ -372,13 +372,14 @@ export const getCharityLeaderboard = asyncHandler(async (req, res) => {
  * Returns aggregate platform community statistics.
  */
 export const getLeaderboardStats = asyncHandler(async (req, res) => {
-  const [standardTotal, distinctDonors, verifiedCharitiesCount] = await Promise.all([
+  const [standardTotal, distinctDonors, verifiedCharitiesCount, totalBrandsCount] = await Promise.all([
     Donation.aggregate([
       { $match: { status: "completed" } },
       { $group: { _id: null, total: { $sum: "$coinAmount" } } },
     ]),
     Donation.distinct("donorUserId", { status: "completed" }),
     Charity.countDocuments({ verificationStatus: "verified" }),
+    Brand.countDocuments({}),
   ]);
 
   const totalCoinsDonated = standardTotal[0]?.total || 0;
@@ -388,6 +389,7 @@ export const getLeaderboardStats = asyncHandler(async (req, res) => {
     totalCoinsDonated,
     totalCommunityDonors,
     verifiedCharitiesSupported: verifiedCharitiesCount,
+    totalPartnerBrands: totalBrandsCount,
     platformImpactRate: "100%",
   });
 });

@@ -436,7 +436,15 @@ export default function LeaderboardSection() {
                   )}
                 </div>
                 <h3>
-                  You are ranked <strong>#{currentUserEntry.rank}</strong> out of {leaderboardData.length} on the leaderboard!
+                  You are ranked <strong>#{currentUserEntry.rank}</strong>
+                  {activeType === "donors" && stats?.totalCommunityDonors
+                    ? ` out of ${stats.totalCommunityDonors.toLocaleString()} members`
+                    : activeType === "charities" && stats?.verifiedCharitiesSupported
+                    ? ` out of ${stats.verifiedCharitiesSupported.toLocaleString()} organizations`
+                    : activeType === "companies" && stats?.totalPartnerBrands
+                    ? ` out of ${stats.totalPartnerBrands.toLocaleString()} brands`
+                    : ""}{" "}
+                  on the leaderboard!
                 </h3>
                 <p>
                   {activeType === "companies"

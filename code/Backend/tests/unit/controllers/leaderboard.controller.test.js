@@ -28,6 +28,7 @@ test("getLeaderboardStats returns aggregated stats with distinct donors and veri
   const originalAggregate = Donation.aggregate;
   const originalDistinct = Donation.distinct;
   const originalCharityCount = Charity.countDocuments;
+  const originalBrandCount = Brand.countDocuments;
 
   Donation.aggregate = async () => [{ _id: null, total: 3850 }];
   Donation.distinct = async (field, query) => {
@@ -39,6 +40,7 @@ test("getLeaderboardStats returns aggregated stats with distinct donors and veri
     assert.deepEqual(query, { verificationStatus: "verified" });
     return 4;
   };
+  Brand.countDocuments = async () => 6;
 
   const req = {};
   const res = createResponseMock();
@@ -51,11 +53,13 @@ test("getLeaderboardStats returns aggregated stats with distinct donors and veri
     assert.equal(res.payload.data.totalCoinsDonated, 3850);
     assert.equal(res.payload.data.totalCommunityDonors, 3);
     assert.equal(res.payload.data.verifiedCharitiesSupported, 4);
+    assert.equal(res.payload.data.totalPartnerBrands, 6);
     assert.equal(res.payload.data.platformImpactRate, "100%");
   } finally {
     Donation.aggregate = originalAggregate;
     Donation.distinct = originalDistinct;
     Charity.countDocuments = originalCharityCount;
+    Brand.countDocuments = originalBrandCount;
   }
 });
 
