@@ -29,7 +29,7 @@ function ProtectedRoute({ children }) {
     return (
       <>
         {accessToken && children}
-        <LoadingScreen isExiting={isExiting} />
+        <LoadingScreen variant="skeleton" isExiting={isExiting} />
       </>
     );
   }

@@ -1,17 +1,19 @@
 import { useState, useEffect } from "react";
 import "./LoadingScreen.css";
 import BrandLogo from "../BrandLogo/BrandLogo";
+import SkeletonPreview from "./SkeletonPreview";
 import { Sparkles, Heart } from "lucide-react";
 
 const DEFAULT_TIPS = [
   "Connecting you with verified changemakers and causes...",
   "Every purchase directly funds verified NGO campaigns...",
-  "100% transparent and verified non-profit partners...",
+  "100% verified organisations and transparent impact tracking...",
   "Making conscious merchandise wearable and impactful...",
   "Setting up your personalized impact dashboard...",
 ];
 
 export default function LoadingScreen({
+  variant = "skeleton", // "skeleton" (Option 3 - default) | "splash" (Option 1)
   message = "Merch4Change",
   subtext = "Wear your values · Fund a cause",
   tips = DEFAULT_TIPS,
@@ -25,7 +27,7 @@ export default function LoadingScreen({
 
   // Dynamic Micro-Copy: rotating impact statements with gentle crossfade
   useEffect(() => {
-    if (!showTips || !tips || tips.length <= 1) return;
+    if (variant !== "splash" || !showTips || !tips || tips.length <= 1) return;
 
     const interval = setInterval(() => {
       setIsFading(true);
@@ -36,8 +38,14 @@ export default function LoadingScreen({
     }, tipInterval);
 
     return () => clearInterval(interval);
-  }, [showTips, tips, tipInterval]);
+  }, [variant, showTips, tips, tipInterval]);
 
+  // Option 3: Ghost Skeleton Preview (Zero Perceived Latency)
+  if (variant === "skeleton") {
+    return <SkeletonPreview isExiting={isExiting} />;
+  }
+
+  // Option 1: The Luminous Impact Splash Screen
   return (
     <div
       className={`m4c-loader-container ${
