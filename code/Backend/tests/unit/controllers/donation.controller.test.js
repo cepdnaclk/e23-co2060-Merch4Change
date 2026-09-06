@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import mongoose from "mongoose";
 import {
   createDonation,
   getMyDonations,
@@ -28,6 +29,101 @@ const createResponseMock = () => {
   };
   return res;
 };
+
+const charityId = new mongoose.Types.ObjectId();
+const ownerUserId = new mongoose.Types.ObjectId();
+const otherCharityId = new mongoose.Types.ObjectId();
+const projectId = new mongoose.Types.ObjectId();
+
+for (const scenario of [
+  { name: "rejects a project owned by another charity", requestedCharity: charityId, projectCharity: otherCharityId, error: "CHARITY_PROJECT_MISMATCH" },
+  { name: "rejects an unknown explicit charity instead of using the project's charity", requestedCharity: otherCharityId, projectCharity: charityId, error: "CHARITY_NOT_FOUND" },
+  { name: "accepts matching charity and project IDs", requestedCharity: charityId, projectCharity: charityId },
+  { name: "accepts an owner user ID for the matching charity", requestedCharity: ownerUserId, projectCharity: charityId },
+  { name: "rejects a mismatched project when the charity uses an owner user ID", requestedCharity: ownerUserId, projectCharity: otherCharityId, error: "CHARITY_PROJECT_MISMATCH" },
+  { name: "accepts a legacy project referencing the matching owner", requestedCharity: charityId, projectCharity: ownerUserId },
+  { name: "infers the charity when only the project is supplied", projectCharity: charityId },
+  { name: "accepts a general donation without a project", requestedCharity: charityId },
+]) {
+  test(`createDonation ${scenario.name}`, async (t) => {
+    const charity = { _id: charityId, ownerUserId, verificationStatus: "verified" };
+    t.mock.method(Charity, "findById", async (id) => String(id) === String(charityId) ? charity : null);
+    t.mock.method(Charity, "findOne", async (filter) => String(filter.ownerUserId) === String(ownerUserId) ? charity : null);
+    t.mock.method(Project, "findOne", async () => ({ _id: projectId, charityId: scenario.projectCharity, status: "active" }));
+
+    const balanceUpdate = t.mock.method(User, "findOneAndUpdate", () => ({
+      select: async () => ({ coinBalance: 450 }),
+    }));
+    const donationCreate = t.mock.method(Donation, "create", async (doc) => ({ _id: "donation1", ...doc }));
+    const projectUpdate = t.mock.method(Project, "findByIdAndUpdate", async () => ({}));
+    const transactionCreate = t.mock.method(CoinTransaction, "create", async () => ({}));
+    const res = createResponseMock();
+    const req = {
+      user: { _id: "user123" },
+      body: {
+        coinAmount: 50,
+        ...(scenario.requestedCharity ? { charityId: String(scenario.requestedCharity) } : {}),
+        ...(scenario.projectCharity ? { charityProjectId: String(projectId) } : {}),
+      },
+    };
+
+    if (scenario.error) {
+      await assert.rejects(() => createDonation(req, res), (err) => {
+        assert.equal(err.code, scenario.error);
+        assert.equal(err.statusCode, scenario.error === "CHARITY_NOT_FOUND" ? 404 : 400);
+        return true;
+      });
+      for (const mutation of [balanceUpdate, donationCreate, projectUpdate, transactionCreate]) {
+        assert.equal(mutation.mock.callCount(), 0, "Rejected donation must not mutate balances or records");
+      }
+    } else {
+      await createDonation(req, res);
+      assert.equal(res.statusCode, 201);
+      assert.equal(String(res.payload.data.donation.charityId), String(charityId));
+      assert.equal(res.payload.data.donation.charityProjectId, scenario.projectCharity ? projectId : null);
+      assert.equal(balanceUpdate.mock.callCount(), 1);
+      assert.equal(donationCreate.mock.callCount(), 1);
+      assert.equal(projectUpdate.mock.callCount(), scenario.projectCharity ? 1 : 0);
+      assert.equal(transactionCreate.mock.callCount(), 1);
+    }
+  });
+}
+
+for (const status of ["completed", "cancelled", "inactive", "ongoing", null]) {
+  test(`createDonation rejects ${status ?? "missing"} projects without changing balances or records`, async (t) => {
+    const storedProject = status ? { _id: projectId, charityId, status } : null;
+    t.mock.method(Project, "findOne", async (filter) => {
+      assert.equal(filter._id, String(projectId));
+      return storedProject && (!filter.status || filter.status === storedProject.status)
+        ? storedProject
+        : null;
+    });
+    // An unrestricted lookup would still find an inactive project.
+    t.mock.method(Project, "findById", async () => storedProject);
+    t.mock.method(Charity, "findById", async () => ({ _id: charityId, verificationStatus: "verified" }));
+    const balanceUpdate = t.mock.method(User, "findOneAndUpdate", () => ({
+      select: async () => ({ coinBalance: 450 }),
+    }));
+    const donationCreate = t.mock.method(Donation, "create", async (doc) => ({ _id: "donation1", ...doc }));
+    const projectUpdate = t.mock.method(Project, "findByIdAndUpdate", async () => ({}));
+    const transactionCreate = t.mock.method(CoinTransaction, "create", async () => ({}));
+
+    await assert.rejects(
+      () => createDonation({
+        user: { _id: "user123" },
+        body: { charityId: String(charityId), charityProjectId: String(projectId), coinAmount: 50 },
+      }, createResponseMock()),
+      (err) => {
+        assert.equal(err.statusCode, 404);
+        assert.equal(err.code, "PROJECT_NOT_FOUND");
+        return true;
+      },
+    );
+    for (const mutation of [balanceUpdate, donationCreate, projectUpdate, transactionCreate]) {
+      assert.equal(mutation.mock.callCount(), 0, "Rejected donation must not mutate balances or records");
+    }
+  });
+}
 
 test("createDonation validates charityId and coinAmount", async () => {
   const req = {
