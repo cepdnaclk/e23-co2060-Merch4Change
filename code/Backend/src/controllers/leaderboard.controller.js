@@ -20,19 +20,30 @@ const getDonorTier = (totalCoins) => {
 };
 
 /**
- * Calculates start date based on timeframe string.
+ * Calculates start date based on timeframe string aligned to UTC boundaries.
  */
-const getTimeframeFilter = (timeframe) => {
-  const now = new Date();
+export const getTimeframeFilter = (timeframe, referenceDate = new Date()) => {
+  const now = referenceDate instanceof Date ? referenceDate : new Date(referenceDate);
+
+  if (timeframe === "today" || timeframe === "day") {
+    const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
+    return { createdAt: { $gte: startOfDay } };
+  }
+
   if (timeframe === "week") {
-    const startOfWeek = new Date(now);
-    startOfWeek.setDate(now.getDate() - 7);
+    // Current calendar week starting Monday 00:00:00.000 UTC
+    const day = now.getUTCDay();
+    const diff = day === 0 ? 6 : day - 1;
+    const startOfWeek = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - diff, 0, 0, 0, 0));
     return { createdAt: { $gte: startOfWeek } };
   }
+
   if (timeframe === "month") {
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    // Current calendar month starting 1st of month 00:00:00.000 UTC
+    const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0));
     return { createdAt: { $gte: startOfMonth } };
   }
+
   return {};
 };
 

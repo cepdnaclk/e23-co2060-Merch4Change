@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { getLeaderboardStats, getCharityLeaderboard, getDonorLeaderboard, getCompanyLeaderboard } from "../../../src/controllers/leaderboard.controller.js";
+import { getLeaderboardStats, getCharityLeaderboard, getDonorLeaderboard, getCompanyLeaderboard, getTimeframeFilter } from "../../../src/controllers/leaderboard.controller.js";
 import Charity from "../../../src/models/Charity.js";
 import Donation from "../../../src/models/Donation.js";
 import User from "../../../src/models/User.js";
@@ -354,4 +354,24 @@ test("Donation and Order schemas define compound indexes for leaderboard perform
     orderIndexes.some((f) => f["items.productId"] === 1 && f.status === 1 && f.createdAt === -1),
     "Order should index { 'items.productId': 1, status: 1, createdAt: -1 }"
   );
+});
+
+test("getTimeframeFilter calculates calendar week and month aligned to UTC midnight boundaries", () => {
+  // Wednesday, Sept 9, 2026 at 15:45:00 UTC
+  const testRef = new Date("2026-09-09T15:45:00.000Z");
+
+  const weekFilter = getTimeframeFilter("week", testRef);
+  // Monday of that week: Sept 7, 2026 at 00:00:00.000 UTC
+  assert.deepEqual(weekFilter, { createdAt: { $gte: new Date("2026-09-07T00:00:00.000Z") } });
+
+  const monthFilter = getTimeframeFilter("month", testRef);
+  // 1st of that month: Sept 1, 2026 at 00:00:00.000 UTC
+  assert.deepEqual(monthFilter, { createdAt: { $gte: new Date("2026-09-01T00:00:00.000Z") } });
+
+  const dayFilter = getTimeframeFilter("today", testRef);
+  // Start of day: Sept 9, 2026 at 00:00:00.000 UTC
+  assert.deepEqual(dayFilter, { createdAt: { $gte: new Date("2026-09-09T00:00:00.000Z") } });
+
+  const allTimeFilter = getTimeframeFilter("all_time", testRef);
+  assert.deepEqual(allTimeFilter, {});
 });
