@@ -5,9 +5,9 @@ import apiClient from "./apiClient";
  * @param {string} timeframe - "all_time" | "month" | "week"
  * @param {number} limit - max number of rows to return
  */
-export const getDonorLeaderboard = async (timeframe = "all_time", limit = 20) => {
+export const getDonorLeaderboard = async (timeframe = "all_time", limit = 20, page = 1) => {
   const response = await apiClient.get("/api/v1/leaderboards/donors", {
-    params: { timeframe, limit },
+    params: { timeframe, limit, page },
   });
   return response.data;
 };
@@ -16,10 +16,11 @@ export const getDonorLeaderboard = async (timeframe = "all_time", limit = 20) =>
  * Fetch ranked company & brand CSR impact.
  * @param {string} timeframe - "all_time" | "month" | "week"
  * @param {number} limit - max number of rows to return
+ * @param {number} page - page number (1-based)
  */
-export const getCompanyLeaderboard = async (timeframe = "all_time", limit = 20) => {
+export const getCompanyLeaderboard = async (timeframe = "all_time", limit = 20, page = 1) => {
   const response = await apiClient.get("/api/v1/leaderboards/companies", {
-    params: { timeframe, limit },
+    params: { timeframe, limit, page },
   });
   return response.data;
 };
@@ -28,10 +29,11 @@ export const getCompanyLeaderboard = async (timeframe = "all_time", limit = 20) 
  * Fetch ranked charities & causes by impact coins raised.
  * @param {string} timeframe - "all_time" | "month" | "week"
  * @param {number} limit - max number of rows to return
+ * @param {number} page - page number (1-based)
  */
-export const getCharityLeaderboard = async (timeframe = "all_time", limit = 20) => {
+export const getCharityLeaderboard = async (timeframe = "all_time", limit = 20, page = 1) => {
   const response = await apiClient.get("/api/v1/leaderboards/charities", {
-    params: { timeframe, limit },
+    params: { timeframe, limit, page },
   });
   return response.data;
 };

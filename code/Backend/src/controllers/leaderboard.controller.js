@@ -57,12 +57,23 @@ export const parseLimit = (queryVal, defaultVal = 20, maxVal = 100) => {
 };
 
 /**
+ * Safely parses and normalizes query page to a valid positive integer >= 1.
+ */
+export const parsePage = (queryVal, defaultVal = 1) => {
+  const parsed = Number.parseInt(queryVal, 10);
+  if (Number.isNaN(parsed) || parsed < 1) return defaultVal;
+  return parsed;
+};
+
+/**
  * GET /api/v1/leaderboards/donors
  * Returns ranked list of individual donors based on total coins donated.
  */
 export const getDonorLeaderboard = asyncHandler(async (req, res) => {
   const timeframe = req.query.timeframe || "all_time";
+  const page = parsePage(req.query.page, 1);
   const limit = parseLimit(req.query.limit, 20, 100);
+  const skip = (page - 1) * limit;
   const timeFilter = getTimeframeFilter(timeframe);
 
   const rankedDonors = await Donation.aggregate([
@@ -76,6 +87,7 @@ export const getDonorLeaderboard = asyncHandler(async (req, res) => {
       },
     },
     { $sort: { totalCoins: -1, donationCount: -1, lastDonatedAt: -1, _id: 1 } },
+    { $skip: skip },
     { $limit: limit },
   ]);
 
@@ -105,10 +117,10 @@ export const getDonorLeaderboard = asyncHandler(async (req, res) => {
       const tierInfo = getDonorTier(item.totalCoins);
       const name = user.firstName && user.lastName
         ? `${user.firstName} ${user.lastName}`.trim()
-        : user.userName || `Donor #${index + 1}`;
+        : user.userName || `Donor #${skip + index + 1}`;
 
       return {
-        rank: index + 1,
+        rank: skip + index + 1,
         userId: user._id,
         userName: user.userName || "",
         name,
@@ -126,6 +138,8 @@ export const getDonorLeaderboard = asyncHandler(async (req, res) => {
 
   return successResponse(res, 200, "Donor leaderboard fetched successfully.", {
     timeframe,
+    page,
+    limit,
     leaderboard,
   });
 });
@@ -136,7 +150,9 @@ export const getDonorLeaderboard = asyncHandler(async (req, res) => {
  */
 export const getCompanyLeaderboard = asyncHandler(async (req, res) => {
   const timeframe = req.query.timeframe || "all_time";
+  const page = parsePage(req.query.page, 1);
   const limit = parseLimit(req.query.limit, 20, 100);
+  const skip = (page - 1) * limit;
   const timeFilter = getTimeframeFilter(timeframe);
 
   // 1. Fetch all brands
@@ -147,6 +163,8 @@ export const getCompanyLeaderboard = asyncHandler(async (req, res) => {
   if (!brands || brands.length === 0) {
     return successResponse(res, 200, "Company leaderboard fetched successfully.", {
       timeframe,
+      page,
+      limit,
       leaderboard: [],
     });
   }
@@ -253,14 +271,16 @@ export const getCompanyLeaderboard = asyncHandler(async (req, res) => {
         String(a.brandName || "").localeCompare(String(b.brandName || "")) ||
         String(a.brandId).localeCompare(String(b.brandId))
     )
-    .slice(0, limit)
+    .slice(skip, skip + limit)
     .map((company, index) => ({
-      rank: index + 1,
+      rank: skip + index + 1,
       ...company,
     }));
 
   return successResponse(res, 200, "Company leaderboard fetched successfully.", {
     timeframe,
+    page,
+    limit,
     leaderboard: rankedCompanies,
   });
 });
@@ -271,7 +291,9 @@ export const getCompanyLeaderboard = asyncHandler(async (req, res) => {
  */
 export const getCharityLeaderboard = asyncHandler(async (req, res) => {
   const timeframe = req.query.timeframe || "all_time";
+  const page = parsePage(req.query.page, 1);
   const limit = parseLimit(req.query.limit, 20, 100);
+  const skip = (page - 1) * limit;
   const timeFilter = getTimeframeFilter(timeframe);
 
   // 1. Fetch all verified charities
@@ -282,6 +304,8 @@ export const getCharityLeaderboard = asyncHandler(async (req, res) => {
   if (!charities || charities.length === 0) {
     return successResponse(res, 200, "Charity leaderboard fetched successfully.", {
       timeframe,
+      page,
+      limit,
       leaderboard: [],
     });
   }
@@ -364,14 +388,16 @@ export const getCharityLeaderboard = asyncHandler(async (req, res) => {
         String(a.name || "").localeCompare(String(b.name || "")) ||
         String(a.charityId).localeCompare(String(b.charityId))
     )
-    .slice(0, limit)
+    .slice(skip, skip + limit)
     .map((charity, index) => ({
-      rank: index + 1,
+      rank: skip + index + 1,
       ...charity,
     }));
 
   return successResponse(res, 200, "Charity leaderboard fetched successfully.", {
     timeframe,
+    page,
+    limit,
     leaderboard: rankedCharities,
   });
 });

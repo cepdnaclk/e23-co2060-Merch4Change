@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { getLeaderboardStats, getCharityLeaderboard, getDonorLeaderboard, getCompanyLeaderboard, getTimeframeFilter, parseLimit } from "../../../src/controllers/leaderboard.controller.js";
+import { getLeaderboardStats, getCharityLeaderboard, getDonorLeaderboard, getCompanyLeaderboard, getTimeframeFilter, parseLimit, parsePage } from "../../../src/controllers/leaderboard.controller.js";
 import Charity from "../../../src/models/Charity.js";
 import Donation from "../../../src/models/Donation.js";
 import User from "../../../src/models/User.js";
@@ -423,4 +423,66 @@ test("parseLimit safely clamps query limit to positive integer [1, maxVal]", () 
   assert.equal(parseLimit("500"), 100); // capped at maxVal
   assert.equal(parseLimit("-10", 15, 50), 15);
   assert.equal(parseLimit("80", 15, 50), 50);
+});
+
+test("parsePage safely normalizes query page to positive integer >= 1", () => {
+  assert.equal(parsePage(undefined), 1);
+  assert.equal(parsePage(null), 1);
+  assert.equal(parsePage("invalid"), 1);
+  assert.equal(parsePage("-5"), 1);
+  assert.equal(parsePage("0"), 1);
+  assert.equal(parsePage("1"), 1);
+  assert.equal(parsePage("3"), 3);
+  assert.equal(parsePage("42"), 42);
+});
+
+test("getDonorLeaderboard applies page offset and assigns correct offset ranks", async () => {
+  const originalAggregate = Donation.aggregate;
+  const originalFind = User.find;
+
+  let capturedPipeline = null;
+  Donation.aggregate = async (pipeline) => {
+    capturedPipeline = pipeline;
+    return [
+      { _id: "user6", totalCoins: 1200, donationCount: 4, lastDonatedAt: new Date() },
+    ];
+  };
+
+  User.find = () => ({
+    select: () => ({
+      lean: async () => [
+        {
+          _id: "user6",
+          firstName: "Diana",
+          lastName: "Prince",
+          userName: "diana",
+          profileImageUrl: "diana.jpg",
+          isVerified: true,
+        },
+      ],
+    }),
+  });
+
+  const req = { query: { timeframe: "all_time", page: "2", limit: "5" } };
+  const res = createResponseMock();
+
+  try {
+    await getDonorLeaderboard(req, res);
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.payload.data.page, 2);
+    assert.equal(res.payload.data.limit, 5);
+
+    // Verify $skip and $limit were added to pipeline
+    const skipStage = capturedPipeline.find((s) => s.$skip !== undefined);
+    const limitStage = capturedPipeline.find((s) => s.$limit !== undefined);
+    assert.equal(skipStage.$skip, 5);
+    assert.equal(limitStage.$limit, 5);
+
+    // Verify rank offset: (page - 1) * limit + 1 = 6
+    assert.equal(res.payload.data.leaderboard[0].rank, 6);
+  } finally {
+    Donation.aggregate = originalAggregate;
+    User.find = originalFind;
+  }
 });
