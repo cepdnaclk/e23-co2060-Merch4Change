@@ -72,23 +72,21 @@ export const createDonation = asyncHandler(async (req, res) => {
       charity = null;
     }
   }
-  if (!charity && project?.charityId) {
-    try {
-      charity = await Charity.findById(project.charityId);
-    } catch {
-      charity = null;
-    }
-    if (!charity) {
-      try {
-        charity = await Charity.findOne({ ownerUserId: project.charityId });
-      } catch {
-        charity = null;
-      }
-    }
-  }
-
   if (!charity) {
     throw new AppError("Charity not found.", 404, "CHARITY_NOT_FOUND");
+  }
+  // Support existing projects that reference the charity's owner user ID,
+  // but never credit a project belonging to a different charity.
+  if (
+    project &&
+    String(project.charityId) !== String(charity._id) &&
+    !(charity.ownerUserId && String(project.charityId) === String(charity.ownerUserId))
+  ) {
+    throw new AppError(
+      "The selected project does not belong to this charity.",
+      400,
+      "CHARITY_PROJECT_MISMATCH",
+    );
   }
   if (charity.verificationStatus !== "verified") {
     throw new AppError("Donations are only accepted for verified charities.", 403, "CHARITY_NOT_VERIFIED");
