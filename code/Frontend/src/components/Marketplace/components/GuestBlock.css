@@ -1,84 +1,336 @@
-.guest-block-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 400px;
-  padding: 2rem;
-  background-color: #f9fafb;
-  border-radius: 20px;
-  margin: 2rem auto;
-  max-width: 600px;
-  border: 1px solid #e5e7eb;
+@font-face {
+  font-family: Marketplace Satoshi;
+  src: url("/fonts/Satoshi-Regular.woff2") format("woff2");
+  font-display: swap;
 }
-
-.guest-block-card {
-  text-align: center;
-  max-width: 400px;
-}
-
-.lock-icon-wrap {
-  width: 80px;
-  height: 80px;
-  background: #fef3c7;
-  color: #d97706;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1.5rem auto;
-}
-
-.guest-block-card h2 {
-  font-family: 'DM Serif Display', serif;
-  font-size: 1.75rem;
-  color: #111827;
-  margin-bottom: 1rem;
-}
-
-.guest-block-card p {
-  color: #6b7280;
-  line-height: 1.6;
-  margin-bottom: 2rem;
-}
-
-.guest-block-actions {
+.marketplace-welcome {
+  --mw-purple: #4a24e1;
+  --mw-ink: #292435;
+  --mw-muted: #72697d;
+  min-height: 100vh;
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  background: #faf9fe;
+  color: var(--mw-ink);
+  font-family: "Marketplace Satoshi", sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
-
-.gb-btn-primary {
-  background-color: #4f46e5;
-  color: white;
-  padding: 0.875rem;
-  border-radius: 12px;
+.marketplace-welcome * {
+  box-sizing: border-box;
+}
+.marketplace-welcome a {
+  color: inherit;
+  text-decoration: none;
+}
+.marketplace-welcome a:focus-visible {
+  outline: 3px solid #9677ef;
+  outline-offset: 5px;
+  border-radius: 5px;
+}
+.mw-wrap {
+  width: min(1100px, calc(100% - 96px));
+  margin-inline: auto;
+}
+.mw-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  min-height: 84px;
+  border-bottom: 1px solid #e7e1ef;
+}
+.mw-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
   font-weight: 600;
+  letter-spacing: -0.6px;
+}
+.mw-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--mw-muted);
+}
+.mw-back:hover {
+  color: var(--mw-purple);
+}
+.mw-main {
+  flex: 1;
+  padding-top: clamp(50px, 8vh, 90px);
+  padding-bottom: 48px;
+}
+.mw-intro {
+  text-align: center;
+}
+.mw-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1.7px;
+  color: #716185;
+}
+.mw-eyebrow > span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--mw-purple);
+}
+.mw-intro h1 {
+  font-size: clamp(49px, 5.5vw, 72px);
+  font-weight: 500;
+  letter-spacing: -3px;
+  line-height: 1.08;
+  margin: 24px 0;
+}
+.mw-intro h1 em {
+  font-family: Georgia, serif;
+  font-weight: 400;
+  color: var(--mw-purple);
+}
+.mw-description {
+  max-width: 465px;
+  font-size: 15px;
+  line-height: 1.9;
+  color: var(--mw-muted);
+  margin: 23px auto 29px;
+}
+.mw-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 13px;
+}
+.mw-actions a {
+  min-height: 49px;
+  padding: 13px 25px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 35px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 5px;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
+}
+.mw-actions .mw-signin {
+  background: var(--mw-purple);
+  color: #fff;
+  border: 1px solid var(--mw-purple);
+  min-width: 172px;
+}
+.mw-actions .mw-signin:hover {
+  background: #3a1ac1;
+  border-color: #3a1ac1;
+}
+.mw-actions .mw-signup {
+  background: transparent;
+  color: #544362;
+  border: 1px solid #d5cce4;
+}
+.mw-actions .mw-signup:hover {
+  background: #eee8fb;
+  border-color: #a38ac8;
+}
+.mw-access-note {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  font-size: 10px;
+  line-height: 1.7;
+  color: #797080;
+  margin: 18px 0 0;
+}
+.mw-access-note svg {
+  flex-shrink: 0;
+}
+.mw-benefits {
+  max-width: 880px;
+  margin: 61px auto 0;
+}
+.mw-benefits-heading {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  transition: all 0.2s;
-  border: none;
-  cursor: pointer;
+  gap: 20px;
 }
-
-.gb-btn-primary:hover {
-  background-color: #4338ca;
-  transform: translateY(-2px);
+.mw-benefits-heading > span {
+  height: 1px;
+  flex: 1;
+  background: #e1d9eb;
 }
-
-.gb-btn-secondary {
-  background-color: transparent;
-  color: #4b5563;
-  padding: 0.875rem;
+.mw-benefits-heading h2 {
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  font-weight: 500;
+  color: #85768f;
+  text-align: center;
+  margin: 0;
+}
+.mw-benefit-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 42px;
+  text-align: center;
+  margin-top: 31px;
+}
+.mw-benefit-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  color: #7554b5;
+  background: #eee8fa;
   border-radius: 12px;
-  font-weight: 600;
-  transition: all 0.2s;
-  border: 1px solid #d1d5db;
-  cursor: pointer;
 }
-
-.gb-btn-secondary:hover {
-  background-color: #f3f4f6;
-  border-color: #9ca3af;
+.mw-benefit-grid h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 16px 0 9px;
+  letter-spacing: -0.2px;
+  line-height: 1.5;
+}
+.mw-benefit-grid p {
+  font-size: 12px;
+  line-height: 1.85;
+  color: var(--mw-muted);
+  max-width: 235px;
+  margin: 0 auto;
+}
+.mw-footer {
+  border-top: 1px solid #e7e1ef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding-block: 23px;
+  color: #797080;
+  font-size: 10px;
+}
+.mw-footer a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.mw-footer a:hover {
+  color: var(--mw-purple);
+}
+@media (max-width: 760px) {
+  .mw-wrap {
+    width: calc(100% - 48px);
+  }
+  .mw-intro h1 {
+    font-size: 55px;
+  }
+  .mw-benefit-grid {
+    gap: 20px;
+  }
+}
+@media (max-width: 520px) {
+  .mw-wrap {
+    width: calc(100% - 40px);
+  }
+  .mw-header {
+    min-height: 72px;
+    gap: 16px;
+  }
+  .mw-brand {
+    font-size: 15px;
+    gap: 7px;
+  }
+  .mw-back {
+    font-size: 10px;
+    gap: 5px;
+  }
+  .mw-back svg {
+    width: 13px;
+  }
+  .mw-main {
+    padding-top: 43px;
+    padding-bottom: 35px;
+  }
+  .mw-eyebrow {
+    font-size: 7px;
+    letter-spacing: 1.3px;
+  }
+  .mw-intro h1 {
+    font-size: clamp(40px, 10vw, 52px);
+    letter-spacing: -1.8px;
+  }
+  .mw-description {
+    font-size: 13px;
+    margin-block: 22px 26px;
+  }
+  .mw-actions {
+    flex-direction: column;
+    gap: 10px;
+    max-width: 320px;
+    margin-inline: auto;
+  }
+  .mw-actions a {
+    width: 100%;
+  }
+  .mw-access-note {
+    font-size: 9px;
+    align-items: flex-start;
+    gap: 6px;
+    max-width: 280px;
+    margin-inline: auto;
+  }
+  .mw-access-note svg {
+    margin-top: 1px;
+  }
+  .mw-benefits {
+    margin-top: 40px;
+  }
+  .mw-benefits-heading {
+    gap: 10px;
+  }
+  .mw-benefits-heading h2 {
+    font-size: 7px;
+    letter-spacing: 1px;
+    max-width: 180px;
+    line-height: 1.8;
+  }
+  .mw-benefit-grid {
+    grid-template-columns: 1fr;
+    text-align: left;
+    gap: 25px;
+    margin-top: 28px;
+  }
+  .mw-benefit-grid article {
+    display: grid;
+    grid-template-columns: 42px 1fr;
+    column-gap: 14px;
+  }
+  .mw-benefit-icon {
+    grid-row: span 2;
+  }
+  .mw-benefit-grid h3 {
+    margin: 0 0 5px;
+    font-size: 13px;
+  }
+  .mw-benefit-grid p {
+    grid-column: 2;
+    margin: 0;
+    max-width: none;
+    font-size: 11px;
+  }
+  .mw-footer {
+    font-size: 9px;
+    gap: 10px;
+    padding-block: 21px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .marketplace-welcome * {
+    transition: none !important;
+  }
 }
