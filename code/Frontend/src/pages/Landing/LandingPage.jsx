@@ -3,9 +3,6 @@ import { useNavigate } from "react-router-dom";
 import "./LandingPage.css";
 import BrandLogo from "../../components/BrandLogo/BrandLogo";
 import {
-  ShoppingBag,
-  Heart,
-  TrendingUp,
   ShieldCheck,
   BarChart2,
   Award,
@@ -83,7 +80,7 @@ function LandingPage() {
                 </button>
                 <button
                   className="lp-btn lp-btn-ghost"
-                  onClick={() => scrollTo("how-it-works")}
+                  onClick={() => navigate("/help#how-it-works")}
                 >
                   How it works
                 </button>
@@ -121,57 +118,6 @@ function LandingPage() {
             <span>GreenPulse</span>
             <span className="lp-trust-dot">·</span>
             <span>Impact Co.</span>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 3 — HOW IT WORKS */}
-      <section id="how-it-works" className="lp-how-it-works">
-        <div className="lp-container">
-          <div className="lp-section-header">
-            <p className="lp-eyebrow">How it works</p>
-            <h2 className="lp-section-title">
-              Three steps to shop with <em>purpose</em>
-            </h2>
-            <p className="lp-section-desc">
-              It's simple, transparent, and impactful.
-            </p>
-          </div>
-
-          <div className="lp-steps">
-            <div className="lp-step">
-              <div className="lp-step-number">01</div>
-              <ShoppingBag size={26} className="lp-step-icon" />
-              <h3 className="lp-step-title">Browse the marketplace</h3>
-              <p className="lp-step-desc">
-                Discover thousands of impact products from verified
-                organisations and creators across Sri Lanka.
-              </p>
-            </div>
-
-            <div className="lp-step-connector"></div>
-
-            <div className="lp-step">
-              <div className="lp-step-number">02</div>
-              <Heart size={26} className="lp-step-icon" />
-              <h3 className="lp-step-title">Support a cause</h3>
-              <p className="lp-step-desc">
-                Every purchase directly funds a campaign or NGO of your choice.
-                You decide where the impact goes.
-              </p>
-            </div>
-
-            <div className="lp-step-connector"></div>
-
-            <div className="lp-step">
-              <div className="lp-step-number">03</div>
-              <TrendingUp size={26} className="lp-step-icon" />
-              <h3 className="lp-step-title">Track your impact</h3>
-              <p className="lp-step-desc">
-                Watch your contributions grow in real time. Earn ranks, badges,
-                and rewards as you make a difference.
-              </p>
-            </div>
           </div>
         </div>
       </section>
@@ -474,7 +420,7 @@ function LandingPage() {
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => scrollTo("how-it-works")}>
+                  <button onClick={() => navigate("/help#how-it-works")}>
                     How it works
                   </button>
                 </li>

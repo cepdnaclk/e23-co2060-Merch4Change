@@ -34,6 +34,7 @@ const Footer = () => {
             <h4>Support</h4>
             <ul>
               <li onClick={() => navigate("/help")}>Help Center</li>
+              <li onClick={() => navigate("/help#how-it-works")}>How It Works</li>
               <li onClick={() => navigate("/faq")}>FAQs</li>
               <li onClick={() => navigate("/help/contact")}>Contact Us</li>
             </ul>

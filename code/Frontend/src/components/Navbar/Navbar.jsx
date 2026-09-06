@@ -59,12 +59,6 @@ function Navbar({ scrolled = false }) {
           <div className="lp-navbar-center">
             <button
               className="lp-navbar-link"
-              onClick={() => scrollTo("how-it-works")}
-            >
-              How it works
-            </button>
-            <button
-              className="lp-navbar-link"
               onClick={() => handleNavigation("/marketplace")}
             >
               Marketplace
@@ -119,12 +113,6 @@ function Navbar({ scrolled = false }) {
       {/* Mobile Menu */}
       {isLandingPage && isMobileMenuOpen && (
         <div className="lp-navbar-mobile-menu">
-          <button
-            className="lp-navbar-mobile-link"
-            onClick={() => scrollTo("how-it-works")}
-          >
-            How it works
-          </button>
           <button
             className="lp-navbar-mobile-link"
             onClick={() => handleNavigation("/marketplace")}

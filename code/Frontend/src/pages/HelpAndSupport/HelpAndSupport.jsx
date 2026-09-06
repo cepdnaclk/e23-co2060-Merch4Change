@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { ShoppingBag, Heart, TrendingUp } from "lucide-react";
 import "./HelpAndSupport.css";
 
 function HelpAndSupport() {
@@ -41,6 +42,61 @@ function HelpAndSupport() {
           </p>
         </div>
       </div>
+
+      {/* SECTION — HOW IT WORKS */}
+      <section id="how-it-works" className="help-how-it-works">
+        <div className="help-section-header">
+          <p className="help-eyebrow">How It Works</p>
+          <h2 className="help-section-title">
+            Three steps to shop with <em>purpose</em>
+          </h2>
+          <p className="help-section-desc">
+            It's simple, transparent, and impactful.
+          </p>
+        </div>
+
+        <div className="help-steps">
+          <div className="help-step">
+            <div className="help-step-number">01</div>
+            <div className="help-step-icon-wrap">
+              <ShoppingBag size={26} className="help-step-icon" />
+            </div>
+            <h3 className="help-step-title">Browse the marketplace</h3>
+            <p className="help-step-desc">
+              Discover thousands of impact products from verified
+              organisations and creators across Sri Lanka.
+            </p>
+          </div>
+
+          <div className="help-step-connector"></div>
+
+          <div className="help-step">
+            <div className="help-step-number">02</div>
+            <div className="help-step-icon-wrap">
+              <Heart size={26} className="help-step-icon" />
+            </div>
+            <h3 className="help-step-title">Support a cause</h3>
+            <p className="help-step-desc">
+              Every purchase directly funds a campaign or NGO of your choice.
+              You decide where the impact goes.
+            </p>
+          </div>
+
+          <div className="help-step-connector"></div>
+
+          <div className="help-step">
+            <div className="help-step-number">03</div>
+            <div className="help-step-icon-wrap">
+              <TrendingUp size={26} className="help-step-icon" />
+            </div>
+            <h3 className="help-step-title">Track your impact</h3>
+            <p className="help-step-desc">
+              Watch your contributions grow in real time. Earn ranks, badges,
+              and rewards as you make a difference.
+            </p>
+          </div>
+        </div>
+      </section>
 
       <div className="help-guides">
         <h2>Popular Guides</h2>

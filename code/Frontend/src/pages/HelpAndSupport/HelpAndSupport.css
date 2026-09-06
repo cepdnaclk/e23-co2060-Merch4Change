@@ -170,3 +170,135 @@
     padding: 16px;
   }
 }
+
+/* ============================================
+   HOW IT WORKS SECTION IN HELP & SUPPORT
+   ============================================ */
+
+.help-how-it-works {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 60px 40px;
+  max-width: 1040px;
+  margin: 0 auto 60px auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+  border: 1px solid #eef2f6;
+}
+
+.help-section-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.help-eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #4a24e1;
+  margin-bottom: 10px;
+}
+
+.help-section-title {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 34px;
+  color: #0f2027;
+  letter-spacing: -0.02em;
+  margin: 0 0 10px 0;
+  font-weight: 600;
+}
+
+.help-section-title em {
+  font-style: italic;
+  color: #4a24e1;
+}
+
+.help-section-desc {
+  font-size: 15px;
+  color: #64748b;
+  margin: 0;
+}
+
+.help-steps {
+  display: flex;
+  gap: 36px;
+  position: relative;
+  justify-content: space-between;
+}
+
+.help-step {
+  flex: 1;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.help-step-number {
+  font-family: 'DM Serif Display', serif;
+  font-size: 44px;
+  color: #ece9fc;
+  line-height: 1;
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.help-step-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: #f3f0ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.help-step-icon {
+  color: #4a24e1;
+}
+
+.help-step-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: #0f2027;
+  margin: 0 0 10px 0;
+}
+
+.help-step-desc {
+  font-size: 14px;
+  color: #64748b;
+  line-height: 1.65;
+  margin: 0;
+  max-width: 260px;
+}
+
+.help-step-connector {
+  position: absolute;
+  top: 60px;
+  left: 15%;
+  right: 15%;
+  height: 1px;
+  border-top: 1.5px dashed #e2e8f0;
+  z-index: 0;
+}
+
+@media (max-width: 860px) {
+  .help-how-it-works {
+    padding: 40px 20px;
+    margin: 0 20px 40px 20px;
+  }
+
+  .help-steps {
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .help-step-connector {
+    display: none;
+  }
+}
+
