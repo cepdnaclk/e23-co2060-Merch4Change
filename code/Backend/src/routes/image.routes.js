@@ -2,6 +2,7 @@ import express from "express";
 import multer from "multer";
 import mongoose from "mongoose";
 import Product from "../models/Product.js";
+import Brand from "../models/Brand.js";
 import User from "../models/User.js";
 import protect from "../middlewares/auth.js";
 import { uploadBufferToCloudinary } from "../utils/uploadToCloudinary.js";
@@ -30,7 +31,7 @@ const isValidId = (id) => mongoose.Types.ObjectId.isValid(id);
    ============================================================ */
 
 // Upload product image  (POST /api/v1/images/product/:id)
-router.post("/product/:id", upload.single("image"), async (req, res) => {
+router.post("/product/:id", protect, upload.single("image"), async (req, res) => {
   try {
     if (!isValidId(req.params.id)) {
       return res.status(400).json({ message: "Invalid product id" });
@@ -41,6 +42,13 @@ router.post("/product/:id", upload.single("image"), async (req, res) => {
 
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ message: "Product not found" });
+
+    if (String(product.ownerUserId) !== String(req.user._id)) {
+      const brand = product.brandId ? await Brand.findById(product.brandId) : null;
+      if (!brand || String(brand.ownerUserId) !== String(req.user._id)) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+    }
 
     product.image = {
       data: req.file.buffer,

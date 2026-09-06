@@ -16,12 +16,10 @@ function PublicLayout() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Smooth scroll to anchors
+  // Scroll to top on route change or scroll to anchor
   useEffect(() => {
     if (!location.hash) {
-      if (location.pathname === "/") {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
       return;
     }
 

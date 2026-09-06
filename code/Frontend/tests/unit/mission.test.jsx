@@ -1,57 +1,73 @@
 import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import { describe, it, expect } from "vitest";
 import Mission from "../../src/pages/About/Mission.jsx";
 
+function renderMission() {
+  return render(
+    <MemoryRouter>
+      <Mission />
+    </MemoryRouter>,
+  );
+}
+
 describe("Mission", () => {
-  it("renders the Our Mission heading", () => {
-    render(<Mission />);
-
+  it("introduces the mission and retains its tagline", () => {
+    renderMission();
     expect(screen.getByText("Our Mission")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        name: "Make every choice a chance for change.",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Driving impact-led commerce globally."),
+    ).toBeInTheDocument();
   });
 
-  it("displays the mission tagline", () => {
-    render(<Mission />);
-
-    expect(screen.getByText("Driving impact-led commerce globally.")).toBeInTheDocument();
+  it("preserves all three priorities and their descriptions", () => {
+    renderMission();
+    ["Global Impact", "Empowering Connections", "Sustainable Commerce"].forEach(
+      (name) => {
+        expect(screen.getByRole("heading", { name })).toBeInTheDocument();
+      },
+    );
+    expect(
+      screen.getByText(/Connecting local communities with global resources/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Fostering powerful partnerships between socially-conscious brands/,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Promoting eco-friendly and ethically sourced merchandise/,
+      ),
+    ).toBeInTheDocument();
   });
 
-  it("displays all three mission cards", () => {
-    render(<Mission />);
-
-    expect(screen.getByText("Global Impact")).toBeInTheDocument();
-    expect(screen.getByText("Empowering Connections")).toBeInTheDocument();
-    expect(screen.getByText("Sustainable Commerce")).toBeInTheDocument();
-  });
-
-  it("displays mission card icons", () => {
-    render(<Mission />);
-
-    expect(screen.getByText("🌍")).toBeInTheDocument();
-    expect(screen.getByText("🤝")).toBeInTheDocument();
-    expect(screen.getByText("♻️")).toBeInTheDocument();
-  });
-
-  it("displays Global Impact mission description", () => {
-    render(<Mission />);
-
-    expect(screen.getByText(/Connecting local communities with global resources/)).toBeInTheDocument();
-  });
-
-  it("displays Empowering Connections mission description", () => {
-    render(<Mission />);
-
-    expect(screen.getByText(/Fostering powerful partnerships between socially-conscious brands/)).toBeInTheDocument();
-  });
-
-  it("displays Sustainable Commerce mission description", () => {
-    render(<Mission />);
-
-    expect(screen.getByText(/Promoting eco-friendly and ethically sourced merchandise/)).toBeInTheDocument();
-  });
-
-  it("applies animate-in class when component mounts", () => {
-    const { container } = render(<Mission />);
-
-    const aboutPage = container.querySelector(".about-page");
-    expect(aboutPage).toHaveClass("animate-in");
+  it("offers working destinations for shoppers, organisations, and support", () => {
+    renderMission();
+    expect(screen.getByRole("link", { name: "Our mission" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(
+      screen.getByRole("link", { name: "Explore what drives us" }),
+    ).toHaveAttribute("href", "#our-priorities");
+    expect(
+      screen.getByRole("link", { name: "Explore the marketplace" }),
+    ).toHaveAttribute("href", "/marketplace");
+    expect(
+      screen.getByRole("link", { name: "Get your organisation started" }),
+    ).toHaveAttribute("href", "/signup?type=org");
+    expect(
+      screen.getByRole("link", { name: "Help & Support" }),
+    ).toHaveAttribute("href", "/help");
+    expect(screen.getByRole("link", { name: "Get in touch" })).toHaveAttribute(
+      "href",
+      "/help/contact",
+    );
   });
 });

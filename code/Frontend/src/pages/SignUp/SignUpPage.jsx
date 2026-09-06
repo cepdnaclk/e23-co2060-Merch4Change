@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import './SignUpPage.css';
+import BrandLogo from '../../components/BrandLogo/BrandLogo';
 import StepAccountType from './steps/StepAccountType';
 import StepBasicInfo from './steps/StepBasicInfo';
 import StepCredentials from './steps/StepCredentials';
-import StepProfile from './steps/StepProfile';
 
 const TOTAL_STEPS = 4;
 
@@ -45,11 +45,13 @@ const TESTIMONIALS = [
 
 export default function SignUpPage() {
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(1);
+  const [searchParams] = useSearchParams();
+  const isOrganisationEntry = searchParams.get('type') === 'org';
+  const [currentStep, setCurrentStep] = useState(isOrganisationEntry ? 2 : 1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [formData, setFormData] = useState({
-    accountType: '',
+    accountType: isOrganisationEntry ? 'org' : '',
     firstName: '', lastName: '', dateOfBirth: '', country: '',
     orgName: '', registrationNumber: '', orgType: '',
     email: '', userName: '', password: '', confirmPassword: '',
@@ -150,9 +152,7 @@ export default function SignUpPage() {
     <div className="signup-page">
       <div className="signup-left">
         <div className="signup-brand" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
-          <div className="signup-brand-icon">
-            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z" /></svg>
-          </div>
+          <BrandLogo size={34} className="signup-brand-icon" />
           <span className="signup-brand-name">Merch4Change</span>
         </div>
 
