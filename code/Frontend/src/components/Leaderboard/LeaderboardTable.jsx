@@ -35,9 +35,24 @@ export default function LeaderboardTable({
       <div className="lb-table-body">
         {rows.map((row) => {
           const isCurrentUser = isCompanyView
-            ? Boolean(currentUserName && row.ownerUserName && row.ownerUserName.toLowerCase() === currentUserName)
+            ? Boolean(
+                (currentUserId && (
+                  (row.ownerUserId && String(row.ownerUserId) === String(currentUserId)) ||
+                  (row.userId && String(row.userId) === String(currentUserId))
+                )) ||
+                (currentUserName && (
+                  (row.ownerUserName && row.ownerUserName.toLowerCase() === currentUserName) ||
+                  (row.userName && row.userName.toLowerCase() === currentUserName)
+                ))
+              )
             : isCharityView
-            ? Boolean(currentUserName && row.userName && row.userName.toLowerCase() === currentUserName)
+            ? Boolean(
+                (currentUserId && (
+                  (row.ownerUserId && String(row.ownerUserId) === String(currentUserId)) ||
+                  (row.userId && String(row.userId) === String(currentUserId))
+                )) ||
+                (currentUserName && row.userName && row.userName.toLowerCase() === currentUserName)
+              )
             : Boolean(
                 (currentUserId && String(row.userId) === String(currentUserId)) ||
                 (currentUserName && row.userName && row.userName.toLowerCase() === currentUserName)

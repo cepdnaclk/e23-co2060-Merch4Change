@@ -137,19 +137,36 @@ export default function LeaderboardSection() {
   );
 
   // Find user entry in current leaderboard view
+  const isMatchUser = (entry) => {
+    if (!entry) return false;
+    if (activeType === "companies") {
+      const idMatch = currentUserId && (
+        (entry.ownerUserId && String(entry.ownerUserId) === String(currentUserId)) ||
+        (entry.userId && String(entry.userId) === String(currentUserId))
+      );
+      const nameMatch = currentUserName && (
+        (entry.ownerUserName && entry.ownerUserName.toLowerCase() === currentUserName) ||
+        (entry.userName && entry.userName.toLowerCase() === currentUserName)
+      );
+      return Boolean(idMatch || nameMatch);
+    }
+    if (activeType === "charities") {
+      const idMatch = currentUserId && (
+        (entry.ownerUserId && String(entry.ownerUserId) === String(currentUserId)) ||
+        (entry.userId && String(entry.userId) === String(currentUserId))
+      );
+      const nameMatch = currentUserName && entry.userName && entry.userName.toLowerCase() === currentUserName;
+      return Boolean(idMatch || nameMatch);
+    }
+    const idMatch = currentUserId && String(entry.userId) === String(currentUserId);
+    const usernameMatch = currentUserName && entry.userName && entry.userName.toLowerCase() === currentUserName;
+    return Boolean(idMatch || usernameMatch);
+  };
+
+  // Find user entry in current leaderboard view
   const currentUserEntry = useMemo(() => {
     if (!leaderboardData.length) return null;
-    return leaderboardData.find((entry) => {
-      if (activeType === "companies") {
-        return Boolean(currentUserName && entry.ownerUserName && entry.ownerUserName.toLowerCase() === currentUserName);
-      } else if (activeType === "charities") {
-        return Boolean(currentUserName && entry.userName && entry.userName.toLowerCase() === currentUserName);
-      } else {
-        const idMatch = currentUserId && String(entry.userId) === String(currentUserId);
-        const usernameMatch = currentUserName && entry.userName && entry.userName.toLowerCase() === currentUserName;
-        return idMatch || usernameMatch;
-      }
-    });
+    return leaderboardData.find(isMatchUser);
   }, [leaderboardData, activeType, currentUserId, currentUserName]);
 
   const performScrollToUser = () => {
@@ -167,17 +184,7 @@ export default function LeaderboardSection() {
   const scrollToMyPosition = () => {
     if (isFiltered) {
       // Check if current user is in filteredData; if not, reset filters first
-      const userInFiltered = filteredData.some((entry) => {
-        if (activeType === "companies") {
-          return Boolean(currentUserName && entry.ownerUserName && entry.ownerUserName.toLowerCase() === currentUserName);
-        } else if (activeType === "charities") {
-          return Boolean(currentUserName && entry.userName && entry.userName.toLowerCase() === currentUserName);
-        } else {
-          const idMatch = currentUserId && String(entry.userId) === String(currentUserId);
-          const usernameMatch = currentUserName && entry.userName && entry.userName.toLowerCase() === currentUserName;
-          return idMatch || usernameMatch;
-        }
-      });
+      const userInFiltered = filteredData.some(isMatchUser);
 
       if (!userInFiltered) {
         resetFilters();

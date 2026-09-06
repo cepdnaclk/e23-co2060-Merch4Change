@@ -36,11 +36,28 @@ export default function LeaderboardPodium({
         }
 
         const isCurrentUser = isCompanyView
-          ? Boolean(currentUserName && data.ownerUserName && data.ownerUserName.toLowerCase() === currentUserName)
+          ? Boolean(
+              (currentUserId && (
+                (data.ownerUserId && String(data.ownerUserId) === String(currentUserId)) ||
+                (data.userId && String(data.userId) === String(currentUserId))
+              )) ||
+              (currentUserName && (
+                (data.ownerUserName && data.ownerUserName.toLowerCase() === currentUserName) ||
+                (data.userName && data.userName.toLowerCase() === currentUserName)
+              ))
+            )
           : isCharityView
-          ? Boolean(currentUserName && data.userName && data.userName.toLowerCase() === currentUserName)
-          : Boolean((currentUserId && String(data.userId) === String(currentUserId)) ||
-            (currentUserName && data.userName && data.userName.toLowerCase() === currentUserName));
+          ? Boolean(
+              (currentUserId && (
+                (data.ownerUserId && String(data.ownerUserId) === String(currentUserId)) ||
+                (data.userId && String(data.userId) === String(currentUserId))
+              )) ||
+              (currentUserName && data.userName && data.userName.toLowerCase() === currentUserName)
+            )
+          : Boolean(
+              (currentUserId && String(data.userId) === String(currentUserId)) ||
+              (currentUserName && data.userName && data.userName.toLowerCase() === currentUserName)
+            );
 
         const profileLink = isCompanyView
           ? `/profile/${data.ownerUserName || data.slug}`

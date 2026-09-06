@@ -251,11 +251,14 @@ export const getCompanyLeaderboard = asyncHandler(async (req, res) => {
 
       return {
         brandId: brand._id,
+        ownerUserId: brand.ownerUserId?._id || brand.ownerUserId || null,
+        userId: brand.ownerUserId?._id || brand.ownerUserId || null,
         brandName: brand.brandName,
         slug: brand.slug || brand.brandName.toLowerCase().replace(/\s+/g, "-"),
         logoUrl: brand.logoUrl || brand.ownerUserId?.profileImageUrl || "",
         description: brand.description || "",
         ownerUserName: brand.ownerUserId?.userName || "",
+        userName: brand.ownerUserId?.userName || "",
         isVerified: brand.ownerUserId?.isVerified || false,
         totalRevenue,
         unitsSold,
@@ -367,6 +370,8 @@ export const getCharityLeaderboard = asyncHandler(async (req, res) => {
 
       return {
         charityId: charity._id,
+        ownerUserId: charity.ownerUserId?._id || charity.ownerUserId || null,
+        userId: charity.ownerUserId?._id || charity.ownerUserId || null,
         name: charity.publicName,
         userName: charity.ownerUserId?.userName || "",
         logoUrl: charity.logoUrl || charity.ownerUserId?.profileImageUrl || "",
