@@ -40,7 +40,7 @@ function Navbar({ scrolled = false }) {
 
   return (
     <nav
-      className={`lp-navbar ${scrolled ? "lp-navbar--scrolled" : ""}`}
+      className={`lp-navbar ${isLandingPage ? "lp-navbar--landing" : ""} ${scrolled ? "lp-navbar--scrolled" : ""}`}
       ref={navbarRef}
     >
       <div className="lp-navbar-container">
@@ -100,6 +100,8 @@ function Navbar({ scrolled = false }) {
             className="lp-navbar-mobile-toggle"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"
+            aria-expanded={isMobileMenuOpen}
+            aria-controls="landing-mobile-menu"
           >
             {isMobileMenuOpen ? (
               <X size={24} />
@@ -112,7 +114,7 @@ function Navbar({ scrolled = false }) {
 
       {/* Mobile Menu */}
       {isLandingPage && isMobileMenuOpen && (
-        <div className="lp-navbar-mobile-menu">
+        <div className="lp-navbar-mobile-menu" id="landing-mobile-menu">
           <button
             className="lp-navbar-mobile-link"
             onClick={() => handleNavigation("/marketplace")}
