@@ -100,36 +100,6 @@ function LandingPage() {
               </div>
             </div>
 
-            {/* Right Column */}
-            <div className="lp-hero-right">
-              <div className="lp-card-stack">
-                <div className="lp-card lp-card-back"></div>
-                <div className="lp-card lp-card-mid"></div>
-                <div className="lp-card lp-card-front">
-                  <div className="lp-card-header">
-                    <div className="lp-card-dot"></div>
-                    <span className="lp-card-title">Eco Tote Bag</span>
-                    <span className="lp-card-price">$24</span>
-                  </div>
-                  <div className="lp-card-image">
-                    <ShoppingBag size={32} color="#d0c8f8" />
-                  </div>
-                  <div className="lp-card-footer">
-                    <p className="lp-card-support">
-                      Supports: Clean Lanka NGO
-                    </p>
-                    <button className="lp-card-badge">Shop now</button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="lp-stats-pills">
-                <div className="lp-pill lp-pill-primary">
-                  $120K+ donated
-                </div>
-                <div className="lp-pill lp-pill-secondary">340+ campaigns</div>
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -288,18 +258,6 @@ function LandingPage() {
             <div className="lp-stat">
               <div className="lp-stat-number">2,400+</div>
               <div className="lp-stat-label">Active users</div>
-            </div>
-            <div className="lp-stat-divider"></div>
-
-            <div className="lp-stat">
-              <div className="lp-stat-number">$120K+</div>
-              <div className="lp-stat-label">Donated to causes</div>
-            </div>
-            <div className="lp-stat-divider"></div>
-
-            <div className="lp-stat">
-              <div className="lp-stat-number">340+</div>
-              <div className="lp-stat-label">Campaigns funded</div>
             </div>
             <div className="lp-stat-divider"></div>
 
