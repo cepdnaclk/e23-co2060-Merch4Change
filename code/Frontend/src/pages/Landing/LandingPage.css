@@ -64,7 +64,7 @@
   width: fit-content;
   position: relative;
 }
-.landing h1 > span {
+.landing h1 .landing-impact-word {
   position: relative;
   display: inline-block;
   color: var(--brand);
@@ -72,7 +72,7 @@
   font-weight: 400;
   font-style: italic;
 }
-.landing h1 > span > svg {
+.landing h1 .landing-impact-word > svg {
   width: 100%;
   height: 16px;
   position: absolute;
@@ -736,5 +736,100 @@
   }
 }
 
-@media (max-width: 360px) {
+/* A short sweep every twelve seconds, followed by a sparkle at the final dot. */
+.landing-heading-shine {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  user-select: none;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  background: linear-gradient(
+      105deg,
+      transparent 0%,
+      #cbbcff 35%,
+      #ffffff 50%,
+      #cbbcff 65%,
+      transparent 100%
+    )
+    no-repeat;
+  background-size: 24% 100%;
+  background-position: -35% 0;
+  background-clip: text;
+  -webkit-background-clip: text;
+  opacity: 0;
+  animation: landing-heading-shimmer 12s linear 3s infinite;
+}
+.landing h1 .landing-heading-shine .landing-impact-word {
+  color: transparent;
+}
+.landing-impact-dot {
+  position: relative;
+}
+.landing-impact-dot::after {
+  content: "";
+  position: absolute;
+  width: 0.4em;
+  height: 0.4em;
+  left: 50%;
+  bottom: 0.07em;
+  pointer-events: none;
+  background: #fff;
+  clip-path: polygon(
+    50% 0%,
+    62% 37%,
+    100% 50%,
+    62% 63%,
+    50% 100%,
+    38% 63%,
+    0% 50%,
+    38% 37%
+  );
+  filter: drop-shadow(0 0 3px #bba4ff);
+  opacity: 0;
+  transform: translate(-50%, 25%) scale(0);
+  animation: landing-dot-sparkle 12s ease-in-out 3s infinite;
+}
+@keyframes landing-heading-shimmer {
+  0% {
+    background-position: -35% 0;
+    opacity: 0;
+  }
+  2% {
+    opacity: 0.9;
+  }
+  20% {
+    opacity: 0.9;
+  }
+  23% {
+    background-position: 135% 0;
+    opacity: 0;
+  }
+  100% {
+    background-position: 135% 0;
+    opacity: 0;
+  }
+}
+@keyframes landing-dot-sparkle {
+  0%,
+  19% {
+    opacity: 0;
+    transform: translate(-50%, 25%) scale(0) rotate(-25deg);
+  }
+  23% {
+    opacity: 1;
+    transform: translate(-50%, 25%) scale(1) rotate(0deg);
+  }
+  29%,
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 25%) scale(0.25) rotate(35deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing-heading-shine,
+  .landing-impact-dot::after {
+    animation: none;
+    display: none;
+  }
 }

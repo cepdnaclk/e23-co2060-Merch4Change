@@ -47,11 +47,16 @@ export default function LandingPage() {
               Good things.
               <br />
               Greater{" "}
-              <span>
-                impact.
+              <span className="landing-impact-word">
+                impact<span className="landing-impact-dot">.</span>
                 <svg viewBox="0 0 330 18" aria-hidden="true">
                   <path d="M4 13Q155-6 325 9" />
                 </svg>
+              </span>
+              <span className="landing-heading-shine" aria-hidden="true">
+                Good things.
+                <br />
+                Greater <span className="landing-impact-word">impact.</span>
               </span>
             </h1>
             <p>
@@ -229,6 +234,7 @@ export default function LandingPage() {
               <Link to="/marketplace">Marketplace</Link>
               <Link to="/about/story">Our story</Link>
               <Link to="/faq">FAQs</Link>
+              <Link to="/help">Help &amp; Support</Link>
               <Link to="/help/contact">
                 Get in touch <ArrowUpRight size={14} />
               </Link>
