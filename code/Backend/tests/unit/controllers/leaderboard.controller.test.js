@@ -260,3 +260,71 @@ test("getCompanyLeaderboard includes paid, shipped, and completed orders in bran
     Order.aggregate = originalOrderAggregate;
   }
 });
+
+test("getCharityLeaderboard deterministically breaks ties using donorCount, donationCount, and name", async () => {
+  const originalFind = Charity.find;
+  const originalAggregate = Donation.aggregate;
+
+  Charity.find = () => ({
+    populate: () => ({
+      lean: async () => [
+        {
+          _id: "charityB",
+          publicName: "Beta Charity",
+          category: "education",
+          description: "Education",
+          ownerUserId: { userName: "beta", profileImageUrl: "b.jpg", isVerified: true },
+        },
+        {
+          _id: "charityA",
+          publicName: "Alpha Charity",
+          category: "environment",
+          description: "Environment",
+          ownerUserId: { userName: "alpha", profileImageUrl: "a.jpg", isVerified: true },
+        },
+      ],
+    }),
+  });
+
+  // Both have exactly 1000 coins, but Charity A has 5 donors (10 donations), Charity B has 2 donors (10 donations)
+  Donation.aggregate = async () => [
+    {
+      _id: "charityA",
+      totalCoins: 1000,
+      donationCount: 10,
+      distinctDonors: ["u1", "u2", "u3", "u4", "u5"],
+    },
+    {
+      _id: "charityB",
+      totalCoins: 1000,
+      donationCount: 10,
+      distinctDonors: ["u1", "u2"],
+    },
+  ];
+
+  const req = { query: { timeframe: "all_time", limit: "10" } };
+  const res = createResponseMock();
+
+  try {
+    await getCharityLeaderboard(req, res);
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.payload.success, true);
+    assert.equal(res.payload.data.leaderboard.length, 2);
+
+    const first = res.payload.data.leaderboard[0];
+    const second = res.payload.data.leaderboard[1];
+
+    // Charity A must be ranked #1 because it has 5 donors vs Charity B's 2 donors despite same coins
+    assert.equal(first.name, "Alpha Charity");
+    assert.equal(first.rank, 1);
+    assert.equal(first.donorCount, 5);
+
+    assert.equal(second.name, "Beta Charity");
+    assert.equal(second.rank, 2);
+    assert.equal(second.donorCount, 2);
+  } finally {
+    Charity.find = originalFind;
+    Donation.aggregate = originalAggregate;
+  }
+});

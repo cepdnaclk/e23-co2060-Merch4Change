@@ -484,7 +484,13 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
     };
 
     const sortedDonors = Array.from(donorMap.values())
-      .sort((a, b) => b.totalCoinsDonated - a.totalCoinsDonated)
+      .sort(
+        (a, b) =>
+          b.totalCoinsDonated - a.totalCoinsDonated ||
+          b.donationsCount - a.donationsCount ||
+          new Date(b.lastDonatedAt || 0) - new Date(a.lastDonatedAt || 0) ||
+          String(a.userId).localeCompare(String(b.userId))
+      )
       .map((item, index) => {
         const u = item.user || {};
         const rank = index + 1;
@@ -665,7 +671,14 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
   };
 
   const sortedCustomers = Array.from(customerMap.values())
-    .sort((a, b) => b.totalSpent - a.totalSpent)
+    .sort(
+      (a, b) =>
+        b.totalSpent - a.totalSpent ||
+        b.ordersCount - a.ordersCount ||
+        b.itemsCount - a.itemsCount ||
+        new Date(b.lastPurchasedAt || 0) - new Date(a.lastPurchasedAt || 0) ||
+        String(a.userId).localeCompare(String(b.userId))
+    )
     .map((item, index) => {
       const u = userMap.get(item.userId.toString());
       if (!u) return null;

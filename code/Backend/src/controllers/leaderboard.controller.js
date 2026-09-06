@@ -55,7 +55,7 @@ export const getDonorLeaderboard = asyncHandler(async (req, res) => {
         lastDonatedAt: { $max: "$createdAt" },
       },
     },
-    { $sort: { totalCoins: -1 } },
+    { $sort: { totalCoins: -1, donationCount: -1, lastDonatedAt: -1, _id: 1 } },
     { $limit: limit },
   ]);
 
@@ -228,7 +228,14 @@ export const getCompanyLeaderboard = asyncHandler(async (req, res) => {
         impactScore: Math.round(effectiveImpactCoins * 1.5 + effectiveUnitsSold * 10),
       };
     })
-    .sort((a, b) => b.impactCoinsGenerated - a.impactCoinsGenerated || b.unitsSold - a.unitsSold)
+    .sort(
+      (a, b) =>
+        b.impactCoinsGenerated - a.impactCoinsGenerated ||
+        b.unitsSold - a.unitsSold ||
+        b.totalRevenue - a.totalRevenue ||
+        String(a.brandName || "").localeCompare(String(b.brandName || "")) ||
+        String(a.brandId).localeCompare(String(b.brandId))
+    )
     .slice(0, limit)
     .map((company, index) => ({
       rank: index + 1,
@@ -332,7 +339,14 @@ export const getCharityLeaderboard = asyncHandler(async (req, res) => {
         donorCount: stats.donorCount,
       };
     })
-    .sort((a, b) => b.totalCoins - a.totalCoins || b.donorCount - a.donorCount)
+    .sort(
+      (a, b) =>
+        b.totalCoins - a.totalCoins ||
+        b.donorCount - a.donorCount ||
+        b.donationCount - a.donationCount ||
+        String(a.name || "").localeCompare(String(b.name || "")) ||
+        String(a.charityId).localeCompare(String(b.charityId))
+    )
     .slice(0, limit)
     .map((charity, index) => ({
       rank: index + 1,
