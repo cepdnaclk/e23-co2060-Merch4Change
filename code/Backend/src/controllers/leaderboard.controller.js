@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Donation from "../models/Donation.js";
 import User from "../models/User.js";
+import Charity from "../models/Charity.js";
 import Brand from "../models/Brand.js";
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
@@ -213,20 +214,21 @@ export const getCompanyLeaderboard = asyncHandler(async (req, res) => {
  * Returns aggregate platform community statistics.
  */
 export const getLeaderboardStats = asyncHandler(async (req, res) => {
-  const [standardTotal, totalDonorsCount, verifiedCharitiesCount] = await Promise.all([
+  const [standardTotal, distinctDonors, verifiedCharitiesCount] = await Promise.all([
     Donation.aggregate([
       { $match: { status: "completed" } },
       { $group: { _id: null, total: { $sum: "$coinAmount" } } },
     ]),
-    User.countDocuments({ role: "user" }),
-    User.countDocuments({ role: "charity" }),
+    Donation.distinct("donorUserId", { status: "completed" }),
+    Charity.countDocuments({ verificationStatus: "verified" }),
   ]);
 
   const totalCoinsDonated = standardTotal[0]?.total || 0;
+  const totalCommunityDonors = Array.isArray(distinctDonors) ? distinctDonors.length : 0;
 
   return successResponse(res, 200, "Leaderboard stats fetched successfully.", {
     totalCoinsDonated,
-    totalCommunityDonors: totalDonorsCount,
+    totalCommunityDonors,
     verifiedCharitiesSupported: verifiedCharitiesCount,
     platformImpactRate: "100%",
   });
