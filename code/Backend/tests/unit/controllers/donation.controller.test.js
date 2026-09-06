@@ -89,6 +89,42 @@ for (const scenario of [
   });
 }
 
+for (const status of ["completed", "cancelled", "inactive", "ongoing", null]) {
+  test(`createDonation rejects ${status ?? "missing"} projects without changing balances or records`, async (t) => {
+    const storedProject = status ? { _id: projectId, charityId, status } : null;
+    t.mock.method(Project, "findOne", async (filter) => {
+      assert.equal(filter._id, String(projectId));
+      return storedProject && (!filter.status || filter.status === storedProject.status)
+        ? storedProject
+        : null;
+    });
+    // An unrestricted lookup would still find an inactive project.
+    t.mock.method(Project, "findById", async () => storedProject);
+    t.mock.method(Charity, "findById", async () => ({ _id: charityId, verificationStatus: "verified" }));
+    const balanceUpdate = t.mock.method(User, "findOneAndUpdate", () => ({
+      select: async () => ({ coinBalance: 450 }),
+    }));
+    const donationCreate = t.mock.method(Donation, "create", async (doc) => ({ _id: "donation1", ...doc }));
+    const projectUpdate = t.mock.method(Project, "findByIdAndUpdate", async () => ({}));
+    const transactionCreate = t.mock.method(CoinTransaction, "create", async () => ({}));
+
+    await assert.rejects(
+      () => createDonation({
+        user: { _id: "user123" },
+        body: { charityId: String(charityId), charityProjectId: String(projectId), coinAmount: 50 },
+      }, createResponseMock()),
+      (err) => {
+        assert.equal(err.statusCode, 404);
+        assert.equal(err.code, "PROJECT_NOT_FOUND");
+        return true;
+      },
+    );
+    for (const mutation of [balanceUpdate, donationCreate, projectUpdate, transactionCreate]) {
+      assert.equal(mutation.mock.callCount(), 0, "Rejected donation must not mutate balances or records");
+    }
+  });
+}
+
 test("createDonation validates charityId and coinAmount", async () => {
   const req = {
     user: { _id: "user123" },

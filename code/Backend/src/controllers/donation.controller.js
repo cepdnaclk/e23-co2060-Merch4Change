@@ -34,13 +34,6 @@ export const createDonation = asyncHandler(async (req, res) => {
       project = null;
     }
     if (!project) {
-      try {
-        project = await Project.findById(charityProjectId);
-      } catch {
-        project = null;
-      }
-    }
-    if (!project) {
       throw new AppError("Active project not found.", 404, "PROJECT_NOT_FOUND");
     }
     resolvedProjectId = project._id;
