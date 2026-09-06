@@ -48,12 +48,21 @@ export const getTimeframeFilter = (timeframe, referenceDate = new Date()) => {
 };
 
 /**
+ * Safely parses and clamps query limit to a valid positive integer [1, maxVal].
+ */
+export const parseLimit = (queryVal, defaultVal = 20, maxVal = 100) => {
+  const parsed = Number.parseInt(queryVal, 10);
+  if (Number.isNaN(parsed) || parsed < 1) return defaultVal;
+  return Math.min(parsed, maxVal);
+};
+
+/**
  * GET /api/v1/leaderboards/donors
  * Returns ranked list of individual donors based on total coins donated.
  */
 export const getDonorLeaderboard = asyncHandler(async (req, res) => {
   const timeframe = req.query.timeframe || "all_time";
-  const limit = Math.min(Number(req.query.limit) || 20, 100);
+  const limit = parseLimit(req.query.limit, 20, 100);
   const timeFilter = getTimeframeFilter(timeframe);
 
   const rankedDonors = await Donation.aggregate([
@@ -127,7 +136,7 @@ export const getDonorLeaderboard = asyncHandler(async (req, res) => {
  */
 export const getCompanyLeaderboard = asyncHandler(async (req, res) => {
   const timeframe = req.query.timeframe || "all_time";
-  const limit = Math.min(Number(req.query.limit) || 20, 100);
+  const limit = parseLimit(req.query.limit, 20, 100);
   const timeFilter = getTimeframeFilter(timeframe);
 
   // 1. Fetch all brands
@@ -262,7 +271,7 @@ export const getCompanyLeaderboard = asyncHandler(async (req, res) => {
  */
 export const getCharityLeaderboard = asyncHandler(async (req, res) => {
   const timeframe = req.query.timeframe || "all_time";
-  const limit = Math.min(Number(req.query.limit) || 20, 100);
+  const limit = parseLimit(req.query.limit, 20, 100);
   const timeFilter = getTimeframeFilter(timeframe);
 
   // 1. Fetch all verified charities

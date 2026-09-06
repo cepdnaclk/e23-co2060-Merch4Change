@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { getLeaderboardStats, getCharityLeaderboard, getDonorLeaderboard, getCompanyLeaderboard, getTimeframeFilter } from "../../../src/controllers/leaderboard.controller.js";
+import { getLeaderboardStats, getCharityLeaderboard, getDonorLeaderboard, getCompanyLeaderboard, getTimeframeFilter, parseLimit } from "../../../src/controllers/leaderboard.controller.js";
 import Charity from "../../../src/models/Charity.js";
 import Donation from "../../../src/models/Donation.js";
 import User from "../../../src/models/User.js";
@@ -378,4 +378,18 @@ test("getTimeframeFilter calculates calendar week and month aligned to UTC midni
 
   const allTimeFilter = getTimeframeFilter("all_time", testRef);
   assert.deepEqual(allTimeFilter, {});
+});
+
+test("parseLimit safely clamps query limit to positive integer [1, maxVal]", () => {
+  assert.equal(parseLimit(undefined), 20);
+  assert.equal(parseLimit(null), 20);
+  assert.equal(parseLimit("invalid"), 20);
+  assert.equal(parseLimit("-5"), 20);
+  assert.equal(parseLimit("0"), 20);
+  assert.equal(parseLimit("1"), 1);
+  assert.equal(parseLimit("50"), 50);
+  assert.equal(parseLimit("100"), 100);
+  assert.equal(parseLimit("500"), 100); // capped at maxVal
+  assert.equal(parseLimit("-10", 15, 50), 15);
+  assert.equal(parseLimit("80", 15, 50), 50);
 });
