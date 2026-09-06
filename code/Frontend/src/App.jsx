@@ -5,14 +5,12 @@ import {
   Navigate,
 } from "react-router-dom";
 import LandingPage from "./pages/Landing/LandingPage";
-import SelectSignUp from "./pages/SelectSignUp/SelectSignUp";
 import LoginPage from "./pages/LoginPage/LoginPage";
 import MessagingPage from "./pages/Messaging/MessagingPage";
 import Home from "./pages/Home/Home";
 import UserProfile from "./pages/UserProfile/UserProfile";
 import MarketplacePage from "./pages/Marketplace/Marketplace";
 import SignUpPage from "./pages/SignUp/SignUpPage";
-import OrgSignupPage from "./pages/SignUp/OrgSignupPage";
 import UserSignupPage from "./pages/SignUp/UserSignupPage";
 import VerifyOtpPage from "./pages/VerifyOtp/VerifyOtpPage";
 import Settings from "./pages/Settings/Settings";
@@ -67,7 +65,7 @@ function App() {
 
           {/* Auth Routes (No Navbar) */}
           <Route path="/signup" element={<SignUpPage />} />
-          <Route path="/signup/orgsignup" element={<OrgSignupPage />} />
+          <Route path="/signup/orgsignup" element={<Navigate to="/signup?type=org" replace />} />
           <Route path="/signup/usersignup" element={<UserSignupPage />} />
           <Route path="/verify-otp" element={<VerifyOtpPage />} />
 

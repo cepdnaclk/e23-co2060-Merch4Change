@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import './SignUpPage.css';
 import BrandLogo from '../../components/BrandLogo/BrandLogo';
 import StepAccountType from './steps/StepAccountType';
 import StepBasicInfo from './steps/StepBasicInfo';
 import StepCredentials from './steps/StepCredentials';
-import StepProfile from './steps/StepProfile';
 
 const TOTAL_STEPS = 4;
 
@@ -46,11 +45,13 @@ const TESTIMONIALS = [
 
 export default function SignUpPage() {
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(1);
+  const [searchParams] = useSearchParams();
+  const isOrganisationEntry = searchParams.get('type') === 'org';
+  const [currentStep, setCurrentStep] = useState(isOrganisationEntry ? 2 : 1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [formData, setFormData] = useState({
-    accountType: '',
+    accountType: isOrganisationEntry ? 'org' : '',
     firstName: '', lastName: '', dateOfBirth: '', country: '',
     orgName: '', registrationNumber: '', orgType: '',
     email: '', userName: '', password: '', confirmPassword: '',

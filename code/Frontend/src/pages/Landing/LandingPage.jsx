@@ -194,7 +194,7 @@ export default function LandingPage() {
             </p>
             <Link
               className="landing-button landing-button-dark"
-              to="/signup/orgsignup"
+              to="/signup?type=org"
             >
               Get your organisation started <ArrowUpRight size={19} />
             </Link>
