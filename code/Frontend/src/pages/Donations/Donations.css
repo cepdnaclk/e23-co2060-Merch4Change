@@ -21,3 +21,120 @@
     margin-left: 0;
   }
 }
+
+/* ── CAUSES EXPLORATION & CATEGORY FILTERS ── */
+.causes-filter-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 36px;
+  max-width: 980px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.causes-filter-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6B6560;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.causes-filter-pills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.cause-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  border: 1px solid #E2DAD0;
+  background: #FFFFFF;
+  color: #4A4642;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.cause-pill:hover {
+  border-color: #0D6B5E;
+  color: #0D6B5E;
+  background: #F0FBF7;
+  transform: translateY(-1px);
+}
+
+.cause-pill.active {
+  background: #0D6B5E;
+  color: #FFFFFF;
+  border-color: #0D6B5E;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(13, 107, 94, 0.25);
+}
+
+.causes-active-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #E1F5EE;
+  border: 1px solid #B8E6D7;
+  border-radius: 12px;
+  padding: 10px 18px;
+  margin-bottom: 32px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13.5px;
+  color: #085048;
+}
+
+.causes-reset-btn {
+  background: transparent;
+  border: none;
+  color: #0D6B5E;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+}
+
+.causes-reset-btn:hover {
+  color: #043831;
+}
+
+.causes-empty-card {
+  grid-column: 1 / -1;
+  background: #FFFFFF;
+  border: 1px dashed #D0C9BF;
+  border-radius: 16px;
+  padding: 40px 24px;
+  text-align: center;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.causes-empty-card p {
+  font-size: 15px;
+  color: #6B6560;
+  margin: 0 0 16px;
+}
+
+.causes-empty-card button {
+  background: #0D6B5E;
+  color: #FFFFFF;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}

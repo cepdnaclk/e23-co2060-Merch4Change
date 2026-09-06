@@ -1,0 +1,488 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { getLeaderboardStats, getCharityLeaderboard, getDonorLeaderboard, getCompanyLeaderboard, getTimeframeFilter, parseLimit, parsePage } from "../../../src/controllers/leaderboard.controller.js";
+import Charity from "../../../src/models/Charity.js";
+import Donation from "../../../src/models/Donation.js";
+import User from "../../../src/models/User.js";
+import Brand from "../../../src/models/Brand.js";
+import Product from "../../../src/models/Product.js";
+import Order from "../../../src/models/Order.js";
+
+const createResponseMock = () => {
+  const res = {
+    statusCode: 200,
+    payload: null,
+    status(code) {
+      this.statusCode = code;
+      return this;
+    },
+    json(data) {
+      this.payload = data;
+      return this;
+    },
+  };
+  return res;
+};
+
+test("getLeaderboardStats returns aggregated stats with distinct donors and verified charities", async () => {
+  const originalAggregate = Donation.aggregate;
+  const originalCharityCount = Charity.countDocuments;
+  const originalBrandCount = Brand.countDocuments;
+
+  Donation.aggregate = async (pipeline) => {
+    const isDistinctPipeline = pipeline.some((stage) => stage.$group && stage.$group._id === "$donorUserId");
+    if (isDistinctPipeline) {
+      assert.deepEqual(pipeline[0].$match, { status: "completed", donorUserId: { $ne: null } });
+      assert.deepEqual(pipeline[1].$group, { _id: "$donorUserId" });
+      assert.deepEqual(pipeline[2].$count, "count");
+      return [{ count: 3 }];
+    }
+    assert.deepEqual(pipeline[0].$match, { status: "completed" });
+    assert.deepEqual(pipeline[1].$group, { _id: null, total: { $sum: "$coinAmount" } });
+    return [{ _id: null, total: 3850 }];
+  };
+  Charity.countDocuments = async (query) => {
+    assert.deepEqual(query, { verificationStatus: "verified" });
+    return 4;
+  };
+  Brand.countDocuments = async () => 6;
+
+  const req = {};
+  const res = createResponseMock();
+
+  try {
+    await getLeaderboardStats(req, res);
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.payload.success, true);
+    assert.equal(res.payload.data.totalCoinsDonated, 3850);
+    assert.equal(res.payload.data.totalCommunityDonors, 3);
+    assert.equal(res.payload.data.verifiedCharitiesSupported, 4);
+    assert.equal(res.payload.data.totalPartnerBrands, 6);
+    assert.equal(res.payload.data.platformImpactRate, "100%");
+  } finally {
+    Donation.aggregate = originalAggregate;
+    Charity.countDocuments = originalCharityCount;
+    Brand.countDocuments = originalBrandCount;
+  }
+});
+
+test("getLeaderboardStats handles empty database results gracefully", async () => {
+  const originalAggregate = Donation.aggregate;
+  const originalCharityCount = Charity.countDocuments;
+  const originalBrandCount = Brand.countDocuments;
+
+  Donation.aggregate = async () => [];
+  Charity.countDocuments = async () => 0;
+  Brand.countDocuments = async () => 0;
+
+  const req = {};
+  const res = createResponseMock();
+
+  try {
+    await getLeaderboardStats(req, res);
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.payload.data.totalCoinsDonated, 0);
+    assert.equal(res.payload.data.totalCommunityDonors, 0);
+    assert.equal(res.payload.data.verifiedCharitiesSupported, 0);
+    assert.equal(res.payload.data.totalPartnerBrands, 0);
+  } finally {
+    Donation.aggregate = originalAggregate;
+    Charity.countDocuments = originalCharityCount;
+    Brand.countDocuments = originalBrandCount;
+  }
+});
+
+test("getCharityLeaderboard returns ranked charities with categories and coins", async () => {
+  const originalFind = Charity.find;
+  const originalAggregate = Donation.aggregate;
+
+  Charity.find = () => ({
+    populate: () => ({
+      lean: async () => [
+        {
+          _id: "charityA",
+          publicName: "Clean Oceans Initiative",
+          category: "environment",
+          description: "Protecting marine life",
+          ownerUserId: { userName: "cleanoceans", profileImageUrl: "ocean.jpg", isVerified: true },
+        },
+        {
+          _id: "charityB",
+          publicName: "Education For All",
+          category: "education",
+          description: "Empowering children",
+          ownerUserId: { userName: "edforall", profileImageUrl: "edu.jpg", isVerified: true },
+        },
+      ],
+    }),
+  });
+
+  Donation.aggregate = async () => [
+    {
+      _id: "charityA",
+      totalCoins: 4500,
+      donationCount: 20,
+      donorCount: 3,
+    },
+    {
+      _id: "charityB",
+      totalCoins: 2100,
+      donationCount: 10,
+      donorCount: 2,
+    },
+  ];
+
+  const req = { query: { timeframe: "all_time", limit: "10" } };
+  const res = createResponseMock();
+
+  try {
+    await getCharityLeaderboard(req, res);
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.payload.success, true);
+    assert.equal(res.payload.data.leaderboard.length, 2);
+
+    const first = res.payload.data.leaderboard[0];
+    assert.equal(first.rank, 1);
+    assert.equal(first.name, "Clean Oceans Initiative");
+    assert.equal(first.totalCoins, 4500);
+    assert.equal(first.donorCount, 3);
+    assert.equal(first.category, "environment");
+    assert.equal(first.categoryIcon, "🌱");
+
+    const second = res.payload.data.leaderboard[1];
+    assert.equal(second.rank, 2);
+    assert.equal(second.name, "Education For All");
+    assert.equal(second.totalCoins, 2100);
+  } finally {
+    Charity.find = originalFind;
+    Donation.aggregate = originalAggregate;
+  }
+});
+
+test("getDonorLeaderboard assigns contiguous ranks starting from 1 even when top donor is missing/deleted", async () => {
+  const originalAggregate = Donation.aggregate;
+  const originalUserFind = User.find;
+
+  // Donation aggregate returns 3 donors: userDeleted (highest), userActive1, userActive2
+  Donation.aggregate = async () => [
+    { _id: "userDeleted", totalCoins: 8000, donationCount: 15, lastDonatedAt: new Date() },
+    { _id: "userActive1", totalCoins: 5000, donationCount: 10, lastDonatedAt: new Date() },
+    { _id: "userActive2", totalCoins: 2000, donationCount: 5, lastDonatedAt: new Date() },
+  ];
+
+  // User.find returns only the existing active users (userDeleted is missing/deleted from User collection)
+  User.find = () => ({
+    select: () => ({
+      lean: async () => [
+        {
+          _id: "userActive1",
+          firstName: "Alice",
+          lastName: "Walker",
+          userName: "alicew",
+          profileImageUrl: "alice.jpg",
+          isVerified: true,
+        },
+        {
+          _id: "userActive2",
+          firstName: "Bob",
+          lastName: "Marley",
+          userName: "bobm",
+          profileImageUrl: "bob.jpg",
+          isVerified: false,
+        },
+      ],
+    }),
+  });
+
+  const req = { query: { timeframe: "all_time", limit: "10" } };
+  const res = createResponseMock();
+
+  try {
+    await getDonorLeaderboard(req, res);
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.payload.success, true);
+    // userDeleted was dropped, so leaderboard has 2 entries
+    assert.equal(res.payload.data.leaderboard.length, 2);
+
+    const first = res.payload.data.leaderboard[0];
+    // Must be rank 1 (NOT rank 2)
+    assert.equal(first.rank, 1);
+    assert.equal(first.userId, "userActive1");
+    assert.equal(first.userName, "alicew");
+    assert.equal(first.totalCoins, 5000);
+    assert.equal(first.tier, "Diamond");
+
+    const second = res.payload.data.leaderboard[1];
+    // Must be rank 2 (NOT rank 3)
+    assert.equal(second.rank, 2);
+    assert.equal(second.userId, "userActive2");
+    assert.equal(second.userName, "bobm");
+    assert.equal(second.totalCoins, 2000);
+    assert.equal(second.tier, "Platinum");
+  } finally {
+    Donation.aggregate = originalAggregate;
+    User.find = originalUserFind;
+  }
+});
+
+test("getCompanyLeaderboard includes paid, shipped, and completed orders in brand impact and revenue", async () => {
+  const originalBrandFind = Brand.find;
+  const originalProductFind = Product.find;
+  const originalOrderAggregate = Order.aggregate;
+
+  let capturedPipeline = null;
+
+  Brand.find = () => ({
+    populate: () => ({
+      lean: async () => [
+        {
+          _id: "b1",
+          brandName: "Eco Threads",
+          slug: "eco-threads",
+          ownerUserId: { userName: "ecothreads", isVerified: true, salesCount: 0 },
+        },
+      ],
+    }),
+  });
+
+  Product.find = () => ({
+    select: () => ({
+      lean: async () => [
+        { _id: "prod1", brandId: "b1", price: 100 },
+        { _id: "prod2", brandId: "b1", price: 200 },
+      ],
+    }),
+  });
+
+  Order.aggregate = async (pipeline) => {
+    capturedPipeline = pipeline;
+    return [
+      { _id: "prod1", totalRevenue: 200, totalUnitsSold: 2 },
+      { _id: "prod2", totalRevenue: 400, totalUnitsSold: 2 },
+    ];
+  };
+
+  const req = { query: { timeframe: "all_time", limit: "10" } };
+  const res = createResponseMock();
+
+  try {
+    await getCompanyLeaderboard(req, res);
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.payload.success, true);
+    assert.ok(capturedPipeline, "Order.aggregate should have been called");
+    assert.deepEqual(capturedPipeline[0].$match.status, { $in: ["paid", "shipped", "completed"] });
+    assert.ok(capturedPipeline[0].$match["items.productId"], "Must filter items.productId in pipeline");
+
+    const leaderboard = res.payload.data.leaderboard;
+    assert.equal(leaderboard.length, 1);
+    const company = leaderboard[0];
+    assert.equal(company.rank, 1);
+    assert.equal(company.brandName, "Eco Threads");
+    // 200 + 400 = 600
+    assert.equal(company.totalRevenue, 600);
+    // 2 + 2 = 4
+    assert.equal(company.unitsSold, 4);
+    // Math.floor(600 / 10) = 60 (strictly from real orders, no fabricated salesCount multiplier)
+    assert.equal(company.impactCoinsGenerated, 60);
+    assert.equal(company.impactScore, 130);
+  } finally {
+    Brand.find = originalBrandFind;
+    Product.find = originalProductFind;
+    Order.aggregate = originalOrderAggregate;
+  }
+});
+
+test("getCharityLeaderboard deterministically breaks ties using donorCount, donationCount, and name", async () => {
+  const originalFind = Charity.find;
+  const originalAggregate = Donation.aggregate;
+
+  Charity.find = () => ({
+    populate: () => ({
+      lean: async () => [
+        {
+          _id: "charityB",
+          publicName: "Beta Charity",
+          category: "education",
+          description: "Education",
+          ownerUserId: { userName: "beta", profileImageUrl: "b.jpg", isVerified: true },
+        },
+        {
+          _id: "charityA",
+          publicName: "Alpha Charity",
+          category: "environment",
+          description: "Environment",
+          ownerUserId: { userName: "alpha", profileImageUrl: "a.jpg", isVerified: true },
+        },
+      ],
+    }),
+  });
+
+  // Both have exactly 1000 coins, but Charity A has 5 donors (10 donations), Charity B has 2 donors (10 donations)
+  Donation.aggregate = async () => [
+    {
+      _id: "charityA",
+      totalCoins: 1000,
+      donationCount: 10,
+      donorCount: 5,
+    },
+    {
+      _id: "charityB",
+      totalCoins: 1000,
+      donationCount: 10,
+      donorCount: 2,
+    },
+  ];
+
+  const req = { query: { timeframe: "all_time", limit: "10" } };
+  const res = createResponseMock();
+
+  try {
+    await getCharityLeaderboard(req, res);
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.payload.success, true);
+    assert.equal(res.payload.data.leaderboard.length, 2);
+
+    const first = res.payload.data.leaderboard[0];
+    const second = res.payload.data.leaderboard[1];
+
+    // Charity A must be ranked #1 because it has 5 donors vs Charity B's 2 donors despite same coins
+    assert.equal(first.name, "Alpha Charity");
+    assert.equal(first.rank, 1);
+    assert.equal(first.donorCount, 5);
+
+    assert.equal(second.name, "Beta Charity");
+    assert.equal(second.rank, 2);
+    assert.equal(second.donorCount, 2);
+  } finally {
+    Charity.find = originalFind;
+    Donation.aggregate = originalAggregate;
+  }
+});
+
+test("Donation and Order schemas define compound indexes for leaderboard performance", () => {
+  const donationIndexes = Donation.schema.indexes().map(([spec]) => spec);
+  assert.ok(
+    donationIndexes.some((f) => f.status === 1 && f.createdAt === -1),
+    "Donation should index { status: 1, createdAt: -1 }"
+  );
+  assert.ok(
+    donationIndexes.some((f) => f.status === 1 && f.donorUserId === 1 && f.coinAmount === 1),
+    "Donation should index { status: 1, donorUserId: 1, coinAmount: 1 }"
+  );
+  assert.ok(
+    donationIndexes.some((f) => f.status === 1 && f.charityId === 1 && f.coinAmount === 1),
+    "Donation should index { status: 1, charityId: 1, coinAmount: 1 }"
+  );
+
+  const orderIndexes = Order.schema.indexes().map(([spec]) => spec);
+  assert.ok(
+    orderIndexes.some((f) => f.status === 1 && f.createdAt === -1),
+    "Order should index { status: 1, createdAt: -1 }"
+  );
+  assert.ok(
+    orderIndexes.some((f) => f["items.productId"] === 1 && f.status === 1 && f.createdAt === -1),
+    "Order should index { 'items.productId': 1, status: 1, createdAt: -1 }"
+  );
+});
+
+test("getTimeframeFilter calculates calendar week and month aligned to UTC midnight boundaries", () => {
+  // Wednesday, Sept 9, 2026 at 15:45:00 UTC
+  const testRef = new Date("2026-09-09T15:45:00.000Z");
+
+  const weekFilter = getTimeframeFilter("week", testRef);
+  // Monday of that week: Sept 7, 2026 at 00:00:00.000 UTC
+  assert.deepEqual(weekFilter, { createdAt: { $gte: new Date("2026-09-07T00:00:00.000Z") } });
+
+  const monthFilter = getTimeframeFilter("month", testRef);
+  // 1st of that month: Sept 1, 2026 at 00:00:00.000 UTC
+  assert.deepEqual(monthFilter, { createdAt: { $gte: new Date("2026-09-01T00:00:00.000Z") } });
+
+  const dayFilter = getTimeframeFilter("today", testRef);
+  // Start of day: Sept 9, 2026 at 00:00:00.000 UTC
+  assert.deepEqual(dayFilter, { createdAt: { $gte: new Date("2026-09-09T00:00:00.000Z") } });
+
+  const allTimeFilter = getTimeframeFilter("all_time", testRef);
+  assert.deepEqual(allTimeFilter, {});
+});
+
+test("parseLimit safely clamps query limit to positive integer [1, maxVal]", () => {
+  assert.equal(parseLimit(undefined), 20);
+  assert.equal(parseLimit(null), 20);
+  assert.equal(parseLimit("invalid"), 20);
+  assert.equal(parseLimit("-5"), 20);
+  assert.equal(parseLimit("0"), 20);
+  assert.equal(parseLimit("1"), 1);
+  assert.equal(parseLimit("50"), 50);
+  assert.equal(parseLimit("100"), 100);
+  assert.equal(parseLimit("500"), 100); // capped at maxVal
+  assert.equal(parseLimit("-10", 15, 50), 15);
+  assert.equal(parseLimit("80", 15, 50), 50);
+});
+
+test("parsePage safely normalizes query page to positive integer >= 1", () => {
+  assert.equal(parsePage(undefined), 1);
+  assert.equal(parsePage(null), 1);
+  assert.equal(parsePage("invalid"), 1);
+  assert.equal(parsePage("-5"), 1);
+  assert.equal(parsePage("0"), 1);
+  assert.equal(parsePage("1"), 1);
+  assert.equal(parsePage("3"), 3);
+  assert.equal(parsePage("42"), 42);
+});
+
+test("getDonorLeaderboard applies page offset and assigns correct offset ranks", async () => {
+  const originalAggregate = Donation.aggregate;
+  const originalFind = User.find;
+
+  let capturedPipeline = null;
+  Donation.aggregate = async (pipeline) => {
+    capturedPipeline = pipeline;
+    return [
+      { _id: "user6", totalCoins: 1200, donationCount: 4, lastDonatedAt: new Date() },
+    ];
+  };
+
+  User.find = () => ({
+    select: () => ({
+      lean: async () => [
+        {
+          _id: "user6",
+          firstName: "Diana",
+          lastName: "Prince",
+          userName: "diana",
+          profileImageUrl: "diana.jpg",
+          isVerified: true,
+        },
+      ],
+    }),
+  });
+
+  const req = { query: { timeframe: "all_time", page: "2", limit: "5" } };
+  const res = createResponseMock();
+
+  try {
+    await getDonorLeaderboard(req, res);
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.payload.data.page, 2);
+    assert.equal(res.payload.data.limit, 5);
+
+    // Verify $skip and $limit were added to pipeline
+    const skipStage = capturedPipeline.find((s) => s.$skip !== undefined);
+    const limitStage = capturedPipeline.find((s) => s.$limit !== undefined);
+    assert.equal(skipStage.$skip, 5);
+    assert.equal(limitStage.$limit, 5);
+
+    // Verify rank offset: (page - 1) * limit + 1 = 6
+    assert.equal(res.payload.data.leaderboard[0].rank, 6);
+  } finally {
+    Donation.aggregate = originalAggregate;
+    User.find = originalFind;
+  }
+});

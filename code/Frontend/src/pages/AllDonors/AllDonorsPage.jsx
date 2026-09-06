@@ -107,18 +107,40 @@ export default function AllDonorsPage() {
     }
 
     if (selectedTier !== "all") {
-      list = list.filter((s) => (s.tier || "").toLowerCase() === selectedTier.toLowerCase());
+      const targetTier = selectedTier.toLowerCase();
+      list = list.filter((s) => (s.tier || "").toLowerCase().includes(targetTier));
     }
 
     if (sortBy === "coins") {
-      list.sort((a, b) => (b.totalCoinsDonated || 0) - (a.totalCoinsDonated || 0));
+      list.sort(
+        (a, b) =>
+          (b.totalCoinsDonated || 0) - (a.totalCoinsDonated || 0) ||
+          (b.donationsCount || 0) - (a.donationsCount || 0) ||
+          (a.rank || 0) - (b.rank || 0) ||
+          String(a.userId || a.name || "").localeCompare(String(b.userId || b.name || ""))
+      );
     } else if (sortBy === "donations") {
-      list.sort((a, b) => (b.donationsCount || 0) - (a.donationsCount || 0));
+      list.sort(
+        (a, b) =>
+          (b.donationsCount || 0) - (a.donationsCount || 0) ||
+          (b.totalCoinsDonated || 0) - (a.totalCoinsDonated || 0) ||
+          (a.rank || 0) - (b.rank || 0) ||
+          String(a.userId || a.name || "").localeCompare(String(b.userId || b.name || ""))
+      );
     } else if (sortBy === "recent") {
-      list.sort((a, b) => new Date(b.lastDonatedAt || 0) - new Date(a.lastDonatedAt || 0));
+      list.sort(
+        (a, b) =>
+          new Date(b.lastDonatedAt || 0) - new Date(a.lastDonatedAt || 0) ||
+          (a.rank || 0) - (b.rank || 0) ||
+          String(a.userId || a.name || "").localeCompare(String(b.userId || b.name || ""))
+      );
     } else {
       // Default: rank
-      list.sort((a, b) => a.rank - b.rank);
+      list.sort(
+        (a, b) =>
+          (a.rank || 0) - (b.rank || 0) ||
+          String(a.userId || a.name || "").localeCompare(String(b.userId || b.name || ""))
+      );
     }
 
     return list;

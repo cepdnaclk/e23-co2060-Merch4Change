@@ -7,6 +7,7 @@ import { listVerifiedCharities, listDonationProjects } from "../../services/char
 import { Search, ArrowRight, ShieldCheck, Heart, Leaf, BookOpen, Stethoscope, Droplets, ChevronRight, Trophy, Flame } from "lucide-react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import LeaderboardSection from "../../components/Leaderboard/LeaderboardSection";
+import apiClient from "../../api/apiClient";
 
 const CATEGORY_META = {
   health: { tag: "Health", TagIcon: Stethoscope, tagColor: "#0c4a6e", tagBg: "#E0F2FE" },
@@ -17,6 +18,16 @@ const CATEGORY_META = {
   other: { tag: "Charity", TagIcon: ShieldCheck, tagColor: "#374151", tagBg: "#F3F4F6" },
 };
 
+const CAUSE_CATEGORIES = [
+  { id: "all", label: "All Causes", icon: "" },
+  { id: "health", label: "Health & Medical", icon: "🩺" },
+  { id: "education", label: "Education & Literacy", icon: "📚" },
+  { id: "environment", label: "Nature & Environment", icon: "🌱" },
+  { id: "humanitarian", label: "Humanitarian Aid", icon: "❤️" },
+  { id: "animal", label: "Animal Welfare", icon: "🐾" },
+  { id: "other", label: "Community & Charity", icon: "🛡️" },
+];
+
 const mapCharityCard = (charity) => {
   const meta = CATEGORY_META[charity.category] || CATEGORY_META.other;
   const raised = charity.totalRaised || charity.raised || 0;
@@ -26,6 +37,7 @@ const mapCharityCard = (charity) => {
   return {
     id: charity._id,
     charityId: charity._id,
+    category: charity.category || "other",
     username: charity.ownerUserId?.userName,
     tag: meta.tag,
     TagIcon: meta.TagIcon,
@@ -45,6 +57,7 @@ const mapProjectCard = (project) => ({
   id: project.id || project._id,
   charityId: project.charityId,
   charityName: project.charityName,
+  category: project.category || "other",
   Icon: Droplets,
   name: project.title,
   desc: project.description,
@@ -130,18 +143,18 @@ function ProjectCard({ p, onDonate }) {
   );
 }
 
-import apiClient from "../../api/apiClient";
-
 export default function DonationsPage() {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTab = searchParams.get("tab") === "leaderboard" ? "leaderboard" : "causes";
   const [activeSection, setActiveSection] = useState(initialTab); // "causes" | "leaderboard"
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
-  const [profileData, setProfileData] = useState({});
+  const [profileData, setProfileData] = useState(null);
   const [charities, setCharities] = useState([]);
   const [projects, setProjects] = useState([]);
   const [stats, setStats] = useState({ totalDonated: 0, charityCount: 0 });
   const [query, setQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [prefilledCharityId, setPrefilledCharityId] = useState("");
   const [prefilledCharityName, setPrefilledCharityName] = useState("");
@@ -151,18 +164,16 @@ export default function DonationsPage() {
 
   useEffect(() => {
     const tabParam = searchParams.get("tab");
-    if (tabParam === "leaderboard" && activeSection !== "leaderboard") {
-      setActiveSection("leaderboard");
-    } else if (tabParam !== "leaderboard" && activeSection === "leaderboard" && !tabParam) {
-      setActiveSection("causes");
+    if (tabParam === "leaderboard") {
+      navigate("/leaderboard", { replace: true });
     }
-  }, [searchParams]);
+  }, [searchParams, navigate]);
 
   const handleTabChange = (section) => {
-    setActiveSection(section);
     if (section === "leaderboard") {
-      setSearchParams({ tab: "leaderboard" });
+      navigate("/leaderboard");
     } else {
+      setActiveSection("causes");
       setSearchParams({});
     }
   };
@@ -219,10 +230,29 @@ export default function DonationsPage() {
     navigate(qs ? `/donate?${qs}` : "/donate");
   };
 
-  const filtered = charities.filter((c) =>
-    c.name.toLowerCase().includes(query.toLowerCase()) ||
-    c.desc.toLowerCase().includes(query.toLowerCase()),
-  );
+  const filteredCharities = charities.filter((c) => {
+    const q = query.trim().toLowerCase();
+    const matchesSearch =
+      !q ||
+      c.name?.toLowerCase().includes(q) ||
+      c.desc?.toLowerCase().includes(q) ||
+      c.tag?.toLowerCase().includes(q);
+    const matchesCategory =
+      selectedCategory === "all" || c.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  const filteredProjects = projects.filter((p) => {
+    const q = query.trim().toLowerCase();
+    const matchesSearch =
+      !q ||
+      p.name?.toLowerCase().includes(q) ||
+      p.desc?.toLowerCase().includes(q) ||
+      p.charityName?.toLowerCase().includes(q);
+    const matchesCategory =
+      selectedCategory === "all" || p.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <div className={`luminous-app ${isSidebarCollapsed ? "sidebar-collapsed" : ""}`}>
@@ -261,8 +291,21 @@ export default function DonationsPage() {
               {/* Search */}
               <div style={{ background: "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)", borderRadius: "16px", padding: "6px 6px 6px 20px", display: "flex", alignItems: "center", gap: "12px", boxShadow: "0 24px 64px rgba(0,0,0,0.2)", marginBottom: "0" }}>
                 <Search size={18} color="#6B6560" style={{ flexShrink: 0 }} />
-                <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search for causes, charities, or projects..."
-                  style={{ flex: 1, background: "transparent", border: "none", outline: "none", fontFamily: "'DM Sans',sans-serif", fontSize: "14px", color: "#1A1A1A", padding: "10px 0" }} />
+                <input
+                  value={query}
+                  onChange={e => setQuery(e.target.value)}
+                  placeholder="Search for causes, charities, or projects..."
+                  style={{ flex: 1, background: "transparent", border: "none", outline: "none", fontFamily: "'DM Sans',sans-serif", fontSize: "14px", color: "#1A1A1A", padding: "10px 0" }}
+                />
+                {query && (
+                  <button
+                    onClick={() => setQuery("")}
+                    title="Clear search"
+                    style={{ background: "none", border: "none", color: "#8E8880", cursor: "pointer", fontSize: "16px", padding: "4px 8px" }}
+                  >
+                    ✕
+                  </button>
+                )}
                 <button onClick={() => handleDonateNavigation()}
                   style={{ background: "#D4820A", color: "#fff", fontFamily: "'DM Sans',sans-serif", fontSize: "14px", fontWeight: 500, padding: "12px 24px", borderRadius: "12px", border: "none", cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0 }}
                   onMouseEnter={e => e.target.style.background = "#be7509"} onMouseLeave={e => e.target.style.background = "#D4820A"}>
@@ -287,7 +330,7 @@ export default function DonationsPage() {
           <div style={{ padding: "32px 40px 80px" }}>
 
             {/* ── SECTION SWITCHER TABS ─────────────────────────────────── */}
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: "40px" }}>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: "32px" }}>
               <div style={{ display: "inline-flex", background: "#EAE5DC", padding: "5px", borderRadius: "16px", gap: "6px" }}>
                 <button
                   onClick={() => handleTabChange("causes")}
@@ -339,25 +382,80 @@ export default function DonationsPage() {
 
             {/* ── RENDER ACTIVE SECTION ─────────────────────────────────── */}
             {activeSection === "leaderboard" ? (
-              <LeaderboardSection />
+              <LeaderboardSection profileData={profileData || authUser} />
             ) : (
               <>
+                {/* ── CAUSES CATEGORY FILTER PILLS ── */}
+                <div className="causes-filter-wrap">
+                  <span className="causes-filter-label">Explore Causes by Category</span>
+                  <div className="causes-filter-pills">
+                    {CAUSE_CATEGORIES.map((cat) => (
+                      <button
+                        key={cat.id}
+                        onClick={() => setSelectedCategory(cat.id)}
+                        className={`cause-pill ${selectedCategory === cat.id ? "active" : ""}`}
+                      >
+                        {cat.icon && <span>{cat.icon}</span>}
+                        <span>{cat.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Active filter summary strip */}
+                {(selectedCategory !== "all" || query.trim()) && (
+                  <div className="causes-active-filter-bar">
+                    <span>
+                      Showing causes
+                      {selectedCategory !== "all" && (
+                        <> in <strong>{CAUSE_CATEGORIES.find(c => c.id === selectedCategory)?.label || selectedCategory}</strong></>
+                      )}
+                      {query.trim() && (
+                        <> matching &ldquo;<strong>{query.trim()}</strong>&rdquo;</>
+                      )}
+                      {" "} ({filteredCharities.length} {filteredCharities.length === 1 ? "charity" : "charities"}, {filteredProjects.length} {filteredProjects.length === 1 ? "project" : "projects"})
+                    </span>
+                    <button
+                      className="causes-reset-btn"
+                      onClick={() => {
+                        setSelectedCategory("all");
+                        setQuery("");
+                      }}
+                    >
+                      Reset filters
+                    </button>
+                  </div>
+                )}
+
                 {/* ── TOP CHARITIES ─────────────────────────────────────── */}
                 <div style={{ marginBottom: "64px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "32px" }}>
                     <div>
                       <div style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "12px", fontWeight: 600, color: "#D4820A", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>Featured</div>
-                      <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: "28px", color: "#1A1A1A", margin: 0 }}>Top Charities</h2>
+                      <h2 style={{ fontFamily: "'DM Serif Display',serif", fontSize: "28px", color: "#1A1A1A", margin: 0 }}>Top Charities & Causes</h2>
                     </div>
-                    <button style={{ display: "flex", alignItems: "center", gap: "6px", background: "transparent", border: "none", cursor: "pointer", fontFamily: "'DM Sans',sans-serif", fontSize: "14px", color: "#D4820A", fontWeight: 500 }}>
+                    <button
+                      onClick={() => {
+                        setSelectedCategory("all");
+                        setQuery("");
+                      }}
+                      style={{ display: "flex", alignItems: "center", gap: "6px", background: "transparent", border: "none", cursor: "pointer", fontFamily: "'DM Sans',sans-serif", fontSize: "14px", color: "#D4820A", fontWeight: 500 }}
+                    >
                       View all <ArrowRight size={14} />
                     </button>
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px,1fr))", gap: "24px" }}>
                     {loading ? (
                       <p style={{ gridColumn: "1/-1", fontFamily: "'DM Sans',sans-serif", color: "#6B6560", fontSize: "14px" }}>Loading verified charities...</p>
-                    ) : filtered.map(c => <CharityCard key={c.id} c={c} onSelect={handleDonateNavigation} />)}
-                    {!loading && !filtered.length && <p style={{ gridColumn: "1/-1", fontFamily: "'DM Sans',sans-serif", color: "#6B6560", fontSize: "14px" }}>No verified charities found.</p>}
+                    ) : filteredCharities.map(c => <CharityCard key={c.id} c={c} onSelect={handleDonateNavigation} />)}
+                    {!loading && !filteredCharities.length && (
+                      <div className="causes-empty-card">
+                        <p>No verified charities found matching your selected cause criteria.</p>
+                        <button onClick={() => { setSelectedCategory("all"); setQuery(""); }}>
+                          View All Causes
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -371,8 +469,15 @@ export default function DonationsPage() {
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(400px,1fr))", gap: "20px" }}>
                     {loading ? (
                       <p style={{ gridColumn: "1/-1", fontFamily: "'DM Sans',sans-serif", color: "#6B6560", fontSize: "14px" }}>Loading projects...</p>
-                    ) : projects.map(p => <ProjectCard key={p.id} p={p} onDonate={handleDonateNavigation} />)}
-                    {!loading && !projects.length && <p style={{ gridColumn: "1/-1", fontFamily: "'DM Sans',sans-serif", color: "#6B6560", fontSize: "14px" }}>No active projects from verified charities yet.</p>}
+                    ) : filteredProjects.map(p => <ProjectCard key={p.id} p={p} onDonate={handleDonateNavigation} />)}
+                    {!loading && !filteredProjects.length && (
+                      <div className="causes-empty-card">
+                        <p>No active projects found matching your selected cause criteria.</p>
+                        <button onClick={() => { setSelectedCategory("all"); setQuery(""); }}>
+                          View All Causes
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </>

@@ -41,6 +41,7 @@ import CharityReview from "./pages/Admin/CharityVerification/CharityReview";
 import NotificationPage from "./pages/Notification/Notification";
 import SearchPage from "./pages/Search/SearchPage";
 import AllDonorsPage from "./pages/AllDonors/AllDonorsPage";
+import LeaderboardPage from "./pages/Leaderboard/LeaderboardPage";
 
 
 function App() {
@@ -78,6 +79,7 @@ function App() {
           <Route path="/profile/:username" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/donations" element={<ProtectedRoute><DonationsPage /></ProtectedRoute>} />
+          <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
           <Route path="/donate" element={<ProtectedRoute><DonatePage /></ProtectedRoute>} />
           <Route path="/under-construction" element={<ProtectedRoute><UnderConstruction /></ProtectedRoute>} />
           <Route path="/notification" element={<ProtectedRoute><NotificationPage /></ProtectedRoute>} />

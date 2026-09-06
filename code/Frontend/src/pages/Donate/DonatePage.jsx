@@ -97,17 +97,19 @@ export default function DonatePage() {
           targetProj = rawProjects.find((p) => (p.id || p._id) === selectedProjectId);
         } else if (initialProjectName) {
           targetProj = rawProjects.find((p) => p.title?.toLowerCase() === initialProjectName.toLowerCase());
+        } else if (initialCharityId) {
+          targetProj = rawProjects.find((p) => String(p.charityId) === String(initialCharityId));
         }
 
-        // If not found in API list but provided via query params, build fallback object
-        if (!targetProj && (initialProjectId || initialProjectName)) {
+        // If not found in API list but provided via query params or charityId provided, build fallback object
+        if (!targetProj && (initialProjectId || initialProjectName || initialCharityId)) {
           targetProj = {
-            id: initialProjectId || "custom-project",
-            _id: initialProjectId || "custom-project",
-            title: initialProjectName || "Selected Cause Initiative",
+            id: initialProjectId || (initialCharityId ? `charity-fund-${initialCharityId}` : "custom-project"),
+            _id: initialProjectId || (initialCharityId ? `charity-fund-${initialCharityId}` : "custom-project"),
+            title: initialProjectName || (initialCharityName ? `${initialCharityName} Impact Fund` : "Selected Cause Initiative"),
             description: "Direct community impact initiative funded by Merch4Change contributions.",
-            goalAmount: initialGoal,
-            collectedAmount: initialCollected,
+            goalAmount: initialGoal || 10000,
+            collectedAmount: initialCollected || 0,
             charityId: initialCharityId,
             charityName: initialCharityName || "Verified Partner Non-Profit",
           };
@@ -178,9 +180,16 @@ export default function DonatePage() {
 
     setSubmitting(true);
     try {
+      const effectiveProjId = selectedProjectId || selectedProject?.id || selectedProject?._id;
+      const isCustomProject =
+        !effectiveProjId ||
+        String(effectiveProjId).startsWith("custom-") ||
+        String(effectiveProjId).startsWith("charity-fund-") ||
+        !/^[0-9a-fA-F]{24}$/.test(String(effectiveProjId));
+
       const payload = {
-        charityProjectId: selectedProjectId || selectedProject?.id || selectedProject?._id,
-        charityId: selectedProject?.charityId || undefined,
+        charityProjectId: isCustomProject ? undefined : effectiveProjId,
+        charityId: selectedProject?.charityId || initialCharityId || undefined,
         coinAmount,
       };
 
@@ -303,7 +312,7 @@ export default function DonatePage() {
                     Donate to Another Project
                   </button>
                   <button
-                    onClick={() => navigate("/donations?tab=leaderboard")}
+                    onClick={() => navigate("/leaderboard")}
                     style={{
                       background: "transparent",
                       color: "#D4820A",
