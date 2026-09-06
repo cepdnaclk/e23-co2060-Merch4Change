@@ -4,6 +4,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../../context/Context";
 import { getMyCharity } from "../../services/charityApi";
 import "./LoginPage.css";
+import BrandLogo from "../../components/BrandLogo/BrandLogo";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -86,7 +87,7 @@ function LoginPage() {
       {/* Left panel */}
       <div className="login-left">
         <Link to="/" className="login-brand">
-          <div className="login-brand-icon">M</div>
+          <BrandLogo size={36} className="login-brand-icon" />
           <span className="login-brand-name">Merch4Change</span>
         </Link>
 

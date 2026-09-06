@@ -151,7 +151,8 @@
 }
 
 .lp-hero-left {
-  width: 55%;
+  width: 100%;
+  max-width: 680px;
 }
 
 .lp-hero-badge {
