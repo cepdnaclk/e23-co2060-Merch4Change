@@ -523,7 +523,10 @@ export default function HelpAndSupport() {
               <button
                 type="button"
                 className="help-btn-secondary"
-                onClick={() => navigate("/faq")}
+                onClick={() => {
+                  window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+                  navigate("/faq");
+                }}
               >
                 <ExternalLink size={16} />
                 <span>Full FAQ Page</span>
