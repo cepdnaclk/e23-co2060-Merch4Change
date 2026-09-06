@@ -139,14 +139,7 @@ export const getCompanyLeaderboard = asyncHandler(async (req, res) => {
 
   const productToBrandMap = new Map(products.map((p) => [p._id.toString(), p.brandId.toString()]));
 
-  // 3. Aggregate orders within timeframe
-  const orders = await Order.find({
-    status: { $in: ["paid", "shipped", "completed"] },
-    ...timeFilter,
-  })
-    .select("items totalAmount coinsEarned")
-    .lean();
-
+  // 3. Aggregate orders within timeframe using database-level aggregation pipeline
   const brandSalesMap = new Map();
   for (const b of brands) {
     brandSalesMap.set(b._id.toString(), {
@@ -156,16 +149,50 @@ export const getCompanyLeaderboard = asyncHandler(async (req, res) => {
     });
   }
 
-  for (const order of orders) {
-    for (const item of order.items || []) {
-      if (!item.productId) continue;
-      const brandIdStr = productToBrandMap.get(item.productId.toString());
+  const productIds = products.map((p) => p._id);
+  if (productIds.length > 0) {
+    const salesAgg = await Order.aggregate([
+      {
+        $match: {
+          status: { $in: ["paid", "shipped", "completed"] },
+          "items.productId": { $in: productIds },
+          ...timeFilter,
+        },
+      },
+      { $unwind: "$items" },
+      {
+        $match: {
+          "items.productId": { $in: productIds },
+        },
+      },
+      {
+        $group: {
+          _id: "$items.productId",
+          totalRevenue: {
+            $sum: {
+              $multiply: [
+                { $ifNull: ["$items.unitPrice", 0] },
+                { $ifNull: ["$items.quantity", 1] },
+              ],
+            },
+          },
+          totalUnitsSold: {
+            $sum: { $ifNull: ["$items.quantity", 1] },
+          },
+        },
+      },
+    ]);
+
+    for (const row of salesAgg || []) {
+      if (!row._id) continue;
+      const brandIdStr = productToBrandMap.get(row._id.toString());
       if (brandIdStr && brandSalesMap.has(brandIdStr)) {
         const stats = brandSalesMap.get(brandIdStr);
-        const itemRevenue = (item.unitPrice || 0) * (item.quantity || 1);
-        stats.totalRevenue += itemRevenue;
-        stats.totalUnitsSold += item.quantity || 1;
-        stats.impactCoinsGenerated += Math.floor(itemRevenue / 10);
+        const revenue = row.totalRevenue || 0;
+        const units = row.totalUnitsSold || 0;
+        stats.totalRevenue += revenue;
+        stats.totalUnitsSold += units;
+        stats.impactCoinsGenerated += Math.floor(revenue / 10);
       }
     }
   }

@@ -197,9 +197,9 @@ test("getDonorLeaderboard assigns contiguous ranks starting from 1 even when top
 test("getCompanyLeaderboard includes paid, shipped, and completed orders in brand impact and revenue", async () => {
   const originalBrandFind = Brand.find;
   const originalProductFind = Product.find;
-  const originalOrderFind = Order.find;
+  const originalOrderAggregate = Order.aggregate;
 
-  let capturedOrderFilter = null;
+  let capturedPipeline = null;
 
   Brand.find = () => ({
     populate: () => ({
@@ -223,26 +223,12 @@ test("getCompanyLeaderboard includes paid, shipped, and completed orders in bran
     }),
   });
 
-  Order.find = (filter) => {
-    capturedOrderFilter = filter;
-    return {
-      select: () => ({
-        lean: async () => [
-          {
-            status: "paid",
-            items: [{ productId: "prod1", unitPrice: 100, quantity: 1 }],
-          },
-          {
-            status: "shipped",
-            items: [{ productId: "prod2", unitPrice: 200, quantity: 2 }],
-          },
-          {
-            status: "completed",
-            items: [{ productId: "prod1", unitPrice: 100, quantity: 1 }],
-          },
-        ],
-      }),
-    };
+  Order.aggregate = async (pipeline) => {
+    capturedPipeline = pipeline;
+    return [
+      { _id: "prod1", totalRevenue: 200, totalUnitsSold: 2 },
+      { _id: "prod2", totalRevenue: 400, totalUnitsSold: 2 },
+    ];
   };
 
   const req = { query: { timeframe: "all_time", limit: "10" } };
@@ -253,22 +239,24 @@ test("getCompanyLeaderboard includes paid, shipped, and completed orders in bran
 
     assert.equal(res.statusCode, 200);
     assert.equal(res.payload.success, true);
-    assert.deepEqual(capturedOrderFilter.status, { $in: ["paid", "shipped", "completed"] });
+    assert.ok(capturedPipeline, "Order.aggregate should have been called");
+    assert.deepEqual(capturedPipeline[0].$match.status, { $in: ["paid", "shipped", "completed"] });
+    assert.ok(capturedPipeline[0].$match["items.productId"], "Must filter items.productId in pipeline");
 
     const leaderboard = res.payload.data.leaderboard;
     assert.equal(leaderboard.length, 1);
     const company = leaderboard[0];
     assert.equal(company.rank, 1);
     assert.equal(company.brandName, "Eco Threads");
-    // 100*1 + 200*2 + 100*1 = 600
+    // 200 + 400 = 600
     assert.equal(company.totalRevenue, 600);
-    // 1 + 2 + 1 = 4
+    // 2 + 2 = 4
     assert.equal(company.unitsSold, 4);
     // Math.max(Math.floor(600 / 10), Math.floor(4 * 25)) = Math.max(60, 100) = 100
     assert.equal(company.impactCoinsGenerated, 100);
   } finally {
     Brand.find = originalBrandFind;
     Product.find = originalProductFind;
-    Order.find = originalOrderFind;
+    Order.aggregate = originalOrderAggregate;
   }
 });

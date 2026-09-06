@@ -48,6 +48,9 @@ test("getTopDonors returns donors with standardized tiers (Diamond, Platinum, Go
   });
 
   Donation.find = () => ({
+    select() {
+      return this;
+    },
     populate() {
       return this;
     },

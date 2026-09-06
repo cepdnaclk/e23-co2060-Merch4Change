@@ -367,6 +367,7 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
         $or: donationConditions,
         status: { $nin: ["failed", "cancelled", "rejected"] },
       })
+        .select("_id donorUserId charityProjectId coinAmount createdAt")
         .populate("donorUserId", "firstName lastName userName profileImageUrl isVerified")
         .populate("charityProjectId", "title")
         .sort({ createdAt: -1 })
