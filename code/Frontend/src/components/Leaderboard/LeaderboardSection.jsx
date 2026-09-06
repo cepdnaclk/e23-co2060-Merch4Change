@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
+import { Link } from "react-router-dom";
 import {
   getDonorLeaderboard,
   getCompanyLeaderboard,
   getLeaderboardStats,
 } from "../../api/leaderboardService";
+import apiClient from "../../api/apiClient";
+import { useAuth } from "../../context/Context";
 import LeaderboardPodium from "./LeaderboardPodium";
 import LeaderboardTable from "./LeaderboardTable";
 import "./Leaderboard.css";
@@ -15,14 +18,66 @@ import {
   Trophy,
   Coins,
   HeartHandshake,
+  Heart,
+  ChevronRight,
 } from "lucide-react";
 
 export default function LeaderboardSection() {
+  const { user: authUser } = useAuth();
+  const [profileData, setProfileData] = useState(null);
+  const currentUserRef = useRef(null);
+
   const [activeType, setActiveType] = useState("donors"); // "donors" | "companies"
   const [timeframe, setTimeframe] = useState("all_time"); // "all_time" | "month" | "week"
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Fetch logged in profile details
+  useEffect(() => {
+    if (!authUser) {
+      setProfileData(null);
+      return;
+    }
+    apiClient
+      .get("/api/v1/profile/me")
+      .then((res) => {
+        if (res.data?.success && res.data?.data?.user) {
+          setProfileData(res.data.data.user);
+        }
+      })
+      .catch(() => {
+        setProfileData(authUser);
+      });
+  }, [authUser]);
+
+  // Determine current user match IDs
+  const currentUserId = profileData?._id || profileData?.id || authUser?.id || authUser?._id || null;
+  const currentUserName = (profileData?.userName || authUser?.userName || "").toLowerCase();
+
+  // Find user entry in current leaderboard view
+  const currentUserEntry = useMemo(() => {
+    if (!leaderboardData.length) return null;
+    return leaderboardData.find((entry) => {
+      if (activeType === "companies") {
+        return Boolean(currentUserName && entry.ownerUserName && entry.ownerUserName.toLowerCase() === currentUserName);
+      } else {
+        const idMatch = currentUserId && String(entry.userId) === String(currentUserId);
+        const usernameMatch = currentUserName && entry.userName && entry.userName.toLowerCase() === currentUserName;
+        return idMatch || usernameMatch;
+      }
+    });
+  }, [leaderboardData, activeType, currentUserId, currentUserName]);
+
+  const scrollToMyPosition = () => {
+    if (currentUserRef.current) {
+      currentUserRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      currentUserRef.current.classList.add("pulse-highlight");
+      setTimeout(() => {
+        currentUserRef.current?.classList.remove("pulse-highlight");
+      }, 2500);
+    }
+  };
 
   // Load stats once
   useEffect(() => {
@@ -153,6 +208,81 @@ export default function LeaderboardSection() {
         </div>
       </div>
 
+      {/* Current User Standing Callout (when logged in and not loading) */}
+      {!loading && authUser && (
+        currentUserEntry ? (
+          <div className="lb-user-standing-card user-found">
+            <div className="lb-standing-main">
+              <div className="lb-standing-rank-badge">
+                #{currentUserEntry.rank}
+              </div>
+              <div className="lb-standing-info">
+                <div className="lb-standing-title-wrap">
+                  <span className="lb-standing-tag">
+                    <Sparkles size={13} /> {activeType === "companies" ? "Your Brand Standing" : "Your Global Standing"}
+                  </span>
+                  {activeType === "donors" && currentUserEntry.tier && (
+                    <span
+                      className="lb-podium-tier-pill"
+                      style={{
+                        backgroundColor: currentUserEntry.tierBg,
+                        color: currentUserEntry.tierColor,
+                        margin: 0,
+                      }}
+                    >
+                      <span>{currentUserEntry.tierIcon}</span>
+                      <span>{currentUserEntry.tier} Donor</span>
+                    </span>
+                  )}
+                </div>
+                <h3>
+                  You are ranked <strong>#{currentUserEntry.rank}</strong> out of {leaderboardData.length} on the leaderboard!
+                </h3>
+                <p>
+                  {activeType === "companies"
+                    ? `Your brand has generated ${(currentUserEntry.impactCoinsGenerated || 0).toLocaleString()} coins across ${currentUserEntry.unitsSold || 0} products sold.`
+                    : `You've donated ${(currentUserEntry.totalCoins || 0).toLocaleString()} coins across ${currentUserEntry.donationCount || 0} contribution${currentUserEntry.donationCount === 1 ? "" : "s"}.`}
+                </p>
+              </div>
+            </div>
+            <button onClick={scrollToMyPosition} className="lb-standing-jump-btn">
+              <span>Jump to my position</span>
+              <ChevronRight size={15} />
+            </button>
+          </div>
+        ) : (
+          <div className="lb-user-standing-card user-unranked">
+            <div className="lb-standing-main">
+              <div className="lb-standing-icon-unranked">
+                <Trophy size={22} />
+              </div>
+              <div className="lb-standing-info">
+                <h3>
+                  {activeType === "companies"
+                    ? "Your brand isn't ranked on the leaderboard yet"
+                    : "You're not ranked on the global leaderboard yet"}
+                </h3>
+                <p>
+                  {activeType === "companies"
+                    ? "List impact products and sell merchandise to generate impact coins and claim your brand's spot!"
+                    : "Donate coins to verified charity projects to earn donor rank and claim your spot among top community donors!"}
+                </p>
+              </div>
+            </div>
+            {activeType === "donors" ? (
+              <Link to="/donations?tab=projects" className="lb-standing-cta-btn">
+                <Heart size={15} />
+                <span>Make a Donation</span>
+              </Link>
+            ) : (
+              <Link to="/marketplace" className="lb-standing-cta-btn">
+                <span>Explore Marketplace</span>
+              </Link>
+            )}
+          </div>
+        )
+      )}
+
       {/* Content Area */}
       {loading ? (
         <div className="lb-spinner" />
@@ -170,12 +300,18 @@ export default function LeaderboardSection() {
           <LeaderboardPodium
             topThree={topThree}
             isCompanyView={activeType === "companies"}
+            currentUserId={currentUserId}
+            currentUserName={currentUserName}
+            currentUserRef={currentUserRef}
           />
 
           {/* Ranked List (4 to 50) */}
           <LeaderboardTable
             rows={remainingRows}
             isCompanyView={activeType === "companies"}
+            currentUserId={currentUserId}
+            currentUserName={currentUserName}
+            currentUserRef={currentUserRef}
           />
         </>
       )}

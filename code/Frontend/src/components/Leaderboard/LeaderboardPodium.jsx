@@ -2,7 +2,13 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { CheckCircle2, Award, Heart, Sparkles, Building2 } from "lucide-react";
 
-export default function LeaderboardPodium({ topThree = [], isCompanyView = false }) {
+export default function LeaderboardPodium({
+  topThree = [],
+  isCompanyView = false,
+  currentUserId = null,
+  currentUserName = "",
+  currentUserRef = null,
+}) {
   if (!topThree || topThree.length === 0) return null;
 
   // Visual layout for podium: 2nd on Left, 1st in Middle, 3rd on Right
@@ -28,6 +34,11 @@ export default function LeaderboardPodium({ topThree = [], isCompanyView = false
           );
         }
 
+        const isCurrentUser = isCompanyView
+          ? Boolean(currentUserName && data.ownerUserName && data.ownerUserName.toLowerCase() === currentUserName)
+          : Boolean((currentUserId && String(data.userId) === String(currentUserId)) ||
+            (currentUserName && data.userName && data.userName.toLowerCase() === currentUserName));
+
         const profileLink = isCompanyView
           ? `/profile/${data.ownerUserName || data.slug}`
           : `/profile/${data.userName}`;
@@ -40,7 +51,11 @@ export default function LeaderboardPodium({ topThree = [], isCompanyView = false
         const subTitle = isCompanyView ? `@${data.ownerUserName || data.slug}` : `@${data.userName}`;
 
         return (
-          <div key={data.rank} className={`lb-podium-card ${rankClass}`}>
+          <div
+            key={data.rank}
+            ref={isCurrentUser ? currentUserRef : null}
+            className={`lb-podium-card ${rankClass} ${isCurrentUser ? "is-current-user" : ""}`}
+          >
             <div className="lb-podium-crown">{crown}</div>
 
             <div className="lb-avatar-container">
@@ -49,8 +64,13 @@ export default function LeaderboardPodium({ topThree = [], isCompanyView = false
             </div>
 
             <Link to={profileLink} className="lb-podium-name">
-              {title}
+              <span>{title}</span>
               {data.isVerified && <CheckCircle2 size={14} color="#0D6B5E" />}
+              {isCurrentUser && (
+                <span className="lb-current-user-tag">
+                  <Sparkles size={10} /> {isCompanyView ? "YOUR BRAND" : "YOU"}
+                </span>
+              )}
             </Link>
 
             <span className="lb-podium-username">{subTitle}</span>

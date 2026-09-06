@@ -1,8 +1,14 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { CheckCircle2, ChevronRight, Award } from "lucide-react";
+import { CheckCircle2, ChevronRight, Award, Sparkles } from "lucide-react";
 
-export default function LeaderboardTable({ rows = [], isCompanyView = false }) {
+export default function LeaderboardTable({
+  rows = [],
+  isCompanyView = false,
+  currentUserId = null,
+  currentUserName = "",
+  currentUserRef = null,
+}) {
   if (!rows || rows.length === 0) {
     return (
       <div className="lb-table-card">
@@ -25,6 +31,13 @@ export default function LeaderboardTable({ rows = [], isCompanyView = false }) {
 
       <div className="lb-table-body">
         {rows.map((row) => {
+          const isCurrentUser = isCompanyView
+            ? Boolean(currentUserName && row.ownerUserName && row.ownerUserName.toLowerCase() === currentUserName)
+            : Boolean(
+                (currentUserId && String(row.userId) === String(currentUserId)) ||
+                (currentUserName && row.userName && row.userName.toLowerCase() === currentUserName)
+              );
+
           const profileLink = isCompanyView
             ? `/profile/${row.ownerUserName || row.slug}`
             : `/profile/${row.userName}`;
@@ -37,7 +50,12 @@ export default function LeaderboardTable({ rows = [], isCompanyView = false }) {
           const subTitle = isCompanyView ? `@${row.ownerUserName || row.slug}` : `@${row.userName}`;
 
           return (
-            <Link to={profileLink} key={row.rank} className="lb-table-row">
+            <Link
+              to={profileLink}
+              key={row.rank}
+              ref={isCurrentUser ? currentUserRef : null}
+              className={`lb-table-row ${isCurrentUser ? "is-current-user" : ""}`}
+            >
               <div className="lb-row-rank">#{row.rank}</div>
 
               <div className="lb-row-user">
@@ -46,6 +64,11 @@ export default function LeaderboardTable({ rows = [], isCompanyView = false }) {
                   <span className="lb-row-name">
                     {title}
                     {row.isVerified && <CheckCircle2 size={13} color="#0D6B5E" />}
+                    {isCurrentUser && (
+                      <span className="lb-current-user-tag">
+                        <Sparkles size={10} /> {isCompanyView ? "YOUR BRAND" : "YOU"}
+                      </span>
+                    )}
                   </span>
                   <span className="lb-row-username">{subTitle}</span>
                 </div>

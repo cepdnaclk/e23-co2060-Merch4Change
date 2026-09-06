@@ -415,3 +415,227 @@
 @keyframes lbSpin {
   to { transform: rotate(360deg); }
 }
+
+/* ==========================================================================
+   Current Logged-in User Highlighting & Standing Banner
+   ========================================================================== */
+
+.lb-user-standing-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 24px;
+  border-radius: 20px;
+  margin-bottom: 28px;
+  transition: all 0.3s ease;
+}
+
+.lb-user-standing-card.user-found {
+  background: linear-gradient(135deg, rgba(13, 107, 94, 0.06) 0%, rgba(13, 107, 94, 0.01) 100%), #ffffff;
+  border: 1.5px solid rgba(13, 107, 94, 0.3);
+  box-shadow: 0 4px 20px rgba(13, 107, 94, 0.06);
+}
+
+.lb-user-standing-card.user-unranked {
+  background: #ffffff;
+  border: 1.5px dashed #D4CECE;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.02);
+}
+
+.lb-standing-main {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.lb-standing-rank-badge {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #0D6B5E 0%, #0A5248 100%);
+  color: #ffffff;
+  font-family: 'DM Serif Display', serif;
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(13, 107, 94, 0.25);
+}
+
+.lb-standing-icon-unranked {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #F4EFEB;
+  color: #8C827A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.lb-standing-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.lb-standing-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.lb-standing-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #0D6B5E;
+  background: rgba(13, 107, 94, 0.1);
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.lb-standing-info h3 {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1A1A1A;
+  margin: 2px 0 3px 0;
+}
+
+.lb-standing-info p {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: #6B6560;
+  margin: 0;
+}
+
+.lb-standing-jump-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  background: #0D6B5E;
+  color: #ffffff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.lb-standing-jump-btn:hover {
+  background: #0A5248;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(13, 107, 94, 0.2);
+}
+
+.lb-standing-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  background: #0D6B5E;
+  color: #ffffff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.lb-standing-cta-btn:hover {
+  background: #0A5248;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(13, 107, 94, 0.2);
+}
+
+/* YOU Tag in Podium & Table */
+.lb-current-user-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: #0D6B5E;
+  color: #FFFFFF;
+  padding: 2px 7px;
+  border-radius: 10px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* Highlight Podium Card */
+.lb-podium-card.is-current-user {
+  outline: 2.5px solid #0D6B5E;
+  outline-offset: -2px;
+  box-shadow: 0 10px 32px rgba(13, 107, 94, 0.22);
+  animation: lbUserPulse 3s ease-in-out infinite alternate;
+}
+
+@keyframes lbUserPulse {
+  0% {
+    box-shadow: 0 8px 24px rgba(13, 107, 94, 0.18);
+  }
+  100% {
+    box-shadow: 0 12px 36px rgba(13, 107, 94, 0.32);
+  }
+}
+
+/* Highlight Table Row */
+.lb-table-row.is-current-user {
+  background: linear-gradient(90deg, rgba(13, 107, 94, 0.08) 0%, rgba(255, 255, 255, 0) 100%);
+  border-left: 4px solid #0D6B5E !important;
+  font-weight: 500;
+}
+
+/* Smooth Jump Pulse Animation */
+.pulse-highlight {
+  animation: pulseHighlight 1.5s ease-in-out infinite;
+}
+
+@keyframes pulseHighlight {
+  0% {
+    box-shadow: 0 0 0 0 rgba(13, 107, 94, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 14px rgba(13, 107, 94, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(13, 107, 94, 0);
+  }
+}
+
+@media (max-width: 768px) {
+  .lb-user-standing-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .lb-standing-jump-btn,
+  .lb-standing-cta-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
