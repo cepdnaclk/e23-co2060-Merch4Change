@@ -19,28 +19,6 @@
   margin: 0 auto;
 }
 
-.privacy-back-link {
-  position: absolute;
-  top: 24px;
-  left: 24px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: none;
-  border: none;
-  padding: 0;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  color: #4a24e1;
-  cursor: pointer;
-  transition: opacity 0.15s;
-}
-
-.privacy-back-link:hover {
-  opacity: 0.75;
-}
-
 .privacy-hero h1 {
   font-size: 34px;
   font-weight: 700;
