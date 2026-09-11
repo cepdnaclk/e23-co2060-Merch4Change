@@ -31,6 +31,6 @@
 .s-switch__slider::before { content: ''; position: absolute; width: 14px; height: 14px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: transform 0.2s; }
 .s-switch input:checked + .s-switch__slider { background: #4a24e1; }
 .s-switch input:checked + .s-switch__slider::before { transform: translateX(16px); }
-.s-list-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid #f0f0f0; font-size: 13.5px; color: #333; cursor: pointer; max-width: 480px; transition: color 0.1s; }
+.s-list-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid #f0f0f0; font-size: 13.5px; color: #333; cursor: pointer; max-width: 480px; transition: color 0.1s; text-decoration: none; }
 .s-list-row:hover { color: #4a24e1; }
 .s-list-row__chevron { font-size: 18px; color: #ccc; }
