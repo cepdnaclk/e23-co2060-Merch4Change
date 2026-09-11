@@ -23,6 +23,7 @@ import Contact from "./pages/HelpAndSupport/Contact";
 import OurStory from "./pages/About/OurStory";
 import Mission from "./pages/About/Mission";
 import Team from "./pages/About/Team";
+import PrivacyPolicy from "./pages/Legal/PrivacyPolicy";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute/AdminRoute";
 import Marketplace from "./pages/Marketplace/Marketplace";
@@ -61,6 +62,7 @@ function App() {
             <Route path="/about/story" element={<OurStory />} />
             <Route path="/about/mission" element={<Mission />} />
             <Route path="/about/team" element={<Team />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
           </Route>
 
           {/* Auth Routes (No Navbar) */}
