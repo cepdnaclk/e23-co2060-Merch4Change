@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import SettingsSidebar from "./components/SettingsSidebar";
 import {
+  ProfileSection,
   SecuritySection,
   PrivacySection,
   NotificationsSection,
@@ -11,8 +12,8 @@ import {
   HelpSection,
 } from "./sections/Sections";
 import OrganizationVerificationSection from "./sections/OrganizationVerificationSection";
-import ProfileSection from "./sections/ProfileSection";
 import apiClient from "../../api/apiClient";
+import { useAuth } from "../../context/Context";
 import "./Settings.css";
 
 const SECTIONS = {
@@ -28,6 +29,8 @@ const SECTIONS = {
 
 function Settings() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { accessToken, logout } = useAuth();
   const initialSection = searchParams.get("section") || "profile";
   const [activeSection, setActiveSection] = useState(initialSection);
   const [profileData, setProfileData] = useState({
@@ -36,20 +39,42 @@ function Settings() {
     userName: "guest",
   });
 
-  
   useEffect(() => {
-    apiClient.get("/api/v1/profile/me")
+    apiClient
+      .get("/api/v1/profile/me")
       .then((res) => {
         const data = res.data;
-        if (data.success && data.data?.user) {
+        if (data?.success && data.data?.user) {
           setProfileData(data.data.user);
         }
       })
       .catch(() => {});
   }, []);
 
+  const handleLogout = async () => {
+    if (!window.confirm("Do you want to logout?")) return;
+
+    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+    try {
+      await fetch(`${apiUrl}/api/v1/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+      });
+    } catch {
+      // Clear client-side state even if request fails
+    } finally {
+      logout();
+      navigate("/login");
+    }
+  };
+
   const handleSelect = (id) => {
-    if (id === "logout") return;
+    if (id === "logout") {
+      handleLogout();
+      return;
+    }
     setActiveSection(id);
   };
 
@@ -70,7 +95,6 @@ function Settings() {
       </div>
     </div>
   );
-};
-
+}
 
 export default Settings;

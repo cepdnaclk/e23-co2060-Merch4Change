@@ -11,6 +11,34 @@
     />
 
     <title>antigravity</title>
+
+    <!--
+      Apply the saved theme/font-size BEFORE React mounts and BEFORE the
+      stylesheet paints, so we never flash the wrong theme on load.
+      Keep this in sync with the keys used in src/context/ThemeContext.jsx.
+    -->
+    <script>
+      (function () {
+        try {
+          var THEME_KEY = "m4c-theme";
+          var FONT_KEY = "m4c-font-size";
+          var theme = localStorage.getItem(THEME_KEY) || "system";
+          var systemDark =
+            window.matchMedia &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches;
+          var resolved = theme === "system" ? (systemDark ? "dark" : "light") : theme;
+
+          document.documentElement.classList.toggle("dark", resolved === "dark");
+          document.documentElement.setAttribute("data-theme", resolved);
+          document.documentElement.setAttribute(
+            "data-font-size",
+            localStorage.getItem(FONT_KEY) || "medium"
+          );
+        } catch (e) {
+          // localStorage unavailable (privacy mode etc.) — fall back to light/medium defaults.
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

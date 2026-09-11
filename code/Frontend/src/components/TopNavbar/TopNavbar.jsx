@@ -48,7 +48,7 @@ function TopNavbar({
     return () => {
       active = false;
     };
-  }, [profileData]);
+  }, [accessToken, profileData]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -92,22 +92,22 @@ function TopNavbar({
     try {
       await fetch(`${apiUrl}/api/v1/auth/logout`, {
         method: "POST",
-        credentials: "include",       // send the refreshToken cookie so backend can clear it
+        credentials: "include",
         headers: accessToken
           ? { Authorization: `Bearer ${accessToken}` }
           : {},
       });
     } catch {
-      // Even if the request fails, clear local auth state client-side.
+      // Clear local auth state regardless of backend errors
     } finally {
-      logout();                       // clear AuthContext (React memory)
+      logout();
       setShowLogoutPopup(false);
       navigate("/login");
     }
   };
 
   const handleNotificationDropDown = () => {
-    setShowNotifications(!showNotifications);
+    setShowNotifications((prev) => !prev);
   };
 
   const handleMarkAsRead = async (id) => {
@@ -127,6 +127,7 @@ function TopNavbar({
     <nav className={`lum-topbar ${themeClass}`}>
       <div className="lum-topbar-left">
         <button
+          type="button"
           className="lum-menu-btn"
           onClick={() => setIsSidebarCollapsed?.(!isSidebarCollapsed)}
           aria-label="Toggle sidebar"
@@ -163,19 +164,35 @@ function TopNavbar({
         >
           Trends
         </span>
-        <div className="lum-icon-btn" onClick={() => handleNotificationDropDown()} ref={notificationRef}>
-          <Bell size={20} />
-          {unreadCount > 0 && (
-            <span className="lum-notif-badge">{unreadCount}</span>
-          )}
-          {showNotifications ?
-            <div className="lum-notification-dropdown"
-              onClick={(e) => e.stopPropagation()}>
-              <NotificationDropDown notifications={notifications} />
+
+        {/* Dedicated relative container for notification button + dropdown */}
+        <div className="lum-notification-wrapper" ref={notificationRef}>
+          <button
+            type="button"
+            className={`lum-icon-btn ${showNotifications ? "active" : ""}`}
+            onClick={handleNotificationDropDown}
+            aria-label="Toggle notifications"
+          >
+            <Bell size={20} />
+            {unreadCount > 0 && (
+              <span className="lum-notif-badge">{unreadCount}</span>
+            )}
+          </button>
+          {showNotifications && (
+            <div
+              className="lum-notification-dropdown bg-white dark:bg-[#1b1b1f] border border-gray-100 dark:border-[#2c2c33] rounded-xl shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <NotificationDropDown
+                notifications={notifications}
+                onMarkAsRead={handleMarkAsRead}
+              />
             </div>
-            : null}
+          )}
         </div>
+
         <CoinBalance />
+
         <div className="lum-profile-menu" ref={popupRef}>
           <button
             type="button"
