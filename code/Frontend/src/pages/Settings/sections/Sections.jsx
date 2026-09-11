@@ -1,12 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import apiClient from "../../../api/apiClient.js";
+import { useTheme } from "../../../context/ThemeContext";
 import "./SettingsSection.css";
 
 function Toggle({ label, desc, badge, checked, onChange }) {
   return (
     <div className="s-toggle-row">
       <div className="s-toggle-row__info">
-        <span className="s-toggle-row__label">{label}{badge && <span className="s-toggle-row__badge">{badge}</span>}</span>
+        <span className="s-toggle-row__label">
+          {label}
+          {badge && <span className="s-toggle-row__badge">{badge}</span>}
+        </span>
         {desc && <span className="s-toggle-row__desc">{desc}</span>}
       </div>
       <label className="s-switch">
@@ -17,20 +22,16 @@ function Toggle({ label, desc, badge, checked, onChange }) {
   );
 }
 
-import apiClient from "../../../api/apiClient.js";
-import { useTheme } from "../../../context/ThemeContext";
-
 export function SecuritySection() {
-  const [twoFA, setTwoFA] = React.useState(false);
-  const [alerts, setAlerts] = React.useState(true);
-  const [currentPassword, setCurrentPassword] = React.useState("");
-  const [newPassword, setNewPassword] = React.useState("");
-  const [confirmPassword, setConfirmPassword] = React.useState("");
-  const [savingToggle, setSavingToggle] = React.useState(false);
-  const [savingPassword, setSavingPassword] = React.useState(false);
+  const [twoFA, setTwoFA] = useState(false);
+  const [alerts, setAlerts] = useState(true);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [savingToggle, setSavingToggle] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
 
-  // Load current settings on mount
-  React.useEffect(() => {
+  useEffect(() => {
     const loadSettings = async () => {
       try {
         const res = await apiClient.get("/api/v1/profile/me");
@@ -53,9 +54,9 @@ export function SecuritySection() {
         twoFactorEnabled: which === "2fa" ? value : twoFA,
         loginActivityAlerts: which === "alerts" ? value : alerts,
       };
-      
+
       const res = await apiClient.put("/api/v1/settings/security", payload);
-      
+
       if (res.data?.success) {
         if (which === "2fa") setTwoFA(value);
         if (which === "alerts") setAlerts(value);
@@ -102,51 +103,51 @@ export function SecuritySection() {
       <p className="s-section__desc">Manage your password and keep your account safe.</p>
       <div className="s-row">
         <label className="s-label">Current password</label>
-        <input 
-          className="s-input" 
-          type="password" 
-          placeholder="Enter current password" 
+        <input
+          className="s-input"
+          type="password"
+          placeholder="Enter current password"
           value={currentPassword}
           onChange={(e) => setCurrentPassword(e.target.value)}
         />
       </div>
       <div className="s-row">
         <label className="s-label">New password</label>
-        <input 
-          className="s-input" 
-          type="password" 
-          placeholder="Enter new password" 
+        <input
+          className="s-input"
+          type="password"
+          placeholder="Enter new password"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
         />
       </div>
       <div className="s-row">
         <label className="s-label">Confirm new password</label>
-        <input 
-          className="s-input" 
-          type="password" 
-          placeholder="Confirm new password" 
+        <input
+          className="s-input"
+          type="password"
+          placeholder="Confirm new password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
       </div>
       <div className="s-divider" />
-      <Toggle 
-        label="Two-factor authentication" 
-        desc="Require a code when logging in from a new device" 
-        badge="Recommended" 
-        checked={twoFA} 
-        onChange={() => handleToggleSave("2fa", !twoFA)} 
+      <Toggle
+        label="Two-factor authentication"
+        desc="Require a code when logging in from a new device"
+        badge="Recommended"
+        checked={twoFA}
+        onChange={() => handleToggleSave("2fa", !twoFA)}
       />
-      <Toggle 
-        label="Login activity alerts" 
-        desc="Get notified when your account is accessed from a new location" 
-        checked={alerts} 
-        onChange={() => handleToggleSave("alerts", !alerts)} 
+      <Toggle
+        label="Login activity alerts"
+        desc="Get notified when your account is accessed from a new location"
+        checked={alerts}
+        onChange={() => handleToggleSave("alerts", !alerts)}
       />
       <div className="s-divider" />
-      <button 
-        className="s-btn s-btn--primary" 
+      <button
+        className="s-btn s-btn--primary"
         onClick={handlePasswordChange}
         disabled={savingPassword || savingToggle}
       >
@@ -157,17 +158,16 @@ export function SecuritySection() {
 }
 
 export function PrivacySection() {
-  const [s, setS] = React.useState({ 
-    private: false, 
-    activity: true, 
-    messages: true, 
+  const [s, setS] = useState({
+    private: false,
+    activity: true,
+    messages: true,
     receipts: false,
-    commentPermission: "following"
+    commentPermission: "following",
   });
-  const [saving, setSaving] = React.useState(false);
+  const [saving, setSaving] = useState(false);
 
-  // Load current settings on mount
-  React.useEffect(() => {
+  useEffect(() => {
     const loadSettings = async () => {
       try {
         const res = await apiClient.get("/api/v1/profile/me");
@@ -178,7 +178,7 @@ export function PrivacySection() {
             activity: user.showActivityStatus ?? true,
             messages: user.allowMessageRequests ?? true,
             receipts: user.hideReadReceipts ?? false,
-            commentPermission: user.commentPermission ?? "following"
+            commentPermission: user.commentPermission ?? "following",
           });
         }
       } catch (err) {
@@ -225,35 +225,35 @@ export function PrivacySection() {
     <div className="s-section">
       <h2 className="s-section__title">Privacy</h2>
       <p className="s-section__desc">Control who can see your content and interact with you.</p>
-      <Toggle 
-        label="Private account" 
-        desc="Only approved followers can see your posts" 
-        checked={s.private} 
-        onChange={() => tog("private")} 
+      <Toggle
+        label="Private account"
+        desc="Only approved followers can see your posts"
+        checked={s.private}
+        onChange={() => tog("private")}
       />
-      <Toggle 
-        label="Show activity status" 
-        desc="Let people see when you were last active" 
-        checked={s.activity} 
-        onChange={() => tog("activity")} 
+      <Toggle
+        label="Show activity status"
+        desc="Let people see when you were last active"
+        checked={s.activity}
+        onChange={() => tog("activity")}
       />
-      <Toggle 
-        label="Allow message requests" 
-        desc="Let people you don't follow send message requests" 
-        checked={s.messages} 
-        onChange={() => tog("messages")} 
+      <Toggle
+        label="Allow message requests"
+        desc="Let people you don't follow send message requests"
+        checked={s.messages}
+        onChange={() => tog("messages")}
       />
-      <Toggle 
-        label="Hide read receipts" 
-        desc="Others won't know when you've read their messages" 
-        checked={s.receipts} 
-        onChange={() => tog("receipts")} 
+      <Toggle
+        label="Hide read receipts"
+        desc="Others won't know when you've read their messages"
+        checked={s.receipts}
+        onChange={() => tog("receipts")}
       />
       <div className="s-divider" />
       <div className="s-row">
         <label className="s-label">Who can comment on your posts</label>
-        <select 
-          className="s-input s-input--select" 
+        <select
+          className="s-input s-input--select"
           value={s.commentPermission}
           onChange={handleCommentPermissionChange}
         >
@@ -269,17 +269,16 @@ export function PrivacySection() {
 }
 
 export function NotificationsSection() {
-  const [s, setS] = React.useState({ 
-    likes: true, 
-    comments: true, 
-    followers: true, 
-    dms: true, 
-    email: false 
+  const [s, setS] = useState({
+    likes: true,
+    comments: true,
+    followers: true,
+    dms: true,
+    email: false,
   });
-  const [saving, setSaving] = React.useState(false);
+  const [saving, setSaving] = useState(false);
 
-  // Load current settings on mount
-  React.useEffect(() => {
+  useEffect(() => {
     const loadSettings = async () => {
       try {
         const res = await apiClient.get("/api/v1/profile/me");
@@ -290,7 +289,7 @@ export function NotificationsSection() {
             comments: user.notifyOnComments ?? true,
             followers: user.notifyOnNewFollowers ?? true,
             dms: user.notifyOnDMs ?? true,
-            email: user.emailNotifications ?? false
+            email: user.emailNotifications ?? false,
           });
         }
       } catch (err) {
@@ -331,35 +330,35 @@ export function NotificationsSection() {
     <div className="s-section">
       <h2 className="s-section__title">Notifications</h2>
       <p className="s-section__desc">Choose what you get notified about.</p>
-      <Toggle 
-        label="Likes" 
-        desc="When someone likes your posts" 
-        checked={s.likes} 
-        onChange={() => tog("likes")} 
+      <Toggle
+        label="Likes"
+        desc="When someone likes your posts"
+        checked={s.likes}
+        onChange={() => tog("likes")}
       />
-      <Toggle 
-        label="Comments" 
-        desc="When someone comments on your posts" 
-        checked={s.comments} 
-        onChange={() => tog("comments")} 
+      <Toggle
+        label="Comments"
+        desc="When someone comments on your posts"
+        checked={s.comments}
+        onChange={() => tog("comments")}
       />
-      <Toggle 
-        label="New followers" 
-        desc="When someone starts following you" 
-        checked={s.followers} 
-        onChange={() => tog("followers")} 
+      <Toggle
+        label="New followers"
+        desc="When someone starts following you"
+        checked={s.followers}
+        onChange={() => tog("followers")}
       />
-      <Toggle 
-        label="Direct messages" 
-        desc="When you receive a new message" 
-        checked={s.dms} 
-        onChange={() => tog("dms")} 
+      <Toggle
+        label="Direct messages"
+        desc="When you receive a new message"
+        checked={s.dms}
+        onChange={() => tog("dms")}
       />
-      <Toggle 
-        label="Email notifications" 
-        desc="Receive a summary of activity to your email" 
-        checked={s.email} 
-        onChange={() => tog("email")} 
+      <Toggle
+        label="Email notifications"
+        desc="Receive a summary of activity to your email"
+        checked={s.email}
+        onChange={() => tog("email")}
       />
       {saving && <p style={{ color: "#999", fontSize: "12px", marginTop: "10px" }}>Saving...</p>}
     </div>
@@ -367,30 +366,43 @@ export function NotificationsSection() {
 }
 
 export function AppearanceSection() {
-  // theme/fontSize here are what's saved on the backend for this user.
-  // The ThemeContext values (below) are what's actually applied to the DOM
-  // right now — they start from localStorage/system and may briefly differ
-  // from the backend value until the profile fetch below resolves.
-  const { theme: appliedTheme, fontSize: appliedFontSize, setTheme, setFontSize } = useTheme();
-  const [appTheme, setAppTheme] = React.useState(appliedTheme);
-  const [fontSize, setFontSizeLocal] = React.useState(appliedFontSize);
-  const [saving, setSaving] = React.useState(false);
-  const [loaded, setLoaded] = React.useState(false);
+  const { theme, fontSize, setTheme, setFontSize } = useTheme();
+  const [appTheme, setAppTheme] = useState(theme);
+  const [localFontSize, setLocalFontSize] = useState(fontSize);
+  const [saving, setSaving] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
-  // Load the user's saved preference and sync it into ThemeContext so the
-  // whole app (not just this form) reflects what's actually stored.
-  React.useEffect(() => {
+  // Keep dropdowns in sync if ThemeContext changes externally (e.g. storage events or init)
+  useEffect(() => {
+    setAppTheme(theme);
+  }, [theme]);
+
+  useEffect(() => {
+    setLocalFontSize(fontSize);
+  }, [fontSize]);
+
+  // Load backend preferences: only apply if local storage has not explicitly set one
+  useEffect(() => {
     const loadSettings = async () => {
       try {
         const res = await apiClient.get("/api/v1/profile/me");
         if (res.data?.data?.user) {
           const user = res.data.data.user;
-          const savedTheme = user.appTheme ?? "system";
-          const savedFontSize = user.fontSize ?? "medium";
-          setAppTheme(savedTheme);
-          setFontSizeLocal(savedFontSize);
-          setTheme(savedTheme); // apply immediately app-wide
-          setFontSize(savedFontSize);
+          const backendTheme = user.appTheme;
+          const backendFontSize = user.fontSize;
+
+          const hasLocalTheme = Boolean(localStorage.getItem("m4c-theme"));
+          const hasLocalFont = Boolean(localStorage.getItem("m4c-font-size"));
+
+          // Only overwrite from backend if user has no existing local preference
+          if (backendTheme && !hasLocalTheme) {
+            setAppTheme(backendTheme);
+            setTheme(backendTheme);
+          }
+          if (backendFontSize && !hasLocalFont) {
+            setLocalFontSize(backendFontSize);
+            setFontSize(backendFontSize);
+          }
         }
       } catch (err) {
         console.error("Failed to load appearance settings:", err);
@@ -399,10 +411,9 @@ export function AppearanceSection() {
       }
     };
     loadSettings();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [setTheme, setFontSize]);
 
-  // Live preview: apply as soon as the user picks a new option, before Save.
+  // Instantly apply change across the entire app and save to localStorage via ThemeContext
   const handleThemeChange = (e) => {
     const next = e.target.value;
     setAppTheme(next);
@@ -411,7 +422,7 @@ export function AppearanceSection() {
 
   const handleFontSizeChange = (e) => {
     const next = e.target.value;
-    setFontSizeLocal(next);
+    setLocalFontSize(next);
     setFontSize(next);
   };
 
@@ -420,7 +431,7 @@ export function AppearanceSection() {
     try {
       const res = await apiClient.put("/api/v1/settings/appearance", {
         appTheme,
-        fontSize,
+        fontSize: localFontSize,
       });
 
       if (res.data?.success) {
@@ -454,7 +465,7 @@ export function AppearanceSection() {
         <label className="s-label">Font size</label>
         <select
           className="s-input s-input--select"
-          value={fontSize}
+          value={localFontSize}
           onChange={handleFontSizeChange}
           disabled={!loaded}
         >
@@ -479,11 +490,10 @@ export function AppearanceSection() {
 }
 
 export function LanguageSection() {
-  const [appLanguage, setAppLanguage] = React.useState("en-US");
-  const [saving, setSaving] = React.useState(false);
+  const [appLanguage, setAppLanguage] = useState("en-US");
+  const [saving, setSaving] = useState(false);
 
-  // Load current settings on mount
-  React.useEffect(() => {
+  useEffect(() => {
     const loadSettings = async () => {
       try {
         const res = await apiClient.get("/api/v1/profile/me");
@@ -521,8 +531,8 @@ export function LanguageSection() {
       <p className="s-section__desc">Choose your preferred language for the app.</p>
       <div className="s-row">
         <label className="s-label">App language</label>
-        <select 
-          className="s-input s-input--select" 
+        <select
+          className="s-input s-input--select"
           value={appLanguage}
           onChange={(e) => setAppLanguage(e.target.value)}
         >
@@ -537,8 +547,8 @@ export function LanguageSection() {
         </select>
       </div>
       <div className="s-divider" />
-      <button 
-        className="s-btn s-btn--primary" 
+      <button
+        className="s-btn s-btn--primary"
         onClick={handleSave}
         disabled={saving}
       >
@@ -549,9 +559,9 @@ export function LanguageSection() {
 }
 
 export function HelpSection() {
-  const [deletePassword, setDeletePassword] = React.useState("");
-  const [deleting, setDeleting] = React.useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleDeleteAccount = async () => {
     if (!deletePassword) {
@@ -571,7 +581,6 @@ export function HelpSection() {
 
       if (res.data?.success) {
         alert("Your account has been permanently deleted.");
-        // Redirect to login or home page
         window.location.href = "/";
       }
     } catch (err) {
@@ -598,10 +607,10 @@ export function HelpSection() {
         <span className="s-list-row__chevron">›</span>
       </Link>
       <div className="s-divider" />
-      
+
       {!showDeleteConfirm && (
-        <button 
-          className="s-btn s-btn--danger" 
+        <button
+          className="s-btn s-btn--danger"
           onClick={() => setShowDeleteConfirm(true)}
         >
           Delete account
@@ -609,33 +618,35 @@ export function HelpSection() {
       )}
 
       {showDeleteConfirm && (
-        <div style={{ 
-          padding: "15px", 
-          backgroundColor: "#fff3cd", 
-          border: "1px solid #ffc107", 
-          borderRadius: "4px",
-          marginTop: "10px"
-        }}>
+        <div
+          style={{
+            padding: "15px",
+            backgroundColor: "#fff3cd",
+            border: "1px solid #ffc107",
+            borderRadius: "4px",
+            marginTop: "10px",
+          }}
+        >
           <p style={{ color: "#856404", marginBottom: "10px" }}>
             ⚠️ Enter your password to permanently delete your account:
           </p>
-          <input 
-            type="password" 
-            className="s-input" 
-            placeholder="Enter your password" 
+          <input
+            type="password"
+            className="s-input"
+            placeholder="Enter your password"
             value={deletePassword}
             onChange={(e) => setDeletePassword(e.target.value)}
           />
           <div style={{ marginTop: "10px", display: "flex", gap: "10px" }}>
-            <button 
-              className="s-btn s-btn--danger" 
+            <button
+              className="s-btn s-btn--danger"
               onClick={handleDeleteAccount}
               disabled={deleting}
             >
               {deleting ? "Deleting..." : "Confirm deletion"}
             </button>
-            <button 
-              className="s-btn s-btn--ghost" 
+            <button
+              className="s-btn s-btn--ghost"
               onClick={() => {
                 setShowDeleteConfirm(false);
                 setDeletePassword("");
