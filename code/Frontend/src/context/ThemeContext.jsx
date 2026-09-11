@@ -59,7 +59,7 @@ function applyFontSizeToDom(fontSize) {
   }
 }
 
-// Immediately apply stored theme prior to React mount to avoid flicker/delays
+// Immediately apply stored theme and font scale prior to React mount
 if (typeof window !== "undefined") {
   try {
     const initialTheme = localStorage.getItem(THEME_KEY);
@@ -73,7 +73,7 @@ if (typeof window !== "undefined") {
       VALID_FONT_SIZES.includes(initialFontSize) ? initialFontSize : "medium"
     );
   } catch (e) {
-    console.error("Failed to apply initial theme from storage:", e);
+    console.error("Failed to apply initial theme/font size from storage:", e);
   }
 }
 
@@ -124,7 +124,7 @@ export const ThemeProvider = ({ children }) => {
     return () => mq.removeEventListener("change", handleChange);
   }, [theme]);
 
-  // Synchronize theme across multiple tabs/windows
+  // Synchronize theme and font size across multiple tabs/windows
   useEffect(() => {
     const handleStorageChange = (e) => {
       if (e.key === THEME_KEY && VALID_THEMES.includes(e.newValue)) {
@@ -132,6 +132,7 @@ export const ThemeProvider = ({ children }) => {
       }
       if (e.key === FONT_KEY && VALID_FONT_SIZES.includes(e.newValue)) {
         setFontSizeState(e.newValue);
+        applyFontSizeToDom(e.newValue);
       }
     };
 
@@ -152,6 +153,7 @@ export const ThemeProvider = ({ children }) => {
   const setFontSize = useCallback((next) => {
     if (!VALID_FONT_SIZES.includes(next)) return;
     setFontSizeState(next);
+    applyFontSizeToDom(next); // Immediate DOM update
     try {
       localStorage.setItem(FONT_KEY, next);
     } catch (e) {

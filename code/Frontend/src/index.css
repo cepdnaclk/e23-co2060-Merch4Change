@@ -58,12 +58,47 @@ body.dark {
   --m4c-switch-off: #45454e;
 }
 
-html[data-font-size="small"] { --m4c-font-scale: 0.9; }
-html[data-font-size="medium"] { --m4c-font-scale: 1; }
-html[data-font-size="large"] { --m4c-font-scale: 1.15; }
+/*
+ * Global font size scaling tokens
+ */
+html[data-font-size="small"],
+body[data-font-size="small"],
+[data-font-size="small"] { 
+  --m4c-font-scale: 0.9; 
+}
+
+html[data-font-size="medium"],
+body[data-font-size="medium"],
+[data-font-size="medium"] { 
+  --m4c-font-scale: 1; 
+}
+
+html[data-font-size="large"],
+body[data-font-size="large"],
+[data-font-size="large"] { 
+  --m4c-font-scale: 1.15; 
+}
 
 /*
- * Site-wide base background, text color, and scaling
+ * Root zoom scaling: forces uniform scaling on all pages even with hardcoded px font sizes
+ */
+html[data-font-size="small"] body,
+body[data-font-size="small"] {
+  zoom: 0.9;
+}
+
+html[data-font-size="medium"] body,
+body[data-font-size="medium"] {
+  zoom: 1;
+}
+
+html[data-font-size="large"] body,
+body[data-font-size="large"] {
+  zoom: 1.15;
+}
+
+/*
+ * Base background, text color, and fallback rem scaling
  */
 html {
   background-color: var(--m4c-bg-page);
