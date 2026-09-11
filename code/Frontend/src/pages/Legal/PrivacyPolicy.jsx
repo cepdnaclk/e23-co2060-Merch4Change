@@ -1,5 +1,6 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import "./PrivacyPolicy.css";
 
 const LAST_UPDATED = "September 2026";
@@ -43,10 +44,25 @@ const SECTIONS = [
 ];
 
 function PrivacyPolicy() {
+  const navigate = useNavigate();
+
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate("/settings");
+    }
+  };
+
   return (
     <div className="privacy-page">
       <div className="privacy-hero">
         <div className="privacy-hero-container">
+          <button type="button" className="privacy-back-link" onClick={handleBack}>
+            <ArrowLeft size={16} />
+            <span>Back</span>
+          </button>
+
           <h1>Privacy Policy</h1>
           <p className="privacy-updated">Last updated: {LAST_UPDATED}</p>
           <p className="privacy-intro">
