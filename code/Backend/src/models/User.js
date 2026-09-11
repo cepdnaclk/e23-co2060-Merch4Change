@@ -102,11 +102,84 @@ const userSchema = new mongoose.Schema(
       default: "",
     }
   },
+
+  // ===== SECURITY SETTINGS =====
+    twoFactorEnabled: {
+      type: Boolean,
+      default: false,
+    },
+    loginActivityAlerts: {
+      type: Boolean,
+      default: true,
+    },
+
+    // ===== PRIVACY SETTINGS =====
+    isPrivate: {
+      type: Boolean,
+      default: false,
+    },
+    showActivityStatus: {
+      type: Boolean,
+      default: true,
+    },
+    allowMessageRequests: {
+      type: Boolean,
+      default: true,
+    },
+    hideReadReceipts: {
+      type: Boolean,
+      default: false,
+    },
+    commentPermission: {
+      type: String,
+      enum: ['everyone', 'followers', 'following', 'none'],
+      default: 'following',
+    },
+
+    // ===== NOTIFICATION SETTINGS =====
+    notifyOnLikes: {
+      type: Boolean,
+      default: true,
+    },
+    notifyOnComments: {
+      type: Boolean,
+      default: true,
+    },
+    notifyOnNewFollowers: {
+      type: Boolean,
+      default: true,
+    },
+    notifyOnDMs: {
+      type: Boolean,
+      default: true,
+    },
+    emailNotifications: {
+      type: Boolean,
+      default: false,
+    },
+
+    // ===== APPEARANCE & PREFERENCES =====
+    appTheme: {
+      type: String,
+      enum: ['system', 'light', 'dark'],
+      default: 'system',
+    },
+    fontSize: {
+      type: String,
+      enum: ['small', 'medium', 'large'],
+      default: 'medium',
+    },
+    appLanguage: {
+      type: String,
+      default: 'en-US',
+    },
+  },
   {
     timestamps: true,
     versionKey: false,
   },
 );
+  
 
 userSchema.pre("save", function assignDefaultRole(next) {
   if (this.isNew && ["admin", "charity"].includes(this.role)) {
