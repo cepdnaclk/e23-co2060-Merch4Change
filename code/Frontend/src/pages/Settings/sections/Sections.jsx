@@ -365,14 +365,81 @@ export function NotificationsSection() {
 }
 
 export function AppearanceSection() {
+  const [appTheme, setAppTheme] = React.useState("system");
+  const [fontSize, setFontSize] = React.useState("medium");
+  const [saving, setSaving] = React.useState(false);
+
+  // Load current settings on mount
+  React.useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const res = await apiClient.get("/api/v1/profile/me");
+        if (res.data?.data?.user) {
+          const user = res.data.data.user;
+          setAppTheme(user.appTheme ?? "system");
+          setFontSize(user.fontSize ?? "medium");
+        }
+      } catch (err) {
+        console.error("Failed to load appearance settings:", err);
+      }
+    };
+    loadSettings();
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const res = await apiClient.put("/api/v1/settings/appearance", {
+        appTheme,
+        fontSize,
+      });
+
+      if (res.data?.success) {
+        alert("Appearance settings saved!");
+      }
+    } catch (err) {
+      alert("Error: " + (err.response?.data?.message || err.message));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="s-section">
       <h2 className="s-section__title">Appearance</h2>
       <p className="s-section__desc">Customize how the app looks for you.</p>
-      <div className="s-row"><label className="s-label">Theme</label><select className="s-input s-input--select" defaultValue="system"><option value="system">System default</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
-      <div className="s-row"><label className="s-label">Font size</label><select className="s-input s-input--select" defaultValue="medium"><option value="small">Small</option><option value="medium">Medium</option><option value="large">Large</option></select></div>
+      <div className="s-row">
+        <label className="s-label">Theme</label>
+        <select 
+          className="s-input s-input--select" 
+          value={appTheme}
+          onChange={(e) => setAppTheme(e.target.value)}
+        >
+          <option value="system">System default</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </div>
+      <div className="s-row">
+        <label className="s-label">Font size</label>
+        <select 
+          className="s-input s-input--select" 
+          value={fontSize}
+          onChange={(e) => setFontSize(e.target.value)}
+        >
+          <option value="small">Small</option>
+          <option value="medium">Medium</option>
+          <option value="large">Large</option>
+        </select>
+      </div>
       <div className="s-divider" />
-      <button className="s-btn s-btn--primary">Save preferences</button>
+      <button 
+        className="s-btn s-btn--primary" 
+        onClick={handleSave}
+        disabled={saving}
+      >
+        {saving ? "Saving..." : "Save preferences"}
+      </button>
     </div>
   );
 }
