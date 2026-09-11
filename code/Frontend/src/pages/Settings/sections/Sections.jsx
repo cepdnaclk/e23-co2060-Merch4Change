@@ -267,17 +267,99 @@ export function PrivacySection() {
 }
 
 export function NotificationsSection() {
-  const [s, setS] = useState({ likes: true, comments: true, followers: true, dms: true, email: false });
-  const tog = (k) => setS(p => ({ ...p, [k]: !p[k] }));
+  const [s, setS] = React.useState({ 
+    likes: true, 
+    comments: true, 
+    followers: true, 
+    dms: true, 
+    email: false 
+  });
+  const [saving, setSaving] = React.useState(false);
+
+  // Load current settings on mount
+  React.useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const res = await apiClient.get("/api/v1/profile/me");
+        if (res.data?.data?.user) {
+          const user = res.data.data.user;
+          setS({
+            likes: user.notifyOnLikes ?? true,
+            comments: user.notifyOnComments ?? true,
+            followers: user.notifyOnNewFollowers ?? true,
+            dms: user.notifyOnDMs ?? true,
+            email: user.emailNotifications ?? false
+          });
+        }
+      } catch (err) {
+        console.error("Failed to load notification settings:", err);
+      }
+    };
+    loadSettings();
+  }, []);
+
+  const tog = (k) => {
+    const newState = { ...s, [k]: !s[k] };
+    setS(newState);
+    handleSave(newState);
+  };
+
+  const handleSave = async (stateData) => {
+    setSaving(true);
+    try {
+      const res = await apiClient.put("/api/v1/settings/notifications", {
+        notifyOnLikes: stateData.likes,
+        notifyOnComments: stateData.comments,
+        notifyOnNewFollowers: stateData.followers,
+        notifyOnDMs: stateData.dms,
+        emailNotifications: stateData.email,
+      });
+
+      if (res.data?.success) {
+        console.log("Notification settings updated!");
+      }
+    } catch (err) {
+      alert("Error updating notifications: " + (err.response?.data?.message || err.message));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="s-section">
       <h2 className="s-section__title">Notifications</h2>
       <p className="s-section__desc">Choose what you get notified about.</p>
-      <Toggle label="Likes" desc="When someone likes your posts" checked={s.likes} onChange={() => tog("likes")} />
-      <Toggle label="Comments" desc="When someone comments on your posts" checked={s.comments} onChange={() => tog("comments")} />
-      <Toggle label="New followers" desc="When someone starts following you" checked={s.followers} onChange={() => tog("followers")} />
-      <Toggle label="Direct messages" desc="When you receive a new message" checked={s.dms} onChange={() => tog("dms")} />
-      <Toggle label="Email notifications" desc="Receive a summary of activity to your email" checked={s.email} onChange={() => tog("email")} />
+      <Toggle 
+        label="Likes" 
+        desc="When someone likes your posts" 
+        checked={s.likes} 
+        onChange={() => tog("likes")} 
+      />
+      <Toggle 
+        label="Comments" 
+        desc="When someone comments on your posts" 
+        checked={s.comments} 
+        onChange={() => tog("comments")} 
+      />
+      <Toggle 
+        label="New followers" 
+        desc="When someone starts following you" 
+        checked={s.followers} 
+        onChange={() => tog("followers")} 
+      />
+      <Toggle 
+        label="Direct messages" 
+        desc="When you receive a new message" 
+        checked={s.dms} 
+        onChange={() => tog("dms")} 
+      />
+      <Toggle 
+        label="Email notifications" 
+        desc="Receive a summary of activity to your email" 
+        checked={s.email} 
+        onChange={() => tog("email")} 
+      />
+      {saving && <p style={{ color: "#999", fontSize: "12px", marginTop: "10px" }}>Saving...</p>}
     </div>
   );
 }
