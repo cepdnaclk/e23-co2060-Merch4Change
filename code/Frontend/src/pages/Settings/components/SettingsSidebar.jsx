@@ -49,7 +49,9 @@ function SettingsSidebar({ activeSection, onSelect, showOrganization }) {
           {group.items.map((item) => (
             <button
               key={item.id}
-              className={`ss-nav__item${activeSection === item.id ? " ss-nav__item--active" : ""}${item.isDanger ? " ss-nav__item--danger" : ""}`}
+              className={`ss-nav__item${activeSection === item.id ? " ss-nav__item--active" : ""}${
+                item.isDanger ? " ss-nav__item--danger" : ""
+              }`}
               onClick={() => onSelect(item.id)}
             >
               <span className="ss-nav__icon">{item.icon}</span>

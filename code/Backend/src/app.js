@@ -30,7 +30,7 @@ import adminRoutes from "./routes/admin.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
 import auctionRoutes from "./routes/auction.routes.js";
 import leaderboardRoutes from "./routes/leaderboard.routes.js";
-
+import settingsRoutes from "./routes/settings.routes.js";
 
 const app = express();
 
@@ -98,6 +98,7 @@ app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/notifications", notificationRoutes);
 app.use("/api/v1/auctions", auctionRoutes);
 app.use("/api/v1/leaderboards", leaderboardRoutes);
+app.use("/api/v1/settings", settingsRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

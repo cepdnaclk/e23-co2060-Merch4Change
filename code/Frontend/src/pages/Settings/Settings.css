@@ -2,9 +2,10 @@
   display: flex;
   height: 100vh;
   overflow: hidden;
-  background: #fafafa;
+  background: var(--m4c-bg-page);
   padding-left: 70px;
-  transition: padding-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: padding-left 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.15s ease;
 }
 
 .settings-page:has(.lum-sidebar-collapsed) {
@@ -21,7 +22,8 @@
 .settings-content {
   flex: 1;
   overflow-y: auto;
-  background: white;
+  background: var(--m4c-bg-surface);
+  transition: background-color 0.15s ease;
 }
 
 @media (max-width: 768px) {
