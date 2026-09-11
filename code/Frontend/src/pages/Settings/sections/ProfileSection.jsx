@@ -1,53 +1,103 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "./SettingsSection.css";
-import { useRef } from "react";
 import apiClient from "../../../api/apiClient";
+
+function ToastBanner({ toast }) {
+  if (!toast.show) return null;
+  return (
+    <div className={`s-toast s-toast--${toast.type}`} role="status" aria-live="polite">
+      {toast.text}
+    </div>
+  );
+}
+
+// Helper to resolve absolute backend URLs for uploaded images
+const resolveImageUrl = (url) => {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) {
+    return url;
+  }
+  const backendBase = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  return `${backendBase.replace(/\/$/, "")}/${url.replace(/^\//, "")}`;
+};
 
 function ProfileSection({ profileData = {}, onUpdate = () => {} }) {
   const [userName, setUserName] = useState(profileData.userName || "");
-  const [fullName, setFullName] = useState(`${profileData.firstName || ""} ${profileData.lastName || ""}`.trim());
-  const [bio, setBio] = useState(profileData.profileBio || "");
-  const [website, setWebsite] = useState(profileData.userLink || "");
+  const [fullName, setFullName] = useState(
+    `${profileData.firstName || ""} ${profileData.lastName || ""}`.trim()
+  );
+  const [bio, setBio] = useState(profileData.profileBio || profileData.bio || "");
+  const [website, setWebsite] = useState(profileData.userLink || profileData.website || "");
+  const [location, setLocation] = useState(profileData.location || "");
   const [email, setEmail] = useState(profileData.email || "");
+  const [avatarUrl, setAvatarUrl] = useState(
+    profileData.profileImageUrl || profileData.avatarUrl || ""
+  );
+  const [imageError, setImageError] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [toast, setToast] = useState({ show: false, text: "", type: "" });
   const fileInputRef = useRef(null);
+
+  const showToast = (text, type = "info") => {
+    setToast({ show: true, text, type });
+    setTimeout(() => setToast({ show: false, text: "", type: "" }), 3500);
+  };
 
   useEffect(() => {
     setUserName(profileData.userName || "");
     setFullName(`${profileData.firstName || ""} ${profileData.lastName || ""}`.trim());
-    setBio(profileData.profileBio || "");
-    setWebsite(profileData.userLink || "");
+    setBio(profileData.profileBio || profileData.bio || "");
+    setWebsite(profileData.userLink || profileData.website || "");
+    setLocation(profileData.location || "");
     setEmail(profileData.email || "");
+
+    const resolved = profileData.profileImageUrl || profileData.avatarUrl || "";
+    setAvatarUrl(resolved);
+    setImageError(false);
   }, [profileData]);
 
-  const handleSave = async () => {
+  const handleSave = async (e) => {
+    if (e) e.preventDefault();
     setSaving(true);
     try {
       const parts = fullName.trim().split(" ");
       const firstName = parts.shift() || "";
       const lastName = parts.join(" ") || "";
 
-      const body = { firstName, lastName, userName, profileBio: bio, userLink: website, email };
+      const body = {
+        firstName,
+        lastName,
+        name: fullName.trim(),
+        userName,
+        profileBio: bio,
+        bio,
+        userLink: website,
+        website,
+        location,
+        email,
+      };
 
-      const res = await apiClient.put("/api/v1/profile/me", body);
+      const res = await apiClient.put("/api/v1/settings/profile", body).catch(() => {
+        return apiClient.put("/api/v1/profile/me", body);
+      });
+
       const data = res.data;
       if (!data?.success) throw new Error(data?.message || "Failed to update profile");
 
       if (data?.success && data.data?.user) {
-        onUpdate(data.data.user);
-        // reflect saved values (in case backend normalizes)
-        setUserName(data.data.user.userName || userName);
-        setFullName(`${data.data.user.firstName || ""} ${data.data.user.lastName || ""}`.trim());
-        setBio(data.data.user.profileBio || bio);
-        setWebsite(data.data.user.userLink || website);
-        setEmail(data.data.user.email || email);
+        const updated = data.data.user;
+        onUpdate(updated);
+        setUserName(updated.userName || userName);
+        setFullName(`${updated.firstName || ""} ${updated.lastName || ""}`.trim());
+        setBio(updated.profileBio || updated.bio || bio);
+        setWebsite(updated.userLink || updated.website || website);
+        setLocation(updated.location || location);
+        setEmail(updated.email || email);
+        showToast("Profile settings updated successfully!", "success");
       }
     } catch (err) {
-      // minimal feedback; caller can enhance
-      // keep simple: use alert
-      // eslint-disable-next-line no-alert
-      alert(err.message || "Unable to save profile");
+      showToast(err.response?.data?.message || err.message || "Unable to save profile", "error");
     } finally {
       setSaving(false);
     }
@@ -63,7 +113,7 @@ function ProfileSection({ profileData = {}, onUpdate = () => {} }) {
     setUploading(true);
     try {
       const userId = profileData?._id || profileData?.id;
-      if (!userId) throw new Error("Missing user id");
+      if (!userId) throw new Error("Missing user ID");
 
       const form = new FormData();
       form.append("image", file);
@@ -73,28 +123,33 @@ function ProfileSection({ profileData = {}, onUpdate = () => {} }) {
 
       if (!data?.success) throw new Error(data?.message || "Failed to upload image");
 
-      // Refresh profile from server to pick up new image URL
+      // Refresh profile to retrieve saved image url
       const profileRes = await apiClient.get("/api/v1/profile/me");
       const profileJson = profileRes.data;
       if (profileJson?.success && profileJson.data?.user) {
-        onUpdate(profileJson.data.user);
-        // ensure local inputs reflect any normalized values
-        setUserName(profileJson.data.user.userName || userName);
+        const freshUser = profileJson.data.user;
+        onUpdate(freshUser);
+        const newUrl = freshUser.profileImageUrl || freshUser.avatarUrl || "";
+        setAvatarUrl(newUrl);
+        setImageError(false);
+        showToast("Profile photo updated!", "success");
       }
     } catch (err) {
-      // eslint-disable-next-line no-alert
-      alert(err.message || "Unable to upload photo");
+      showToast(err.response?.data?.message || err.message || "Unable to upload photo", "error");
     } finally {
       setUploading(false);
-      // reset file input
       if (fileInputRef.current) fileInputRef.current.value = null;
     }
   };
 
+  const resolvedSrc = resolveImageUrl(avatarUrl);
+
   return (
     <div className="s-section">
+      <ToastBanner toast={toast} />
       <h2 className="s-section__title">Edit profile</h2>
       <p className="s-section__desc">Update your personal information and how it appears to others.</p>
+
       <div className="s-avatar-row">
         <input
           ref={fileInputRef}
@@ -103,35 +158,97 @@ function ProfileSection({ profileData = {}, onUpdate = () => {} }) {
           style={{ display: "none" }}
           onChange={handlePhotoChange}
         />
-        <div className="s-avatar">{(userName?.[0] || "U").toUpperCase()}</div>
+        {resolvedSrc && !imageError ? (
+          <img
+            src={resolvedSrc}
+            alt={userName || "avatar"}
+            className="s-avatar"
+            style={{ objectFit: "cover" }}
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          <div className="s-avatar">{(userName?.[0] || "U").toUpperCase()}</div>
+        )}
         <div className="s-avatar-info">
           <span className="s-avatar-name">{userName || "unknown"}</span>
-          <span className="s-avatar-sub">Premium User</span>
+          <span className="s-avatar-sub">
+            {profileData.accountType === "organization" ? "Organization Account" : "Member"}
+          </span>
         </div>
-        <button className="s-btn s-btn--ghost" onClick={handlePhotoClick} disabled={uploading}>{uploading ? "Uploading..." : "Change photo"}</button>
+        <button
+          className="s-btn s-btn--ghost"
+          onClick={handlePhotoClick}
+          disabled={uploading}
+        >
+          {uploading ? "Uploading..." : "Change photo"}
+        </button>
       </div>
+
       <div className="s-row">
         <label className="s-label">Username</label>
-        <input className="s-input" type="text" value={userName} onChange={(e) => setUserName(e.target.value)} />
+        <input
+          className="s-input"
+          type="text"
+          value={userName}
+          onChange={(e) => setUserName(e.target.value)}
+        />
       </div>
       <div className="s-row">
         <label className="s-label">Full name</label>
-        <input className="s-input" type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+        <input
+          className="s-input"
+          type="text"
+          value={fullName}
+          onChange={(e) => setFullName(e.target.value)}
+        />
       </div>
       <div className="s-row">
         <label className="s-label">Bio</label>
-        <input className="s-input" type="text" placeholder="Write something about yourself..." value={bio} onChange={(e) => setBio(e.target.value)} />
+        <textarea
+          className="s-input"
+          rows="3"
+          placeholder="Write something about yourself..."
+          value={bio}
+          onChange={(e) => setBio(e.target.value)}
+        />
+      </div>
+      <div className="s-row">
+        <label className="s-label">Location</label>
+        <input
+          className="s-input"
+          type="text"
+          placeholder="e.g. Colombo, Sri Lanka"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+        />
       </div>
       <div className="s-row">
         <label className="s-label">Website</label>
-        <input className="s-input" type="url" placeholder="https://yourwebsite.com" value={website} onChange={(e) => setWebsite(e.target.value)} />
+        <input
+          className="s-input"
+          type="url"
+          placeholder="https://yourwebsite.com"
+          value={website}
+          onChange={(e) => setWebsite(e.target.value)}
+        />
       </div>
       <div className="s-row">
         <label className="s-label">Email</label>
-        <input className="s-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <input
+          className="s-input"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
       </div>
       <div className="s-divider" />
-      <button className="s-btn s-btn--primary" onClick={handleSave} disabled={saving}>{saving ? "Saving..." : "Save changes"}</button>
+      <button
+        className="s-btn s-btn--primary"
+        onClick={handleSave}
+        disabled={saving}
+      >
+        {saving ? "Saving..." : "Save changes"}
+      </button>
     </div>
   );
 }

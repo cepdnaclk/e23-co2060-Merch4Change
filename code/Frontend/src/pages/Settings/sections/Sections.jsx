@@ -4,6 +4,9 @@ import apiClient from "../../../api/apiClient.js";
 import { useTheme } from "../../../context/ThemeContext";
 import "./SettingsSection.css";
 
+// Re-export ProfileSection so all sections can be imported from this file
+export { default as ProfileSection } from "./ProfileSection";
+
 function ToastBanner({ toast }) {
   if (!toast.show) return null;
   return (
@@ -36,141 +39,9 @@ function Toggle({ label, desc, badge, checked, onChange, disabled }) {
   );
 }
 
-export function ProfileSection() {
-  const [profile, setProfile] = useState({
-    firstName: "",
-    lastName: "",
-    bio: "",
-    website: "",
-    location: "",
-  });
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState({ show: false, text: "", type: "" });
-
-  const showToast = (text, type = "info") => {
-    setToast({ show: true, text, type });
-    setTimeout(() => setToast({ show: false, text: "", type: "" }), 3500);
-  };
-
-  useEffect(() => {
-    const loadProfile = async () => {
-      try {
-        setLoading(true);
-        const res = await apiClient.get("/api/v1/profile/me");
-        if (res.data?.data?.user) {
-          const u = res.data.data.user;
-          setProfile({
-            firstName: u.firstName || "",
-            lastName: u.lastName || "",
-            bio: u.profileBio || u.bio || "",
-            website: u.website || "",
-            location: u.location || "",
-          });
-        }
-      } catch (err) {
-        showToast(err.response?.data?.message || "Failed to load profile", "error");
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadProfile();
-  }, []);
-
-  const handleSave = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      const res = await apiClient.put("/api/v1/settings/profile", {
-        name: `${profile.firstName} ${profile.lastName}`.trim(),
-        bio: profile.bio,
-        website: profile.website,
-        location: profile.location,
-      });
-
-      if (res.data?.success) {
-        showToast("Profile settings updated!", "success");
-      }
-    } catch (err) {
-      showToast(err.response?.data?.message || "Failed to update profile", "error");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="s-section">
-        <h2 className="s-section__title">Profile information</h2>
-        <p className="s-section__desc">Loading profile data...</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="s-section">
-      <ToastBanner toast={toast} />
-      <h2 className="s-section__title">Profile information</h2>
-      <p className="s-section__desc">Manage your public profile details and links.</p>
-
-      <form onSubmit={handleSave}>
-        <div className="s-row">
-          <label className="s-label">First name</label>
-          <input
-            className="s-input"
-            type="text"
-            value={profile.firstName}
-            onChange={(e) => setProfile({ ...profile, firstName: e.target.value })}
-          />
-        </div>
-        <div className="s-row">
-          <label className="s-label">Last name</label>
-          <input
-            className="s-input"
-            type="text"
-            value={profile.lastName}
-            onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
-          />
-        </div>
-        <div className="s-row">
-          <label className="s-label">Bio</label>
-          <textarea
-            className="s-input"
-            rows="3"
-            value={profile.bio}
-            onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-          />
-        </div>
-        <div className="s-row">
-          <label className="s-label">Location</label>
-          <input
-            className="s-input"
-            type="text"
-            placeholder="e.g. Colombo, Sri Lanka"
-            value={profile.location}
-            onChange={(e) => setProfile({ ...profile, location: e.target.value })}
-          />
-        </div>
-        <div className="s-row">
-          <label className="s-label">Website</label>
-          <input
-            className="s-input"
-            type="url"
-            placeholder="https://example.com"
-            value={profile.website}
-            onChange={(e) => setProfile({ ...profile, website: e.target.value })}
-          />
-        </div>
-
-        <div className="s-divider" />
-        <button className="s-btn s-btn--primary" type="submit" disabled={saving}>
-          {saving ? "Saving..." : "Save changes"}
-        </button>
-      </form>
-    </div>
-  );
-}
-
+// ==========================================
+// SECURITY SECTION
+// ==========================================
 export function SecuritySection() {
   const [twoFA, setTwoFA] = useState(false);
   const [alerts, setAlerts] = useState(true);
@@ -203,7 +74,13 @@ export function SecuritySection() {
   }, []);
 
   const handleToggleSave = async (which, value) => {
+    const prevTwoFA = twoFA;
+    const prevAlerts = alerts;
+
+    if (which === "2fa") setTwoFA(value);
+    if (which === "alerts") setAlerts(value);
     setSavingToggle(true);
+
     try {
       const payload = {
         twoFactorEnabled: which === "2fa" ? value : twoFA,
@@ -211,13 +88,12 @@ export function SecuritySection() {
       };
 
       const res = await apiClient.put("/api/v1/settings/security", payload);
-
       if (res.data?.success) {
-        if (which === "2fa") setTwoFA(value);
-        if (which === "alerts") setAlerts(value);
         showToast("Security settings updated!", "success");
       }
     } catch (err) {
+      if (which === "2fa") setTwoFA(prevTwoFA);
+      if (which === "alerts") setAlerts(prevAlerts);
       showToast(err.response?.data?.message || err.message, "error");
     } finally {
       setSavingToggle(false);
@@ -315,6 +191,9 @@ export function SecuritySection() {
   );
 }
 
+// ==========================================
+// PRIVACY SECTION
+// ==========================================
 export function PrivacySection() {
   const [s, setS] = useState({
     private: false,
@@ -442,6 +321,9 @@ export function PrivacySection() {
   );
 }
 
+// ==========================================
+// NOTIFICATIONS SECTION
+// ==========================================
 export function NotificationsSection() {
   const [s, setS] = useState({
     likes: true,
@@ -565,6 +447,9 @@ export function NotificationsSection() {
   );
 }
 
+// ==========================================
+// APPEARANCE SECTION
+// ==========================================
 export function AppearanceSection() {
   const { theme, fontSize, setTheme, setFontSize } = useTheme();
   const [appTheme, setAppTheme] = useState(theme);
@@ -701,6 +586,9 @@ export function AppearanceSection() {
   );
 }
 
+// ==========================================
+// LANGUAGE SECTION
+// ==========================================
 export function LanguageSection() {
   const [appLanguage, setAppLanguage] = useState("en-US");
   const [saving, setSaving] = useState(false);
@@ -774,6 +662,9 @@ export function LanguageSection() {
   );
 }
 
+// ==========================================
+// HELP & SUPPORT SECTION
+// ==========================================
 export function HelpSection() {
   const [deletePassword, setDeletePassword] = useState("");
   const [deleting, setDeleting] = useState(false);

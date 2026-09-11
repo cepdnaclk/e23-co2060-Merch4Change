@@ -1,9 +1,9 @@
-// AFTER
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import SettingsSidebar from "./components/SettingsSidebar";
 import {
+  ProfileSection,
   SecuritySection,
   PrivacySection,
   NotificationsSection,
@@ -12,7 +12,6 @@ import {
   HelpSection,
 } from "./sections/Sections";
 import OrganizationVerificationSection from "./sections/OrganizationVerificationSection";
-import ProfileSection from "./sections/ProfileSection";
 import apiClient from "../../api/apiClient";
 import { useAuth } from "../../context/Context";
 import "./Settings.css";
@@ -28,7 +27,6 @@ const SECTIONS = {
   organization: OrganizationVerificationSection,
 };
 
-// AFTER
 function Settings() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -41,12 +39,12 @@ function Settings() {
     userName: "guest",
   });
 
-  
   useEffect(() => {
-    apiClient.get("/api/v1/profile/me")
+    apiClient
+      .get("/api/v1/profile/me")
       .then((res) => {
         const data = res.data;
-        if (data.success && data.data?.user) {
+        if (data?.success && data.data?.user) {
           setProfileData(data.data.user);
         }
       })
@@ -61,15 +59,13 @@ function Settings() {
     try {
       await fetch(`${apiUrl}/api/v1/auth/logout`, {
         method: "POST",
-        credentials: "include",       // send the refreshToken cookie so backend can clear it
-        headers: accessToken
-          ? { Authorization: `Bearer ${accessToken}` }
-          : {},
+        credentials: "include",
+        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
       });
     } catch {
-      // Even if the request fails, clear local auth state client-side.
+      // Clear client-side state even if request fails
     } finally {
-      logout();                       // clear AuthContext (React memory)
+      logout();
       navigate("/login");
     }
   };
@@ -99,7 +95,6 @@ function Settings() {
       </div>
     </div>
   );
-};
-
+}
 
 export default Settings;
