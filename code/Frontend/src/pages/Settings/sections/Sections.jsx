@@ -4,9 +4,9 @@ import apiClient from "../../../api/apiClient.js";
 import { useTheme } from "../../../context/ThemeContext";
 import "./SettingsSection.css";
 
-function Toggle({ label, desc, badge, checked, onChange }) {
+function Toggle({ label, desc, badge, checked, onChange, disabled }) {
   return (
-    <div className="s-toggle-row">
+    <div className={`s-toggle-row ${disabled ? "s-toggle-row--disabled" : ""}`}>
       <div className="s-toggle-row__info">
         <span className="s-toggle-row__label">
           {label}
@@ -15,7 +15,12 @@ function Toggle({ label, desc, badge, checked, onChange }) {
         {desc && <span className="s-toggle-row__desc">{desc}</span>}
       </div>
       <label className="s-switch">
-        <input type="checkbox" checked={checked} onChange={onChange} />
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={onChange}
+          disabled={disabled}
+        />
         <span className="s-switch__slider" />
       </label>
     </div>
@@ -276,11 +281,22 @@ export function NotificationsSection() {
     dms: true,
     email: false,
   });
-  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [savingKey, setSavingKey] = useState(null);
+  const [toast, setToast] = useState({ show: false, text: "", type: "" });
 
+  const showToast = (text, type = "info") => {
+    setToast({ show: true, text, type });
+    setTimeout(() => {
+      setToast({ show: false, text: "", type: "" });
+    }, 3500);
+  };
+
+  // 1. Frontend State Sync: Fetch initial settings from backend on mount
   useEffect(() => {
     const loadSettings = async () => {
       try {
+        setLoading(true);
         const res = await apiClient.get("/api/v1/profile/me");
         if (res.data?.data?.user) {
           const user = res.data.data.user;
@@ -294,73 +310,103 @@ export function NotificationsSection() {
         }
       } catch (err) {
         console.error("Failed to load notification settings:", err);
+        showToast("Failed to load notification preferences", "error");
+      } finally {
+        setLoading(false);
       }
     };
     loadSettings();
   }, []);
 
-  const tog = (k) => {
-    const newState = { ...s, [k]: !s[k] };
-    setS(newState);
-    handleSave(newState);
-  };
+  // 2. Update Handlers & 3. Optimistic UI with Rollback
+  const tog = async (k) => {
+    const previousValue = s[k];
+    const nextValue = !previousValue;
 
-  const handleSave = async (stateData) => {
-    setSaving(true);
+    // Optimistically update UI
+    const updatedState = { ...s, [k]: nextValue };
+    setS(updatedState);
+    setSavingKey(k);
+
     try {
       const res = await apiClient.put("/api/v1/settings/notifications", {
-        notifyOnLikes: stateData.likes,
-        notifyOnComments: stateData.comments,
-        notifyOnNewFollowers: stateData.followers,
-        notifyOnDMs: stateData.dms,
-        emailNotifications: stateData.email,
+        notifyOnLikes: updatedState.likes,
+        notifyOnComments: updatedState.comments,
+        notifyOnNewFollowers: updatedState.followers,
+        notifyOnDMs: updatedState.dms,
+        emailNotifications: updatedState.email,
       });
 
       if (res.data?.success) {
-        console.log("Notification settings updated!");
+        showToast("Notification preference updated!", "success");
       }
     } catch (err) {
-      alert("Error updating notifications: " + (err.response?.data?.message || err.message));
+      // Rollback on network/server error
+      setS((prev) => ({ ...prev, [k]: previousValue }));
+      showToast(
+        err.response?.data?.message || "Failed to update notification. Reverted.",
+        "error"
+      );
     } finally {
-      setSaving(false);
+      setSavingKey(null);
     }
   };
 
+  if (loading) {
+    return (
+      <div className="s-section">
+        <h2 className="s-section__title">Notifications</h2>
+        <p className="s-section__desc">Loading notification preferences...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="s-section">
+      {toast.show && (
+        <div className={`s-toast s-toast--${toast.type}`}>
+          {toast.text}
+        </div>
+      )}
+
       <h2 className="s-section__title">Notifications</h2>
       <p className="s-section__desc">Choose what you get notified about.</p>
+
       <Toggle
         label="Likes"
         desc="When someone likes your posts"
         checked={s.likes}
+        disabled={savingKey === "likes"}
         onChange={() => tog("likes")}
       />
       <Toggle
         label="Comments"
         desc="When someone comments on your posts"
         checked={s.comments}
+        disabled={savingKey === "comments"}
         onChange={() => tog("comments")}
       />
       <Toggle
         label="New followers"
         desc="When someone starts following you"
         checked={s.followers}
+        disabled={savingKey === "followers"}
         onChange={() => tog("followers")}
       />
       <Toggle
         label="Direct messages"
         desc="When you receive a new message"
         checked={s.dms}
+        disabled={savingKey === "dms"}
         onChange={() => tog("dms")}
       />
       <Toggle
         label="Email notifications"
         desc="Receive a summary of activity to your email"
         checked={s.email}
+        disabled={savingKey === "email"}
         onChange={() => tog("email")}
       />
-      {saving && <p style={{ color: "#999", fontSize: "12px", marginTop: "10px" }}>Saving...</p>}
     </div>
   );
 }
