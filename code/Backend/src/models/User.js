@@ -100,8 +100,7 @@ const userSchema = new mongoose.Schema(
     userLink: {
       type: String,
       default: "",
-    }
-  },
+    },
 
   // ===== SECURITY SETTINGS =====
     twoFactorEnabled: {
