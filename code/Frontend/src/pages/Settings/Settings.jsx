@@ -1,5 +1,6 @@
+// AFTER
 import React, { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import SettingsSidebar from "./components/SettingsSidebar";
 import {
@@ -13,6 +14,7 @@ import {
 import OrganizationVerificationSection from "./sections/OrganizationVerificationSection";
 import ProfileSection from "./sections/ProfileSection";
 import apiClient from "../../api/apiClient";
+import { useAuth } from "../../context/Context";
 import "./Settings.css";
 
 const SECTIONS = {
@@ -26,8 +28,11 @@ const SECTIONS = {
   organization: OrganizationVerificationSection,
 };
 
+// AFTER
 function Settings() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { accessToken, logout } = useAuth();
   const initialSection = searchParams.get("section") || "profile";
   const [activeSection, setActiveSection] = useState(initialSection);
   const [profileData, setProfileData] = useState({
@@ -48,8 +53,32 @@ function Settings() {
       .catch(() => {});
   }, []);
 
+  const handleLogout = async () => {
+    if (!window.confirm("Do you want to logout?")) return;
+
+    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+    try {
+      await fetch(`${apiUrl}/api/v1/auth/logout`, {
+        method: "POST",
+        credentials: "include",       // send the refreshToken cookie so backend can clear it
+        headers: accessToken
+          ? { Authorization: `Bearer ${accessToken}` }
+          : {},
+      });
+    } catch {
+      // Even if the request fails, clear local auth state client-side.
+    } finally {
+      logout();                       // clear AuthContext (React memory)
+      navigate("/login");
+    }
+  };
+
   const handleSelect = (id) => {
-    if (id === "logout") return;
+    if (id === "logout") {
+      handleLogout();
+      return;
+    }
     setActiveSection(id);
   };
 
