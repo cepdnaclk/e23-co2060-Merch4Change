@@ -5,16 +5,24 @@
   left: 0;
   top: 0;
   height: 100vh;
-  background: var(--m4c-bg-surface);
+  background: var(--m4c-bg-surface, #ffffff);
+  border-right: 1px solid var(--m4c-border, #f0f0f0);
   padding: 20px 15px;
   display: flex;
   flex-direction: column;
   box-shadow: 2px 0 20px rgba(0, 0, 0, 0.02);
   z-index: 1000;
   box-sizing: border-box;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease, border-color 0.2s ease;
   overflow-x: hidden;
   overflow-y: auto;
+}
+
+.dark .lum-sidebar-left,
+[data-theme="dark"] .lum-sidebar-left {
+  background: var(--m4c-bg-surface, #1b1b1f) !important;
+  border-right: 1px solid var(--m4c-border, #2c2c33) !important;
+  box-shadow: 2px 0 20px rgba(0, 0, 0, 0.35);
 }
 
 .lum-sidebar-left:hover {
@@ -33,7 +41,7 @@
 }
 
 .lum-logo-icon {
-  background: var(--m4c-accent);
+  background: var(--m4c-accent, #4a24e1);
   color: white;
   width: 28px;
   height: 28px;
@@ -51,6 +59,7 @@
   font-weight: 800;
   white-space: nowrap;
   display: none;
+  color: var(--m4c-text-primary, #111111);
 }
 
 .lum-sidebar-left:hover .lum-logo h2 {
@@ -60,6 +69,7 @@
 /* Ensure landing navbar text style fits inside sidebar */
 .lum-logo h2.lp-navbar-text {
   font-size: 14px;
+  color: var(--m4c-text-primary, #111111);
 }
 
 .lum-sidebar-nav {
@@ -75,10 +85,11 @@
   gap: 12px;
   padding: 10px 12px;
   border-radius: 10px;
-  color: var(--m4c-text-secondary);
+  color: var(--m4c-text-secondary, #666666);
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .lum-nav-icon {
@@ -86,16 +97,48 @@
   align-items: center;
   justify-content: center;
   min-width: 20px;
+  color: inherit;
 }
 
 .lum-nav-text {
   margin-left: 12px;
   white-space: nowrap;
   display: none;
+  color: inherit;
 }
 
-.lum-sidebar-footer img{
-  border: 1px solid hsla(0, 2%, 77%, 0.957);
+.lum-sidebar-left:hover .lum-nav-text {
+  display: block;
+}
+
+.lum-nav-item:hover {
+  background: var(--m4c-bg-surface-alt, #f8f9fb);
+  color: var(--m4c-text-primary, #111111);
+}
+
+.dark .lum-nav-item:hover {
+  background: var(--m4c-bg-surface-alt, #232329);
+  color: var(--m4c-text-primary, #f2f2f4);
+}
+
+.lum-nav-item.active {
+  background: var(--m4c-bg-surface-alt, #f8f9fb);
+  color: var(--m4c-accent, #4a24e1);
+}
+
+.dark .lum-nav-item.active {
+  background: rgba(138, 107, 255, 0.15);
+  color: var(--m4c-accent, #8a6bff);
+}
+
+.lum-sidebar-footer {
+  margin-top: auto;
+  border-top: 1px solid var(--m4c-border, #f0f0f0);
+  padding-top: 10px;
+}
+
+.lum-sidebar-footer img {
+  border: 1px solid var(--m4c-border, #e0e0e0);
   border-radius: 50%;
   width: 32px;
   height: 32px;
@@ -104,40 +147,28 @@
   object-fit: cover;
 }
 
-.lum-sidebar-left:hover .lum-nav-text {
-  display: block;
-}
-
-.lum-nav-item:hover {
-  background: var(--m4c-bg-surface-alt);
-}
-
-.lum-nav-item.active {
-  background: var(--m4c-bg-surface-alt);
-  color: var(--m4c-accent);
-}
-
-.lum-sidebar-footer {
-  margin-top: auto;
-  border-top: 1px solid var(--m4c-border);
-  padding-top: 10px;
-}
-
 .lum-sidebar-profile-link {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 10px 12px;
   border-radius: 10px;
-  color: var(--m4c-text-secondary);
+  color: var(--m4c-text-secondary, #666666);
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
   text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .lum-sidebar-profile-link:hover {
-  background: var(--m4c-bg-surface-alt);
+  background: var(--m4c-bg-surface-alt, #f8f9fb);
+  color: var(--m4c-text-primary, #111111);
+}
+
+.dark .lum-sidebar-profile-link:hover {
+  background: var(--m4c-bg-surface-alt, #232329);
+  color: var(--m4c-text-primary, #f2f2f4);
 }
 
 .lum-sidebar-profile-img {
@@ -145,7 +176,7 @@
   height: 28px;
   border-radius: 50%;
   object-fit: cover;
-  background-color: var(--m4c-bg-surface-alt);
+  background-color: var(--m4c-bg-surface-alt, #f8f9fb);
 }
 
 /* Responsive */
@@ -156,6 +187,5 @@
 
   .sidebar-collapsed .lum-sidebar-left {
     transform: translateX(0);
-    /* show when menu btn is clicked on mobile */
   }
 }

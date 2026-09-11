@@ -372,7 +372,6 @@ export function AppearanceSection() {
   const [saving, setSaving] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
-  // Keep dropdowns in sync if ThemeContext changes externally (e.g. storage events or init)
   useEffect(() => {
     setAppTheme(theme);
   }, [theme]);
@@ -381,7 +380,6 @@ export function AppearanceSection() {
     setLocalFontSize(fontSize);
   }, [fontSize]);
 
-  // Load backend preferences: only apply if local storage has not explicitly set one
   useEffect(() => {
     const loadSettings = async () => {
       try {
@@ -391,15 +389,15 @@ export function AppearanceSection() {
           const backendTheme = user.appTheme;
           const backendFontSize = user.fontSize;
 
-          const hasLocalTheme = Boolean(localStorage.getItem("m4c-theme"));
-          const hasLocalFont = Boolean(localStorage.getItem("m4c-font-size"));
+          const storedLocalTheme = localStorage.getItem("m4c-theme");
+          const storedLocalFont = localStorage.getItem("m4c-font-size");
 
-          // Only overwrite from backend if user has no existing local preference
-          if (backendTheme && !hasLocalTheme) {
+          // Do not overwrite user choice if already stored locally
+          if (!storedLocalTheme && backendTheme) {
             setAppTheme(backendTheme);
             setTheme(backendTheme);
           }
-          if (backendFontSize && !hasLocalFont) {
+          if (!storedLocalFont && backendFontSize) {
             setLocalFontSize(backendFontSize);
             setFontSize(backendFontSize);
           }
@@ -413,11 +411,24 @@ export function AppearanceSection() {
     loadSettings();
   }, [setTheme, setFontSize]);
 
-  // Instantly apply change across the entire app and save to localStorage via ThemeContext
   const handleThemeChange = (e) => {
     const next = e.target.value;
     setAppTheme(next);
     setTheme(next);
+
+    // Synchronous immediate DOM reflection to avoid delayed paint
+    const isDark =
+      next === "dark" ||
+      (next === "system" &&
+        window.matchMedia &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+    document.documentElement.classList.toggle("dark", isDark);
+    document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
+    if (document.body) {
+      document.body.classList.toggle("dark", isDark);
+      document.body.setAttribute("data-theme", isDark ? "dark" : "light");
+    }
   };
 
   const handleFontSizeChange = (e) => {
