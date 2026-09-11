@@ -16,21 +16,140 @@ function Toggle({ label, desc, badge, checked, onChange }) {
   );cd
 }
 
+import apiClient from "../../../api/apiClient.js";
+
 export function SecuritySection() {
-  const [twoFA, setTwoFA] = useState(true);
-  const [alerts, setAlerts] = useState(true);
+  const [twoFA, setTwoFA] = React.useState(false);
+  const [alerts, setAlerts] = React.useState(true);
+  const [currentPassword, setCurrentPassword] = React.useState("");
+  const [newPassword, setNewPassword] = React.useState("");
+  const [confirmPassword, setConfirmPassword] = React.useState("");
+  const [savingToggle, setSavingToggle] = React.useState(false);
+  const [savingPassword, setSavingPassword] = React.useState(false);
+
+  // Load current settings on mount
+  React.useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const res = await apiClient.get("/api/v1/profile/me");
+        if (res.data?.data?.user) {
+          const user = res.data.data.user;
+          setTwoFA(user.twoFactorEnabled ?? false);
+          setAlerts(user.loginActivityAlerts ?? true);
+        }
+      } catch (err) {
+        console.error("Failed to load security settings:", err);
+      }
+    };
+    loadSettings();
+  }, []);
+
+  const handleToggleSave = async (which, value) => {
+    setSavingToggle(true);
+    try {
+      const payload = {
+        twoFactorEnabled: which === "2fa" ? value : twoFA,
+        loginActivityAlerts: which === "alerts" ? value : alerts,
+      };
+      
+      const res = await apiClient.put("/api/v1/settings/security", payload);
+      
+      if (res.data?.success) {
+        if (which === "2fa") setTwoFA(value);
+        if (which === "alerts") setAlerts(value);
+        alert("Security settings updated!");
+      }
+    } catch (err) {
+      alert("Error: " + (err.response?.data?.message || err.message));
+    } finally {
+      setSavingToggle(false);
+    }
+  };
+
+  const handlePasswordChange = async () => {
+    setSavingPassword(true);
+    try {
+      if (!currentPassword || !newPassword || !confirmPassword) {
+        alert("All password fields are required");
+        setSavingPassword(false);
+        return;
+      }
+
+      const res = await apiClient.post("/api/v1/settings/change-password", {
+        currentPassword,
+        newPassword,
+        confirmPassword,
+      });
+
+      if (res.data?.success) {
+        alert("Password changed successfully!");
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      }
+    } catch (err) {
+      alert("Error: " + (err.response?.data?.message || err.message));
+    } finally {
+      setSavingPassword(false);
+    }
+  };
+
   return (
     <div className="s-section">
       <h2 className="s-section__title">Account security</h2>
       <p className="s-section__desc">Manage your password and keep your account safe.</p>
-      <div className="s-row"><label className="s-label">Current password</label><input className="s-input" type="password" placeholder="Enter current password" /></div>
-      <div className="s-row"><label className="s-label">New password</label><input className="s-input" type="password" placeholder="Enter new password" /></div>
-      <div className="s-row"><label className="s-label">Confirm new password</label><input className="s-input" type="password" placeholder="Confirm new password" /></div>
+      <div className="s-row">
+        <label className="s-label">Current password</label>
+        <input 
+          className="s-input" 
+          type="password" 
+          placeholder="Enter current password" 
+          value={currentPassword}
+          onChange={(e) => setCurrentPassword(e.target.value)}
+        />
+      </div>
+      <div className="s-row">
+        <label className="s-label">New password</label>
+        <input 
+          className="s-input" 
+          type="password" 
+          placeholder="Enter new password" 
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+        />
+      </div>
+      <div className="s-row">
+        <label className="s-label">Confirm new password</label>
+        <input 
+          className="s-input" 
+          type="password" 
+          placeholder="Confirm new password" 
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+        />
+      </div>
       <div className="s-divider" />
-      <Toggle label="Two-factor authentication" desc="Require a code when logging in from a new device" badge="Recommended" checked={twoFA} onChange={() => setTwoFA(p => !p)} />
-      <Toggle label="Login activity alerts" desc="Get notified when your account is accessed from a new location" checked={alerts} onChange={() => setAlerts(p => !p)} />
+      <Toggle 
+        label="Two-factor authentication" 
+        desc="Require a code when logging in from a new device" 
+        badge="Recommended" 
+        checked={twoFA} 
+        onChange={() => handleToggleSave("2fa", !twoFA)} 
+      />
+      <Toggle 
+        label="Login activity alerts" 
+        desc="Get notified when your account is accessed from a new location" 
+        checked={alerts} 
+        onChange={() => handleToggleSave("alerts", !alerts)} 
+      />
       <div className="s-divider" />
-      <button className="s-btn s-btn--primary">Update password</button>
+      <button 
+        className="s-btn s-btn--primary" 
+        onClick={handlePasswordChange}
+        disabled={savingPassword || savingToggle}
+      >
+        {savingPassword ? "Updating..." : "Update password"}
+      </button>
     </div>
   );
 }
