@@ -6,6 +6,7 @@ import {
   useLayoutEffect,
   useCallback,
 } from "react";
+import apiClient from "../api/apiClient.js";
 
 const ThemeContext = createContext(null);
 
@@ -15,7 +16,6 @@ const FONT_KEY = "m4c-font-size"; // "small" | "medium" | "large"
 const VALID_THEMES = ["system", "light", "dark"];
 const VALID_FONT_SIZES = ["small", "medium", "large"];
 
-// Safe layout effect for browser environments
 const useIsomorphicLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
@@ -40,11 +40,9 @@ function applyThemeToDom(resolved) {
 
   const isDark = resolved === "dark";
 
-  // Apply to <html> (Tailwind 'class' strategy)
   root.classList.toggle("dark", isDark);
   root.setAttribute("data-theme", resolved);
 
-  // Apply to <body> (for custom CSS classes and body-level styling)
   if (body) {
     body.classList.toggle("dark", isDark);
     body.setAttribute("data-theme", resolved);
@@ -59,7 +57,7 @@ function applyFontSizeToDom(fontSize) {
   }
 }
 
-// Immediately apply stored theme and font scale prior to React mount
+// Immediately apply cached theme and font scale prior to React mount
 if (typeof window !== "undefined") {
   try {
     const initialTheme = localStorage.getItem(THEME_KEY);
@@ -98,6 +96,33 @@ export const ThemeProvider = ({ children }) => {
 
   const [resolvedTheme, setResolvedTheme] = useState(() => resolveTheme(theme));
 
+  // Sync with backend on initial load for cross-device persistence
+  useEffect(() => {
+    const fetchBackendSettings = async () => {
+      try {
+        const res = await apiClient.get("/api/v1/profile/me");
+        if (res.data?.data?.user) {
+          const { appTheme, fontSize: backendFont } = res.data.data.user;
+          const cachedTheme = localStorage.getItem(THEME_KEY);
+          const cachedFont = localStorage.getItem(FONT_KEY);
+
+          if (!cachedTheme && VALID_THEMES.includes(appTheme)) {
+            setThemeState(appTheme);
+            localStorage.setItem(THEME_KEY, appTheme);
+          }
+
+          if (!cachedFont && VALID_FONT_SIZES.includes(backendFont)) {
+            setFontSizeState(backendFont);
+            localStorage.setItem(FONT_KEY, backendFont);
+          }
+        }
+      } catch {
+        // Fallback silently to localStorage for unauthenticated users
+      }
+    };
+    fetchBackendSettings();
+  }, []);
+
   // Synchronously update DOM before painting pages
   useIsomorphicLayoutEffect(() => {
     const resolved = resolveTheme(theme);
@@ -109,7 +134,7 @@ export const ThemeProvider = ({ children }) => {
     applyFontSizeToDom(fontSize);
   }, [fontSize]);
 
-  // Keep tracking OS-level theme changes when theme === "system"
+  // Track OS-level theme changes when theme === "system"
   useEffect(() => {
     if (theme !== "system" || !window.matchMedia) return;
 
@@ -124,7 +149,7 @@ export const ThemeProvider = ({ children }) => {
     return () => mq.removeEventListener("change", handleChange);
   }, [theme]);
 
-  // Synchronize theme and font size across multiple tabs/windows
+  // Synchronize across multiple tabs/windows
   useEffect(() => {
     const handleStorageChange = (e) => {
       if (e.key === THEME_KEY && VALID_THEMES.includes(e.newValue)) {
@@ -140,24 +165,28 @@ export const ThemeProvider = ({ children }) => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  const setTheme = useCallback((next) => {
+  // Mutator: updates state, localStorage, and database
+  const setTheme = useCallback(async (next) => {
     if (!VALID_THEMES.includes(next)) return;
     setThemeState(next);
     try {
       localStorage.setItem(THEME_KEY, next);
+      await apiClient.put("/api/v1/settings/appearance", { appTheme: next });
     } catch (e) {
-      console.error("Failed to save theme to localStorage:", e);
+      console.warn("Theme synced locally; database sync failed:", e.message);
     }
   }, []);
 
-  const setFontSize = useCallback((next) => {
+  // Mutator: updates state, localStorage, and database
+  const setFontSize = useCallback(async (next) => {
     if (!VALID_FONT_SIZES.includes(next)) return;
     setFontSizeState(next);
-    applyFontSizeToDom(next); // Immediate DOM update
+    applyFontSizeToDom(next);
     try {
       localStorage.setItem(FONT_KEY, next);
+      await apiClient.put("/api/v1/settings/appearance", { fontSize: next });
     } catch (e) {
-      console.error("Failed to save font size to localStorage:", e);
+      console.warn("Font size synced locally; database sync failed:", e.message);
     }
   }, []);
 
