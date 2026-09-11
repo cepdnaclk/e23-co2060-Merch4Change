@@ -155,26 +155,113 @@ export function SecuritySection() {
 }
 
 export function PrivacySection() {
-  const [s, setS] = useState({ private: false, activity: true, messages: true, receipts: false });
-  const tog = (k) => setS(p => ({ ...p, [k]: !p[k] }));
+  const [s, setS] = React.useState({ 
+    private: false, 
+    activity: true, 
+    messages: true, 
+    receipts: false,
+    commentPermission: "following"
+  });
+  const [saving, setSaving] = React.useState(false);
+
+  // Load current settings on mount
+  React.useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const res = await apiClient.get("/api/v1/profile/me");
+        if (res.data?.data?.user) {
+          const user = res.data.data.user;
+          setS({
+            private: user.isPrivate ?? false,
+            activity: user.showActivityStatus ?? true,
+            messages: user.allowMessageRequests ?? true,
+            receipts: user.hideReadReceipts ?? false,
+            commentPermission: user.commentPermission ?? "following"
+          });
+        }
+      } catch (err) {
+        console.error("Failed to load privacy settings:", err);
+      }
+    };
+    loadSettings();
+  }, []);
+
+  const tog = (k) => {
+    const newState = { ...s, [k]: !s[k] };
+    setS(newState);
+    handleSave(newState);
+  };
+
+  const handleCommentPermissionChange = (e) => {
+    const newState = { ...s, commentPermission: e.target.value };
+    setS(newState);
+    handleSave(newState);
+  };
+
+  const handleSave = async (stateData) => {
+    setSaving(true);
+    try {
+      const res = await apiClient.put("/api/v1/settings/privacy", {
+        isPrivate: stateData.private,
+        showActivityStatus: stateData.activity,
+        allowMessageRequests: stateData.messages,
+        hideReadReceipts: stateData.receipts,
+        commentPermission: stateData.commentPermission,
+      });
+
+      if (res.data?.success) {
+        console.log("Privacy settings updated!");
+      }
+    } catch (err) {
+      alert("Error updating privacy: " + (err.response?.data?.message || err.message));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="s-section">
       <h2 className="s-section__title">Privacy</h2>
       <p className="s-section__desc">Control who can see your content and interact with you.</p>
-      <Toggle label="Private account" desc="Only approved followers can see your posts" checked={s.private} onChange={() => tog("private")} />
-      <Toggle label="Show activity status" desc="Let people see when you were last active" checked={s.activity} onChange={() => tog("activity")} />
-      <Toggle label="Allow message requests" desc="Let people you don't follow send message requests" checked={s.messages} onChange={() => tog("messages")} />
-      <Toggle label="Hide read receipts" desc="Others won't know when you've read their messages" checked={s.receipts} onChange={() => tog("receipts")} />
+      <Toggle 
+        label="Private account" 
+        desc="Only approved followers can see your posts" 
+        checked={s.private} 
+        onChange={() => tog("private")} 
+      />
+      <Toggle 
+        label="Show activity status" 
+        desc="Let people see when you were last active" 
+        checked={s.activity} 
+        onChange={() => tog("activity")} 
+      />
+      <Toggle 
+        label="Allow message requests" 
+        desc="Let people you don't follow send message requests" 
+        checked={s.messages} 
+        onChange={() => tog("messages")} 
+      />
+      <Toggle 
+        label="Hide read receipts" 
+        desc="Others won't know when you've read their messages" 
+        checked={s.receipts} 
+        onChange={() => tog("receipts")} 
+      />
       <div className="s-divider" />
       <div className="s-row">
         <label className="s-label">Who can comment on your posts</label>
-        <select className="s-input s-input--select" defaultValue="following">
+        <select 
+          className="s-input s-input--select" 
+          value={s.commentPermission}
+          onChange={handleCommentPermissionChange}
+        >
           <option value="everyone">Everyone</option>
           <option value="followers">Followers only</option>
           <option value="following">People you follow</option>
           <option value="none">No one</option>
         </select>
       </div>
+      {saving && <p style={{ color: "#999", fontSize: "12px", marginTop: "10px" }}>Saving...</p>}
     </div>
   );
 }
