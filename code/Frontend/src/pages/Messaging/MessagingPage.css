@@ -8,6 +8,9 @@
   --color-text-secondary: #666666;
   --color-text-tertiary: #888888;
   --color-accent: #4a24e1;
+  --color-active-chat: #f5f3ff;
+  --color-bubble-received: #f0f2f5;
+  --color-bubble-received-text: #666666;
 
   display: flex;
   height: 100vh;
@@ -15,6 +18,24 @@
   overflow: hidden;
   font-family: 'DM Sans', sans-serif;
   background: var(--color-background-primary);
+  color: var(--color-text-primary);
+}
+
+/* ── Dark mode tokens mapped to root design tokens ── */
+.dark .messaging-page-container,
+[data-theme="dark"] .messaging-page-container {
+  --color-background-primary: var(--m4c-bg-surface, #1b1b1f);
+  --color-background-secondary: var(--m4c-bg-page, #121214);
+  --color-background-tertiary: var(--m4c-bg-surface-alt, #232329);
+  --color-border-secondary: var(--m4c-border, #2c2c33);
+  --color-border-tertiary: var(--m4c-border-strong, #33333b);
+  --color-text-primary: var(--m4c-text-primary, #f2f2f4);
+  --color-text-secondary: var(--m4c-text-secondary, #b7b7bf);
+  --color-text-tertiary: var(--m4c-text-muted, #8a8a92);
+  --color-accent: var(--m4c-accent, #8a6bff);
+  --color-active-chat: rgba(138, 107, 255, 0.14);
+  --color-bubble-received: var(--m4c-bg-surface-alt, #232329);
+  --color-bubble-received-text: var(--m4c-text-primary, #f2f2f4);
 }
 
 .messaging-main-content {
@@ -44,6 +65,13 @@
   text-align: left;
 }
 
+.dark .messaging-empty-state,
+[data-theme="dark"] .messaging-empty-state {
+  background: linear-gradient(135deg, #1b1b1f 0%, #232329 100%);
+  border: 1px solid rgba(138, 107, 255, 0.22);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4);
+}
+
 .messaging-empty-kicker {
   display: inline-flex;
   align-items: center;
@@ -51,7 +79,7 @@
   padding: 6px 12px;
   border-radius: 999px;
   background: rgba(74, 36, 225, 0.08);
-  color: #4a24e1;
+  color: var(--color-accent);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -183,7 +211,7 @@
   background: var(--color-background-tertiary);
 }
 .ci.active {
-  background: #f5f3ff;
+  background: var(--color-active-chat);
   border-left: 3px solid var(--color-accent);
   padding-left: 13px;
 }
@@ -323,7 +351,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, border-color 0.15s;
   color: var(--color-text-secondary);
 }
 .mc-hbtn:hover {
@@ -364,6 +392,7 @@
 }
 .day-sep span {
   background: var(--color-background-secondary);
+  color: var(--color-text-tertiary);
   padding: 0 12px;
   position: relative;
 }
@@ -393,20 +422,21 @@
   max-width: 600px;
   width: max-content;
   padding: 10px 14px;
-  border-radius: 16px;
+  border-radius: 16px 16px 16px 4px;
   font-size: 14px;
   line-height: 1.5;
-  color: var(--color-text-secondary);
-  background: var(--color-background-tertiary);
-  border-radius: 16px 16px 16px 4px;
+  color: var(--color-bubble-received-text);
+  background: var(--color-bubble-received);
   font-family: 'Inter', sans-serif;
   word-break: break-word;
   white-space: pre-wrap;
+  border: 1px solid var(--color-border-secondary);
 }
 .msg-row.mine .msg-bubble {
   background: var(--color-accent);
-  color: white;
+  color: #ffffff;
   border-radius: 16px 16px 4px 16px;
+  border: 1px solid transparent;
 }
 .msg-meta {
   font-size: 11px;
@@ -474,7 +504,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, border-color 0.15s;
   color: var(--color-text-secondary);
 }
 .mc-act-btn:hover {
@@ -529,12 +559,12 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, opacity 0.15s;
   flex-shrink: 0;
   color: white;
 }
 .mc-send:hover {
-  background: #3b1bc2;
+  opacity: 0.9;
 }
 
 /* org badge */
