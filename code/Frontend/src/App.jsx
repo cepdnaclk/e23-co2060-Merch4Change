@@ -34,6 +34,7 @@ import UnderConstruction from "./components/UnderConstruction/UnderConstruction"
 import NotificationDropDown from "./components/Notifications/NotificationDropDown";
 import { Analytics } from "@vercel/analytics/react"; //vercel analytics
 import { AuthProvider } from "./context/Context";
+import { ThemeProvider } from "./context/ThemeContext";
 import VerificationForm from "./pages/Charity/VerificationForm";
 import CharityQueue from "./pages/Admin/CharityVerification/CharityQueue";
 import CharityReview from "./pages/Admin/CharityVerification/CharityReview";
@@ -46,71 +47,73 @@ import LeaderboardPage from "./pages/Leaderboard/LeaderboardPage";
 function App() {
 
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          {/* Public Routes */}
-          {/*path gives the address on the address bar, element is the component that will be rendered when the path is accessed */}
-          {/* The landing page is the default route */}
-          <Route element={<PublicLayout />}>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/help" element={<HelpAndSupport />} />
-            <Route path="/help/contact" element={<Contact />} />
-            <Route path="/contact" element={<Navigate to="/help/contact" replace />} />
-            <Route path="/about/story" element={<OurStory />} />
-            <Route path="/about/mission" element={<Mission />} />
-            <Route path="/about/team" element={<Team />} />
-            <Route path="/privacy" element={<PrivacyPolicy />} />
-          </Route>
+    <ThemeProvider>
+      <AuthProvider>
+        <Router>
+          <Routes>
+            {/* Public Routes */}
+            {/*path gives the address on the address bar, element is the component that will be rendered when the path is accessed */}
+            {/* The landing page is the default route */}
+            <Route element={<PublicLayout />}>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/help" element={<HelpAndSupport />} />
+              <Route path="/help/contact" element={<Contact />} />
+              <Route path="/contact" element={<Navigate to="/help/contact" replace />} />
+              <Route path="/about/story" element={<OurStory />} />
+              <Route path="/about/mission" element={<Mission />} />
+              <Route path="/about/team" element={<Team />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+            </Route>
 
-          {/* Auth Routes (No Navbar) */}
-          <Route path="/signup" element={<SignUpPage />} />
-          <Route path="/signup/orgsignup" element={<Navigate to="/signup?type=org" replace />} />
-          <Route path="/signup/usersignup" element={<UserSignupPage />} />
-          <Route path="/verify-otp" element={<VerifyOtpPage />} />
-
-
-          {/* Private/App Routes */}
-          <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-          <Route path="/messaging" element={<ProtectedRoute><MessagingPage /></ProtectedRoute>} />
-          <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-          <Route path="/profile/me" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
-          <Route path="/profile/:username" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
-          <Route path="/marketplace" element={<Marketplace />} />
-          <Route path="/donations" element={<ProtectedRoute><DonationsPage /></ProtectedRoute>} />
-          <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
-          <Route path="/donate" element={<ProtectedRoute><DonatePage /></ProtectedRoute>} />
-          <Route path="/under-construction" element={<ProtectedRoute><UnderConstruction /></ProtectedRoute>} />
-          <Route path="/notification" element={<ProtectedRoute><NotificationPage /></ProtectedRoute>} />
-          <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
-          <Route path="/charity/verify" element={<ProtectedRoute><VerificationForm /></ProtectedRoute>} />
-          <Route path="/admin/charities" element={<AdminRoute><CharityQueue /></AdminRoute>} />
-          <Route path="/admin/charities/:id" element={<AdminRoute><CharityReview /></AdminRoute>} />
+            {/* Auth Routes (No Navbar) */}
+            <Route path="/signup" element={<SignUpPage />} />
+            <Route path="/signup/orgsignup" element={<Navigate to="/signup?type=org" replace />} />
+            <Route path="/signup/usersignup" element={<UserSignupPage />} />
+            <Route path="/verify-otp" element={<VerifyOtpPage />} />
 
 
-          {/* Dynamic Route: Perfect for Social Media Profiles */}
-          <Route path="/profile/:username" element={<UserProfile />} />
-          <Route
-            path="/profile/:username/donors"
-            element={<ProtectedRoute><AllDonorsPage /></ProtectedRoute>}
-          />
-          <Route
-            path="/profile/:username/projects"
-            element={<OrgProjects />}
-          />
-          <Route
-            path="/profile/:username/communities"
-            element={<OrgCommunities />}
-          />
+            {/* Private/App Routes */}
+            <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+            <Route path="/messaging" element={<ProtectedRoute><MessagingPage /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            <Route path="/profile/me" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
+            <Route path="/profile/:username" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
+            <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/donations" element={<ProtectedRoute><DonationsPage /></ProtectedRoute>} />
+            <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
+            <Route path="/donate" element={<ProtectedRoute><DonatePage /></ProtectedRoute>} />
+            <Route path="/under-construction" element={<ProtectedRoute><UnderConstruction /></ProtectedRoute>} />
+            <Route path="/notification" element={<ProtectedRoute><NotificationPage /></ProtectedRoute>} />
+            <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
+            <Route path="/charity/verify" element={<ProtectedRoute><VerificationForm /></ProtectedRoute>} />
+            <Route path="/admin/charities" element={<AdminRoute><CharityQueue /></AdminRoute>} />
+            <Route path="/admin/charities/:id" element={<AdminRoute><CharityReview /></AdminRoute>} />
 
-          {/* Fallback: Redirect any unknown URL to landing */}
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-        <Analytics />
-      </Router>
-    </AuthProvider>
+
+            {/* Dynamic Route: Perfect for Social Media Profiles */}
+            <Route path="/profile/:username" element={<UserProfile />} />
+            <Route
+              path="/profile/:username/donors"
+              element={<ProtectedRoute><AllDonorsPage /></ProtectedRoute>}
+            />
+            <Route
+              path="/profile/:username/projects"
+              element={<OrgProjects />}
+            />
+            <Route
+              path="/profile/:username/communities"
+              element={<OrgCommunities />}
+            />
+
+            {/* Fallback: Redirect any unknown URL to landing */}
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+          <Analytics />
+        </Router>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 export default App;
