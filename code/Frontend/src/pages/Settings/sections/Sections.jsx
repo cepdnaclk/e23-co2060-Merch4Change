@@ -18,6 +18,7 @@ function Toggle({ label, desc, badge, checked, onChange }) {
 }
 
 import apiClient from "../../../api/apiClient.js";
+import { useTheme } from "../../../context/ThemeContext";
 
 export function SecuritySection() {
   const [twoFA, setTwoFA] = React.useState(false);
@@ -366,26 +367,53 @@ export function NotificationsSection() {
 }
 
 export function AppearanceSection() {
-  const [appTheme, setAppTheme] = React.useState("system");
-  const [fontSize, setFontSize] = React.useState("medium");
+  // theme/fontSize here are what's saved on the backend for this user.
+  // The ThemeContext values (below) are what's actually applied to the DOM
+  // right now — they start from localStorage/system and may briefly differ
+  // from the backend value until the profile fetch below resolves.
+  const { theme: appliedTheme, fontSize: appliedFontSize, setTheme, setFontSize } = useTheme();
+  const [appTheme, setAppTheme] = React.useState(appliedTheme);
+  const [fontSize, setFontSizeLocal] = React.useState(appliedFontSize);
   const [saving, setSaving] = React.useState(false);
+  const [loaded, setLoaded] = React.useState(false);
 
-  // Load current settings on mount
+  // Load the user's saved preference and sync it into ThemeContext so the
+  // whole app (not just this form) reflects what's actually stored.
   React.useEffect(() => {
     const loadSettings = async () => {
       try {
         const res = await apiClient.get("/api/v1/profile/me");
         if (res.data?.data?.user) {
           const user = res.data.data.user;
-          setAppTheme(user.appTheme ?? "system");
-          setFontSize(user.fontSize ?? "medium");
+          const savedTheme = user.appTheme ?? "system";
+          const savedFontSize = user.fontSize ?? "medium";
+          setAppTheme(savedTheme);
+          setFontSizeLocal(savedFontSize);
+          setTheme(savedTheme); // apply immediately app-wide
+          setFontSize(savedFontSize);
         }
       } catch (err) {
         console.error("Failed to load appearance settings:", err);
+      } finally {
+        setLoaded(true);
       }
     };
     loadSettings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Live preview: apply as soon as the user picks a new option, before Save.
+  const handleThemeChange = (e) => {
+    const next = e.target.value;
+    setAppTheme(next);
+    setTheme(next);
+  };
+
+  const handleFontSizeChange = (e) => {
+    const next = e.target.value;
+    setFontSizeLocal(next);
+    setFontSize(next);
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -411,10 +439,11 @@ export function AppearanceSection() {
       <p className="s-section__desc">Customize how the app looks for you.</p>
       <div className="s-row">
         <label className="s-label">Theme</label>
-        <select 
-          className="s-input s-input--select" 
+        <select
+          className="s-input s-input--select"
           value={appTheme}
-          onChange={(e) => setAppTheme(e.target.value)}
+          onChange={handleThemeChange}
+          disabled={!loaded}
         >
           <option value="system">System default</option>
           <option value="light">Light</option>
@@ -423,19 +452,23 @@ export function AppearanceSection() {
       </div>
       <div className="s-row">
         <label className="s-label">Font size</label>
-        <select 
-          className="s-input s-input--select" 
+        <select
+          className="s-input s-input--select"
           value={fontSize}
-          onChange={(e) => setFontSize(e.target.value)}
+          onChange={handleFontSizeChange}
+          disabled={!loaded}
         >
           <option value="small">Small</option>
           <option value="medium">Medium</option>
           <option value="large">Large</option>
         </select>
       </div>
+      <p className="s-section__desc" style={{ margin: "-8px 0 18px" }}>
+        Changes preview instantly — click save to keep them on your other devices.
+      </p>
       <div className="s-divider" />
-      <button 
-        className="s-btn s-btn--primary" 
+      <button
+        className="s-btn s-btn--primary"
         onClick={handleSave}
         disabled={saving}
       >
