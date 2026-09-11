@@ -3,20 +3,9 @@ import {
   useContext,
   useState,
   useEffect,
+  useLayoutEffect,
   useCallback,
 } from "react";
-
-/**
- * Global theme + font-size state for the whole app.
- *
- * This is intentionally independent from AuthContext: theme should work
- * even on public pages before login, and should apply instantly (from
- * localStorage) before the user's saved preference comes back from
- * /api/v1/profile/me. Settings/sections/Sections.jsx (AppearanceSection)
- * is responsible for syncing the backend value into this context once it
- * loads, and for calling setTheme/setFontSize on every change so the user
- * gets a live preview instead of only seeing the change after "Save".
- */
 
 const ThemeContext = createContext(null);
 
@@ -25,6 +14,10 @@ const FONT_KEY = "m4c-font-size"; // "small" | "medium" | "large"
 
 const VALID_THEMES = ["system", "light", "dark"];
 const VALID_FONT_SIZES = ["small", "medium", "large"];
+
+// Safe layout effect for browser environments
+const useIsomorphicLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 function getSystemPrefersDark() {
   return (
@@ -41,65 +34,148 @@ function resolveTheme(theme) {
 }
 
 function applyThemeToDom(resolved) {
+  if (typeof document === "undefined") return;
   const root = document.documentElement;
-  root.classList.toggle("dark", resolved === "dark");
+  const body = document.body;
+
+  const isDark = resolved === "dark";
+
+  // Apply to <html> (Tailwind 'class' strategy)
+  root.classList.toggle("dark", isDark);
   root.setAttribute("data-theme", resolved);
+
+  // Apply to <body> (for custom CSS classes and body-level styling)
+  if (body) {
+    body.classList.toggle("dark", isDark);
+    body.setAttribute("data-theme", resolved);
+  }
 }
 
 function applyFontSizeToDom(fontSize) {
+  if (typeof document === "undefined") return;
   document.documentElement.setAttribute("data-font-size", fontSize);
+  if (document.body) {
+    document.body.setAttribute("data-font-size", fontSize);
+  }
+}
+
+// Immediately apply stored theme prior to React mount to avoid flicker/delays
+if (typeof window !== "undefined") {
+  try {
+    const initialTheme = localStorage.getItem(THEME_KEY);
+    const resolvedInitial = resolveTheme(
+      VALID_THEMES.includes(initialTheme) ? initialTheme : "system"
+    );
+    applyThemeToDom(resolvedInitial);
+
+    const initialFontSize = localStorage.getItem(FONT_KEY);
+    applyFontSizeToDom(
+      VALID_FONT_SIZES.includes(initialFontSize) ? initialFontSize : "medium"
+    );
+  } catch (e) {
+    console.error("Failed to apply initial theme from storage:", e);
+  }
 }
 
 export const ThemeProvider = ({ children }) => {
   const [theme, setThemeState] = useState(() => {
-    const stored = localStorage.getItem(THEME_KEY);
-    return VALID_THEMES.includes(stored) ? stored : "system";
+    try {
+      const stored = localStorage.getItem(THEME_KEY);
+      return VALID_THEMES.includes(stored) ? stored : "system";
+    } catch {
+      return "system";
+    }
   });
+
   const [fontSize, setFontSizeState] = useState(() => {
-    const stored = localStorage.getItem(FONT_KEY);
-    return VALID_FONT_SIZES.includes(stored) ? stored : "medium";
+    try {
+      const stored = localStorage.getItem(FONT_KEY);
+      return VALID_FONT_SIZES.includes(stored) ? stored : "medium";
+    } catch {
+      return "medium";
+    }
   });
+
   const [resolvedTheme, setResolvedTheme] = useState(() => resolveTheme(theme));
 
-  // Apply whenever `theme` changes (covers first render + every future change).
-  useEffect(() => {
+  // Synchronously update DOM before painting pages
+  useIsomorphicLayoutEffect(() => {
     const resolved = resolveTheme(theme);
     setResolvedTheme(resolved);
     applyThemeToDom(resolved);
   }, [theme]);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     applyFontSizeToDom(fontSize);
   }, [fontSize]);
 
-  // If the user picked "system", keep tracking OS-level changes live.
+  // Keep tracking OS-level theme changes when theme === "system"
   useEffect(() => {
     if (theme !== "system" || !window.matchMedia) return;
+
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = () => {
       const resolved = resolveTheme("system");
       setResolvedTheme(resolved);
       applyThemeToDom(resolved);
     };
+
     mq.addEventListener("change", handleChange);
     return () => mq.removeEventListener("change", handleChange);
   }, [theme]);
 
+  // Synchronize theme across multiple tabs/windows
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === THEME_KEY && VALID_THEMES.includes(e.newValue)) {
+        setThemeState(e.newValue);
+      }
+      if (e.key === FONT_KEY && VALID_FONT_SIZES.includes(e.newValue)) {
+        setFontSizeState(e.newValue);
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
   const setTheme = useCallback((next) => {
     if (!VALID_THEMES.includes(next)) return;
     setThemeState(next);
-    localStorage.setItem(THEME_KEY, next);
+    try {
+      localStorage.setItem(THEME_KEY, next);
+    } catch (e) {
+      console.error("Failed to save theme to localStorage:", e);
+    }
   }, []);
 
   const setFontSize = useCallback((next) => {
     if (!VALID_FONT_SIZES.includes(next)) return;
     setFontSizeState(next);
-    localStorage.setItem(FONT_KEY, next);
+    try {
+      localStorage.setItem(FONT_KEY, next);
+    } catch (e) {
+      console.error("Failed to save font size to localStorage:", e);
+    }
   }, []);
 
-  const value = { theme, resolvedTheme, fontSize, setTheme, setFontSize };
+  const toggleTheme = useCallback(() => {
+    setTheme(resolvedTheme === "dark" ? "light" : "dark");
+  }, [resolvedTheme, setTheme]);
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  const value = {
+    theme,
+    resolvedTheme,
+    fontSize,
+    isDarkMode: resolvedTheme === "dark",
+    setTheme,
+    setFontSize,
+    toggleTheme,
+  };
+
+  return (
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  );
 };
 
 export const useTheme = () => {
