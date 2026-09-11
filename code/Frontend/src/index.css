@@ -1,3 +1,64 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+ * Design tokens for theming (light/dark) + font-size scaling.
+ * `.dark` is toggled on <html> by ThemeContext (src/context/ThemeContext.jsx).
+ * Only the Settings module consumes these for now — other pages still use
+ * hardcoded colors and will need to be migrated to these variables the same
+ * way before dark mode will visibly affect them too.
+ */
+:root {
+  --m4c-bg-page: #fafafa;
+  --m4c-bg-surface: #ffffff;
+  --m4c-bg-surface-alt: #f8f9fb;
+  --m4c-border: #f0f0f0;
+  --m4c-border-strong: #e8e8e8;
+
+  --m4c-text-primary: #111111;
+  --m4c-text-secondary: #666666;
+  --m4c-text-muted: #999999;
+  --m4c-text-faint: #bbbbbb;
+
+  --m4c-accent: #4a24e1;
+  --m4c-accent-contrast: #ffffff;
+
+  --m4c-danger: #ed4956;
+  --m4c-danger-bg-hover: #fff0f1;
+
+  --m4c-badge-bg: #e8f4fe;
+  --m4c-badge-text: #0066cc;
+
+  --m4c-switch-off: #dddddd;
+
+  --m4c-font-scale: 1;
+}
+
+:root.dark {
+  --m4c-bg-page: #121214;
+  --m4c-bg-surface: #1b1b1f;
+  --m4c-bg-surface-alt: #232329;
+  --m4c-border: #2c2c33;
+  --m4c-border-strong: #33333b;
+
+  --m4c-text-primary: #f2f2f4;
+  --m4c-text-secondary: #b7b7bf;
+  --m4c-text-muted: #8a8a92;
+  --m4c-text-faint: #6a6a73;
+
+  --m4c-accent: #8a6bff;
+  --m4c-accent-contrast: #ffffff;
+
+  --m4c-danger: #ff6b76;
+  --m4c-danger-bg-hover: #3a1c20;
+
+  --m4c-badge-bg: #16324d;
+  --m4c-badge-text: #7fc3ff;
+
+  --m4c-switch-off: #45454e;
+}
+
+html[data-font-size="small"] { --m4c-font-scale: 0.9; }
+html[data-font-size="medium"] { --m4c-font-scale: 1; }
+html[data-font-size="large"] { --m4c-font-scale: 1.15; }

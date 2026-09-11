@@ -1,10 +1,10 @@
-.ss-nav { width: 220px; min-width: 220px; height: 100%; background: white; border-right: 1px solid #f0f0f0; display: flex; flex-direction: column; overflow-y: auto; }
-.ss-nav__header { padding: 22px 16px 14px; font-size: 15px; font-weight: 700; color: #111; border-bottom: 1px solid #f0f0f0; }
+.ss-nav { width: 220px; min-width: 220px; height: 100%; background: var(--m4c-bg-surface); border-right: 1px solid var(--m4c-border); display: flex; flex-direction: column; overflow-y: auto; transition: background-color 0.15s ease, border-color 0.15s ease; }
+.ss-nav__header { padding: 22px 16px 14px; font-size: calc(15px * var(--m4c-font-scale)); font-weight: 700; color: var(--m4c-text-primary); border-bottom: 1px solid var(--m4c-border); }
 .ss-nav__group { padding: 10px 0; }
-.ss-nav__group-label { display: block; font-size: 10.5px; font-weight: 700; color: #bbb; padding: 4px 16px 6px; text-transform: uppercase; letter-spacing: 0.07em; }
-.ss-nav__item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 16px; background: none; border: none; border-right: 2px solid transparent; font-size: 13.5px; font-weight: 500; color: #666; cursor: pointer; text-align: left; font-family: inherit; transition: background 0.1s, color 0.1s; }
-.ss-nav__item:hover { background: #f8f9fb; color: #222; }
-.ss-nav__item--active { background: #f4f5f8; color: #4a24e1; border-right-color: #4a24e1; }
-.ss-nav__item--danger { color: #ed4956; }
-.ss-nav__item--danger:hover { background: #fff0f1; color: #ed4956; }
+.ss-nav__group-label { display: block; font-size: calc(10.5px * var(--m4c-font-scale)); font-weight: 700; color: var(--m4c-text-faint); padding: 4px 16px 6px; text-transform: uppercase; letter-spacing: 0.07em; }
+.ss-nav__item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 16px; background: none; border: none; border-right: 2px solid transparent; font-size: calc(13.5px * var(--m4c-font-scale)); font-weight: 500; color: var(--m4c-text-secondary); cursor: pointer; text-align: left; font-family: inherit; transition: background 0.1s, color 0.1s; }
+.ss-nav__item:hover { background: var(--m4c-bg-surface-alt); color: var(--m4c-text-primary); }
+.ss-nav__item--active { background: var(--m4c-bg-surface-alt); color: var(--m4c-accent); border-right-color: var(--m4c-accent); }
+.ss-nav__item--danger { color: var(--m4c-danger); }
+.ss-nav__item--danger:hover { background: var(--m4c-danger-bg-hover); color: var(--m4c-danger); }
 .ss-nav__icon { display: flex; align-items: center; width: 18px; flex-shrink: 0; }
