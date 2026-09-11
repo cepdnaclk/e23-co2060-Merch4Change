@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import "./SettingsSection.css";
 
 function Toggle({ label, desc, badge, checked, onChange }) {
@@ -551,18 +552,18 @@ export function HelpSection() {
     <div className="s-section">
       <h2 className="s-section__title">Help & support</h2>
       <p className="s-section__desc">Find answers or get in touch with the support team.</p>
-      <div className="s-list-row">
+      <Link to="/help" className="s-list-row">
         <span>Help center</span>
         <span className="s-list-row__chevron">›</span>
-      </div>
-      <div className="s-list-row">
+      </Link>
+      <Link to="/help/contact" className="s-list-row">
         <span>Report a problem</span>
         <span className="s-list-row__chevron">›</span>
-      </div>
-      <div className="s-list-row">
+      </Link>
+      <Link to="/privacy" className="s-list-row">
         <span>Privacy policy</span>
         <span className="s-list-row__chevron">›</span>
-      </div>
+      </Link>
       <div className="s-divider" />
       
       {!showDeleteConfirm && (
