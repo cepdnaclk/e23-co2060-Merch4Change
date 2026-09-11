@@ -4,7 +4,7 @@ import apiClient from "../../../api/apiClient.js";
 import { useTheme } from "../../../context/ThemeContext";
 import "./SettingsSection.css";
 
-// Re-export ProfileSection so all sections can be imported from this file
+// Re-export ProfileSection from ProfileSection.jsx to maintain single source of truth
 export { default as ProfileSection } from "./ProfileSection";
 
 function ToastBanner({ toast }) {

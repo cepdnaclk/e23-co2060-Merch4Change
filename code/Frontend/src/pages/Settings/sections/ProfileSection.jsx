@@ -11,7 +11,7 @@ function ToastBanner({ toast }) {
   );
 }
 
-// Helper to resolve absolute backend URLs for uploaded images
+// Convert relative image paths to full backend URLs
 const resolveImageUrl = (url) => {
   if (!url) return "";
   if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) {
@@ -123,7 +123,7 @@ function ProfileSection({ profileData = {}, onUpdate = () => {} }) {
 
       if (!data?.success) throw new Error(data?.message || "Failed to upload image");
 
-      // Refresh profile to retrieve saved image url
+      // Refresh profile data from server to receive the newly generated image path
       const profileRes = await apiClient.get("/api/v1/profile/me");
       const profileJson = profileRes.data;
       if (profileJson?.success && profileJson.data?.user) {
