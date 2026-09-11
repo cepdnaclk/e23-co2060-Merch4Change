@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./Footer.css";
-import icon from "../../assets/icon.png";
+import BrandLogo from "../BrandLogo/BrandLogo";
 
 const Footer = () => {
   const navigate = useNavigate();
@@ -11,7 +11,7 @@ const Footer = () => {
       <div className="footer-content">
         <div className="footer-brand">
           <div className="footer-logo-row">
-            <img src={icon} alt="Merch4Change icon" className="footer-logo" />
+            <BrandLogo size={36} className="footer-logo" />
             <span className="footer-title">Merch4Change</span>
           </div>
           <p className="footer-desc">
@@ -34,6 +34,7 @@ const Footer = () => {
             <h4>Support</h4>
             <ul>
               <li onClick={() => navigate("/help")}>Help Center</li>
+              <li onClick={() => navigate("/help#how-it-works")}>How It Works</li>
               <li onClick={() => navigate("/faq")}>FAQs</li>
               <li onClick={() => navigate("/help/contact")}>Contact Us</li>
             </ul>

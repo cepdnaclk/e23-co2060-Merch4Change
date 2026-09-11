@@ -13,19 +13,28 @@ const protect = asyncHandler(async (req, res, next) => {
     throw new AppError("Not authorized. Token is missing.", 401, "TOKEN_MISSING");
   }
 
+  let user;
   try {
     const decoded = jwt.verify(token, env.jwtSecret);
-    const user = await User.findById(decoded.userId).select("-password");
+    user = await User.findById(decoded.userId).select("-password");
 
     if (!user) {
       throw new AppError("User not found for token.", 401, "USER_NOT_FOUND");
     }
-
-    req.user = user;
-    next();
   } catch (verifyError) {
     throw new AppError("Not authorized. Invalid token.", 401, "INVALID_TOKEN");
   }
+
+  if (!user.isActive) {
+    throw new AppError(
+      "This account has been deactivated or suspended.",
+      403,
+      "ACCOUNT_INACTIVE",
+    );
+  }
+
+  req.user = user;
+  next();
 });
 
 export default protect;

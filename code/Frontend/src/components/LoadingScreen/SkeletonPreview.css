@@ -1,0 +1,378 @@
+/* ============================================================================
+   MERCH4CHANGE — GHOST SKELETON PREVIEW (OPTION 3)
+   Zero Perceived Latency layout wireframe with wave shimmer animation
+   ============================================================================ */
+
+.m4c-skeleton-app {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #f6f7fa;
+  z-index: 99999;
+  overflow-y: auto;
+  overflow-x: hidden;
+  user-select: none;
+  pointer-events: auto;
+  transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1), filter 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, filter;
+  opacity: 1;
+  filter: blur(0);
+}
+
+.m4c-skeleton-app.m4c-skeleton-exiting {
+  opacity: 0 !important;
+  filter: blur(3px) !important;
+  pointer-events: none !important;
+}
+
+.m4c-skeleton-layout {
+  display: flex;
+  justify-content: center;
+  max-width: 100%;
+  margin: 0 auto;
+  width: 100%;
+  padding-bottom: 50px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   SYNCHRONIZED WAVE SHIMMER ANIMATION
+   ───────────────────────────────────────────────────────────────────────── */
+
+@keyframes m4c-wave-sweep {
+  0% {
+    background-position: -600px 0;
+  }
+  100% {
+    background-position: 600px 0;
+  }
+}
+
+.m4c-sk-wave {
+  background: linear-gradient(
+    90deg,
+    #ececf3 0%,
+    #f8f8fd 45%,
+    #edeef5 65%,
+    #ececf3 100%
+  );
+  background-size: 1200px 100%;
+  animation: m4c-wave-sweep 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: background-position;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   LEFT SIDEBAR SKELETON
+   ───────────────────────────────────────────────────────────────────────── */
+
+.m4c-sk-sidebar {
+  width: 70px;
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  background: #ffffff;
+  padding: 20px 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 2px 0 20px rgba(0, 0, 0, 0.02);
+  z-index: 1000;
+  box-sizing: border-box;
+}
+
+.m4c-sk-logo-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  margin-bottom: 30px;
+  background: linear-gradient(135deg, rgba(74, 36, 225, 0.2) 0%, rgba(139, 92, 246, 0.1) 100%);
+}
+
+.m4c-sk-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+  align-items: center;
+}
+
+.m4c-sk-nav-item {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+
+.m4c-sk-nav-item.active {
+  background: rgba(74, 36, 225, 0.16);
+}
+
+.m4c-sk-sidebar-footer {
+  margin-top: auto;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   MAIN FEED SKELETON
+   ───────────────────────────────────────────────────────────────────────── */
+
+.m4c-sk-main {
+  flex: 1;
+  margin-left: 70px;
+  padding: 20px 30px;
+  max-width: 850px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-sizing: border-box;
+}
+
+/* Top Stories Carousel Card */
+.m4c-sk-stories-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+}
+
+.m4c-sk-stories-scroll {
+  display: flex;
+  gap: 18px;
+  overflow: hidden;
+}
+
+.m4c-sk-story-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.m4c-sk-story-ring {
+  padding: 3px;
+  border: 2px dashed rgba(74, 36, 225, 0.22);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.m4c-sk-story-circle {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+}
+
+.m4c-sk-story-name {
+  width: 44px;
+  height: 8px;
+  border-radius: 4px;
+  margin-top: 8px;
+}
+
+/* Promo Banner */
+.m4c-sk-promo-banner {
+  height: 100px;
+  border-radius: 16px;
+  width: 100%;
+}
+
+/* Feed Post Card */
+.m4c-sk-post-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.m4c-sk-post-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.m4c-sk-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.m4c-sk-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.m4c-sk-line-title {
+  width: 130px;
+  height: 12px;
+  border-radius: 4px;
+}
+
+.m4c-sk-line-sub {
+  width: 90px;
+  height: 9px;
+  border-radius: 4px;
+}
+
+.m4c-sk-post-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.m4c-sk-line-full {
+  width: 100%;
+  height: 11px;
+  border-radius: 4px;
+}
+
+.m4c-sk-line-three-quarters {
+  width: 78%;
+  height: 11px;
+  border-radius: 4px;
+}
+
+.m4c-sk-line-half {
+  width: 52%;
+  height: 11px;
+  border-radius: 4px;
+}
+
+.m4c-sk-post-media {
+  width: 100%;
+  height: 260px;
+  border-radius: 12px;
+}
+
+.m4c-sk-post-media.short {
+  height: 160px;
+}
+
+.m4c-sk-post-actions {
+  display: flex;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.m4c-sk-action-btn {
+  width: 54px;
+  height: 26px;
+  border-radius: 13px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   RIGHT SIDEBAR SKELETON (Desktop)
+   ───────────────────────────────────────────────────────────────────────── */
+
+.m4c-sk-right-sidebar {
+  width: 340px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-top: 20px;
+  padding-right: 20px;
+  box-sizing: border-box;
+}
+
+.m4c-sk-search-pill {
+  height: 44px;
+  border-radius: 22px;
+  width: 100%;
+}
+
+.m4c-sk-widget-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+}
+
+.m4c-sk-widget-title {
+  width: 110px;
+  height: 13px;
+  border-radius: 4px;
+  margin-bottom: 2px;
+}
+
+.m4c-sk-widget-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.m4c-sk-widget-text-main {
+  width: 85%;
+  height: 11px;
+  border-radius: 4px;
+}
+
+.m4c-sk-widget-text-sub {
+  width: 50%;
+  height: 9px;
+  border-radius: 4px;
+}
+
+.m4c-sk-donor-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.m4c-sk-donor-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.m4c-sk-donor-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+}
+
+.m4c-sk-donor-name {
+  width: 70%;
+  height: 10px;
+  border-radius: 4px;
+}
+
+.m4c-sk-donor-sub {
+  width: 45%;
+  height: 8px;
+  border-radius: 4px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   RESPONSIVE BREAKPOINTS
+   ───────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 1180px) {
+  .m4c-sk-right-sidebar {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .m4c-sk-sidebar {
+    display: none;
+  }
+
+  .m4c-sk-main {
+    margin-left: 0;
+    padding: 16px;
+  }
+}

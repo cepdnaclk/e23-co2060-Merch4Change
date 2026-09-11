@@ -1,6 +1,8 @@
 // src/routes/homeBanner.routes.js
 import express from "express";
 import multer from "multer";
+import protect from "../middlewares/auth.js";
+import requireRole from "../middlewares/requireRole.js";
 import {
   uploadBanner,
   getBanners,
@@ -16,7 +18,7 @@ const upload = multer({
 });
 
 router.get("/", getBanners);
-router.post("/", upload.single("image"), uploadBanner);
-router.delete("/:id", deleteBanner);
+router.post("/", protect, requireRole("admin"), upload.single("image"), uploadBanner);
+router.delete("/:id", protect, requireRole("admin"), deleteBanner);
 
 export default router;

@@ -2,6 +2,7 @@ import React, { memo, useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import "./Sidebar.css";
 import CreatePostModal from "../CreatePostModal/CreatePostModal";
+import BrandLogo from "../BrandLogo/BrandLogo";
 import { useAuth } from "../../context/Context";
 import { fetchNotifications } from "../../services/notificationService";
 import {
@@ -63,7 +64,7 @@ function Sidebar({ profileData, setIsSidebarCollapsed, onPostCreated }) {
   return (
     <aside className="lum-sidebar-left">
       <div className="lum-logo">
-        <div className="lp-navbar-icon">M</div>
+        <BrandLogo size={34} className="lp-navbar-icon" />
         <h2 className="lp-navbar-text">Merch4Change</h2>
       </div>
 

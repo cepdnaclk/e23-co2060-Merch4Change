@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../../context/Context";
 import "./VerifyOtpPage.css";
+import BrandLogo from "../../components/BrandLogo/BrandLogo";
 
 function VerifyOtpPage() {
   const navigate = useNavigate();
@@ -163,7 +164,7 @@ function VerifyOtpPage() {
       {/* Left panel */}
       <div className="verify-otp-left">
         <Link to="/" className="verify-otp-brand">
-          <div className="verify-otp-brand-icon">M</div>
+          <BrandLogo size={36} className="verify-otp-brand-icon" />
           <span className="verify-otp-brand-name">Merch4Change</span>
         </Link>
 

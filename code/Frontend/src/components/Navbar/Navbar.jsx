@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
 import "./Navbar.css";
+import BrandLogo from "../BrandLogo/BrandLogo";
 
 function Navbar({ scrolled = false }) {
   const navigate = useNavigate();
@@ -39,7 +40,7 @@ function Navbar({ scrolled = false }) {
 
   return (
     <nav
-      className={`lp-navbar ${scrolled ? "lp-navbar--scrolled" : ""}`}
+      className={`lp-navbar ${isLandingPage ? "lp-navbar--landing" : ""} ${scrolled ? "lp-navbar--scrolled" : ""}`}
       ref={navbarRef}
     >
       <div className="lp-navbar-container">
@@ -49,19 +50,13 @@ function Navbar({ scrolled = false }) {
           onClick={() => handleNavigation("/")}
           aria-label="Merch4Change"
         >
-          <div className="lp-navbar-icon">M</div>
+          <BrandLogo size={34} className="lp-navbar-icon" />
           <span className="lp-navbar-text">Merch4Change</span>
         </button>
 
         {/* Center: Navigation (desktop only) */}
         {isLandingPage && (
           <div className="lp-navbar-center">
-            <button
-              className="lp-navbar-link"
-              onClick={() => scrollTo("how-it-works")}
-            >
-              How it works
-            </button>
             <button
               className="lp-navbar-link"
               onClick={() => handleNavigation("/marketplace")}
@@ -105,6 +100,8 @@ function Navbar({ scrolled = false }) {
             className="lp-navbar-mobile-toggle"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"
+            aria-expanded={isMobileMenuOpen}
+            aria-controls="landing-mobile-menu"
           >
             {isMobileMenuOpen ? (
               <X size={24} />
@@ -117,13 +114,7 @@ function Navbar({ scrolled = false }) {
 
       {/* Mobile Menu */}
       {isLandingPage && isMobileMenuOpen && (
-        <div className="lp-navbar-mobile-menu">
-          <button
-            className="lp-navbar-mobile-link"
-            onClick={() => scrollTo("how-it-works")}
-          >
-            How it works
-          </button>
+        <div className="lp-navbar-mobile-menu" id="landing-mobile-menu">
           <button
             className="lp-navbar-mobile-link"
             onClick={() => handleNavigation("/marketplace")}

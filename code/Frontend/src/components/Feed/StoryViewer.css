@@ -8,6 +8,13 @@
   justify-content: center;
 }
 
+.sv-viewer-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .sv-card {
   width: 380px;
   height: 640px;
@@ -15,6 +22,65 @@
   overflow: hidden;
   position: relative;
   background: #1a1a1a;
+  user-select: none;
+}
+
+/* Floating outer arrow buttons */
+.sv-arrow-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 30;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.sv-arrow-btn:hover {
+  background: rgba(255, 255, 255, 0.45);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.sv-arrow-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.sv-arrow-btn-left {
+  left: -66px;
+}
+
+.sv-arrow-btn-right {
+  right: -66px;
+}
+
+/* Segmented progress bars */
+.sv-progress-container {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  height: 3px;
+  display: flex;
+  gap: 4px;
+  z-index: 20;
+}
+
+.sv-progress-track {
+  flex: 1;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  overflow: hidden;
 }
 
 .sv-progress {
@@ -34,6 +100,13 @@
   width: 0%;
   background: #ffffff;
   border-radius: 2px;
+}
+
+.sv-progress-completed {
+  width: 100%;
+}
+
+.sv-progress-active {
   animation: svDrain 5s linear forwards;
 }
 
@@ -61,12 +134,31 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 10;
+  z-index: 20;
   line-height: 1;
+  transition: background 0.2s;
 }
 
 .sv-close:hover {
   background: rgba(0, 0, 0, 0.7);
+}
+
+/* Card tap zones for left/right clicking */
+.sv-tap-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 35%;
+  z-index: 8;
+  cursor: pointer;
+}
+
+.sv-tap-left {
+  left: 0;
+}
+
+.sv-tap-right {
+  right: 0;
 }
 
 .sv-image {
@@ -78,17 +170,53 @@
   z-index: 2;
 }
 
+/* Smooth swipe animations */
+.sv-card.sv-slide-next .sv-image {
+  animation: svSwipeFromRight 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.sv-card.sv-slide-prev .sv-image {
+  animation: svSwipeFromLeft 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes svSwipeFromRight {
+  from {
+    opacity: 0.65;
+    transform: translateX(45px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes svSwipeFromLeft {
+  from {
+    opacity: 0.65;
+    transform: translateX(-45px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 .sv-label {
   position: absolute;
   bottom: 20px;
   left: 20px;
   color: #fff;
   font-family: 'DM Sans', sans-serif;
-  font-weight: 500;
   text-shadow: 0 1px 4px rgba(0,0,0,0.5);
   font-size: 20px;
   font-weight: 600;
-  z-index: 10;
+  z-index: 20;
+}
+
+.sv-counter {
+  font-size: 14px;
+  font-weight: 400;
+  opacity: 0.85;
 }
 
 .sv-save-btn {
@@ -107,9 +235,31 @@
   cursor: pointer;
   backdrop-filter: blur(4px);
   transition: background 0.2s;
-  z-index: 10;
+  z-index: 20;
 }
 
 .sv-save-btn:hover {
   background: rgba(0, 0, 0, 0.7);
+}
+
+@media (max-width: 560px) {
+  .sv-card {
+    width: 92vw;
+    height: 80vh;
+    max-height: 640px;
+  }
+
+  .sv-arrow-btn {
+    width: 38px;
+    height: 38px;
+    background: rgba(0, 0, 0, 0.45);
+  }
+
+  .sv-arrow-btn-left {
+    left: 10px;
+  }
+
+  .sv-arrow-btn-right {
+    right: 10px;
+  }
 }

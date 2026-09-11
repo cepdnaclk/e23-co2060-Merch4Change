@@ -52,6 +52,10 @@ function MarketplacePage() {
     [navigate]
   );
 
+  if (!authLoading && !isLoading && !token) {
+    return <GuestBlock />;
+  }
+
   return (
     <div className={`luminous-app ${isSidebarCollapsed ? "sidebar-collapsed" : ""}`}>
       <TopNavbar
@@ -69,13 +73,11 @@ function MarketplacePage() {
         />
 
         <main className="lum-main-content home-main-content">
-          {isLoading ? (
+          {authLoading || isLoading ? (
              <div className="mk-loading-wrap">
                <div className="mk-spinner" />
                <p>Verifying access...</p>
              </div>
-          ) : !token ? (
-            <GuestBlock />
           ) : (
             <MarketplaceContent />
           )}
