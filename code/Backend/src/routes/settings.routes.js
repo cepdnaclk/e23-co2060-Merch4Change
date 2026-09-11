@@ -1,6 +1,7 @@
 import { Router } from "express";
 import protect from "../middlewares/auth.js";
 import {
+  updateProfileSettings,
   updateSecuritySettings,
   updatePrivacySettings,
   updateNotificationSettings,
@@ -14,6 +15,9 @@ const router = Router();
 
 // All routes require authentication
 router.use(protect);
+
+// Profile endpoint
+router.put("/profile", updateProfileSettings);
 
 // Security endpoints
 router.put("/security", updateSecuritySettings);

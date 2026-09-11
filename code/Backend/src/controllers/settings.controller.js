@@ -5,6 +5,29 @@ import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 
 // ==========================================
+// PROFILE SETTINGS CONTROLLER
+// ==========================================
+export const updateProfileSettings = asyncHandler(async (req, res) => {
+  const { name, bio, website, location, avatarUrl } = req.body;
+
+  const updateData = {};
+  if (name !== undefined) updateData.name = name;
+  if (bio !== undefined) updateData.bio = bio;
+  if (website !== undefined) updateData.website = website;
+  if (location !== undefined) updateData.location = location;
+  if (avatarUrl !== undefined) updateData.avatarUrl = avatarUrl;
+
+  const updatedUser = await User.findByIdAndUpdate(req.user._id, updateData, {
+    new: true,
+    runValidators: true,
+  });
+
+  return successResponse(res, 200, "Profile settings updated successfully.", {
+    user: updatedUser,
+  });
+});
+
+// ==========================================
 // SECURITY SETTINGS CONTROLLER
 // ==========================================
 export const updateSecuritySettings = asyncHandler(async (req, res) => {
