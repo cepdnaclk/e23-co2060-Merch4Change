@@ -515,15 +515,103 @@ export function LanguageSection() {
 }
 
 export function HelpSection() {
+  const [deletePassword, setDeletePassword] = React.useState("");
+  const [deleting, setDeleting] = React.useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
+
+  const handleDeleteAccount = async () => {
+    if (!deletePassword) {
+      alert("Please enter your password to confirm account deletion.");
+      return;
+    }
+
+    if (!window.confirm("⚠️ Are you sure? This action is permanent and cannot be undone!")) {
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      const res = await apiClient.delete("/api/v1/settings/account", {
+        data: { password: deletePassword },
+      });
+
+      if (res.data?.success) {
+        alert("Your account has been permanently deleted.");
+        // Redirect to login or home page
+        window.location.href = "/";
+      }
+    } catch (err) {
+      alert("Error: " + (err.response?.data?.message || err.message));
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="s-section">
       <h2 className="s-section__title">Help & support</h2>
       <p className="s-section__desc">Find answers or get in touch with the support team.</p>
-      <div className="s-list-row"><span>Help center</span><span className="s-list-row__chevron">›</span></div>
-      <div className="s-list-row"><span>Report a problem</span><span className="s-list-row__chevron">›</span></div>
-      <div className="s-list-row"><span>Privacy policy</span><span className="s-list-row__chevron">›</span></div>
+      <div className="s-list-row">
+        <span>Help center</span>
+        <span className="s-list-row__chevron">›</span>
+      </div>
+      <div className="s-list-row">
+        <span>Report a problem</span>
+        <span className="s-list-row__chevron">›</span>
+      </div>
+      <div className="s-list-row">
+        <span>Privacy policy</span>
+        <span className="s-list-row__chevron">›</span>
+      </div>
       <div className="s-divider" />
-      <button className="s-btn s-btn--danger">Delete account</button>
+      
+      {!showDeleteConfirm && (
+        <button 
+          className="s-btn s-btn--danger" 
+          onClick={() => setShowDeleteConfirm(true)}
+        >
+          Delete account
+        </button>
+      )}
+
+      {showDeleteConfirm && (
+        <div style={{ 
+          padding: "15px", 
+          backgroundColor: "#fff3cd", 
+          border: "1px solid #ffc107", 
+          borderRadius: "4px",
+          marginTop: "10px"
+        }}>
+          <p style={{ color: "#856404", marginBottom: "10px" }}>
+            ⚠️ Enter your password to permanently delete your account:
+          </p>
+          <input 
+            type="password" 
+            className="s-input" 
+            placeholder="Enter your password" 
+            value={deletePassword}
+            onChange={(e) => setDeletePassword(e.target.value)}
+          />
+          <div style={{ marginTop: "10px", display: "flex", gap: "10px" }}>
+            <button 
+              className="s-btn s-btn--danger" 
+              onClick={handleDeleteAccount}
+              disabled={deleting}
+            >
+              {deleting ? "Deleting..." : "Confirm deletion"}
+            </button>
+            <button 
+              className="s-btn s-btn--ghost" 
+              onClick={() => {
+                setShowDeleteConfirm(false);
+                setDeletePassword("");
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
