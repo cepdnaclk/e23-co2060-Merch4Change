@@ -4,6 +4,15 @@ import apiClient from "../../../api/apiClient.js";
 import { useTheme } from "../../../context/ThemeContext";
 import "./SettingsSection.css";
 
+function ToastBanner({ toast }) {
+  if (!toast.show) return null;
+  return (
+    <div className={`s-toast s-toast--${toast.type}`} role="status" aria-live="polite">
+      {toast.text}
+    </div>
+  );
+}
+
 function Toggle({ label, desc, badge, checked, onChange, disabled }) {
   return (
     <div className={`s-toggle-row ${disabled ? "s-toggle-row--disabled" : ""}`}>
@@ -27,6 +36,141 @@ function Toggle({ label, desc, badge, checked, onChange, disabled }) {
   );
 }
 
+export function ProfileSection() {
+  const [profile, setProfile] = useState({
+    firstName: "",
+    lastName: "",
+    bio: "",
+    website: "",
+    location: "",
+  });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState({ show: false, text: "", type: "" });
+
+  const showToast = (text, type = "info") => {
+    setToast({ show: true, text, type });
+    setTimeout(() => setToast({ show: false, text: "", type: "" }), 3500);
+  };
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        setLoading(true);
+        const res = await apiClient.get("/api/v1/profile/me");
+        if (res.data?.data?.user) {
+          const u = res.data.data.user;
+          setProfile({
+            firstName: u.firstName || "",
+            lastName: u.lastName || "",
+            bio: u.profileBio || u.bio || "",
+            website: u.website || "",
+            location: u.location || "",
+          });
+        }
+      } catch (err) {
+        showToast(err.response?.data?.message || "Failed to load profile", "error");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadProfile();
+  }, []);
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const res = await apiClient.put("/api/v1/settings/profile", {
+        name: `${profile.firstName} ${profile.lastName}`.trim(),
+        bio: profile.bio,
+        website: profile.website,
+        location: profile.location,
+      });
+
+      if (res.data?.success) {
+        showToast("Profile settings updated!", "success");
+      }
+    } catch (err) {
+      showToast(err.response?.data?.message || "Failed to update profile", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="s-section">
+        <h2 className="s-section__title">Profile information</h2>
+        <p className="s-section__desc">Loading profile data...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="s-section">
+      <ToastBanner toast={toast} />
+      <h2 className="s-section__title">Profile information</h2>
+      <p className="s-section__desc">Manage your public profile details and links.</p>
+
+      <form onSubmit={handleSave}>
+        <div className="s-row">
+          <label className="s-label">First name</label>
+          <input
+            className="s-input"
+            type="text"
+            value={profile.firstName}
+            onChange={(e) => setProfile({ ...profile, firstName: e.target.value })}
+          />
+        </div>
+        <div className="s-row">
+          <label className="s-label">Last name</label>
+          <input
+            className="s-input"
+            type="text"
+            value={profile.lastName}
+            onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
+          />
+        </div>
+        <div className="s-row">
+          <label className="s-label">Bio</label>
+          <textarea
+            className="s-input"
+            rows="3"
+            value={profile.bio}
+            onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+          />
+        </div>
+        <div className="s-row">
+          <label className="s-label">Location</label>
+          <input
+            className="s-input"
+            type="text"
+            placeholder="e.g. Colombo, Sri Lanka"
+            value={profile.location}
+            onChange={(e) => setProfile({ ...profile, location: e.target.value })}
+          />
+        </div>
+        <div className="s-row">
+          <label className="s-label">Website</label>
+          <input
+            className="s-input"
+            type="url"
+            placeholder="https://example.com"
+            value={profile.website}
+            onChange={(e) => setProfile({ ...profile, website: e.target.value })}
+          />
+        </div>
+
+        <div className="s-divider" />
+        <button className="s-btn s-btn--primary" type="submit" disabled={saving}>
+          {saving ? "Saving..." : "Save changes"}
+        </button>
+      </form>
+    </div>
+  );
+}
+
 export function SecuritySection() {
   const [twoFA, setTwoFA] = useState(false);
   const [alerts, setAlerts] = useState(true);
@@ -35,6 +179,12 @@ export function SecuritySection() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [savingToggle, setSavingToggle] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
+  const [toast, setToast] = useState({ show: false, text: "", type: "" });
+
+  const showToast = (text, type = "info") => {
+    setToast({ show: true, text, type });
+    setTimeout(() => setToast({ show: false, text: "", type: "" }), 3500);
+  };
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -46,7 +196,7 @@ export function SecuritySection() {
           setAlerts(user.loginActivityAlerts ?? true);
         }
       } catch (err) {
-        console.error("Failed to load security settings:", err);
+        showToast("Failed to load security settings", "error");
       }
     };
     loadSettings();
@@ -65,10 +215,10 @@ export function SecuritySection() {
       if (res.data?.success) {
         if (which === "2fa") setTwoFA(value);
         if (which === "alerts") setAlerts(value);
-        alert("Security settings updated!");
+        showToast("Security settings updated!", "success");
       }
     } catch (err) {
-      alert("Error: " + (err.response?.data?.message || err.message));
+      showToast(err.response?.data?.message || err.message, "error");
     } finally {
       setSavingToggle(false);
     }
@@ -78,7 +228,7 @@ export function SecuritySection() {
     setSavingPassword(true);
     try {
       if (!currentPassword || !newPassword || !confirmPassword) {
-        alert("All password fields are required");
+        showToast("All password fields are required", "error");
         setSavingPassword(false);
         return;
       }
@@ -90,13 +240,13 @@ export function SecuritySection() {
       });
 
       if (res.data?.success) {
-        alert("Password changed successfully!");
+        showToast("Password changed successfully!", "success");
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
       }
     } catch (err) {
-      alert("Error: " + (err.response?.data?.message || err.message));
+      showToast(err.response?.data?.message || err.message, "error");
     } finally {
       setSavingPassword(false);
     }
@@ -104,6 +254,7 @@ export function SecuritySection() {
 
   return (
     <div className="s-section">
+      <ToastBanner toast={toast} />
       <h2 className="s-section__title">Account security</h2>
       <p className="s-section__desc">Manage your password and keep your account safe.</p>
       <div className="s-row">
@@ -142,12 +293,14 @@ export function SecuritySection() {
         desc="Require a code when logging in from a new device"
         badge="Recommended"
         checked={twoFA}
+        disabled={savingToggle}
         onChange={() => handleToggleSave("2fa", !twoFA)}
       />
       <Toggle
         label="Login activity alerts"
         desc="Get notified when your account is accessed from a new location"
         checked={alerts}
+        disabled={savingToggle}
         onChange={() => handleToggleSave("alerts", !alerts)}
       />
       <div className="s-divider" />
@@ -171,6 +324,12 @@ export function PrivacySection() {
     commentPermission: "following",
   });
   const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState({ show: false, text: "", type: "" });
+
+  const showToast = (text, type = "info") => {
+    setToast({ show: true, text, type });
+    setTimeout(() => setToast({ show: false, text: "", type: "" }), 3500);
+  };
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -187,25 +346,27 @@ export function PrivacySection() {
           });
         }
       } catch (err) {
-        console.error("Failed to load privacy settings:", err);
+        showToast("Failed to load privacy settings", "error");
       }
     };
     loadSettings();
   }, []);
 
   const tog = (k) => {
-    const newState = { ...s, [k]: !s[k] };
+    const prev = s[k];
+    const newState = { ...s, [k]: !prev };
     setS(newState);
-    handleSave(newState);
+    handleSave(newState, k, prev);
   };
 
   const handleCommentPermissionChange = (e) => {
+    const prev = s.commentPermission;
     const newState = { ...s, commentPermission: e.target.value };
     setS(newState);
-    handleSave(newState);
+    handleSave(newState, "commentPermission", prev);
   };
 
-  const handleSave = async (stateData) => {
+  const handleSave = async (stateData, rollbackKey, rollbackVal) => {
     setSaving(true);
     try {
       const res = await apiClient.put("/api/v1/settings/privacy", {
@@ -217,10 +378,13 @@ export function PrivacySection() {
       });
 
       if (res.data?.success) {
-        console.log("Privacy settings updated!");
+        showToast("Privacy settings updated!", "success");
       }
     } catch (err) {
-      alert("Error updating privacy: " + (err.response?.data?.message || err.message));
+      if (rollbackKey) {
+        setS((prev) => ({ ...prev, [rollbackKey]: rollbackVal }));
+      }
+      showToast(err.response?.data?.message || "Error updating privacy", "error");
     } finally {
       setSaving(false);
     }
@@ -228,30 +392,35 @@ export function PrivacySection() {
 
   return (
     <div className="s-section">
+      <ToastBanner toast={toast} />
       <h2 className="s-section__title">Privacy</h2>
       <p className="s-section__desc">Control who can see your content and interact with you.</p>
       <Toggle
         label="Private account"
         desc="Only approved followers can see your posts"
         checked={s.private}
+        disabled={saving}
         onChange={() => tog("private")}
       />
       <Toggle
         label="Show activity status"
         desc="Let people see when you were last active"
         checked={s.activity}
+        disabled={saving}
         onChange={() => tog("activity")}
       />
       <Toggle
         label="Allow message requests"
         desc="Let people you don't follow send message requests"
         checked={s.messages}
+        disabled={saving}
         onChange={() => tog("messages")}
       />
       <Toggle
         label="Hide read receipts"
         desc="Others won't know when you've read their messages"
         checked={s.receipts}
+        disabled={saving}
         onChange={() => tog("receipts")}
       />
       <div className="s-divider" />
@@ -261,6 +430,7 @@ export function PrivacySection() {
           className="s-input s-input--select"
           value={s.commentPermission}
           onChange={handleCommentPermissionChange}
+          disabled={saving}
         >
           <option value="everyone">Everyone</option>
           <option value="followers">Followers only</option>
@@ -268,7 +438,6 @@ export function PrivacySection() {
           <option value="none">No one</option>
         </select>
       </div>
-      {saving && <p style={{ color: "#999", fontSize: "12px", marginTop: "10px" }}>Saving...</p>}
     </div>
   );
 }
@@ -287,12 +456,9 @@ export function NotificationsSection() {
 
   const showToast = (text, type = "info") => {
     setToast({ show: true, text, type });
-    setTimeout(() => {
-      setToast({ show: false, text: "", type: "" });
-    }, 3500);
+    setTimeout(() => setToast({ show: false, text: "", type: "" }), 3500);
   };
 
-  // 1. Frontend State Sync: Fetch initial settings from backend on mount
   useEffect(() => {
     const loadSettings = async () => {
       try {
@@ -309,7 +475,6 @@ export function NotificationsSection() {
           });
         }
       } catch (err) {
-        console.error("Failed to load notification settings:", err);
         showToast("Failed to load notification preferences", "error");
       } finally {
         setLoading(false);
@@ -318,12 +483,10 @@ export function NotificationsSection() {
     loadSettings();
   }, []);
 
-  // 2. Update Handlers & 3. Optimistic UI with Rollback
   const tog = async (k) => {
     const previousValue = s[k];
     const nextValue = !previousValue;
 
-    // Optimistically update UI
     const updatedState = { ...s, [k]: nextValue };
     setS(updatedState);
     setSavingKey(k);
@@ -341,12 +504,8 @@ export function NotificationsSection() {
         showToast("Notification preference updated!", "success");
       }
     } catch (err) {
-      // Rollback on network/server error
       setS((prev) => ({ ...prev, [k]: previousValue }));
-      showToast(
-        err.response?.data?.message || "Failed to update notification. Reverted.",
-        "error"
-      );
+      showToast(err.response?.data?.message || "Failed to update notification. Reverted.", "error");
     } finally {
       setSavingKey(null);
     }
@@ -363,12 +522,7 @@ export function NotificationsSection() {
 
   return (
     <div className="s-section">
-      {toast.show && (
-        <div className={`s-toast s-toast--${toast.type}`}>
-          {toast.text}
-        </div>
-      )}
-
+      <ToastBanner toast={toast} />
       <h2 className="s-section__title">Notifications</h2>
       <p className="s-section__desc">Choose what you get notified about.</p>
 
@@ -417,6 +571,12 @@ export function AppearanceSection() {
   const [localFontSize, setLocalFontSize] = useState(fontSize);
   const [saving, setSaving] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [toast, setToast] = useState({ show: false, text: "", type: "" });
+
+  const showToast = (text, type = "info") => {
+    setToast({ show: true, text, type });
+    setTimeout(() => setToast({ show: false, text: "", type: "" }), 3500);
+  };
 
   useEffect(() => {
     setAppTheme(theme);
@@ -438,7 +598,6 @@ export function AppearanceSection() {
           const storedLocalTheme = localStorage.getItem("m4c-theme");
           const storedLocalFont = localStorage.getItem("m4c-font-size");
 
-          // Do not overwrite user choice if already stored locally
           if (!storedLocalTheme && backendTheme) {
             setAppTheme(backendTheme);
             setTheme(backendTheme);
@@ -449,7 +608,7 @@ export function AppearanceSection() {
           }
         }
       } catch (err) {
-        console.error("Failed to load appearance settings:", err);
+        showToast("Failed to load appearance preferences", "error");
       } finally {
         setLoaded(true);
       }
@@ -462,7 +621,6 @@ export function AppearanceSection() {
     setAppTheme(next);
     setTheme(next);
 
-    // Synchronous immediate DOM reflection to avoid delayed paint
     const isDark =
       next === "dark" ||
       (next === "system" &&
@@ -492,10 +650,10 @@ export function AppearanceSection() {
       });
 
       if (res.data?.success) {
-        alert("Appearance settings saved!");
+        showToast("Appearance settings saved!", "success");
       }
     } catch (err) {
-      alert("Error: " + (err.response?.data?.message || err.message));
+      showToast(err.response?.data?.message || err.message, "error");
     } finally {
       setSaving(false);
     }
@@ -503,6 +661,7 @@ export function AppearanceSection() {
 
   return (
     <div className="s-section">
+      <ToastBanner toast={toast} />
       <h2 className="s-section__title">Appearance</h2>
       <p className="s-section__desc">Customize how the app looks for you.</p>
       <div className="s-row">
@@ -511,7 +670,7 @@ export function AppearanceSection() {
           className="s-input s-input--select"
           value={appTheme}
           onChange={handleThemeChange}
-          disabled={!loaded}
+          disabled={!loaded || saving}
         >
           <option value="system">System default</option>
           <option value="light">Light</option>
@@ -524,7 +683,7 @@ export function AppearanceSection() {
           className="s-input s-input--select"
           value={localFontSize}
           onChange={handleFontSizeChange}
-          disabled={!loaded}
+          disabled={!loaded || saving}
         >
           <option value="small">Small</option>
           <option value="medium">Medium</option>
@@ -535,11 +694,7 @@ export function AppearanceSection() {
         Changes preview instantly — click save to keep them on your other devices.
       </p>
       <div className="s-divider" />
-      <button
-        className="s-btn s-btn--primary"
-        onClick={handleSave}
-        disabled={saving}
-      >
+      <button className="s-btn s-btn--primary" onClick={handleSave} disabled={saving}>
         {saving ? "Saving..." : "Save preferences"}
       </button>
     </div>
@@ -549,6 +704,12 @@ export function AppearanceSection() {
 export function LanguageSection() {
   const [appLanguage, setAppLanguage] = useState("en-US");
   const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState({ show: false, text: "", type: "" });
+
+  const showToast = (text, type = "info") => {
+    setToast({ show: true, text, type });
+    setTimeout(() => setToast({ show: false, text: "", type: "" }), 3500);
+  };
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -559,7 +720,7 @@ export function LanguageSection() {
           setAppLanguage(user.appLanguage ?? "en-US");
         }
       } catch (err) {
-        console.error("Failed to load language settings:", err);
+        showToast("Failed to load language settings", "error");
       }
     };
     loadSettings();
@@ -573,10 +734,10 @@ export function LanguageSection() {
       });
 
       if (res.data?.success) {
-        alert("Language preference updated!");
+        showToast("Language preference updated!", "success");
       }
     } catch (err) {
-      alert("Error: " + (err.response?.data?.message || err.message));
+      showToast(err.response?.data?.message || err.message, "error");
     } finally {
       setSaving(false);
     }
@@ -584,6 +745,7 @@ export function LanguageSection() {
 
   return (
     <div className="s-section">
+      <ToastBanner toast={toast} />
       <h2 className="s-section__title">Language</h2>
       <p className="s-section__desc">Choose your preferred language for the app.</p>
       <div className="s-row">
@@ -592,6 +754,7 @@ export function LanguageSection() {
           className="s-input s-input--select"
           value={appLanguage}
           onChange={(e) => setAppLanguage(e.target.value)}
+          disabled={saving}
         >
           <option value="en-US">English (US)</option>
           <option value="en-UK">English (UK)</option>
@@ -604,11 +767,7 @@ export function LanguageSection() {
         </select>
       </div>
       <div className="s-divider" />
-      <button
-        className="s-btn s-btn--primary"
-        onClick={handleSave}
-        disabled={saving}
-      >
+      <button className="s-btn s-btn--primary" onClick={handleSave} disabled={saving}>
         {saving ? "Saving..." : "Save"}
       </button>
     </div>
@@ -619,10 +778,16 @@ export function HelpSection() {
   const [deletePassword, setDeletePassword] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [toast, setToast] = useState({ show: false, text: "", type: "" });
+
+  const showToast = (text, type = "info") => {
+    setToast({ show: true, text, type });
+    setTimeout(() => setToast({ show: false, text: "", type: "" }), 3500);
+  };
 
   const handleDeleteAccount = async () => {
     if (!deletePassword) {
-      alert("Please enter your password to confirm account deletion.");
+      showToast("Please enter your password to confirm deletion.", "error");
       return;
     }
 
@@ -637,11 +802,13 @@ export function HelpSection() {
       });
 
       if (res.data?.success) {
-        alert("Your account has been permanently deleted.");
-        window.location.href = "/";
+        showToast("Account deleted. Redirecting...", "success");
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 1200);
       }
     } catch (err) {
-      alert("Error: " + (err.response?.data?.message || err.message));
+      showToast(err.response?.data?.message || err.message, "error");
     } finally {
       setDeleting(false);
     }
@@ -649,6 +816,7 @@ export function HelpSection() {
 
   return (
     <div className="s-section">
+      <ToastBanner toast={toast} />
       <h2 className="s-section__title">Help & support</h2>
       <p className="s-section__desc">Find answers or get in touch with the support team.</p>
       <Link to="/help" className="s-list-row">
