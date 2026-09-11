@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       minlength: 8,
-      select: false,  // default do not return pw in quering 
+      select: false, // default do not return pw in querying
     },
     accountType: {
       type: String,
@@ -62,6 +62,10 @@ const userSchema = new mongoose.Schema(
       contentType: String,
     },
     profileImageUrl: {
+      type: String,
+      default: "",
+    },
+    avatarUrl: {
       type: String,
       default: "",
     },
@@ -93,6 +97,20 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    bio: {
+      type: String,
+      default: "",
+    },
+    website: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    location: {
+      type: String,
+      default: "",
+      trim: true,
+    },
     isVerified: {
       type: Boolean,
       default: false,
@@ -102,7 +120,7 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
 
-  // ===== SECURITY SETTINGS =====
+    // ===== SECURITY SETTINGS =====
     twoFactorEnabled: {
       type: Boolean,
       default: false,
@@ -131,8 +149,8 @@ const userSchema = new mongoose.Schema(
     },
     commentPermission: {
       type: String,
-      enum: ['everyone', 'followers', 'following', 'none'],
-      default: 'following',
+      enum: ["everyone", "followers", "following", "none"],
+      default: "following",
     },
 
     // ===== NOTIFICATION SETTINGS =====
@@ -160,25 +178,24 @@ const userSchema = new mongoose.Schema(
     // ===== APPEARANCE & PREFERENCES =====
     appTheme: {
       type: String,
-      enum: ['system', 'light', 'dark'],
-      default: 'system',
+      enum: ["system", "light", "dark"],
+      default: "system",
     },
     fontSize: {
       type: String,
-      enum: ['small', 'medium', 'large'],
-      default: 'medium',
+      enum: ["small", "medium", "large"],
+      default: "medium",
     },
     appLanguage: {
       type: String,
-      default: 'en-US',
+      default: "en-US",
     },
   },
   {
     timestamps: true,
     versionKey: false,
-  },
+  }
 );
-  
 
 userSchema.pre("save", function assignDefaultRole(next) {
   if (this.isNew && ["admin", "charity"].includes(this.role)) {
