@@ -445,13 +445,53 @@ export function AppearanceSection() {
 }
 
 export function LanguageSection() {
+  const [appLanguage, setAppLanguage] = React.useState("en-US");
+  const [saving, setSaving] = React.useState(false);
+
+  // Load current settings on mount
+  React.useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const res = await apiClient.get("/api/v1/profile/me");
+        if (res.data?.data?.user) {
+          const user = res.data.data.user;
+          setAppLanguage(user.appLanguage ?? "en-US");
+        }
+      } catch (err) {
+        console.error("Failed to load language settings:", err);
+      }
+    };
+    loadSettings();
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const res = await apiClient.put("/api/v1/settings/language", {
+        appLanguage,
+      });
+
+      if (res.data?.success) {
+        alert("Language preference updated!");
+      }
+    } catch (err) {
+      alert("Error: " + (err.response?.data?.message || err.message));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="s-section">
       <h2 className="s-section__title">Language</h2>
       <p className="s-section__desc">Choose your preferred language for the app.</p>
       <div className="s-row">
         <label className="s-label">App language</label>
-        <select className="s-input s-input--select" defaultValue="en-US">
+        <select 
+          className="s-input s-input--select" 
+          value={appLanguage}
+          onChange={(e) => setAppLanguage(e.target.value)}
+        >
           <option value="en-US">English (US)</option>
           <option value="en-UK">English (UK)</option>
           <option value="si">Sinhala</option>
@@ -463,7 +503,13 @@ export function LanguageSection() {
         </select>
       </div>
       <div className="s-divider" />
-      <button className="s-btn s-btn--primary">Save</button>
+      <button 
+        className="s-btn s-btn--primary" 
+        onClick={handleSave}
+        disabled={saving}
+      >
+        {saving ? "Saving..." : "Save"}
+      </button>
     </div>
   );
 }
