@@ -13,7 +13,7 @@ function Toggle({ label, desc, badge, checked, onChange }) {
         <span className="s-switch__slider" />
       </label>
     </div>
-  );cd
+  );
 }
 
 import apiClient from "../../../api/apiClient.js";
