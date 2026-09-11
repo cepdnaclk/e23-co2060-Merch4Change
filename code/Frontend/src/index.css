@@ -4,10 +4,7 @@
 
 /*
  * Design tokens for theming (light/dark) + font-size scaling.
- * `.dark` is toggled on <html> by ThemeContext (src/context/ThemeContext.jsx).
- * Only the Settings module consumes these for now — other pages still use
- * hardcoded colors and will need to be migrated to these variables the same
- * way before dark mode will visibly affect them too.
+ * `.dark` is toggled on <html> and <body> by ThemeContext (src/context/ThemeContext.jsx).
  */
 :root {
   --m4c-bg-page: #fafafa;
@@ -35,7 +32,9 @@
   --m4c-font-scale: 1;
 }
 
-:root.dark {
+:root.dark,
+html.dark,
+body.dark {
   --m4c-bg-page: #121214;
   --m4c-bg-surface: #1b1b1f;
   --m4c-bg-surface-alt: #232329;
@@ -64,16 +63,12 @@ html[data-font-size="medium"] { --m4c-font-scale: 1; }
 html[data-font-size="large"] { --m4c-font-scale: 1.15; }
 
 /*
- * Site-wide base. Without this, toggling `.dark` on <html> only changes the
- * custom-property values themselves — nothing painted the page background
- * or default text color from those variables, so pages outside Settings
- * stayed white. This is the minimum needed for dark mode to be visible
- * everywhere; individual components below still override with hardcoded
- * hex colors and need to be migrated to the var(--m4c-*) tokens too.
+ * Site-wide base background, text color, and scaling
  */
 html {
   background-color: var(--m4c-bg-page);
   color-scheme: light;
+  font-size: calc(16px * var(--m4c-font-scale, 1));
 }
 
 html.dark {
@@ -83,5 +78,16 @@ html.dark {
 body {
   background-color: var(--m4c-bg-page);
   color: var(--m4c-text-primary);
+  min-height: 100vh;
   transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/*
+ * Global fallback for common layout and card wrappers across all pages
+ */
+.dark .luminous-app,
+.dark .lum-layout,
+.dark .lum-main-content {
+  background-color: var(--m4c-bg-page) !important;
+  color: var(--m4c-text-primary);
 }
