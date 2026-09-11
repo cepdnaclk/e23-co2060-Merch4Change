@@ -62,3 +62,26 @@
 html[data-font-size="small"] { --m4c-font-scale: 0.9; }
 html[data-font-size="medium"] { --m4c-font-scale: 1; }
 html[data-font-size="large"] { --m4c-font-scale: 1.15; }
+
+/*
+ * Site-wide base. Without this, toggling `.dark` on <html> only changes the
+ * custom-property values themselves — nothing painted the page background
+ * or default text color from those variables, so pages outside Settings
+ * stayed white. This is the minimum needed for dark mode to be visible
+ * everywhere; individual components below still override with hardcoded
+ * hex colors and need to be migrated to the var(--m4c-*) tokens too.
+ */
+html {
+  background-color: var(--m4c-bg-page);
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--m4c-bg-page);
+  color: var(--m4c-text-primary);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}

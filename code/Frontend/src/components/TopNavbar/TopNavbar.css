@@ -11,8 +11,8 @@
   align-items: center;
   padding: 0 32px;
   height: 64px;
-  background: #ffffff;
-  border-bottom: 1px solid #E2DAD0;
+  background: var(--m4c-bg-surface);
+  border-bottom: 1px solid var(--m4c-border);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -38,7 +38,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: #6B6560;
+  color: var(--m4c-text-secondary);
   display: none;
   padding: 4px;
   border-radius: 6px;
@@ -73,8 +73,8 @@
 
 /* Search */
 .lum-search {
-  background: #F7F5F0;
-  border: 1px solid #E2DAD0;
+  background: var(--m4c-bg-surface-alt);
+  border: 1px solid var(--m4c-border);
   border-radius: 10px;
   padding: 9px 16px;
   display: flex;
@@ -98,10 +98,10 @@
   font-family: 'DM Sans', sans-serif;
   font-size: 14px;
   font-weight: 400;
-  color: #1A1A1A;
+  color: var(--m4c-text-primary);
 }
 
-.lum-search input::placeholder { color: #B0A9A2; }
+.lum-search input::placeholder { color: var(--m4c-text-faint); }
 
 /* ── Center: nav links ───────────────────────── */
 .lum-nav-links {
@@ -114,7 +114,7 @@
   font-family: 'DM Sans', sans-serif;
   font-size: 14px;
   font-weight: 400;
-  color: #6B6560;
+  color: var(--m4c-text-secondary);
   cursor: pointer;
   padding: 6px 12px;
   border-radius: 8px;
@@ -136,8 +136,8 @@
 
 /* ── Notification icon button ───────────────── */
 .lum-icon-btn {
-  background: #F7F5F0;
-  border: 1px solid #E2DAD0;
+  background: var(--m4c-bg-surface-alt);
+  border: 1px solid var(--m4c-border);
   width: 38px;
   height: 38px;
   border-radius: 50%;
@@ -145,7 +145,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #6B6560;
+  color: var(--m4c-text-secondary);
   transition: all 0.18s;
   flex-shrink: 0;
   position: relative;
@@ -167,7 +167,7 @@
   position: absolute;
   top: -4px;
   right: -4px;
-  background: #ed4956;
+  background: var(--m4c-danger);
   color: white;
   font-size: 10px;
   font-weight: 700;
@@ -193,8 +193,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #F7F5F0;
-  border: 1px solid #E2DAD0;
+  background: var(--m4c-bg-surface-alt);
+  border: 1px solid var(--m4c-border);
   padding: 8px 14px;
   border-radius: 24px;
   cursor: pointer;
@@ -203,7 +203,7 @@
   font-family: 'DM Sans', sans-serif;
   font-size: 13.5px;
   font-weight: 500;
-  color: #1A1A1A;
+  color: var(--m4c-text-primary);
 }
 
 .lum-coin-balance:hover {
@@ -230,8 +230,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #F7F5F0;
-  border: 1px solid #E2DAD0;
+  background: var(--m4c-bg-surface-alt);
+  border: 1px solid var(--m4c-border);
   padding: 5px 14px 5px 5px;
   border-radius: 30px;
   cursor: pointer;
@@ -239,7 +239,7 @@
   font-family: 'DM Sans', sans-serif;
   font-size: 13.5px;
   font-weight: 500;
-  color: #1A1A1A;
+  color: var(--m4c-text-primary);
 }
 
 .lum-profile-btn:hover {
@@ -260,8 +260,8 @@
   top: calc(100% + 8px);
   right: 0;
   width: 220px;
-  background: #fff;
-  border: 1px solid #E2DAD0;
+  background: var(--m4c-bg-surface);
+  border: 1px solid var(--m4c-border);
   border-radius: 12px;
   padding: 14px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
@@ -272,7 +272,7 @@
   margin: 0 0 12px;
   font-family: 'DM Sans', sans-serif;
   font-size: 13px;
-  color: #1A1A1A;
+  color: var(--m4c-text-primary);
   font-weight: 400;
 }
 
@@ -295,15 +295,15 @@
 }
 
 .lum-logout-cancel {
-  background: #F7F5F0;
-  color: #6B6560;
-  border: 1px solid #E2DAD0;
+  background: var(--m4c-bg-surface-alt);
+  color: var(--m4c-text-secondary);
+  border: 1px solid var(--m4c-border);
 }
 
 .lum-logout-cancel:hover { background: #EDEAE4; }
 
 .lum-logout-confirm {
-  background: #d93d3d;
+  background: var(--m4c-danger);
   color: #fff;
 }
 
