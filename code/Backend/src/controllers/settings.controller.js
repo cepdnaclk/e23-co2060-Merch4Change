@@ -2,6 +2,14 @@ import asyncHandler from "../utils/asyncHandler.js";
 import AppError from "../utils/appError.js";
 import { successResponse } from "../utils/apiResponse.js";
 import User from "../models/User.js";
+import Post from "../models/Post.js";
+import Like from "../models/Like.js";
+import Follow from "../models/Follow.js";
+import Notification from "../models/Notification.js";
+import Story from "../models/Story.js";
+import StoryCollection from "../models/StoryCollection.js";
+import UserBadge from "../models/UserBadge.js";
+import Product from "../models/Product.js";
 import bcrypt from "bcryptjs";
 import { uploadBufferToCloudinary } from "../utils/uploadToCloudinary.js";
 
@@ -240,8 +248,44 @@ export const deleteAccount = asyncHandler(async (req, res) => {
     throw new AppError("Incorrect password. Account not deleted.", 401, "INVALID_PASSWORD");
   }
 
-  // Delete user
-  await User.findByIdAndDelete(req.user._id);
+  const userId = req.user._id;
+
+  // Content the user owns outright — safe to hard-delete.
+  await Post.deleteMany({ userId });
+  await Like.deleteMany({ userId });
+  await Story.deleteMany({ userId });
+  await StoryCollection.deleteMany({ userId });
+  await UserBadge.deleteMany({ userId });
+  await Product.deleteMany({ ownerUserId: userId });
+
+  // Notifications addressed to this user.
+  await Notification.deleteMany({ userId });
+
+  // Follow relationships in either direction.
+  await Follow.deleteMany({ $or: [{ followerId: userId }, { followingId: userId }] });
+
+  // Remove the user's footprint from other people's posts (likes + comments)
+  // instead of deleting those posts, since the post itself still belongs to
+  // someone else.
+  await Post.updateMany(
+    { likes: userId },
+    { $pull: { likes: userId } }
+  );
+  await Post.updateMany(
+    { "comments.author": userId },
+    { $pull: { comments: { author: userId } } }
+  );
+
+  // Note: Donation, CoinTransaction, Order, Auction, Bid, Review, Message/
+  // Conversation, and OrganizationProfile/Charity/Brand records are
+  // intentionally left untouched. Those carry financial, audit, or other
+  // users' data (e.g. a charity's donation total, another user's purchase
+  // history) and deleting them here could corrupt shared records. Handling
+  // them requires a separate product decision (hard delete vs. anonymize)
+  // rather than a blanket cascade.
+
+  // Finally, delete the user account itself.
+  await User.findByIdAndDelete(userId);
 
   return successResponse(res, 200, "Account deleted successfully.", {
     message: "Your account has been permanently deleted.",
