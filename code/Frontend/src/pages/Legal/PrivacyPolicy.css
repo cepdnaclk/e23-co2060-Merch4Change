@@ -20,20 +20,22 @@
 }
 
 .privacy-hero h1 {
-  font-size: 34px;
+  font-size: 36px;
   font-weight: 700;
-  margin: 0 0 8px 0;
+  margin: 0 0 12px 0;
   color: #1e1b3a;
+  letter-spacing: -0.02em;
 }
 
 .privacy-updated {
   font-size: 13px;
+  font-weight: 500;
   color: #7c6fae;
   margin: 0 0 16px 0;
 }
 
 .privacy-intro {
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.6;
   color: #4b4568;
   margin: 0;
@@ -46,27 +48,33 @@
 }
 
 .privacy-section {
-  margin-bottom: 32px;
+  margin-bottom: 36px;
+  background: #ffffff;
+  padding: 24px 28px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
 .privacy-section h2 {
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 700;
   color: #1e1b3a;
-  margin: 0 0 8px 0;
+  margin: 0 0 10px 0;
 }
 
 .privacy-section p {
-  font-size: 14px;
+  font-size: 14.5px;
   line-height: 1.7;
-  color: #3f3a5c;
+  color: #334155;
   margin: 0;
 }
 
 .privacy-footer-links {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  gap: 12px;
   margin-top: 48px;
   padding-top: 24px;
   border-top: 1px solid #e9e3fa;
@@ -84,5 +92,5 @@
 }
 
 .privacy-footer-links span {
-  color: #ccc;
+  color: #cbd5e1;
 }
