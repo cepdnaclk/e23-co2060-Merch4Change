@@ -79,7 +79,7 @@ export function SecuritySection() {
           setAlerts(user.loginActivityAlerts ?? true);
         }
       } catch (err) {
-        showToast("Failed to load security settings", "error");
+        showToast(err.response?.data?.message || "Failed to load security settings", "error");
       }
     };
     loadSettings();
@@ -408,7 +408,7 @@ export function PrivacySection() {
           });
         }
       } catch (err) {
-        showToast("Failed to load privacy settings", "error");
+        showToast(err.response?.data?.message || "Failed to load privacy settings", "error");
       }
     };
     loadSettings();
@@ -540,7 +540,7 @@ export function NotificationsSection() {
           });
         }
       } catch (err) {
-        showToast("Failed to load notification preferences", "error");
+        showToast(err.response?.data?.message || "Failed to load notification preferences", "error");
       } finally {
         setLoading(false);
       }
@@ -676,7 +676,7 @@ export function AppearanceSection() {
           }
         }
       } catch (err) {
-        showToast("Failed to load appearance preferences", "error");
+        showToast(err.response?.data?.message || "Failed to load appearance preferences", "error");
       } finally {
         setLoaded(true);
       }
@@ -798,7 +798,7 @@ export function LanguageSection() {
           setLanguage(savedLanguage);
         }
       } catch (err) {
-        showToast(t("settings.language.loadError"), "error");
+        showToast(err.response?.data?.message || t("settings.language.loadError"), "error");
       }
     };
     loadSettings();
