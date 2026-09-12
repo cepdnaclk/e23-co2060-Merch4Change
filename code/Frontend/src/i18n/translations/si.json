@@ -1,0 +1,189 @@
+{
+  "common": {
+    "appName": "Merch4Change",
+    "save": "සුරකින්න",
+    "saving": "සුරකිමින්...",
+    "cancel": "අවලංගු කරන්න",
+    "close": "වසන්න",
+    "edit": "සංස්කරණය කරන්න",
+    "delete": "මකන්න",
+    "loading": "පූරණය වෙමින්...",
+    "search": "සොයන්න",
+    "seeAll": "සියල්ල බලන්න",
+    "back": "ආපසු",
+    "next": "ඊළඟට",
+    "submit": "ඉදිරිපත් කරන්න",
+    "confirm": "තහවුරු කරන්න",
+    "yes": "ඔව්",
+    "no": "නැත",
+    "signIn": "පිවිසෙන්න",
+    "signUp": "ලියාපදිංචි වන්න",
+    "getStarted": "ආරම්භ කරන්න",
+    "logout": "ඉවත් වන්න",
+    "viewAll": "සියල්ල බලන්න",
+    "readMore": "තව කියවන්න",
+    "logoutConfirm": "ඔබට ඉවත් වීමට අවශ්‍යද?"
+  },
+  "nav": {
+    "home": "මුල් පිටුව",
+    "search": "සොයන්න",
+    "messages": "පණිවිඩ",
+    "notifications": "දැනුම්දීම්",
+    "marketplace": "වෙළඳපොළ",
+    "collections": "එකතු",
+    "analytics": "විශ්ලේෂණ",
+    "donations": "පරිත්‍යාග",
+    "leaderboard": "ප්‍රමුඛතා පුවරුව",
+    "charityVerification": "පුණ්‍ය ආයතන සත්‍යාපනය",
+    "settings": "සැකසුම්",
+    "addProject": "ව්‍යාපෘතිය එක් කරන්න",
+    "createPost": "පළකිරීමක් සාදන්න"
+  },
+  "publicNav": {
+    "marketplace": "වෙළඳපොළ",
+    "forOrganisations": "සංවිධාන සඳහා",
+    "impact": "බලපෑම"
+  },
+  "footer": {
+    "tagline": "බලපෑමෙන් යුත් වෙළඳාම හරහා ප්‍රජාවන් සවිබල ගැන්වීම. වෙනසක් කිරීමට ඔබේ ප්‍රියතම වෙළඳ නාම සමඟ සම්බන්ධ වන්න.",
+    "aboutUs": "අප ගැන",
+    "ourStory": "අපගේ කතාව",
+    "ourMission": "අපගේ මෙහෙවර",
+    "teamAntigravity": "Team Antigravity",
+    "support": "සහාය",
+    "helpCenter": "සහාය මධ්‍යස්ථානය",
+    "howItWorks": "එය ක්‍රියා කරන ආකාරය",
+    "faqs": "නිතර අසන ප්‍රශ්න",
+    "contactUs": "අප අමතන්න",
+    "legal": "නීතිමය",
+    "privacyPolicy": "පෞද්ගලිකත්ව ප්‍රතිපත්තිය",
+    "termsOfService": "සේවා නියම",
+    "cookiePolicy": "කුකී ප්‍රතිපත්තිය",
+    "rightsReserved": "සියලුම හිමිකම් ඇවිරිණි."
+  },
+  "settings": {
+    "sidebar": {
+      "account": "ගිණුම",
+      "preferences": "අභිප්‍රේත",
+      "more": "තවත්",
+      "profile": "පැතිකඩ",
+      "security": "ආරක්ෂාව",
+      "privacy": "පෞද්ගලිකත්වය",
+      "notifications": "දැනුම්දීම්",
+      "appearance": "පෙනුම",
+      "language": "භාෂාව",
+      "help": "සහාය සහ උදව්",
+      "logout": "ඉවත් වන්න",
+      "organizationVerification": "සංවිධාන සත්‍යාපනය",
+      "editProfile": "පැතිකඩ සංස්කරණය",
+      "accountSecurity": "ගිණුම් ආරක්ෂාව",
+      "header": "සැකසුම්"
+    },
+    "language": {
+      "title": "භාෂාව",
+      "description": "යෙදුම සඳහා ඔබ කැමති භාෂාව තෝරන්න.",
+      "appLanguage": "යෙදුම් භාෂාව",
+      "updateSuccess": "භාෂා අභිප්‍රේතය යාවත්කාලීන කරන ලදී!",
+      "loadError": "භාෂා සැකසුම් පූරණය කිරීම අසාර්ථක විය"
+    },
+    "appearance": {
+      "title": "පෙනුම",
+      "description": "ඔබේ උපාංගයේ Merch4Change පෙනෙන ආකාරය අභිරුචිකරණය කරන්න.",
+      "theme": "තේමාව",
+      "light": "ආලෝකමත්",
+      "dark": "අඳුරු",
+      "system": "පද්ධතිය",
+      "fontSize": "අකුරු ප්‍රමාණය",
+      "small": "කුඩා",
+      "medium": "මධ්‍යම",
+      "large": "විශාල",
+      "updateSuccess": "පෙනුම යාවත්කාලීන කරන ලදී!"
+    },
+    "notifications": {
+      "title": "දැනුම්දීම්",
+      "description": "ඔබට දැනුම් දිය යුතු දේ තෝරන්න."
+    },
+    "privacy": {
+      "title": "පෞද්ගලිකත්වය"
+    },
+    "security": {
+      "title": "ආරක්ෂාව"
+    },
+    "profile": {
+      "title": "පැතිකඩ"
+    },
+    "help": {
+      "title": "සහාය සහ උදව්"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "ආයුබෝවන්",
+      "subtitle": "Merch4Change වෙත ඉදිරියට යාමට පිවිසෙන්න",
+      "email": "විද්‍යුත් තැපෑල",
+      "password": "මුරපදය",
+      "forgotPassword": "මුරපදය අමතකද?",
+      "loginButton": "පිවිසෙන්න",
+      "noAccount": "ගිණුමක් නැද්ද?",
+      "signUp": "ලියාපදිංචි වන්න"
+    },
+    "signup": {
+      "title": "ඔබේ ගිණුම සාදන්න",
+      "haveAccount": "දැනටමත් ගිණුමක් තිබේද?",
+      "logIn": "පිවිසෙන්න"
+    }
+  },
+  "home": {
+    "title": "මුල් පිටුව",
+    "trendingNow": "දැන් ප්‍රවණතාවය",
+    "forYou": "ඔබ සඳහා"
+  },
+  "marketplace": {
+    "title": "වෙළඳපොළ",
+    "trending": "ප්‍රවණතාවය",
+    "guestBlockTitle": "වෙළඳපොළේ සාප්පු යාමට පිවිසෙන්න",
+    "emptyTitle": "නිෂ්පාදන හමු නොවීය"
+  },
+  "leaderboard": {
+    "title": "ප්‍රමුඛතා පුවරුව",
+    "topDonors": "ඉහළම පරිත්‍යාගශීලීන්"
+  },
+  "donations": {
+    "title": "පරිත්‍යාග",
+    "donate": "පරිත්‍යාග කරන්න",
+    "myDonations": "මගේ පරිත්‍යාග"
+  },
+  "messaging": {
+    "title": "පණිවිඩ",
+    "noConversation": "පණිවිඩ යැවීම ආරම්භ කිරීමට සංවාදයක් තෝරන්න"
+  },
+  "notificationsPage": {
+    "title": "දැනුම්දීම්",
+    "empty": "ඔබ සියල්ල නරඹා ඇත!"
+  },
+  "search": {
+    "title": "සොයන්න",
+    "placeholder": "Merch4Change තුළ සොයන්න"
+  },
+  "about": {
+    "ourStory": "අපගේ කතාව",
+    "ourMission": "අපගේ මෙහෙවර",
+    "team": "Team Antigravity"
+  },
+  "faq": {
+    "title": "නිතර අසන ප්‍රශ්න"
+  },
+  "help": {
+    "title": "සහාය සහ උදව්",
+    "contact": "අප අමතන්න"
+  },
+  "profile": {
+    "posts": "පළකිරීම්",
+    "followers": "අනුගාමිකයින්",
+    "following": "අනුගමනය කරන"
+  },
+  "underConstruction": {
+    "title": "ඉක්මනින් පැමිණේ",
+    "message": "අපි තවමත් මෙම පිටුව ගොඩනඟමින් සිටිමු. ඉක්මනින් නැවත පරීක්ෂා කරන්න!"
+  }
+}

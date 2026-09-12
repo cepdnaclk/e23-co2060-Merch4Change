@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import apiClient from "../../../api/apiClient.js";
 import { useTheme } from "../../../context/ThemeContext";
+import { useI18n } from "../../../i18n/I18nContext";
 import "./SettingsSection.css";
 
 // Re-export ProfileSection from ProfileSection.jsx to maintain single source of truth
@@ -772,7 +773,10 @@ export function AppearanceSection() {
 // LANGUAGE SECTION
 // ==========================================
 export function LanguageSection() {
-  const [appLanguage, setAppLanguage] = useState("en-US");
+  const { language, setLanguage, t, languages } = useI18n();
+  // Local draft value so the dropdown can be changed without affecting the
+  // live app until the user hits Save (matches the rest of Settings' pattern).
+  const [appLanguage, setAppLanguage] = useState(language);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState({ show: false, text: "", type: "" });
 
@@ -787,13 +791,18 @@ export function LanguageSection() {
         const res = await apiClient.get("/api/v1/profile/me");
         if (res.data?.data?.user) {
           const user = res.data.data.user;
-          setAppLanguage(user.appLanguage ?? "en-US");
+          const savedLanguage = user.appLanguage ?? "en-US";
+          setAppLanguage(savedLanguage);
+          // Apply whatever is saved on the account as soon as it loads, so a
+          // language chosen on another device/session takes effect here too.
+          setLanguage(savedLanguage);
         }
       } catch (err) {
-        showToast("Failed to load language settings", "error");
+        showToast(t("settings.language.loadError"), "error");
       }
     };
     loadSettings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSave = async () => {
@@ -804,7 +813,9 @@ export function LanguageSection() {
       });
 
       if (res.data?.success) {
-        showToast("Language preference updated!", "success");
+        // Apply immediately across the whole app (nav, sidebar, settings, etc.)
+        setLanguage(appLanguage);
+        showToast(t("settings.language.updateSuccess"), "success");
       }
     } catch (err) {
       showToast(err.response?.data?.message || err.message, "error");
@@ -816,29 +827,26 @@ export function LanguageSection() {
   return (
     <div className="s-section">
       <ToastBanner toast={toast} />
-      <h2 className="s-section__title">Language</h2>
-      <p className="s-section__desc">Choose your preferred language for the app.</p>
+      <h2 className="s-section__title">{t("settings.language.title")}</h2>
+      <p className="s-section__desc">{t("settings.language.description")}</p>
       <div className="s-row">
-        <label className="s-label">App language</label>
+        <label className="s-label">{t("settings.language.appLanguage")}</label>
         <select
           className="s-input s-input--select"
           value={appLanguage}
           onChange={(e) => setAppLanguage(e.target.value)}
           disabled={saving}
         >
-          <option value="en-US">English (US)</option>
-          <option value="en-UK">English (UK)</option>
-          <option value="si">Sinhala</option>
-          <option value="ta">Tamil</option>
-          <option value="es">Spanish</option>
-          <option value="fr">French</option>
-          <option value="de">German</option>
-          <option value="ja">Japanese</option>
+          {languages.map((lang) => (
+            <option key={lang.code} value={lang.code}>
+              {lang.label}
+            </option>
+          ))}
         </select>
       </div>
       <div className="s-divider" />
       <button className="s-btn s-btn--primary" onClick={handleSave} disabled={saving}>
-        {saving ? "Saving..." : "Save"}
+        {saving ? t("common.saving") : t("common.save")}
       </button>
     </div>
   );
