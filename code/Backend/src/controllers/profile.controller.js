@@ -93,7 +93,7 @@ export const getProfileByUsername = asyncHandler(async (req, res) => {
 
   const cleanParam = decodeURIComponent(username || "").trim();
   const alphanumericOnly = cleanParam.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const fuzzyPattern = cleanParam.replace(/[-_]/g, "[\\s-_]*");
+  const fuzzyPattern = cleanParam.replace(/[-_]/g, "[\\s\\-_]*");
   const fuzzyRegex = new RegExp(`^${fuzzyPattern}$`, "i");
 
   let user = await User.findOne({
@@ -128,9 +128,11 @@ export const getProfileByUsername = asyncHandler(async (req, res) => {
     throw new AppError("User not found.", 404, "USER_NOT_FOUND");
   }
 
+  const dbReady = mongoose.connection?.readyState === 1;
+
   // Check if current user is following this user
   let isFollowing = false;
-  if (req.user) {
+  if (dbReady && req.user) {
     const followRecord = await Follow.findOne({
       followerId: req.user._id,
       followingId: user._id,
@@ -139,7 +141,7 @@ export const getProfileByUsername = asyncHandler(async (req, res) => {
   }
 
   const userObj = user.toObject ? user.toObject() : { ...user };
-  if (userObj.accountType === "organization" || userObj.role === "charity" || charity) {
+  if (dbReady && (userObj.accountType === "organization" || userObj.role === "charity" || charity)) {
     const possibleCharityIds = [user._id];
     if (charity?._id) possibleCharityIds.push(charity._id);
     const projectsCount = await Project.countDocuments({
@@ -157,12 +159,17 @@ export const getProfileByUsername = asyncHandler(async (req, res) => {
     userObj.charity = charity;
   }
 
-  const [followersCount, followingCount] = await Promise.all([
-    Follow.countDocuments({ followingId: user._id }),
-    Follow.countDocuments({ followerId: user._id }),
-  ]);
-  userObj.followersCount = followersCount;
-  userObj.followingCount = followingCount;
+  if (dbReady) {
+    const [followersCount, followingCount] = await Promise.all([
+      Follow.countDocuments({ followingId: user._id }),
+      Follow.countDocuments({ followerId: user._id }),
+    ]);
+    userObj.followersCount = followersCount;
+    userObj.followingCount = followingCount;
+  } else {
+    userObj.followersCount = userObj.followersCount ?? 0;
+    userObj.followingCount = userObj.followingCount ?? 0;
+  }
 
   return successResponse(res, 200, "User profile fetched successfully.", {
     user: userObj,
@@ -202,19 +209,21 @@ export const followUser = asyncHandler(async (req, res) => {
     followingId: userToFollow._id,
   });
 
-  await User.findByIdAndUpdate(userToFollow._id, { $inc: { followersCount: 1 } });
-  await User.findByIdAndUpdate(req.user._id, { $inc: { followingCount: 1 } });
+  if (mongoose.connection?.readyState === 1) {
+    await User.findByIdAndUpdate(userToFollow._id, { $inc: { followersCount: 1 } });
+    await User.findByIdAndUpdate(req.user._id, { $inc: { followingCount: 1 } });
 
-  if (mongoose.Types.ObjectId.isValid(userToFollow._id)) {
-    const followerName = req.user.firstName && req.user.lastName
-      ? `${req.user.firstName} ${req.user.lastName}`.trim()
-      : (req.user.firstName || req.user.userName || "Someone");
-    await Notification.create({
-      userId: userToFollow._id,
-      type: "follow",
-      message: `${followerName} started following you.`,
-      isRead: false,
-    });
+    if (mongoose.Types.ObjectId.isValid(userToFollow._id)) {
+      const followerName = req.user.firstName && req.user.lastName
+        ? `${req.user.firstName} ${req.user.lastName}`.trim()
+        : (req.user.firstName || req.user.userName || "Someone");
+      await Notification.create({
+        userId: userToFollow._id,
+        type: "follow",
+        message: `${followerName} started following you.`,
+        isRead: false,
+      });
+    }
   }
 
   return successResponse(res, 200, "Successfully followed user.", { isFollowing: true });
@@ -238,7 +247,7 @@ export const unfollowUser = asyncHandler(async (req, res) => {
     followingId: userToUnfollow._id,
   });
 
-  if (deleted) {
+  if (deleted && mongoose.connection?.readyState === 1) {
     await User.findByIdAndUpdate(userToUnfollow._id, { $inc: { followersCount: -1 } });
     await User.findByIdAndUpdate(req.user._id, { $inc: { followingCount: -1 } });
   }
@@ -247,6 +256,12 @@ export const unfollowUser = asyncHandler(async (req, res) => {
 });
 
 export const getSuggestedUsers = asyncHandler(async (req, res) => {
+  if (mongoose.connection?.readyState !== 1) {
+    return successResponse(res, 200, "Suggested users fetched successfully.", {
+      suggestedUsers: [],
+    });
+  }
+
   // Find users the current user is already following
   const followingRecords = await Follow.find({ followerId: req.user._id }).select("followingId");
   const followingIds = followingRecords.map(record => record.followingId);
@@ -272,7 +287,7 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
   let targetUser = null;
   const cleanParam = decodeURIComponent(username || "").trim();
   const alphanumericOnly = cleanParam.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const fuzzyPattern = cleanParam.replace(/[-_]/g, "[\\s-_]*");
+  const fuzzyPattern = cleanParam.replace(/[-_]/g, "[\\s\\-_]*");
   const fuzzyRegex = new RegExp(`^${fuzzyPattern}$`, "i");
 
   if (username === "me" && req.user) {
@@ -724,4 +739,4 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
   });
 });
 
-export const getTopDonors = getTopCustomers;
+export const getTopDonors = getTopCustomers;
