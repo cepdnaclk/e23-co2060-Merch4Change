@@ -25,8 +25,13 @@ const validateRequest = (schema = {}) => (req, res, next) => {
   }
 
   if (validationErrors.length) {
+    // Surface the first specific message (e.g. "userName must be between 2 and
+    // 30 characters.") as the top-level error message, since that's what the
+    // frontend toasts display. The full list still travels in `details` for
+    // any caller that wants to show every failure at once.
+    const message = validationErrors[0].message;
     return next(
-      new AppError("Validation failed.", 400, "VALIDATION_ERROR", validationErrors),
+      new AppError(message, 400, "VALIDATION_ERROR", validationErrors),
     );
   }
 

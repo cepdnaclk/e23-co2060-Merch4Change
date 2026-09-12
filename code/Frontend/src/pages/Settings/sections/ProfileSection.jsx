@@ -78,9 +78,7 @@ function ProfileSection({ profileData = {}, onUpdate = () => {} }) {
         email,
       };
 
-      const res = await apiClient.put("/api/v1/settings/profile", body).catch(() => {
-        return apiClient.put("/api/v1/profile/me", body);
-      });
+      const res = await apiClient.put("/api/v1/settings/profile", body);
 
       const data = res.data;
       if (!data?.success) throw new Error(data?.message || "Failed to update profile");

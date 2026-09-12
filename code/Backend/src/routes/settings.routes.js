@@ -1,6 +1,17 @@
 import { Router } from "express";
 import protect from "../middlewares/auth.js";
 import { upload } from "../middlewares/upload.js"; // <-- Add this import
+import validateRequest from "../middlewares/validateRequest.js";
+import {
+  validateProfileSettingsBody,
+  validateSecuritySettingsBody,
+  validateChangePasswordBody,
+  validatePrivacySettingsBody,
+  validateNotificationSettingsBody,
+  validateAppearanceSettingsBody,
+  validateLanguageSettingsBody,
+  validateDeleteAccountBody,
+} from "../validators/settings.validator.js";
 import {
   updateProfileSettings,
   updateSecuritySettings,
@@ -18,25 +29,58 @@ const router = Router();
 router.use(protect);
 
 // Profile endpoint with optional single file upload (field name: 'avatar')
-router.put("/profile", upload.single("avatar"), updateProfileSettings);
+router.put(
+  "/profile",
+  upload.single("avatar"),
+  validateRequest({ body: validateProfileSettingsBody }),
+  updateProfileSettings
+);
 
 // Security endpoints
-router.put("/security", updateSecuritySettings);
-router.post("/change-password", changePassword);
+router.put(
+  "/security",
+  validateRequest({ body: validateSecuritySettingsBody }),
+  updateSecuritySettings
+);
+router.post(
+  "/change-password",
+  validateRequest({ body: validateChangePasswordBody }),
+  changePassword
+);
 
 // Privacy endpoints
-router.put("/privacy", updatePrivacySettings);
+router.put(
+  "/privacy",
+  validateRequest({ body: validatePrivacySettingsBody }),
+  updatePrivacySettings
+);
 
 // Notification endpoints
-router.put("/notifications", updateNotificationSettings);
+router.put(
+  "/notifications",
+  validateRequest({ body: validateNotificationSettingsBody }),
+  updateNotificationSettings
+);
 
 // Appearance endpoints
-router.put("/appearance", updateAppearanceSettings);
+router.put(
+  "/appearance",
+  validateRequest({ body: validateAppearanceSettingsBody }),
+  updateAppearanceSettings
+);
 
 // Language endpoints
-router.put("/language", updateLanguageSettings);
+router.put(
+  "/language",
+  validateRequest({ body: validateLanguageSettingsBody }),
+  updateLanguageSettings
+);
 
 // Account deletion
-router.delete("/account", deleteAccount);
+router.delete(
+  "/account",
+  validateRequest({ body: validateDeleteAccountBody }),
+  deleteAccount
+);
 
 export default router;
