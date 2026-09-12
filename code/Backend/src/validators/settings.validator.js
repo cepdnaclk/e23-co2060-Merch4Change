@@ -18,7 +18,6 @@ export const validateProfileSettingsBody = (payload = {}) => {
     profileBio: trimIfString(payload.profileBio),
     userLink: trimIfString(payload.userLink),
     location: trimIfString(payload.location),
-    email: typeof payload.email === "string" ? payload.email.toLowerCase().trim() : payload.email,
   };
 
   const errors = [];
@@ -40,12 +39,6 @@ export const validateProfileSettingsBody = (payload = {}) => {
       errors.push("userName must be a string between 2 and 30 characters.");
     } else if (!usernamePattern.test(normalized.userName)) {
       errors.push("userName can only contain letters, numbers, periods, and underscores.");
-    }
-  }
-
-  if (normalized.email !== undefined) {
-    if (typeof normalized.email !== "string" || !emailPattern.test(normalized.email)) {
-      errors.push("email must be a valid email address.");
     }
   }
 
@@ -74,6 +67,46 @@ export const validateSecuritySettingsBody = (payload = {}) => {
   }
 
   return { value: payload, errors };
+};
+
+// ==========================================
+// REQUEST EMAIL CHANGE
+// ==========================================
+export const validateRequestEmailChangeBody = (payload = {}) => {
+  const normalized = {
+    newEmail: typeof payload.newEmail === "string" ? payload.newEmail.toLowerCase().trim() : payload.newEmail,
+    currentPassword: payload.currentPassword,
+  };
+
+  const errors = [];
+
+  if (!normalized.newEmail || typeof normalized.newEmail !== "string" || !emailPattern.test(normalized.newEmail)) {
+    errors.push("newEmail must be a valid email address.");
+  }
+
+  if (!normalized.currentPassword || typeof normalized.currentPassword !== "string") {
+    errors.push("currentPassword is required.");
+  }
+
+  return { value: normalized, errors };
+};
+
+// ==========================================
+// VERIFY EMAIL CHANGE
+// ==========================================
+export const validateVerifyEmailChangeBody = (payload = {}) => {
+  const normalized = {
+    otp: typeof payload.otp === "string" ? payload.otp.trim() : payload.otp,
+    otpCode: typeof payload.otpCode === "string" ? payload.otpCode.trim() : payload.otpCode,
+  };
+
+  const errors = [];
+
+  if (!normalized.otp && !normalized.otpCode) {
+    errors.push("otp is required.");
+  }
+
+  return { value: normalized, errors };
 };
 
 // ==========================================

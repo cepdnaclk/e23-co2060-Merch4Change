@@ -61,23 +61,20 @@ export const getMyCoins = asyncHandler(async (req, res) => {
 export const updateMe = asyncHandler(async (req, res) => {
   const payload = req.body || {};
 
-  // Only allow certain fields to be updated
-  const allowed = ["firstName", "lastName", "userName", "email", "profileBio", "userLink"];
+  // Only allow certain fields to be updated.
+  // NOTE: "email" is intentionally excluded — changing the account email now
+  // requires OTP re-verification via /api/v1/settings/email/request-change
+  // and /verify, so it can no longer be set directly through this endpoint.
+  const allowed = ["firstName", "lastName", "userName", "profileBio", "userLink"];
   const updateData = {};
   for (const k of allowed) {
     if (Object.prototype.hasOwnProperty.call(payload, k)) updateData[k] = payload[k];
   }
 
-  // If username or email is changing, ensure uniqueness
+  // If username is changing, ensure uniqueness
   if (updateData.userName && updateData.userName !== req.user.userName) {
     const exists = await User.findOne({ userName: updateData.userName, _id: { $ne: req.user._id } });
     if (exists) throw new AppError("Username already taken.", 409, "USERNAME_TAKEN");
-  }
-
-  if (updateData.email && updateData.email !== req.user.email) {
-    const exists = await User.findOne({ email: updateData.email.toLowerCase(), _id: { $ne: req.user._id } });
-    if (exists) throw new AppError("Email already in use.", 409, "EMAIL_TAKEN");
-    updateData.email = updateData.email.toLowerCase();
   }
 
   Object.assign(req.user, updateData);

@@ -111,6 +111,26 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
 
+    // ===== PENDING EMAIL CHANGE (OTP re-verification) =====
+    // Holds state for an in-progress email change. `email` above is only
+    // ever updated once the OTP sent to `pendingEmail` is verified.
+    pendingEmail: {
+      type: String,
+      default: null,
+      lowercase: true,
+      trim: true,
+    },
+    pendingEmailOtp: {
+      type: String,
+      default: null,
+      select: false,
+    },
+    pendingEmailOtpExpiresAt: {
+      type: Date,
+      default: null,
+      select: false,
+    },
+
     // ===== SECURITY SETTINGS =====
     twoFactorEnabled: {
       type: Boolean,

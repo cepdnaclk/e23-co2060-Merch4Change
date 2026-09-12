@@ -2,6 +2,7 @@ import { Router } from "express";
 import protect from "../middlewares/auth.js";
 import { upload } from "../middlewares/upload.js"; // <-- Add this import
 import validateRequest from "../middlewares/validateRequest.js";
+import { authRateLimiter } from "../middlewares/rateLimit.js";
 import {
   validateProfileSettingsBody,
   validateSecuritySettingsBody,
@@ -11,9 +12,14 @@ import {
   validateAppearanceSettingsBody,
   validateLanguageSettingsBody,
   validateDeleteAccountBody,
+  validateRequestEmailChangeBody,
+  validateVerifyEmailChangeBody,
 } from "../validators/settings.validator.js";
 import {
   updateProfileSettings,
+  requestEmailChange,
+  resendEmailChangeOtp,
+  verifyEmailChange,
   updateSecuritySettings,
   updatePrivacySettings,
   updateNotificationSettings,
@@ -34,6 +40,24 @@ router.put(
   upload.single("avatar"),
   validateRequest({ body: validateProfileSettingsBody }),
   updateProfileSettings
+);
+
+// Email re-verification endpoints (OTP)
+router.post(
+  "/email/request-change",
+  authRateLimiter,
+  validateRequest({ body: validateRequestEmailChangeBody }),
+  requestEmailChange
+);
+router.post(
+  "/email/resend-otp",
+  authRateLimiter,
+  resendEmailChangeOtp
+);
+router.post(
+  "/email/verify",
+  validateRequest({ body: validateVerifyEmailChangeBody }),
+  verifyEmailChange
 );
 
 // Security endpoints
