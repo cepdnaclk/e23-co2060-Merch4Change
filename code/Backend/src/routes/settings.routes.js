@@ -1,5 +1,6 @@
 import { Router } from "express";
 import protect from "../middlewares/auth.js";
+import { upload } from "../middlewares/upload.js"; // <-- Add this import
 import {
   updateProfileSettings,
   updateSecuritySettings,
@@ -16,8 +17,8 @@ const router = Router();
 // All routes require authentication
 router.use(protect);
 
-// Profile endpoint
-router.put("/profile", updateProfileSettings);
+// Profile endpoint with optional single file upload (field name: 'avatar')
+router.put("/profile", upload.single("avatar"), updateProfileSettings);
 
 // Security endpoints
 router.put("/security", updateSecuritySettings);

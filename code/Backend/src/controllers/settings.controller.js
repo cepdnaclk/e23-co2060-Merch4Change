@@ -3,19 +3,49 @@ import AppError from "../utils/appError.js";
 import { successResponse } from "../utils/apiResponse.js";
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
+import { uploadBufferToCloudinary } from "../utils/uploadToCloudinary.js";
 
 // ==========================================
 // PROFILE SETTINGS CONTROLLER
 // ==========================================
 export const updateProfileSettings = asyncHandler(async (req, res) => {
-  const { name, bio, website, location, avatarUrl } = req.body;
+  const {
+    name,
+    firstName,
+    lastName,
+    userName,
+    bio,
+    profileBio,
+    website,
+    userLink,
+    location,
+    email,
+    avatarUrl,
+  } = req.body;
 
   const updateData = {};
+
+  // Form field mappings
   if (name !== undefined) updateData.name = name;
+  if (firstName !== undefined) updateData.firstName = firstName;
+  if (lastName !== undefined) updateData.lastName = lastName;
+  if (userName !== undefined) updateData.userName = userName;
   if (bio !== undefined) updateData.bio = bio;
+  if (profileBio !== undefined) updateData.profileBio = profileBio;
   if (website !== undefined) updateData.website = website;
+  if (userLink !== undefined) updateData.userLink = userLink;
   if (location !== undefined) updateData.location = location;
-  if (avatarUrl !== undefined) updateData.avatarUrl = avatarUrl;
+  if (email !== undefined) updateData.email = email;
+
+  // Handle image upload from multipart form or fallback URL string
+  if (req.file) {
+    const uploadResult = await uploadBufferToCloudinary(req.file.buffer, "avatars");
+    updateData.avatarUrl = uploadResult.secure_url;
+    updateData.profileImageUrl = uploadResult.secure_url;
+  } else if (avatarUrl !== undefined) {
+    updateData.avatarUrl = avatarUrl;
+    updateData.profileImageUrl = avatarUrl;
+  }
 
   const updatedUser = await User.findByIdAndUpdate(req.user._id, updateData, {
     new: true,

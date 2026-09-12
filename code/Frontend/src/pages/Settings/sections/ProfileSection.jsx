@@ -112,27 +112,25 @@ function ProfileSection({ profileData = {}, onUpdate = () => {} }) {
     if (!file) return;
     setUploading(true);
     try {
-      const userId = profileData?._id || profileData?.id;
-      if (!userId) throw new Error("Missing user ID");
-
       const form = new FormData();
-      form.append("image", file);
+      form.append("avatar", file);
 
-      const res = await apiClient.post(`/api/v1/images/user/${userId}`, form);
+      const res = await apiClient.put("/api/v1/settings/profile", form, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
       const data = res.data;
-
       if (!data?.success) throw new Error(data?.message || "Failed to upload image");
 
-      // Refresh profile data from server to receive the newly generated image path
-      const profileRes = await apiClient.get("/api/v1/profile/me");
-      const profileJson = profileRes.data;
-      if (profileJson?.success && profileJson.data?.user) {
-        const freshUser = profileJson.data.user;
-        onUpdate(freshUser);
-        const newUrl = freshUser.profileImageUrl || freshUser.avatarUrl || "";
+      const updated = data.data?.user;
+      if (updated) {
+        onUpdate(updated);
+        const newUrl = updated.profileImageUrl || updated.avatarUrl || "";
         setAvatarUrl(newUrl);
         setImageError(false);
-        showToast("Profile photo updated!", "success");
+        showToast("Profile photo updated successfully!", "success");
       }
     } catch (err) {
       showToast(err.response?.data?.message || err.message || "Unable to upload photo", "error");
