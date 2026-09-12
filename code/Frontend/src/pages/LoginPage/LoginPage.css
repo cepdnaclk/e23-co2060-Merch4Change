@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
 
 *,
 *::before,
@@ -52,7 +52,7 @@
 
 .login-brand-name {
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 600;
   color: #111;
   letter-spacing: -0.01em;
 }
@@ -82,10 +82,10 @@
 
 .login-desc {
   font-size: 14px;
-  color: #888;
+  color: #666;
   line-height: 1.7;
-  font-weight: 300;
-  max-width: 300px;
+  font-weight: 400;
+  max-width: 320px;
 }
 
 .login-testimonial-wrap {
@@ -99,14 +99,15 @@
   background: #fff;
   border-radius: 16px;
   padding: 20px 22px;
-  border: 0.5px solid #e8e8e8;
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
 .login-testimonial-text {
   font-size: 13px;
-  color: #555;
+  color: #444;
   line-height: 1.65;
-  font-weight: 300;
+  font-weight: 400;
   margin-bottom: 16px;
 }
 
@@ -123,7 +124,7 @@
   background: #4a24e1;
   color: #fff;
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -132,13 +133,13 @@
 
 .login-author-name {
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   color: #111;
 }
 
 .login-author-role {
   font-size: 11.5px;
-  color: #aaa;
+  color: #888;
   margin-top: 1px;
 }
 
@@ -176,7 +177,7 @@
 
 .login-eyebrow {
   font-size: 11.5px;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #4a24e1;
@@ -195,9 +196,9 @@
 
 .login-subtitle {
   font-size: 14px;
-  color: #aaa;
+  color: #777;
   margin-bottom: 32px;
-  font-weight: 300;
+  font-weight: 400;
 }
 
 .login-link {
@@ -253,7 +254,7 @@
   display: block;
   font-size: 12.5px;
   font-weight: 500;
-  color: #555;
+  color: #444;
   margin-bottom: 7px;
   letter-spacing: 0.01em;
 }
@@ -269,20 +270,20 @@
   color: #111;
   outline: none;
   transition: border-color 0.15s, background 0.15s;
-  appearance: none;
 }
 
 .login-password-wrapper input {
-  padding-right: 44px; /* Make room for the eye icon */
+  padding-right: 44px;
 }
 
 .login-field input:focus {
   border-color: #4a24e1;
   background: #fff;
+  box-shadow: 0 0 0 3px rgba(74, 36, 225, 0.1);
 }
 
 .login-field input::placeholder {
-  color: #ccc;
+  color: #aaa;
 }
 
 .login-options-row {
@@ -298,8 +299,8 @@
   gap: 8px;
   cursor: pointer;
   font-size: 13.5px;
-  color: #666;
-  font-weight: 300;
+  color: #555;
+  font-weight: 400;
   user-select: none;
 }
 
@@ -315,7 +316,7 @@
   font-size: 13.5px;
   color: #4a24e1;
   text-decoration: none;
-  font-weight: 400;
+  font-weight: 500;
 }
 .login-forgot:hover {
   text-decoration: underline;
@@ -329,7 +330,7 @@
   border: none;
   border-radius: 10px;
   font-size: 14.5px;
-  font-weight: 500;
+  font-weight: 600;
   font-family: 'DM Sans', sans-serif;
   cursor: pointer;
   letter-spacing: 0.01em;
@@ -337,7 +338,7 @@
 }
 
 .login-btn:hover:not(:disabled) {
-  opacity: 0.88;
+  opacity: 0.92;
   transform: translateY(-1px);
 }
 
@@ -352,11 +353,11 @@
 
 .login-terms {
   font-size: 12.5px;
-  color: #bbb;
+  color: #999;
   text-align: center;
   margin-top: 28px;
   line-height: 1.6;
-  font-weight: 300;
+  font-weight: 400;
 }
 
 @media (max-width: 768px) {

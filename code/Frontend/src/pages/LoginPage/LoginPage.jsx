@@ -14,19 +14,19 @@ function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  const { login } = useAuth();
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-
-  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg("");
 
     if (!formData.email.trim() || !formData.password) {
-      setErrorMsg("Please enter your email and password.");
+      setErrorMsg("Please enter both your email address and password.");
       return;
     }
 
@@ -37,17 +37,18 @@ function LoginPage() {
       const response = await fetch(`${apiBase}/api/v1/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",     // browser accept set-cookies 
+        credentials: "include",
         body: JSON.stringify({
           email: formData.email.trim(),
           password: formData.password,
+          rememberMe,
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        setErrorMsg(data.message || "Invalid email or password.");
+        setErrorMsg(data.message || "Invalid credentials provided.");
         return;
       }
 
@@ -70,12 +71,11 @@ function LoginPage() {
 
         navigate("/home");
       } else {
-        setErrorMsg("Login failed — no access token received.");
+        setErrorMsg("Login failed — access token missing.");
       }
-
     } catch (err) {
       console.error("Login Error:", err);
-      setErrorMsg("Network error. Please try again.");
+      setErrorMsg("Unable to connect to service. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -83,8 +83,6 @@ function LoginPage() {
 
   return (
     <div className="login-page">
-
-      {/* Left panel */}
       <div className="login-left">
         <Link to="/" className="login-brand">
           <BrandLogo size={36} className="login-brand-icon" />
@@ -98,22 +96,20 @@ function LoginPage() {
             your sleeve.
           </h1>
           <p className="login-desc">
-            Connect with causes, creators, and communities that matter — through
-            merchandise that makes a difference.
+            Connect with causes, creators, and communities that matter — through merchandise that makes a difference.
           </p>
         </div>
 
         <div className="login-testimonial-wrap">
           <div className="login-testimonial">
             <p className="login-testimonial-text">
-              "Merch4Change helped us raise over $12,000 for our local shelter —
-              and the products practically sold themselves."
+              "Merch4Change helped us raise over $12,000 for our local shelter — and the products practically sold themselves."
             </p>
             <div className="login-testimonial-author">
               <div className="login-avatar">SR</div>
               <div>
                 <div className="login-author-name">Sarah R.</div>
-                <div className="login-author-role">NGO founder, Colombo</div>
+                <div className="login-author-role">NGO Founder, Colombo</div>
               </div>
             </div>
           </div>
@@ -125,10 +121,8 @@ function LoginPage() {
         </div>
       </div>
 
-      {/* Right panel */}
       <div className="login-right">
         <div className="login-form-wrap">
-
           <p className="login-eyebrow">Welcome back</p>
           <h2 className="login-title">Sign in to your account</h2>
           <p className="login-subtitle">
@@ -136,12 +130,9 @@ function LoginPage() {
             <Link to="/signup" className="login-link">Sign up free</Link>
           </p>
 
-          {errorMsg && (
-            <div className="login-error">{errorMsg}</div>
-          )}
+          {errorMsg && <div className="login-error" role="alert">{errorMsg}</div>}
 
           <form onSubmit={handleSubmit} noValidate>
-
             <div className="login-field">
               <label htmlFor="email">Email address</label>
               <input
@@ -172,7 +163,7 @@ function LoginPage() {
                 <button
                   type="button"
                   className="login-password-toggle"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => setShowPassword((prev) => !prev)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
@@ -194,23 +185,16 @@ function LoginPage() {
               </Link>
             </div>
 
-            <button
-              type="submit"
-              className="login-btn"
-              disabled={isSubmitting}
-            >
+            <button type="submit" className="login-btn" disabled={isSubmitting}>
               {isSubmitting ? "Signing in…" : "Sign in"}
             </button>
-
           </form>
 
           <p className="login-terms">
             By signing in you agree to our{" "}
-            <Link to="/terms" className="login-link">Terms</Link>
-            {" "}&amp;{" "}
+            <Link to="/terms" className="login-link">Terms</Link>{" "}&amp;{" "}
             <Link to="/privacy" className="login-link">Privacy Policy</Link>
           </p>
-
         </div>
       </div>
     </div>
