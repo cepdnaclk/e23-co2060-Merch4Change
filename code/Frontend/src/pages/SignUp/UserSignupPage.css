@@ -1,9 +1,59 @@
+/* ============================================
+   BASE / LIGHT MODE VARIABLES
+   ============================================ */
 .user-signup-outer {
+  --user-bg: linear-gradient(135deg, #f5f7fb 0%, #eef5ef 48%, #f8fafc 100%);
+  --hero-bg: radial-gradient(circle at top left, rgba(67, 160, 71, 0.18), transparent 35%),
+    linear-gradient(155deg, #173826 0%, #245337 52%, #1f4631 100%);
+  --panel-bg: rgba(255, 255, 255, 0.8);
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --card-border: rgba(17, 75, 42, 0.08);
+  --text-main: #12331f;
+  --text-label: #22402d;
+  
+  --input-bg: #fbfdfb;
+  --input-border: #d5e2d8;
+  --input-focus-bg: #ffffff;
+  
+  --dropdown-bg: #ffffff;
+  --dropdown-border: #d8e6dc;
+  --pill-bg: #f5faf5;
+  --pill-border: #cfe0d2;
+  --pill-text: #245337;
+
   min-height: 100vh;
   display: grid;
   grid-template-columns: 1.05fr 0.95fr;
-  background: linear-gradient(135deg, #f5f7fb 0%, #eef5ef 48%, #f8fafc 100%);
-  color: #12331f;
+  background: var(--user-bg);
+  color: var(--text-main);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* ============================================
+   DARK MODE OVERRIDES
+   ============================================ */
+:root.dark .user-signup-outer,
+body.dark .user-signup-outer,
+[data-theme="dark"] .user-signup-outer,
+[data-mode="dark"] .user-signup-outer {
+  --user-bg: #090d16;
+  --hero-bg: radial-gradient(circle at top left, rgba(67, 160, 71, 0.15), transparent 35%),
+    linear-gradient(155deg, #0b1a11 0%, #12281b 52%, #0e1e15 100%);
+  --panel-bg: rgba(15, 23, 42, 0.7);
+  --card-bg: #111827;
+  --card-border: #1f2937;
+  --text-main: #f3f4f6;
+  --text-label: #d1d5db;
+  
+  --input-bg: #1f2937;
+  --input-border: #374151;
+  --input-focus-bg: #1f2937;
+  
+  --dropdown-bg: #1f2937;
+  --dropdown-border: #374151;
+  --pill-bg: #111827;
+  --pill-border: #374151;
+  --pill-text: #818cf8;
 }
 
 .user-signup-hero,
@@ -17,14 +67,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(circle at top left, rgba(67, 160, 71, 0.18), transparent 35%),
-    linear-gradient(155deg, #173826 0%, #245337 52%, #1f4631 100%);
+  background: var(--hero-bg);
   color: #f4faf5;
 }
 
 .user-signup-form-panel {
   padding: 56px 48px;
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--panel-bg);
   backdrop-filter: blur(12px);
 }
 
@@ -33,9 +82,10 @@
   margin: 0 auto;
   padding: 36px;
   border-radius: 28px;
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 20px 60px rgba(13, 41, 22, 0.12);
-  border: 1px solid rgba(17, 75, 42, 0.08);
+  background: var(--card-bg);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--card-border);
+  transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 .user-brand-mark {
@@ -69,16 +119,16 @@
 .user-form-group label {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #22402d;
+  color: var(--text-label);
 }
 
 .user-form-group input {
   width: 100%;
-  border: 1px solid #d5e2d8;
+  border: 1px solid var(--input-border);
   border-radius: 16px;
   padding: 15px 16px;
-  background: #fbfdfb;
-  color: #12331f;
+  background: var(--input-bg);
+  color: var(--text-main);
   font-size: 1rem;
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
@@ -86,8 +136,8 @@
 
 .user-form-group input:focus {
   border-color: #2e7d32;
-  box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.12);
-  background: #fff;
+  box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.2);
+  background: var(--input-focus-bg);
 }
 
 .user-input-shell {
@@ -137,7 +187,7 @@
 
 .user-username-status-icon--unavailable {
   background: rgba(239, 68, 68, 0.12);
-  color: #c81e1e;
+  color: #fca5a5;
 }
 
 .user-username-help {
@@ -147,13 +197,13 @@
 }
 
 .user-username-help--available {
-  color: #15803d;
+  color: #22c55e;
 }
 
 .user-username-help--taken,
 .user-username-help--invalid,
 .user-username-help--error {
-  color: #b91c1c;
+  color: #fca5a5;
 }
 
 .user-username-suggestions {
@@ -165,9 +215,9 @@
   max-width: 100%;
   padding: 12px;
   border-radius: 16px;
-  background: #ffffff;
-  border: 1px solid #d8e6dc;
-  box-shadow: 0 16px 40px rgba(13, 41, 22, 0.14);
+  background: var(--dropdown-bg);
+  border: 1px solid var(--dropdown-border);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
 }
 
 .user-username-suggestions-label {
@@ -177,7 +227,7 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #4c5f52;
+  color: var(--text-label);
 }
 
 .user-username-suggestions-list {
@@ -187,11 +237,11 @@
 }
 
 .user-username-suggestion {
-  border: 1px solid #cfe0d2;
+  border: 1px solid var(--pill-border);
   border-radius: 999px;
   padding: 8px 12px;
-  background: #f5faf5;
-  color: #245337;
+  background: var(--pill-bg);
+  color: var(--pill-text);
   font-size: 0.86rem;
   font-weight: 600;
   cursor: pointer;
@@ -200,8 +250,7 @@
 
 .user-username-suggestion:hover {
   transform: translateY(-1px);
-  background: #e9f5ea;
-  border-color: #9dd39f;
+  border-color: #2e7d32;
 }
 
 .user-submit-btn {
@@ -241,15 +290,15 @@
 }
 
 .error-alert {
-  color: #991b1b;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  color: #fca5a5;
+  background: #3f1d1d;
+  border: 1px solid #7f1d1d;
 }
 
 .success-alert {
-  color: #166534;
-  background: #ecfdf3;
-  border: 1px solid #bbf7d0;
+  color: #86efac;
+  background: #14532d;
+  border: 1px solid #166534;
 }
 
 @keyframes userSpin {
