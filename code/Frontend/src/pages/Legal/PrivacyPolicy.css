@@ -4,6 +4,7 @@
   min-height: 100vh;
   color: #1e293b;
   padding-bottom: 80px;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .privacy-hero {
@@ -12,6 +13,7 @@
   border-bottom: 1px solid #e9e3fa;
   padding: 56px 24px 48px 24px;
   text-align: center;
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .privacy-hero-container {
@@ -54,6 +56,7 @@
   border-radius: 12px;
   border: 1px solid #e2e8f0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .privacy-section h2 {
@@ -79,6 +82,7 @@
   padding-top: 24px;
   border-top: 1px solid #e9e3fa;
   font-size: 14px;
+  transition: border-color 0.2s ease;
 }
 
 .privacy-footer-links a {
@@ -93,4 +97,78 @@
 
 .privacy-footer-links span {
   color: #cbd5e1;
+}
+
+/* ==========================================================================
+   DARK MODE OVERRIDES (Listens to html/body .dark or [data-theme="dark"])
+   ========================================================================== */
+
+:root.dark .privacy-page,
+body.dark .privacy-page,
+.privacy-page[data-theme="dark"] {
+  background-color: #030712;
+  color: #f9fafb;
+}
+
+:root.dark .privacy-hero,
+body.dark .privacy-hero,
+.privacy-page[data-theme="dark"] .privacy-hero {
+  background: radial-gradient(circle at 50% 30%, #1e1b4b 0%, #0f172a 70%, #030712 100%);
+  border-bottom-color: #1f2937;
+}
+
+:root.dark .privacy-hero h1,
+body.dark .privacy-hero h1,
+.privacy-page[data-theme="dark"] .privacy-hero h1 {
+  color: #f9fafb;
+}
+
+:root.dark .privacy-updated,
+body.dark .privacy-updated,
+.privacy-page[data-theme="dark"] .privacy-updated {
+  color: #c084fc;
+}
+
+:root.dark .privacy-intro,
+body.dark .privacy-intro,
+.privacy-page[data-theme="dark"] .privacy-intro {
+  color: #e5e7eb;
+}
+
+:root.dark .privacy-section,
+body.dark .privacy-section,
+.privacy-page[data-theme="dark"] .privacy-section {
+  background: #111827;
+  border-color: #1f2937;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+}
+
+:root.dark .privacy-section h2,
+body.dark .privacy-section h2,
+.privacy-page[data-theme="dark"] .privacy-section h2 {
+  color: #f3f4f6;
+}
+
+:root.dark .privacy-section p,
+body.dark .privacy-section p,
+.privacy-page[data-theme="dark"] .privacy-section p {
+  color: #d1d5db;
+}
+
+:root.dark .privacy-footer-links,
+body.dark .privacy-footer-links,
+.privacy-page[data-theme="dark"] .privacy-footer-links {
+  border-top-color: #1f2937;
+}
+
+:root.dark .privacy-footer-links a,
+body.dark .privacy-footer-links a,
+.privacy-page[data-theme="dark"] .privacy-footer-links a {
+  color: #c084fc;
+}
+
+:root.dark .privacy-footer-links span,
+body.dark .privacy-footer-links span,
+.privacy-page[data-theme="dark"] .privacy-footer-links span {
+  color: #4b5563;
 }

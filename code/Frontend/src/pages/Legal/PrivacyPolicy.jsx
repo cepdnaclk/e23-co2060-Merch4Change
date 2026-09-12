@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useTheme } from "../../context/ThemeContext";
 import "./PrivacyPolicy.css";
 
 const LAST_UPDATED = "September 12, 2026";
@@ -36,8 +37,10 @@ const SECTIONS = [
 ];
 
 function PrivacyPolicy() {
+  const { resolvedTheme } = useTheme();
+
   return (
-    <div className="privacy-page">
+    <div className="privacy-page" data-theme={resolvedTheme}>
       <div className="privacy-hero">
         <div className="privacy-hero-container">
           <h1>Privacy Policy</h1>
