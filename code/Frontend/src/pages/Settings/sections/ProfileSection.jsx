@@ -26,8 +26,8 @@ function ProfileSection({ profileData = {}, onUpdate = () => {} }) {
   const [fullName, setFullName] = useState(
     `${profileData.firstName || ""} ${profileData.lastName || ""}`.trim()
   );
-  const [bio, setBio] = useState(profileData.profileBio || profileData.bio || "");
-  const [website, setWebsite] = useState(profileData.userLink || profileData.website || "");
+  const [bio, setBio] = useState(profileData.profileBio || "");
+  const [website, setWebsite] = useState(profileData.userLink || "");
   const [location, setLocation] = useState(profileData.location || "");
   const [email, setEmail] = useState(profileData.email || "");
   const [avatarUrl, setAvatarUrl] = useState(
@@ -47,8 +47,8 @@ function ProfileSection({ profileData = {}, onUpdate = () => {} }) {
   useEffect(() => {
     setUserName(profileData.userName || "");
     setFullName(`${profileData.firstName || ""} ${profileData.lastName || ""}`.trim());
-    setBio(profileData.profileBio || profileData.bio || "");
-    setWebsite(profileData.userLink || profileData.website || "");
+    setBio(profileData.profileBio || "");
+    setWebsite(profileData.userLink || "");
     setLocation(profileData.location || "");
     setEmail(profileData.email || "");
 
@@ -71,9 +71,7 @@ function ProfileSection({ profileData = {}, onUpdate = () => {} }) {
         name: fullName.trim(),
         userName,
         profileBio: bio,
-        bio,
         userLink: website,
-        website,
         location,
         email,
       };
@@ -88,8 +86,8 @@ function ProfileSection({ profileData = {}, onUpdate = () => {} }) {
         onUpdate(updated);
         setUserName(updated.userName || userName);
         setFullName(`${updated.firstName || ""} ${updated.lastName || ""}`.trim());
-        setBio(updated.profileBio || updated.bio || bio);
-        setWebsite(updated.userLink || updated.website || website);
+        setBio(updated.profileBio || bio);
+        setWebsite(updated.userLink || website);
         setLocation(updated.location || location);
         setEmail(updated.email || email);
         showToast("Profile settings updated successfully!", "success");

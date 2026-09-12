@@ -20,9 +20,7 @@ test("validateProfileSettingsBody accepts a valid payload and trims/normalizes f
     firstName: "  Jane  ",
     lastName: "  Doe  ",
     userName: "  jane_doe.99  ",
-    bio: "  Loves clean water projects  ",
     profileBio: "  Loves clean water projects  ",
-    website: "https://example.com",
     userLink: "https://example.com",
     location: "  Colombo  ",
     email: "  JANE@EXAMPLE.COM  ",
@@ -37,7 +35,7 @@ test("validateProfileSettingsBody accepts a valid payload and trims/normalizes f
 });
 
 test("validateProfileSettingsBody allows a partial payload (all fields optional)", () => {
-  const result = validateProfileSettingsBody({ bio: "Just updating my bio" });
+  const result = validateProfileSettingsBody({ profileBio: "Just updating my bio" });
 
   assert.deepEqual(result.errors, []);
 });
@@ -66,23 +64,19 @@ test("validateProfileSettingsBody rejects an invalid email", () => {
   assert.equal(result.errors.some((m) => m.includes("email must be a valid email address")), true);
 });
 
-test("validateProfileSettingsBody rejects bio/profileBio over 500 characters", () => {
+test("validateProfileSettingsBody rejects profileBio over 500 characters", () => {
   const result = validateProfileSettingsBody({
-    bio: "x".repeat(501),
     profileBio: "y".repeat(501),
   });
 
-  assert.equal(result.errors.some((m) => m.includes("bio must not exceed 500 characters")), true);
   assert.equal(result.errors.some((m) => m.includes("profileBio must not exceed 500 characters")), true);
 });
 
-test("validateProfileSettingsBody rejects website/userLink without http(s) scheme", () => {
+test("validateProfileSettingsBody rejects userLink without http(s) scheme", () => {
   const result = validateProfileSettingsBody({
-    website: "example.com",
     userLink: "ftp://example.com",
   });
 
-  assert.equal(result.errors.some((m) => m.includes("website must be a valid URL")), true);
   assert.equal(result.errors.some((m) => m.includes("userLink must be a valid URL")), true);
 });
 

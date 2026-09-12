@@ -35,14 +35,14 @@ const baseReq = (overrides = {}) => ({
 test("updateProfileSettings only forwards fields that were actually sent", async (t) => {
   const update = t.mock.method(User, "findByIdAndUpdate", async (id, data) => ({ _id: id, ...data }));
 
-  const req = baseReq({ body: { firstName: "Jane", bio: "Hello" } });
+  const req = baseReq({ body: { firstName: "Jane", profileBio: "Hello" } });
   const res = createMockResponse();
 
   await updateProfileSettings(req, res, () => {});
 
   assert.equal(update.mock.calls.length, 1);
   const [, updateData] = update.mock.calls[0].arguments;
-  assert.deepEqual(updateData, { firstName: "Jane", bio: "Hello" });
+  assert.deepEqual(updateData, { firstName: "Jane", profileBio: "Hello" });
   assert.equal(res.statusCode, 200);
   assert.equal(res.payload.data.user.firstName, "Jane");
 });

@@ -22,9 +22,7 @@ export const updateProfileSettings = asyncHandler(async (req, res) => {
     firstName,
     lastName,
     userName,
-    bio,
     profileBio,
-    website,
     userLink,
     location,
     email,
@@ -38,9 +36,7 @@ export const updateProfileSettings = asyncHandler(async (req, res) => {
   if (firstName !== undefined) updateData.firstName = firstName;
   if (lastName !== undefined) updateData.lastName = lastName;
   if (userName !== undefined) updateData.userName = userName;
-  if (bio !== undefined) updateData.bio = bio;
   if (profileBio !== undefined) updateData.profileBio = profileBio;
-  if (website !== undefined) updateData.website = website;
   if (userLink !== undefined) updateData.userLink = userLink;
   if (location !== undefined) updateData.location = location;
   if (email !== undefined) updateData.email = email;

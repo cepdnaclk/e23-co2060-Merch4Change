@@ -97,15 +97,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    bio: {
-      type: String,
-      default: "",
-    },
-    website: {
-      type: String,
-      default: "",
-      trim: true,
-    },
     location: {
       type: String,
       default: "",

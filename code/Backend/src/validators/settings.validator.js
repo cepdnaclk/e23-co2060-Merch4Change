@@ -15,9 +15,7 @@ export const validateProfileSettingsBody = (payload = {}) => {
     firstName: trimIfString(payload.firstName),
     lastName: trimIfString(payload.lastName),
     userName: trimIfString(payload.userName),
-    bio: trimIfString(payload.bio),
     profileBio: trimIfString(payload.profileBio),
-    website: trimIfString(payload.website),
     userLink: trimIfString(payload.userLink),
     location: trimIfString(payload.location),
     email: typeof payload.email === "string" ? payload.email.toLowerCase().trim() : payload.email,
@@ -51,16 +49,10 @@ export const validateProfileSettingsBody = (payload = {}) => {
     }
   }
 
-  if (normalized.bio !== undefined && normalized.bio.length > 500) {
-    errors.push("bio must not exceed 500 characters.");
-  }
   if (normalized.profileBio !== undefined && normalized.profileBio.length > 500) {
     errors.push("profileBio must not exceed 500 characters.");
   }
 
-  if (normalized.website && !urlPattern.test(normalized.website)) {
-    errors.push("website must be a valid URL starting with http:// or https://.");
-  }
   if (normalized.userLink && !urlPattern.test(normalized.userLink)) {
     errors.push("userLink must be a valid URL starting with http:// or https://.");
   }
