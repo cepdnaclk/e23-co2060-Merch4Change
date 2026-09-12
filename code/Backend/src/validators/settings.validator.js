@@ -59,11 +59,35 @@ export const validateProfileSettingsBody = (payload = {}) => {
 export const validateSecuritySettingsBody = (payload = {}) => {
   const errors = [];
 
-  if (payload.twoFactorEnabled !== undefined && typeof payload.twoFactorEnabled !== "boolean") {
-    errors.push("twoFactorEnabled must be a boolean.");
-  }
+  // NOTE: twoFactorEnabled is intentionally not settable through this
+  // endpoint — see validateVerifyEnable2FABody / validateDisable2FABody,
+  // which back the OTP-gated enable/disable flow.
   if (payload.loginActivityAlerts !== undefined && typeof payload.loginActivityAlerts !== "boolean") {
     errors.push("loginActivityAlerts must be a boolean.");
+  }
+
+  return { value: payload, errors };
+};
+
+// ==========================================
+// TWO-FACTOR AUTHENTICATION (OTP-gated enable/disable)
+// ==========================================
+export const validateVerifyEnable2FABody = (payload = {}) => {
+  const errors = [];
+  const finalOtp = payload.otp || payload.otpCode;
+
+  if (!finalOtp || typeof finalOtp !== "string") {
+    errors.push("otp is required and must be a string.");
+  }
+
+  return { value: payload, errors };
+};
+
+export const validateDisable2FABody = (payload = {}) => {
+  const errors = [];
+
+  if (!payload.currentPassword || typeof payload.currentPassword !== "string") {
+    errors.push("currentPassword is required and must be a string.");
   }
 
   return { value: payload, errors };

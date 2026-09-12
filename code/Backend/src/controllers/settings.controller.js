@@ -291,14 +291,14 @@ export const verifyEmailChange = asyncHandler(async (req, res) => {
 
 // ==========================================
 // SECURITY SETTINGS CONTROLLER
+// (twoFactorEnabled is intentionally NOT accepted here — flipping it on
+// requires an OTP round-trip; see the 2FA endpoints below. This endpoint
+// only ever handles the settings that don't need re-verification.)
 // ==========================================
 export const updateSecuritySettings = asyncHandler(async (req, res) => {
-  const { twoFactorEnabled, loginActivityAlerts } = req.body;
+  const { loginActivityAlerts } = req.body;
 
   const updateData = {};
-  if (typeof twoFactorEnabled === "boolean") {
-    updateData.twoFactorEnabled = twoFactorEnabled;
-  }
   if (typeof loginActivityAlerts === "boolean") {
     updateData.loginActivityAlerts = loginActivityAlerts;
   }
@@ -310,6 +310,136 @@ export const updateSecuritySettings = asyncHandler(async (req, res) => {
 
   return successResponse(res, 200, "Security settings updated successfully.", {
     user: updatedUser,
+  });
+});
+
+// ==========================================
+// REQUEST TWO-FACTOR AUTHENTICATION ENABLE (sends OTP)
+// ==========================================
+export const requestEnable2FA = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  if (user.twoFactorEnabled) {
+    throw new AppError("Two-factor authentication is already enabled.", 400, "2FA_ALREADY_ENABLED");
+  }
+
+  let record = await OtpResendRecord.findOne({ email: user.email });
+  if (!record) {
+    record = new OtpResendRecord({ email: user.email, count: 0 });
+  }
+
+  let cooldownSeconds = 60;
+  if (record.count === 1) cooldownSeconds = 120;
+  else if (record.count === 2) cooldownSeconds = 300;
+  else if (record.count >= 3) cooldownSeconds = 600;
+
+  const now = Date.now();
+  const lastRequestTime = record.lastRequestAt ? record.lastRequestAt.getTime() : 0;
+  const elapsedSeconds = Math.floor((now - lastRequestTime) / 1000);
+
+  if (elapsedSeconds < cooldownSeconds && record.count > 0) {
+    const remainingSeconds = cooldownSeconds - elapsedSeconds;
+    throw new AppError(
+      `Please wait ${remainingSeconds} seconds before requesting another code.`,
+      429,
+      "RATE_LIMIT_EXCEEDED",
+      { remainingSeconds }
+    );
+  }
+
+  const otpCode = crypto.randomInt(100000, 1000000).toString();
+  user.twoFactorSetupOtp = otpCode;
+  user.twoFactorSetupOtpExpiresAt = new Date(now + OTP_EXPIRE_MIN * 60 * 1000);
+  await user.save();
+
+  await sendOtpEmail(user.email, otpCode);
+
+  record.count += 1;
+  record.lastRequestAt = new Date();
+  await record.save();
+
+  let nextCooldown = 60;
+  if (record.count === 1) nextCooldown = 120;
+  else if (record.count === 2) nextCooldown = 300;
+  else if (record.count >= 3) nextCooldown = 600;
+
+  return successResponse(res, 200, "A verification code has been sent to your email.", {
+    nextCooldownSeconds: nextCooldown,
+  });
+});
+
+// ==========================================
+// VERIFY TWO-FACTOR AUTHENTICATION ENABLE (commits the change)
+// ==========================================
+export const verifyEnable2FA = asyncHandler(async (req, res) => {
+  const { otp, otpCode } = req.body;
+  const finalOtp = otp || otpCode;
+
+  if (!finalOtp) {
+    throw new AppError("OTP code is required.", 400, "VALIDATION_ERROR");
+  }
+
+  const user = await User.findById(req.user._id).select(
+    "+twoFactorSetupOtp +twoFactorSetupOtpExpiresAt"
+  );
+
+  if (!user.twoFactorSetupOtp) {
+    throw new AppError(
+      "No pending 2FA setup found. Please start again.",
+      400,
+      "NO_PENDING_2FA_SETUP"
+    );
+  }
+
+  if (user.twoFactorSetupOtpExpiresAt && user.twoFactorSetupOtpExpiresAt.getTime() < Date.now()) {
+    user.twoFactorSetupOtp = null;
+    user.twoFactorSetupOtpExpiresAt = null;
+    await user.save();
+    throw new AppError(
+      "This verification code has expired. Please request a new one.",
+      400,
+      "OTP_EXPIRED"
+    );
+  }
+
+  if (user.twoFactorSetupOtp !== String(finalOtp).trim()) {
+    throw new AppError("Invalid verification code.", 400, "INVALID_OTP");
+  }
+
+  user.twoFactorEnabled = true;
+  user.twoFactorSetupOtp = null;
+  user.twoFactorSetupOtpExpiresAt = null;
+  await user.save();
+
+  return successResponse(res, 200, "Two-factor authentication is now enabled.", {
+    user,
+  });
+});
+
+// ==========================================
+// DISABLE TWO-FACTOR AUTHENTICATION (requires current password)
+// ==========================================
+export const disable2FA = asyncHandler(async (req, res) => {
+  const { currentPassword } = req.body;
+
+  if (!currentPassword) {
+    throw new AppError("Current password is required.", 400, "VALIDATION_ERROR");
+  }
+
+  const user = await User.findById(req.user._id).select("+password");
+
+  const isPasswordCorrect = await bcrypt.compare(currentPassword, user.password);
+  if (!isPasswordCorrect) {
+    throw new AppError("Current password is incorrect.", 401, "INVALID_PASSWORD");
+  }
+
+  user.twoFactorEnabled = false;
+  user.loginOtp = null;
+  user.loginOtpExpiresAt = null;
+  await user.save();
+
+  return successResponse(res, 200, "Two-factor authentication is now disabled.", {
+    user,
   });
 });
 

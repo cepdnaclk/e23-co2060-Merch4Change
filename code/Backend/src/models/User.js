@@ -141,6 +141,30 @@ const userSchema = new mongoose.Schema(
       default: true,
     },
 
+    // ===== 2FA — ENABLING (OTP sent to confirm turning it on) =====
+    twoFactorSetupOtp: {
+      type: String,
+      default: null,
+      select: false,
+    },
+    twoFactorSetupOtpExpiresAt: {
+      type: Date,
+      default: null,
+      select: false,
+    },
+
+    // ===== 2FA — LOGIN CHALLENGE (OTP sent at login time) =====
+    loginOtp: {
+      type: String,
+      default: null,
+      select: false,
+    },
+    loginOtpExpiresAt: {
+      type: Date,
+      default: null,
+      select: false,
+    },
+
     // ===== PRIVACY SETTINGS =====
     isPrivate: {
       type: Boolean,

@@ -14,6 +14,8 @@ import {
   validateDeleteAccountBody,
   validateRequestEmailChangeBody,
   validateVerifyEmailChangeBody,
+  validateVerifyEnable2FABody,
+  validateDisable2FABody,
 } from "../validators/settings.validator.js";
 import {
   updateProfileSettings,
@@ -21,6 +23,9 @@ import {
   resendEmailChangeOtp,
   verifyEmailChange,
   updateSecuritySettings,
+  requestEnable2FA,
+  verifyEnable2FA,
+  disable2FA,
   updatePrivacySettings,
   updateNotificationSettings,
   updateAppearanceSettings,
@@ -70,6 +75,23 @@ router.post(
   "/change-password",
   validateRequest({ body: validateChangePasswordBody }),
   changePassword
+);
+
+// Two-factor authentication (OTP-gated enable, password-gated disable)
+router.post(
+  "/security/2fa/request-enable",
+  authRateLimiter,
+  requestEnable2FA
+);
+router.post(
+  "/security/2fa/verify-enable",
+  validateRequest({ body: validateVerifyEnable2FABody }),
+  verifyEnable2FA
+);
+router.post(
+  "/security/2fa/disable",
+  validateRequest({ body: validateDisable2FABody }),
+  disable2FA
 );
 
 // Privacy endpoints
