@@ -7,6 +7,8 @@ import User from "../models/User.js";
 import { successResponse } from "../utils/apiResponse.js";
 import AppError from "../utils/appError.js";
 import asyncHandler from "../utils/asyncHandler.js";
+import sendLoginAlertEmail from "../utils/sendLoginAlertEmail.js";
+import { logError } from "../utils/logger.js";
 import {
   createUserProfile,
   createOrganizationProfile,
@@ -235,6 +237,18 @@ export const login = asyncHandler(async (req, res) => {
     sameSite: env.nodeEnv === "production" ? "none" : "lax",
     maxAge: ms(env.jwtRefreshExpiresIn), // calculated in milliseconds
   });
+
+  // Fire-and-forget: notify the user of this login if they've opted in.
+  // Never block or fail the login response because of an email issue.
+  if (user.loginActivityAlerts) {
+    sendLoginAlertEmail(user.email, {
+      device: req.headers["user-agent"],
+      ip: req.ip,
+      time: new Date(),
+    }).catch((err) => {
+      logError("Failed to send login alert email", err, { userId: user._id });
+    });
+  }
 
   return successResponse(res, 200, "Login successful.", {
     accessToken,
