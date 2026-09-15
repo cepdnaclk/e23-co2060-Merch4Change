@@ -65,13 +65,13 @@ test("updateProfileSettings falls back to the avatarUrl string when there is no 
 test("updateSecuritySettings only sets fields that are actual booleans", async (t) => {
   const update = t.mock.method(User, "findByIdAndUpdate", async (id, data) => ({ _id: id, ...data }));
 
-  const req = baseReq({ body: { twoFactorEnabled: true, loginActivityAlerts: "not-a-boolean" } });
+  const req = baseReq({ body: { loginActivityAlerts: true, bogusField: "not-a-boolean" } });
   const res = createMockResponse();
 
   await updateSecuritySettings(req, res, () => {});
 
   const [, updateData] = update.mock.calls[0].arguments;
-  assert.deepEqual(updateData, { twoFactorEnabled: true });
+  assert.deepEqual(updateData, { loginActivityAlerts: true });
   assert.equal(res.statusCode, 200);
 });
 

@@ -13,67 +13,27 @@ describe("HelpAndSupport", () => {
     expect(screen.getByText("How can we help you today?")).toBeInTheDocument();
   });
 
-  it("displays the search bar with placeholder text", () => {
+  it("displays knowledge base topics", () => {
     render(
       <MemoryRouter>
         <HelpAndSupport />
       </MemoryRouter>,
     );
 
-    const searchInput = screen.getByPlaceholderText("Search for articles, guides or FAQs...");
+    expect(screen.getByText("Knowledge Base Topics")).toBeInTheDocument();
+    expect(screen.getAllByText("Getting Started")[0]).toBeInTheDocument();
+    expect(screen.getByText("Orders & Shipping")).toBeInTheDocument();
+  });
+
+  it("displays search bar input", () => {
+    render(
+      <MemoryRouter>
+        <HelpAndSupport />
+      </MemoryRouter>,
+    );
+
+    const searchInput = screen.getByPlaceholderText("Search all 32 guides, shipping questions, verification...");
     expect(searchInput).toBeInTheDocument();
-  });
-
-  it("displays help category cards with icons", () => {
-    render(
-      <MemoryRouter>
-        <HelpAndSupport />
-      </MemoryRouter>,
-    );
-
-    expect(screen.getByText("Getting Started")).toBeInTheDocument();
-    expect(screen.getByText("FAQs")).toBeInTheDocument();
-    expect(screen.getByText("Contact Support")).toBeInTheDocument();
-    expect(screen.getByText("📚")).toBeInTheDocument();
-    expect(screen.getByText("❓")).toBeInTheDocument();
-    expect(screen.getByText("✉️")).toBeInTheDocument();
-  });
-
-  it("displays help category descriptions", () => {
-    render(
-      <MemoryRouter>
-        <HelpAndSupport />
-      </MemoryRouter>,
-    );
-
-    expect(screen.getByText(/Learn the basics of using Merch4Change/)).toBeInTheDocument();
-    expect(screen.getByText(/Find answers to the most frequently asked questions/)).toBeInTheDocument();
-    expect(screen.getByText(/Can't find what you need/)).toBeInTheDocument();
-  });
-
-  it("displays popular guides section", () => {
-    render(
-      <MemoryRouter>
-        <HelpAndSupport />
-      </MemoryRouter>,
-    );
-
-    expect(screen.getByText("Popular Guides")).toBeInTheDocument();
-    expect(screen.getByText("How to setup your organization profile")).toBeInTheDocument();
-    expect(screen.getByText("Connecting with partner brands")).toBeInTheDocument();
-    expect(screen.getByText("Managing your charity campaigns")).toBeInTheDocument();
-    expect(screen.getByText("Understanding shipping and delivery")).toBeInTheDocument();
-  });
-
-  it("displays search button", () => {
-    render(
-      <MemoryRouter>
-        <HelpAndSupport />
-      </MemoryRouter>,
-    );
-
-    const searchButton = screen.getByRole("button", { name: "Search" });
-    expect(searchButton).toBeInTheDocument();
   });
 
   it("search input can be typed into", () => {
@@ -83,7 +43,7 @@ describe("HelpAndSupport", () => {
       </MemoryRouter>,
     );
 
-    const searchInput = screen.getByPlaceholderText("Search for articles, guides or FAQs...");
+    const searchInput = screen.getByPlaceholderText("Search all 32 guides, shipping questions, verification...");
     fireEvent.change(searchInput, { target: { value: "account" } });
 
     expect(searchInput.value).toBe("account");

@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import {
   validateProfileSettingsBody,
   validateSecuritySettingsBody,
+  validateRequestEmailChangeBody,
   validateChangePasswordBody,
   validatePrivacySettingsBody,
   validateNotificationSettingsBody,
@@ -23,14 +24,12 @@ test("validateProfileSettingsBody accepts a valid payload and trims/normalizes f
     profileBio: "  Loves clean water projects  ",
     userLink: "https://example.com",
     location: "  Colombo  ",
-    email: "  JANE@EXAMPLE.COM  ",
   });
 
   assert.deepEqual(result.errors, []);
   assert.equal(result.value.firstName, "Jane");
   assert.equal(result.value.lastName, "Doe");
   assert.equal(result.value.userName, "jane_doe.99");
-  assert.equal(result.value.email, "jane@example.com");
   assert.equal(result.value.location, "Colombo");
 });
 
@@ -58,10 +57,10 @@ test("validateProfileSettingsBody rejects invalid userName characters and length
   );
 });
 
-test("validateProfileSettingsBody rejects an invalid email", () => {
-  const result = validateProfileSettingsBody({ email: "not-an-email" });
+test("validateRequestEmailChangeBody rejects an invalid email", () => {
+  const result = validateRequestEmailChangeBody({ newEmail: "not-an-email", currentPassword: "pass" });
 
-  assert.equal(result.errors.some((m) => m.includes("email must be a valid email address")), true);
+  assert.equal(result.errors.some((m) => m.includes("newEmail must be a valid email address")), true);
 });
 
 test("validateProfileSettingsBody rejects profileBio over 500 characters", () => {
@@ -84,7 +83,7 @@ test("validateProfileSettingsBody rejects userLink without http(s) scheme", () =
 // SECURITY SETTINGS
 // ==========================================
 test("validateSecuritySettingsBody accepts valid boolean toggles", () => {
-  const result = validateSecuritySettingsBody({ twoFactorEnabled: true, loginActivityAlerts: false });
+  const result = validateSecuritySettingsBody({ loginActivityAlerts: false });
 
   assert.deepEqual(result.errors, []);
 });
@@ -96,9 +95,8 @@ test("validateSecuritySettingsBody accepts an empty payload", () => {
 });
 
 test("validateSecuritySettingsBody rejects non-boolean values", () => {
-  const result = validateSecuritySettingsBody({ twoFactorEnabled: "yes", loginActivityAlerts: 1 });
+  const result = validateSecuritySettingsBody({ loginActivityAlerts: "not-a-boolean" });
 
-  assert.equal(result.errors.some((m) => m.includes("twoFactorEnabled must be a boolean")), true);
   assert.equal(result.errors.some((m) => m.includes("loginActivityAlerts must be a boolean")), true);
 });
 

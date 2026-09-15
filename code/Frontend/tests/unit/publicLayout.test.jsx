@@ -22,7 +22,7 @@ describe("PublicLayout", () => {
 
     expect(screen.getByRole("button", { name: "Merch4Change" })).toBeInTheDocument();
     expect(screen.getByText("Landing content")).toBeInTheDocument();
-    expect(scrollToSpy).toHaveBeenCalledWith({ top: 0, behavior: "smooth" });
+    expect(scrollToSpy).toHaveBeenCalledWith({ top: 0, left: 0, behavior: "instant" });
   });
 
   it("hides the navbar on the login page", () => {

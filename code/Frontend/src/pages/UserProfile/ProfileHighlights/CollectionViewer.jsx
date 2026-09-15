@@ -5,6 +5,20 @@ function CollectionViewer({ collection, onClose }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const stories = collection.stories || [];
 
+  const handleNext = () => {
+    if (currentIndex < stories.length - 1) {
+      setCurrentIndex((prev) => prev + 1);
+    } else {
+      onClose(); // auto close when reached the end
+    }
+  };
+
+  const handlePrev = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex((prev) => prev - 1);
+    }
+  };
+
   useEffect(() => {
     const handleKey = (e) => {
       if (e.key === "Escape") onClose();
@@ -14,21 +28,7 @@ function CollectionViewer({ collection, onClose }) {
 
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [currentIndex, onClose]);
-
-  const handleNext = () => {
-    if (currentIndex < stories.length - 1) {
-      setCurrentIndex(prev => prev + 1);
-    } else {
-      onClose(); // auto close when reached the end
-    }
-  };
-
-  const handlePrev = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(prev => prev - 1);
-    }
-  };
+  }, [currentIndex, onClose, handleNext, handlePrev]);
 
   if (stories.length === 0) {
     return (

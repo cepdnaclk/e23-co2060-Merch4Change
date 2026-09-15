@@ -22,7 +22,6 @@ describe("Navbar", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText("How it works")).toBeInTheDocument();
     expect(screen.getByText("Marketplace")).toBeInTheDocument();
     expect(screen.getByText("For Organisations")).toBeInTheDocument();
     expect(screen.getByText("Impact")).toBeInTheDocument();
@@ -40,8 +39,8 @@ describe("Navbar", () => {
 
     fireEvent.click(toggleButton);
 
-    const allHowItWorks = screen.getAllByText("How it works");
-    const mobileLink = allHowItWorks.find(el => el.classList.contains("lp-navbar-mobile-link"));
+    const allMarketplace = screen.getAllByText("Marketplace");
+    const mobileLink = allMarketplace.find(el => el.classList.contains("lp-navbar-mobile-link"));
     expect(mobileLink).toBeInTheDocument();
 
     fireEvent.click(toggleButton);
@@ -65,6 +64,6 @@ describe("Navbar", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.queryByText("How it works")).not.toBeInTheDocument();
+    expect(screen.queryByText("Marketplace")).not.toBeInTheDocument();
   });
 });
