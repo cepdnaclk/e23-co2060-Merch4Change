@@ -7,6 +7,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/Context";
 import { fetchNotifications, markNotificationRead } from "../../services/notificationService";
 import userSvg from "../../assets/user.svg";
+import { useI18n } from "../../i18n/I18nContext";
 import "./TopNavbar.css";
 
 function TopNavbar({
@@ -19,6 +20,7 @@ function TopNavbar({
   const navigate = useNavigate();
   const location = useLocation();
   const { accessToken, logout } = useAuth();
+  const { t } = useI18n();
   const isDonations = location.pathname.startsWith("/donations") || location.pathname.startsWith("/leaderboard");
   const themeClass = isDonations ? "lum-topbar--teal" : "lum-topbar--purple";
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
@@ -134,7 +136,7 @@ function TopNavbar({
         >
           <Menu size={22} />
         </button>
-        <span className="lum-brand" onClick={() => navigate("/home")}>Merch4Change</span>
+        <span className="lum-brand" onClick={() => navigate("/home")}>{t("common.appName")}</span>
         <div style={{ position: 'relative' }}>
           <SearchBar />
         </div>
@@ -212,13 +214,13 @@ function TopNavbar({
 
           {showLogoutPopup && (
             <div className="lum-logout-popup">
-              <p>Do you want to logout?</p>
+              <p>{t("common.logoutConfirm")}</p>
               <div className="lum-logout-actions">
                 <button type="button" className="lum-logout-cancel" onClick={() => setShowLogoutPopup(false)}>
-                  Cancel
+                  {t("common.cancel")}
                 </button>
                 <button type="button" className="lum-logout-confirm" onClick={handleLogout}>
-                  Logout
+                  {t("common.logout")}
                 </button>
               </div>
             </div>

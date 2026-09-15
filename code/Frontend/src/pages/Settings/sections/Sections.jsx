@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import apiClient from "../../../api/apiClient.js";
 import { useTheme } from "../../../context/ThemeContext";
+import { useI18n } from "../../../i18n/I18nContext";
 import "./SettingsSection.css";
 
 // Re-export ProfileSection from ProfileSection.jsx to maintain single source of truth
@@ -52,6 +53,17 @@ export function SecuritySection() {
   const [savingPassword, setSavingPassword] = useState(false);
   const [toast, setToast] = useState({ show: false, text: "", type: "" });
 
+  // ----- 2FA enable flow (OTP sent to the account's email) -----
+  const [twoFAStep, setTwoFAStep] = useState("idle"); // idle | awaiting-otp
+  const [enableOtp, setEnableOtp] = useState("");
+  const [confirmingOtp, setConfirmingOtp] = useState(false);
+  const [resendingOtp, setResendingOtp] = useState(false);
+
+  // ----- 2FA disable flow (requires current password) -----
+  const [showDisableConfirm, setShowDisableConfirm] = useState(false);
+  const [disablePassword, setDisablePassword] = useState("");
+  const [disabling, setDisabling] = useState(false);
+
   const showToast = (text, type = "info") => {
     setToast({ show: true, text, type });
     setTimeout(() => setToast({ show: false, text: "", type: "" }), 3500);
@@ -67,36 +79,119 @@ export function SecuritySection() {
           setAlerts(user.loginActivityAlerts ?? true);
         }
       } catch (err) {
-        showToast("Failed to load security settings", "error");
+        showToast(err.response?.data?.message || "Failed to load security settings", "error");
       }
     };
     loadSettings();
   }, []);
 
-  const handleToggleSave = async (which, value) => {
-    const prevTwoFA = twoFA;
+  const handleAlertsToggle = async () => {
     const prevAlerts = alerts;
-
-    if (which === "2fa") setTwoFA(value);
-    if (which === "alerts") setAlerts(value);
+    const value = !alerts;
+    setAlerts(value);
     setSavingToggle(true);
 
     try {
-      const payload = {
-        twoFactorEnabled: which === "2fa" ? value : twoFA,
-        loginActivityAlerts: which === "alerts" ? value : alerts,
-      };
-
-      const res = await apiClient.put("/api/v1/settings/security", payload);
+      const res = await apiClient.put("/api/v1/settings/security", {
+        loginActivityAlerts: value,
+      });
       if (res.data?.success) {
         showToast("Security settings updated!", "success");
       }
     } catch (err) {
-      if (which === "2fa") setTwoFA(prevTwoFA);
-      if (which === "alerts") setAlerts(prevAlerts);
+      setAlerts(prevAlerts);
       showToast(err.response?.data?.message || err.message, "error");
     } finally {
       setSavingToggle(false);
+    }
+  };
+
+  // Turning the 2FA switch ON sends an OTP instead of flipping it directly.
+  const handleTwoFAToggleClick = () => {
+    if (twoFA) {
+      setShowDisableConfirm(true);
+      return;
+    }
+    handleRequestEnable2FA();
+  };
+
+  const handleRequestEnable2FA = async () => {
+    setSavingToggle(true);
+    try {
+      const res = await apiClient.post("/api/v1/settings/security/2fa/request-enable");
+      if (res.data?.success) {
+        setTwoFAStep("awaiting-otp");
+        showToast("Verification code sent to your email.", "success");
+      }
+    } catch (err) {
+      showToast(err.response?.data?.message || err.message, "error");
+    } finally {
+      setSavingToggle(false);
+    }
+  };
+
+  const handleResendEnable2FA = async () => {
+    setResendingOtp(true);
+    try {
+      const res = await apiClient.post("/api/v1/settings/security/2fa/request-enable");
+      if (res.data?.success) {
+        showToast("A new code has been sent.", "success");
+      }
+    } catch (err) {
+      showToast(err.response?.data?.message || err.message, "error");
+    } finally {
+      setResendingOtp(false);
+    }
+  };
+
+  const handleConfirmEnable2FA = async () => {
+    if (!enableOtp.trim()) {
+      showToast("Please enter the verification code.", "error");
+      return;
+    }
+    setConfirmingOtp(true);
+    try {
+      const res = await apiClient.post("/api/v1/settings/security/2fa/verify-enable", {
+        otp: enableOtp.trim(),
+      });
+      if (res.data?.success) {
+        setTwoFA(true);
+        setTwoFAStep("idle");
+        setEnableOtp("");
+        showToast("Two-factor authentication enabled!", "success");
+      }
+    } catch (err) {
+      showToast(err.response?.data?.message || err.message, "error");
+    } finally {
+      setConfirmingOtp(false);
+    }
+  };
+
+  const handleCancelEnable2FA = () => {
+    setTwoFAStep("idle");
+    setEnableOtp("");
+  };
+
+  const handleDisable2FA = async () => {
+    if (!disablePassword) {
+      showToast("Please enter your password to confirm.", "error");
+      return;
+    }
+    setDisabling(true);
+    try {
+      const res = await apiClient.post("/api/v1/settings/security/2fa/disable", {
+        currentPassword: disablePassword,
+      });
+      if (res.data?.success) {
+        setTwoFA(false);
+        setShowDisableConfirm(false);
+        setDisablePassword("");
+        showToast("Two-factor authentication disabled.", "success");
+      }
+    } catch (err) {
+      showToast(err.response?.data?.message || err.message, "error");
+    } finally {
+      setDisabling(false);
     }
   };
 
@@ -166,18 +261,106 @@ export function SecuritySection() {
       <div className="s-divider" />
       <Toggle
         label="Two-factor authentication"
-        desc="Require a code when logging in from a new device"
+        desc="Require a code sent to your email when logging in"
         badge="Recommended"
         checked={twoFA}
-        disabled={savingToggle}
-        onChange={() => handleToggleSave("2fa", !twoFA)}
+        disabled={savingToggle || twoFAStep === "awaiting-otp"}
+        onChange={handleTwoFAToggleClick}
       />
+
+      {twoFAStep === "awaiting-otp" && (
+        <div
+          style={{
+            padding: "15px",
+            backgroundColor: "#f0f6ff",
+            border: "1px solid #b6d4fe",
+            borderRadius: "4px",
+            marginTop: "-6px",
+            marginBottom: "18px",
+          }}
+        >
+          <p style={{ marginBottom: "10px" }}>
+            Enter the verification code we just emailed you to finish turning on 2FA.
+          </p>
+          <input
+            className="s-input"
+            type="text"
+            inputMode="numeric"
+            maxLength={6}
+            placeholder="123456"
+            value={enableOtp}
+            onChange={(e) => setEnableOtp(e.target.value.replace(/\D/g, ""))}
+          />
+          <div style={{ marginTop: "10px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
+            <button
+              className="s-btn s-btn--primary"
+              onClick={handleConfirmEnable2FA}
+              disabled={confirmingOtp}
+            >
+              {confirmingOtp ? "Confirming..." : "Confirm code"}
+            </button>
+            <button
+              className="s-btn s-btn--ghost"
+              onClick={handleResendEnable2FA}
+              disabled={resendingOtp}
+            >
+              {resendingOtp ? "Resending..." : "Resend code"}
+            </button>
+            <button className="s-btn s-btn--ghost" onClick={handleCancelEnable2FA}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showDisableConfirm && (
+        <div
+          style={{
+            padding: "15px",
+            backgroundColor: "#fff3cd",
+            border: "1px solid #ffc107",
+            borderRadius: "4px",
+            marginTop: "-6px",
+            marginBottom: "18px",
+          }}
+        >
+          <p style={{ color: "#856404", marginBottom: "10px" }}>
+            Enter your password to turn off two-factor authentication:
+          </p>
+          <input
+            type="password"
+            className="s-input"
+            placeholder="Enter your password"
+            value={disablePassword}
+            onChange={(e) => setDisablePassword(e.target.value)}
+          />
+          <div style={{ marginTop: "10px", display: "flex", gap: "10px" }}>
+            <button
+              className="s-btn s-btn--danger"
+              onClick={handleDisable2FA}
+              disabled={disabling}
+            >
+              {disabling ? "Disabling..." : "Disable 2FA"}
+            </button>
+            <button
+              className="s-btn s-btn--ghost"
+              onClick={() => {
+                setShowDisableConfirm(false);
+                setDisablePassword("");
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
       <Toggle
         label="Login activity alerts"
         desc="Get notified when your account is accessed from a new location"
         checked={alerts}
         disabled={savingToggle}
-        onChange={() => handleToggleSave("alerts", !alerts)}
+        onChange={handleAlertsToggle}
       />
       <div className="s-divider" />
       <button
@@ -225,7 +408,7 @@ export function PrivacySection() {
           });
         }
       } catch (err) {
-        showToast("Failed to load privacy settings", "error");
+        showToast(err.response?.data?.message || "Failed to load privacy settings", "error");
       }
     };
     loadSettings();
@@ -357,7 +540,7 @@ export function NotificationsSection() {
           });
         }
       } catch (err) {
-        showToast("Failed to load notification preferences", "error");
+        showToast(err.response?.data?.message || "Failed to load notification preferences", "error");
       } finally {
         setLoading(false);
       }
@@ -493,7 +676,7 @@ export function AppearanceSection() {
           }
         }
       } catch (err) {
-        showToast("Failed to load appearance preferences", "error");
+        showToast(err.response?.data?.message || "Failed to load appearance preferences", "error");
       } finally {
         setLoaded(true);
       }
@@ -590,7 +773,10 @@ export function AppearanceSection() {
 // LANGUAGE SECTION
 // ==========================================
 export function LanguageSection() {
-  const [appLanguage, setAppLanguage] = useState("en-US");
+  const { language, setLanguage, t, languages } = useI18n();
+  // Local draft value so the dropdown can be changed without affecting the
+  // live app until the user hits Save (matches the rest of Settings' pattern).
+  const [appLanguage, setAppLanguage] = useState(language);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState({ show: false, text: "", type: "" });
 
@@ -605,13 +791,18 @@ export function LanguageSection() {
         const res = await apiClient.get("/api/v1/profile/me");
         if (res.data?.data?.user) {
           const user = res.data.data.user;
-          setAppLanguage(user.appLanguage ?? "en-US");
+          const savedLanguage = user.appLanguage ?? "en-US";
+          setAppLanguage(savedLanguage);
+          // Apply whatever is saved on the account as soon as it loads, so a
+          // language chosen on another device/session takes effect here too.
+          setLanguage(savedLanguage);
         }
       } catch (err) {
-        showToast("Failed to load language settings", "error");
+        showToast(err.response?.data?.message || t("settings.language.loadError"), "error");
       }
     };
     loadSettings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSave = async () => {
@@ -622,7 +813,9 @@ export function LanguageSection() {
       });
 
       if (res.data?.success) {
-        showToast("Language preference updated!", "success");
+        // Apply immediately across the whole app (nav, sidebar, settings, etc.)
+        setLanguage(appLanguage);
+        showToast(t("settings.language.updateSuccess"), "success");
       }
     } catch (err) {
       showToast(err.response?.data?.message || err.message, "error");
@@ -634,29 +827,26 @@ export function LanguageSection() {
   return (
     <div className="s-section">
       <ToastBanner toast={toast} />
-      <h2 className="s-section__title">Language</h2>
-      <p className="s-section__desc">Choose your preferred language for the app.</p>
+      <h2 className="s-section__title">{t("settings.language.title")}</h2>
+      <p className="s-section__desc">{t("settings.language.description")}</p>
       <div className="s-row">
-        <label className="s-label">App language</label>
+        <label className="s-label">{t("settings.language.appLanguage")}</label>
         <select
           className="s-input s-input--select"
           value={appLanguage}
           onChange={(e) => setAppLanguage(e.target.value)}
           disabled={saving}
         >
-          <option value="en-US">English (US)</option>
-          <option value="en-UK">English (UK)</option>
-          <option value="si">Sinhala</option>
-          <option value="ta">Tamil</option>
-          <option value="es">Spanish</option>
-          <option value="fr">French</option>
-          <option value="de">German</option>
-          <option value="ja">Japanese</option>
+          {languages.map((lang) => (
+            <option key={lang.code} value={lang.code}>
+              {lang.label}
+            </option>
+          ))}
         </select>
       </div>
       <div className="s-divider" />
       <button className="s-btn s-btn--primary" onClick={handleSave} disabled={saving}>
-        {saving ? "Saving..." : "Save"}
+        {saving ? t("common.saving") : t("common.save")}
       </button>
     </div>
   );

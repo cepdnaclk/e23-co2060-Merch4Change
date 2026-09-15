@@ -36,7 +36,7 @@ export const getUserProducts = async (req, res) => {
     const { username } = req.params;
     const cleanParam = decodeURIComponent(username || "").trim();
     const alphanumericOnly = cleanParam.toLowerCase().replace(/[^a-z0-9]/g, "");
-    const fuzzyPattern = cleanParam.replace(/[-_]/g, "[\\s-_]*");
+    const fuzzyPattern = cleanParam.replace(/[-_]/g, "[\\s\\-_]*");
     const fuzzyRegex = new RegExp(`^${fuzzyPattern}$`, "i");
 
     const User = (await import("../models/User.js")).default;

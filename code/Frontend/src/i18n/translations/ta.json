@@ -1,0 +1,189 @@
+{
+  "common": {
+    "appName": "Merch4Change",
+    "save": "சேமி",
+    "saving": "சேமிக்கிறது...",
+    "cancel": "ரத்துசெய்",
+    "close": "மூடு",
+    "edit": "திருத்து",
+    "delete": "நீக்கு",
+    "loading": "ஏற்றுகிறது...",
+    "search": "தேடு",
+    "seeAll": "அனைத்தையும் காண்க",
+    "back": "பின்செல்",
+    "next": "அடுத்து",
+    "submit": "சமர்ப்பி",
+    "confirm": "உறுதிப்படுத்து",
+    "yes": "ஆம்",
+    "no": "இல்லை",
+    "signIn": "உள்நுழை",
+    "signUp": "பதிவு செய்",
+    "getStarted": "தொடங்குங்கள்",
+    "logout": "வெளியேறு",
+    "viewAll": "அனைத்தையும் காண்க",
+    "readMore": "மேலும் படிக்க",
+    "logoutConfirm": "நீங்கள் வெளியேற விரும்புகிறீர்களா?"
+  },
+  "nav": {
+    "home": "முகப்பு",
+    "search": "தேடு",
+    "messages": "செய்திகள்",
+    "notifications": "அறிவிப்புகள்",
+    "marketplace": "சந்தை",
+    "collections": "தொகுப்புகள்",
+    "analytics": "பகுப்பாய்வு",
+    "donations": "நன்கொடைகள்",
+    "leaderboard": "தலைமைப் பலகை",
+    "charityVerification": "தொண்டு நிறுவன சரிபார்ப்பு",
+    "settings": "அமைப்புகள்",
+    "addProject": "திட்டத்தைச் சேர்",
+    "createPost": "இடுகையை உருவாக்கு"
+  },
+  "publicNav": {
+    "marketplace": "சந்தை",
+    "forOrganisations": "நிறுவனங்களுக்கு",
+    "impact": "தாக்கம்"
+  },
+  "footer": {
+    "tagline": "தாக்கம் சார்ந்த வர்த்தகத்தின் மூலம் சமூகங்களை மேம்படுத்துதல். மாற்றத்தை ஏற்படுத்த உங்களுக்குப் பிடித்த பிராண்டுகளுடன் இணையுங்கள்.",
+    "aboutUs": "எங்களைப் பற்றி",
+    "ourStory": "எங்கள் கதை",
+    "ourMission": "எங்கள் நோக்கம்",
+    "teamAntigravity": "Team Antigravity",
+    "support": "ஆதரவு",
+    "helpCenter": "உதவி மையம்",
+    "howItWorks": "இது எவ்வாறு செயல்படுகிறது",
+    "faqs": "அடிக்கடி கேட்கப்படும் கேள்விகள்",
+    "contactUs": "எங்களை தொடர்பு கொள்ள",
+    "legal": "சட்டப்பூர்வ",
+    "privacyPolicy": "தனியுரிமைக் கொள்கை",
+    "termsOfService": "சேவை விதிமுறைகள்",
+    "cookiePolicy": "குக்கீ கொள்கை",
+    "rightsReserved": "அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை."
+  },
+  "settings": {
+    "sidebar": {
+      "account": "கணக்கு",
+      "preferences": "விருப்பத்தேர்வுகள்",
+      "more": "மேலும்",
+      "profile": "சுயவிவரம்",
+      "security": "பாதுகாப்பு",
+      "privacy": "தனியுரிமை",
+      "notifications": "அறிவிப்புகள்",
+      "appearance": "தோற்றம்",
+      "language": "மொழி",
+      "help": "உதவி மற்றும் ஆதரவு",
+      "logout": "வெளியேறு",
+      "organizationVerification": "நிறுவன சரிபார்ப்பு",
+      "editProfile": "சுயவிவரத்தைத் திருத்து",
+      "accountSecurity": "கணக்கு பாதுகாப்பு",
+      "header": "அமைப்புகள்"
+    },
+    "language": {
+      "title": "மொழி",
+      "description": "பயன்பாட்டிற்கான உங்கள் விருப்ப மொழியைத் தேர்ந்தெடுக்கவும்.",
+      "appLanguage": "பயன்பாட்டு மொழி",
+      "updateSuccess": "மொழி விருப்பம் புதுப்பிக்கப்பட்டது!",
+      "loadError": "மொழி அமைப்புகளை ஏற்ற முடியவில்லை"
+    },
+    "appearance": {
+      "title": "தோற்றம்",
+      "description": "உங்கள் சாதனத்தில் Merch4Change எவ்வாறு தோன்றுகிறது என்பதைத் தனிப்பயனாக்குங்கள்.",
+      "theme": "தீம்",
+      "light": "வெளிச்சம்",
+      "dark": "இருள்",
+      "system": "கணினி",
+      "fontSize": "எழுத்துரு அளவு",
+      "small": "சிறியது",
+      "medium": "நடுத்தரம்",
+      "large": "பெரியது",
+      "updateSuccess": "தோற்றம் புதுப்பிக்கப்பட்டது!"
+    },
+    "notifications": {
+      "title": "அறிவிப்புகள்",
+      "description": "எதைப் பற்றி அறிவிக்கப்பட விரும்புகிறீர்கள் என்பதைத் தேர்ந்தெடுக்கவும்."
+    },
+    "privacy": {
+      "title": "தனியுரிமை"
+    },
+    "security": {
+      "title": "பாதுகாப்பு"
+    },
+    "profile": {
+      "title": "சுயவிவரம்"
+    },
+    "help": {
+      "title": "உதவி மற்றும் ஆதரவு"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "மீண்டும் வரவேற்கிறோம்",
+      "subtitle": "Merch4Change இல் தொடர உள்நுழையவும்",
+      "email": "மின்னஞ்சல்",
+      "password": "கடவுச்சொல்",
+      "forgotPassword": "கடவுச்சொல்லை மறந்துவிட்டீர்களா?",
+      "loginButton": "உள்நுழை",
+      "noAccount": "கணக்கு இல்லையா?",
+      "signUp": "பதிவு செய்"
+    },
+    "signup": {
+      "title": "உங்கள் கணக்கை உருவாக்கவும்",
+      "haveAccount": "ஏற்கனவே கணக்கு உள்ளதா?",
+      "logIn": "உள்நுழை"
+    }
+  },
+  "home": {
+    "title": "முகப்பு",
+    "trendingNow": "இப்போது டிரெண்டிங்",
+    "forYou": "உங்களுக்காக"
+  },
+  "marketplace": {
+    "title": "சந்தை",
+    "trending": "பிரபலமானவை",
+    "guestBlockTitle": "சந்தையில் ஷாப்பிங் செய்ய உள்நுழையவும்",
+    "emptyTitle": "பொருட்கள் எதுவும் இல்லை"
+  },
+  "leaderboard": {
+    "title": "தலைமைப் பலகை",
+    "topDonors": "முதன்மை நன்கொடையாளர்கள்"
+  },
+  "donations": {
+    "title": "நன்கொடைகள்",
+    "donate": "நன்கொடை அளி",
+    "myDonations": "எனது நன்கொடைகள்"
+  },
+  "messaging": {
+    "title": "செய்திகள்",
+    "noConversation": "செய்தி அனுப்பத் தொடங்க ஒரு உரையாடலைத் தேர்ந்தெடுக்கவும்"
+  },
+  "notificationsPage": {
+    "title": "அறிவிப்புகள்",
+    "empty": "நீங்கள் அனைத்தையும் பார்த்துவிட்டீர்கள்!"
+  },
+  "search": {
+    "title": "தேடு",
+    "placeholder": "Merch4Change இல் தேடுங்கள்"
+  },
+  "about": {
+    "ourStory": "எங்கள் கதை",
+    "ourMission": "எங்கள் நோக்கம்",
+    "team": "Team Antigravity"
+  },
+  "faq": {
+    "title": "அடிக்கடி கேட்கப்படும் கேள்விகள்"
+  },
+  "help": {
+    "title": "உதவி மற்றும் ஆதரவு",
+    "contact": "எங்களை தொடர்பு கொள்ள"
+  },
+  "profile": {
+    "posts": "இடுகைகள்",
+    "followers": "பின்தொடர்பவர்கள்",
+    "following": "பின்தொடர்கிறது"
+  },
+  "underConstruction": {
+    "title": "விரைவில் வருகிறது",
+    "message": "நாங்கள் இந்தப் பக்கத்தை இன்னும் உருவாக்கி வருகிறோம். விரைவில் மீண்டும் பாருங்கள்!"
+  }
+}
