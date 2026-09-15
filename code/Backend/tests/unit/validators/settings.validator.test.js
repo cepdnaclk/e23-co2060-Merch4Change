@@ -60,6 +60,12 @@ test("validateProfileSettingsBody rejects invalid userName characters and length
   );
 });
 
+test("validateRequestEmailChangeBody rejects an invalid email", () => {
+  const result = validateRequestEmailChangeBody({ newEmail: "not-an-email", currentPassword: "pass" });
+
+  assert.equal(result.errors.some((m) => m.includes("newEmail must be a valid email address")), true);
+});
+
 test("validateProfileSettingsBody rejects profileBio over 500 characters", () => {
   const result = validateProfileSettingsBody({
     profileBio: "y".repeat(501),
@@ -79,7 +85,7 @@ test("validateProfileSettingsBody rejects userLink without http(s) scheme", () =
 // ==========================================
 // SECURITY SETTINGS
 // ==========================================
-test("validateSecuritySettingsBody accepts a valid boolean toggle", () => {
+test("validateSecuritySettingsBody accepts valid boolean toggles", () => {
   const result = validateSecuritySettingsBody({ loginActivityAlerts: false });
 
   assert.deepEqual(result.errors, []);
@@ -92,7 +98,7 @@ test("validateSecuritySettingsBody accepts an empty payload", () => {
 });
 
 test("validateSecuritySettingsBody rejects a non-boolean loginActivityAlerts", () => {
-  const result = validateSecuritySettingsBody({ loginActivityAlerts: 1 });
+  const result = validateSecuritySettingsBody({ loginActivityAlerts: "not-a-boolean" });
 
   assert.equal(result.errors.some((m) => m.includes("loginActivityAlerts must be a boolean")), true);
 });

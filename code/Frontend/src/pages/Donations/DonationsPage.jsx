@@ -9,6 +9,8 @@ import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import LeaderboardSection from "../../components/Leaderboard/LeaderboardSection";
 import apiClient from "../../api/apiClient";
 
+import { useAuth } from "../../context/Context";
+
 const CATEGORY_META = {
   health: { tag: "Health", TagIcon: Stethoscope, tagColor: "#0c4a6e", tagBg: "#E0F2FE" },
   education: { tag: "Education", TagIcon: BookOpen, tagColor: "#92400e", tagBg: "#FEF3C7" },
@@ -145,6 +147,7 @@ function ProjectCard({ p, onDonate }) {
 
 export default function DonationsPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTab = searchParams.get("tab") === "leaderboard" ? "leaderboard" : "causes";
   const [activeSection, setActiveSection] = useState(initialTab); // "causes" | "leaderboard"
@@ -382,7 +385,7 @@ export default function DonationsPage() {
 
             {/* ── RENDER ACTIVE SECTION ─────────────────────────────────── */}
             {activeSection === "leaderboard" ? (
-              <LeaderboardSection profileData={profileData || authUser} />
+              <LeaderboardSection profileData={profileData || user} />
             ) : (
               <>
                 {/* ── CAUSES CATEGORY FILTER PILLS ── */}

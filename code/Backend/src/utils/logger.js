@@ -33,7 +33,7 @@ const parseMaxLogFileSize = () => {
 export const MAX_LOG_FILE_SIZE_BYTES = parseMaxLogFileSize();
 
 export const isSensitiveKey = (key) => {
-  const normalizedKey = String(key).toLowerCase().replace(/[\s\-]/g, "");
+  const normalizedKey = String(key).toLowerCase().replace(/[\s-]/g, "");
 
   if (SENSITIVE_KEYS.has(normalizedKey)) {
     return true;
