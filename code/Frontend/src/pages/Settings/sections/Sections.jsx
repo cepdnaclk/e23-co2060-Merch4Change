@@ -623,12 +623,6 @@ export function AppearanceSection({ profileData, onUpdate }) {
   const { theme, fontSize, setTheme, setFontSize } = useTheme();
   const [appTheme, setAppTheme] = useState(profileData?.appTheme ?? theme);
   const [localFontSize, setLocalFontSize] = useState(profileData?.fontSize ?? fontSize);
-  const [toast, setToast] = useState({ show: false, text: "", type: "" });
-
-  const showToast = (text, type = "info") => {
-    setToast({ show: true, text, type });
-    setTimeout(() => setToast({ show: false, text: "", type: "" }), 3500);
-  };
 
   // Sync from parent whenever profileData is refreshed (e.g. initial load)
   useEffect(() => {
@@ -668,7 +662,6 @@ export function AppearanceSection({ profileData, onUpdate }) {
 
   return (
     <div className="s-section">
-      <ToastBanner toast={toast} />
       <h2 className="s-section__title">Appearance</h2>
       <p className="s-section__desc">Customize how the app looks for you.</p>
       <div className="s-row">
