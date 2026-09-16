@@ -212,6 +212,23 @@ function ProfileSection({ profileData = {}, onUpdate = () => {} }) {
     }
   };
 
+  const handleEmailOtpPaste = (e) => {
+    e.preventDefault();
+    const pastedText = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (!pastedText) return;
+
+    const next = [...emailOtp];
+    for (let i = 0; i < 6; i++) {
+      next[i] = pastedText[i] || "";
+    }
+    setEmailOtp(next);
+
+    const focusIndex = Math.min(pastedText.length, 5);
+    if (emailOtpRefs.current[focusIndex]) {
+      emailOtpRefs.current[focusIndex].focus();
+    }
+  };
+
   const handleVerifyEmailChange = async (e) => {
     if (e) e.preventDefault();
     const code = emailOtp.join("");
@@ -404,12 +421,15 @@ function ProfileSection({ profileData = {}, onUpdate = () => {} }) {
                 <input
                   key={index}
                   type="text"
+                  inputMode="numeric"
                   maxLength="1"
                   value={digit}
                   onChange={(e) => handleEmailOtpChange(e, index)}
                   onKeyDown={(e) => handleEmailOtpKeyDown(e, index)}
+                  onPaste={handleEmailOtpPaste}
                   ref={(el) => (emailOtpRefs.current[index] = el)}
                   className="otp-input"
+                  aria-label={`Verification code digit ${index + 1}`}
                 />
               ))}
             </div>
