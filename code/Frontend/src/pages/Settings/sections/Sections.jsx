@@ -43,9 +43,9 @@ function Toggle({ label, desc, badge, checked, onChange, disabled }) {
 // ==========================================
 // SECURITY SECTION
 // ==========================================
-export function SecuritySection() {
-  const [twoFA, setTwoFA] = useState(false);
-  const [alerts, setAlerts] = useState(true);
+export function SecuritySection({ profileData, onUpdate }) {
+  const [twoFA, setTwoFA] = useState(profileData?.twoFactorEnabled ?? false);
+  const [alerts, setAlerts] = useState(profileData?.loginActivityAlerts ?? true);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -70,20 +70,15 @@ export function SecuritySection() {
   };
 
   useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        const res = await apiClient.get("/api/v1/profile/me");
-        if (res.data?.data?.user) {
-          const user = res.data.data.user;
-          setTwoFA(user.twoFactorEnabled ?? false);
-          setAlerts(user.loginActivityAlerts ?? true);
-        }
-      } catch (err) {
-        showToast(err.response?.data?.message || "Failed to load security settings", "error");
+    if (profileData) {
+      if (profileData.twoFactorEnabled !== undefined) {
+        setTwoFA(profileData.twoFactorEnabled);
       }
-    };
-    loadSettings();
-  }, []);
+      if (profileData.loginActivityAlerts !== undefined) {
+        setAlerts(profileData.loginActivityAlerts);
+      }
+    }
+  }, [profileData]);
 
   const handleAlertsToggle = async () => {
     const prevAlerts = alerts;
@@ -96,6 +91,7 @@ export function SecuritySection() {
         loginActivityAlerts: value,
       });
       if (res.data?.success) {
+        onUpdate?.({ ...profileData, loginActivityAlerts: value });
         showToast("Security settings updated!", "success");
       }
     } catch (err) {
@@ -158,6 +154,7 @@ export function SecuritySection() {
         setTwoFA(true);
         setTwoFAStep("idle");
         setEnableOtp("");
+        onUpdate?.({ ...profileData, twoFactorEnabled: true });
         showToast("Two-factor authentication enabled!", "success");
       }
     } catch (err) {
@@ -186,6 +183,7 @@ export function SecuritySection() {
         setTwoFA(false);
         setShowDisableConfirm(false);
         setDisablePassword("");
+        onUpdate?.({ ...profileData, twoFactorEnabled: false });
         showToast("Two-factor authentication disabled.", "success");
       }
     } catch (err) {
@@ -380,13 +378,13 @@ export function SecuritySection() {
 // ==========================================
 // PRIVACY SECTION
 // ==========================================
-export function PrivacySection() {
+export function PrivacySection({ profileData, onUpdate }) {
   const [s, setS] = useState({
-    private: false,
-    activity: true,
-    messages: true,
-    receipts: false,
-    commentPermission: "following",
+    private: profileData?.isPrivate ?? false,
+    activity: profileData?.showActivityStatus ?? true,
+    messages: profileData?.allowMessageRequests ?? true,
+    receipts: profileData?.hideReadReceipts ?? false,
+    commentPermission: profileData?.commentPermission ?? "following",
   });
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState({ show: false, text: "", type: "" });
@@ -397,25 +395,16 @@ export function PrivacySection() {
   };
 
   useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        const res = await apiClient.get("/api/v1/profile/me");
-        if (res.data?.data?.user) {
-          const user = res.data.data.user;
-          setS({
-            private: user.isPrivate ?? false,
-            activity: user.showActivityStatus ?? true,
-            messages: user.allowMessageRequests ?? true,
-            receipts: user.hideReadReceipts ?? false,
-            commentPermission: user.commentPermission ?? "following",
-          });
-        }
-      } catch (err) {
-        showToast(err.response?.data?.message || "Failed to load privacy settings", "error");
-      }
-    };
-    loadSettings();
-  }, []);
+    if (profileData) {
+      setS({
+        private: profileData.isPrivate ?? false,
+        activity: profileData.showActivityStatus ?? true,
+        messages: profileData.allowMessageRequests ?? true,
+        receipts: profileData.hideReadReceipts ?? false,
+        commentPermission: profileData.commentPermission ?? "following",
+      });
+    }
+  }, [profileData]);
 
   const tog = (k) => {
     const prev = s[k];
@@ -443,6 +432,14 @@ export function PrivacySection() {
       });
 
       if (res.data?.success) {
+        onUpdate?.({
+          ...profileData,
+          isPrivate: stateData.private,
+          showActivityStatus: stateData.activity,
+          allowMessageRequests: stateData.messages,
+          hideReadReceipts: stateData.receipts,
+          commentPermission: stateData.commentPermission,
+        });
         showToast("Privacy settings updated!", "success");
       }
     } catch (err) {
@@ -510,15 +507,14 @@ export function PrivacySection() {
 // ==========================================
 // NOTIFICATIONS SECTION
 // ==========================================
-export function NotificationsSection() {
+export function NotificationsSection({ profileData, onUpdate }) {
   const [s, setS] = useState({
-    likes: true,
-    comments: true,
-    followers: true,
-    dms: true,
-    email: false,
+    likes: profileData?.notifyOnLikes ?? true,
+    comments: profileData?.notifyOnComments ?? true,
+    followers: profileData?.notifyOnNewFollowers ?? true,
+    dms: profileData?.notifyOnDMs ?? true,
+    email: profileData?.emailNotifications ?? false,
   });
-  const [loading, setLoading] = useState(true);
   const [savingKey, setSavingKey] = useState(null);
   const [toast, setToast] = useState({ show: false, text: "", type: "" });
 
@@ -528,28 +524,16 @@ export function NotificationsSection() {
   };
 
   useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        setLoading(true);
-        const res = await apiClient.get("/api/v1/profile/me");
-        if (res.data?.data?.user) {
-          const user = res.data.data.user;
-          setS({
-            likes: user.notifyOnLikes ?? true,
-            comments: user.notifyOnComments ?? true,
-            followers: user.notifyOnNewFollowers ?? true,
-            dms: user.notifyOnDMs ?? true,
-            email: user.emailNotifications ?? false,
-          });
-        }
-      } catch (err) {
-        showToast(err.response?.data?.message || "Failed to load notification preferences", "error");
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadSettings();
-  }, []);
+    if (profileData) {
+      setS({
+        likes: profileData.notifyOnLikes ?? true,
+        comments: profileData.notifyOnComments ?? true,
+        followers: profileData.notifyOnNewFollowers ?? true,
+        dms: profileData.notifyOnDMs ?? true,
+        email: profileData.emailNotifications ?? false,
+      });
+    }
+  }, [profileData]);
 
   const tog = async (k) => {
     const previousValue = s[k];
@@ -569,6 +553,14 @@ export function NotificationsSection() {
       });
 
       if (res.data?.success) {
+        onUpdate?.({
+          ...profileData,
+          notifyOnLikes: updatedState.likes,
+          notifyOnComments: updatedState.comments,
+          notifyOnNewFollowers: updatedState.followers,
+          notifyOnDMs: updatedState.dms,
+          emailNotifications: updatedState.email,
+        });
         showToast("Notification preference updated!", "success");
       }
     } catch (err) {
@@ -578,15 +570,6 @@ export function NotificationsSection() {
       setSavingKey(null);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="s-section">
-        <h2 className="s-section__title">Notifications</h2>
-        <p className="s-section__desc">Loading notification preferences...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="s-section">
@@ -636,12 +619,10 @@ export function NotificationsSection() {
 // ==========================================
 // APPEARANCE SECTION
 // ==========================================
-export function AppearanceSection() {
+export function AppearanceSection({ profileData, onUpdate }) {
   const { theme, fontSize, setTheme, setFontSize } = useTheme();
-  const [appTheme, setAppTheme] = useState(theme);
-  const [localFontSize, setLocalFontSize] = useState(fontSize);
-  const [saving, setSaving] = useState(false);
-  const [loaded, setLoaded] = useState(false);
+  const [appTheme, setAppTheme] = useState(profileData?.appTheme ?? theme);
+  const [localFontSize, setLocalFontSize] = useState(profileData?.fontSize ?? fontSize);
   const [toast, setToast] = useState({ show: false, text: "", type: "" });
 
   const showToast = (text, type = "info") => {
@@ -649,47 +630,16 @@ export function AppearanceSection() {
     setTimeout(() => setToast({ show: false, text: "", type: "" }), 3500);
   };
 
+  // Sync from parent whenever profileData is refreshed (e.g. initial load)
   useEffect(() => {
-    setAppTheme(theme);
-  }, [theme]);
-
-  useEffect(() => {
-    setLocalFontSize(fontSize);
-  }, [fontSize]);
-
-  useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        const res = await apiClient.get("/api/v1/profile/me");
-        if (res.data?.data?.user) {
-          const user = res.data.data.user;
-          const backendTheme = user.appTheme;
-          const backendFontSize = user.fontSize;
-
-          const storedLocalTheme = localStorage.getItem("m4c-theme");
-          const storedLocalFont = localStorage.getItem("m4c-font-size");
-
-          if (!storedLocalTheme && backendTheme) {
-            setAppTheme(backendTheme);
-            setTheme(backendTheme);
-          }
-          if (!storedLocalFont && backendFontSize) {
-            setLocalFontSize(backendFontSize);
-            setFontSize(backendFontSize);
-          }
-        }
-      } catch (err) {
-        showToast(err.response?.data?.message || "Failed to load appearance preferences", "error");
-      } finally {
-        setLoaded(true);
-      }
-    };
-    loadSettings();
-  }, [setTheme, setFontSize]);
+    if (profileData?.appTheme) setAppTheme(profileData.appTheme);
+    if (profileData?.fontSize) setLocalFontSize(profileData.fontSize);
+  }, [profileData]);
 
   const handleThemeChange = (e) => {
     const next = e.target.value;
     setAppTheme(next);
+    // ThemeContext.setTheme auto-persists via PUT /api/v1/settings/appearance
     setTheme(next);
 
     const isDark =
@@ -704,30 +654,16 @@ export function AppearanceSection() {
       document.body.classList.toggle("dark", isDark);
       document.body.setAttribute("data-theme", isDark ? "dark" : "light");
     }
+
+    onUpdate?.({ ...profileData, appTheme: next });
   };
 
   const handleFontSizeChange = (e) => {
     const next = e.target.value;
     setLocalFontSize(next);
+    // ThemeContext.setFontSize auto-persists via PUT /api/v1/settings/appearance
     setFontSize(next);
-  };
-
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      const res = await apiClient.put("/api/v1/settings/appearance", {
-        appTheme,
-        fontSize: localFontSize,
-      });
-
-      if (res.data?.success) {
-        showToast("Appearance settings saved!", "success");
-      }
-    } catch (err) {
-      showToast(err.response?.data?.message || err.message, "error");
-    } finally {
-      setSaving(false);
-    }
+    onUpdate?.({ ...profileData, fontSize: next });
   };
 
   return (
@@ -741,7 +677,6 @@ export function AppearanceSection() {
           className="s-input s-input--select"
           value={appTheme}
           onChange={handleThemeChange}
-          disabled={!loaded || saving}
         >
           <option value="system">System default</option>
           <option value="light">Light</option>
@@ -754,7 +689,6 @@ export function AppearanceSection() {
           className="s-input s-input--select"
           value={localFontSize}
           onChange={handleFontSizeChange}
-          disabled={!loaded || saving}
         >
           <option value="small">Small</option>
           <option value="medium">Medium</option>
@@ -762,12 +696,8 @@ export function AppearanceSection() {
         </select>
       </div>
       <p className="s-section__desc" style={{ margin: "-8px 0 18px" }}>
-        Changes preview instantly — click save to keep them on your other devices.
+        ✓ Changes are saved automatically.
       </p>
-      <div className="s-divider" />
-      <button className="s-btn s-btn--primary" onClick={handleSave} disabled={saving}>
-        {saving ? "Saving..." : "Save preferences"}
-      </button>
     </div>
   );
 }
@@ -775,11 +705,11 @@ export function AppearanceSection() {
 // ==========================================
 // LANGUAGE SECTION
 // ==========================================
-export function LanguageSection() {
+export function LanguageSection({ profileData, onUpdate }) {
   const { language, setLanguage, t, languages } = useI18n();
   // Local draft value so the dropdown can be changed without affecting the
   // live app until the user hits Save (matches the rest of Settings' pattern).
-  const [appLanguage, setAppLanguage] = useState(language);
+  const [appLanguage, setAppLanguage] = useState(profileData?.appLanguage ?? language);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState({ show: false, text: "", type: "" });
 
@@ -788,25 +718,13 @@ export function LanguageSection() {
     setTimeout(() => setToast({ show: false, text: "", type: "" }), 3500);
   };
 
+  // Sync from parent whenever profileData is refreshed (e.g. initial load)
   useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        const res = await apiClient.get("/api/v1/profile/me");
-        if (res.data?.data?.user) {
-          const user = res.data.data.user;
-          const savedLanguage = user.appLanguage ?? "en-US";
-          setAppLanguage(savedLanguage);
-          // Apply whatever is saved on the account as soon as it loads, so a
-          // language chosen on another device/session takes effect here too.
-          setLanguage(savedLanguage);
-        }
-      } catch (err) {
-        showToast(err.response?.data?.message || t("settings.language.loadError"), "error");
-      }
-    };
-    loadSettings();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (profileData?.appLanguage) {
+      setAppLanguage(profileData.appLanguage);
+      setLanguage(profileData.appLanguage);
+    }
+  }, [profileData, setLanguage]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -818,6 +736,7 @@ export function LanguageSection() {
       if (res.data?.success) {
         // Apply immediately across the whole app (nav, sidebar, settings, etc.)
         setLanguage(appLanguage);
+        onUpdate?.({ ...profileData, appLanguage });
         showToast(t("settings.language.updateSuccess"), "success");
       }
     } catch (err) {
@@ -854,6 +773,7 @@ export function LanguageSection() {
     </div>
   );
 }
+
 
 // ==========================================
 // HELP & SUPPORT SECTION
