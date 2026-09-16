@@ -61,6 +61,7 @@ router.post(
 );
 router.post(
   "/email/verify",
+  authRateLimiter,
   validateRequest({ body: validateVerifyEmailChangeBody }),
   verifyEmailChange
 );
@@ -73,6 +74,7 @@ router.put(
 );
 router.post(
   "/change-password",
+  authRateLimiter,
   validateRequest({ body: validateChangePasswordBody }),
   changePassword
 );
@@ -85,11 +87,13 @@ router.post(
 );
 router.post(
   "/security/2fa/verify-enable",
+  authRateLimiter,
   validateRequest({ body: validateVerifyEnable2FABody }),
   verifyEnable2FA
 );
 router.post(
   "/security/2fa/disable",
+  authRateLimiter,
   validateRequest({ body: validateDisable2FABody }),
   disable2FA
 );
@@ -125,6 +129,7 @@ router.put(
 // Account deletion
 router.delete(
   "/account",
+  authRateLimiter,
   validateRequest({ body: validateDeleteAccountBody }),
   deleteAccount
 );

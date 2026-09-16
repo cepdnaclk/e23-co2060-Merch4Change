@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import apiClient from "../../../api/apiClient.js";
+import apiClient, { setAccessToken } from "../../../api/apiClient.js";
 import { useTheme } from "../../../context/ThemeContext";
 import { useI18n } from "../../../i18n/I18nContext";
 import "./SettingsSection.css";
@@ -211,6 +211,9 @@ export function SecuritySection() {
       });
 
       if (res.data?.success) {
+        if (res.data?.data?.accessToken) {
+          setAccessToken(res.data.data.accessToken);
+        }
         showToast("Password changed successfully!", "success");
         setCurrentPassword("");
         setNewPassword("");

@@ -66,14 +66,14 @@ const toLoginType = (accountType) => {
 
 // 3. create tokens
 // AccessToken: use for authenticate via endpoints
-const createAccessToken = (userId) => {
+export const createAccessToken = (userId) => {
   return jwt.sign({ userId }, env.jwtSecret, {
     expiresIn: env.jwtExpiresIn,
   });
 };
 
 // RefreshToken: use to get a new accessToken
-const createRefreshToken = (userId) => {
+export const createRefreshToken = (userId) => {
   return jwt.sign({ userId }, env.jwtRefreshSecret, {
     expiresIn: env.jwtRefreshExpiresIn,
   });
@@ -290,8 +290,9 @@ export const login = asyncHandler(async (req, res) => {
   if (user.twoFactorEnabled) {
     const otpCode = crypto.randomInt(100000, 1000000).toString();
 
-    user.loginOtp = otpCode;
+    user.loginOtp = crypto.createHash("sha256").update(otpCode).digest("hex");
     user.loginOtpExpiresAt = new Date(Date.now() + OTP_EXPIRE_MIN * 60 * 1000);
+    user.loginOtpAttempts = 0;
     await user.save();
 
     await sendOtpEmail(user.email, otpCode);
@@ -327,7 +328,7 @@ export const verifyLoginOtp = asyncHandler(async (req, res) => {
     throw new AppError("Invalid verification token.", 401, "INVALID_2FA_TOKEN");
   }
 
-  const user = await User.findById(decoded.userId).select("+loginOtp +loginOtpExpiresAt");
+  const user = await User.findById(decoded.userId).select("+loginOtp +loginOtpExpiresAt +loginOtpAttempts");
 
   if (!user || !user.isActive) {
     throw new AppError("User not found or inactive.", 401, "INVALID_2FA_TOKEN");
@@ -337,12 +338,32 @@ export const verifyLoginOtp = asyncHandler(async (req, res) => {
     throw new AppError("This code has expired. Please request a new one.", 400, "OTP_EXPIRED");
   }
 
-  if (user.loginOtp !== String(otp).trim()) {
-    throw new AppError("Invalid verification code.", 400, "INVALID_OTP");
+  const hashedOtp = crypto.createHash("sha256").update(String(otp).trim()).digest("hex");
+  if (user.loginOtp !== hashedOtp) {
+    user.loginOtpAttempts = (user.loginOtpAttempts || 0) + 1;
+    if (user.loginOtpAttempts >= 5) {
+      user.loginOtp = null;
+      user.loginOtpExpiresAt = null;
+      user.loginOtpAttempts = 0;
+      await user.save();
+      throw new AppError(
+        "Too many incorrect attempts. Verification code has been invalidated. Please request a new one.",
+        429,
+        "TOO_MANY_ATTEMPTS",
+      );
+    }
+    await user.save();
+    const remaining = 5 - user.loginOtpAttempts;
+    throw new AppError(
+      `Invalid verification code. You have ${remaining} ${remaining === 1 ? "attempt" : "attempts"} remaining.`,
+      400,
+      "INVALID_OTP",
+    );
   }
 
   user.loginOtp = null;
   user.loginOtpExpiresAt = null;
+  user.loginOtpAttempts = 0;
   await user.save();
 
   return finalizeLogin(req, res, user);
@@ -374,8 +395,9 @@ export const resendLoginOtp = asyncHandler(async (req, res) => {
   }
 
   const otpCode = crypto.randomInt(100000, 1000000).toString();
-  user.loginOtp = otpCode;
+  user.loginOtp = crypto.createHash("sha256").update(otpCode).digest("hex");
   user.loginOtpExpiresAt = new Date(Date.now() + OTP_EXPIRE_MIN * 60 * 1000);
+  user.loginOtpAttempts = 0;
   await user.save();
 
   await sendOtpEmail(user.email, otpCode);
@@ -416,6 +438,17 @@ export const refresh = asyncHandler(async (req, res) => {
       401,
       "INVALID_REFRESH_TOKEN",
     );
+  }
+
+  if (user.passwordChangedAt) {
+    const changedTimestamp = parseInt(user.passwordChangedAt.getTime() / 1000, 10);
+    if (decoded.iat && decoded.iat < changedTimestamp) {
+      throw new AppError(
+        "Password was changed recently. Please log in again.",
+        401,
+        "TOKEN_EXPIRED",
+      );
+    }
   }
 
   const newAccessToken = createAccessToken(user._id);

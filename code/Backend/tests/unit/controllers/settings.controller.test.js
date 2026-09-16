@@ -14,6 +14,7 @@ import StoryCollection from "../../../src/models/StoryCollection.js";
 import UserBadge from "../../../src/models/UserBadge.js";
 import Product from "../../../src/models/Product.js";
 import OtpResendRecord from "../../../src/models/OtpResendRecord.js";
+import crypto from "crypto";
 import {
   updateProfileSettings,
   requestEmailChange,
@@ -273,7 +274,7 @@ test("verifyEmailChange commits the new email on a correct, unexpired code", asy
   const savedUser = {
     _id: "user1",
     pendingEmail: "new@example.com",
-    pendingEmailOtp: "111111",
+    pendingEmailOtp: crypto.createHash("sha256").update("111111").digest("hex"),
     pendingEmailOtpExpiresAt: new Date(Date.now() + 60000),
     save: async function () {},
   };
@@ -323,7 +324,7 @@ test("verifyEnable2FA rejects a missing OTP code", async () => {
 
 test("verifyEnable2FA turns on 2FA for a correct code", async (t) => {
   const savedUser = {
-    twoFactorSetupOtp: "222222",
+    twoFactorSetupOtp: crypto.createHash("sha256").update("222222").digest("hex"),
     twoFactorSetupOtpExpiresAt: new Date(Date.now() + 60000),
     twoFactorEnabled: false,
     save: async function () {},
@@ -453,6 +454,7 @@ test("changePassword rejects when currentPassword does not match the stored hash
 test("changePassword hashes and saves the new password on success", async (t) => {
   let savedPassword;
   const fakeUser = {
+    _id: "user1",
     password: "hashed-old",
     save: async function () {
       savedPassword = this.password;
@@ -472,7 +474,126 @@ test("changePassword hashes and saves the new password on success", async (t) =>
   await changePassword(req, res, () => {});
 
   assert.equal(savedPassword, "hashed-new");
+  assert.ok(fakeUser.passwordChangedAt instanceof Date);
+  assert.ok(res.payload.data.accessToken);
+  assert.ok(res.cookies.refreshToken);
   assert.equal(res.statusCode, 200);
+});
+
+// ==========================================
+// EMAIL CHANGE OTP
+// ==========================================
+test("verifyEmailChange verifies hashed OTP and updates email", async (t) => {
+  const rawOtp = "123456";
+  const hashedOtp = crypto.createHash("sha256").update(rawOtp).digest("hex");
+  const fakeUser = {
+    _id: "user1",
+    pendingEmail: "new@example.com",
+    pendingEmailOtp: hashedOtp,
+    pendingEmailOtpExpiresAt: new Date(Date.now() + 60000),
+    pendingEmailOtpAttempts: 0,
+    save: async function () {},
+  };
+
+  t.mock.method(User, "findById", () => ({ select: async () => fakeUser }));
+  t.mock.method(User, "findOne", async () => null);
+
+  const req = baseReq({ body: { otp: rawOtp } });
+  const res = createMockResponse();
+
+  await verifyEmailChange(req, res, () => {});
+
+  assert.equal(fakeUser.email, "new@example.com");
+  assert.equal(fakeUser.pendingEmail, null);
+  assert.equal(fakeUser.pendingEmailOtp, null);
+  assert.equal(fakeUser.pendingEmailOtpAttempts, 0);
+  assert.equal(res.statusCode, 200);
+});
+
+test("verifyEmailChange locks out after 5 failed attempts", async (t) => {
+  const fakeUser = {
+    _id: "user1",
+    pendingEmail: "new@example.com",
+    pendingEmailOtp: crypto.createHash("sha256").update("123456").digest("hex"),
+    pendingEmailOtpExpiresAt: new Date(Date.now() + 60000),
+    pendingEmailOtpAttempts: 4, // 5th attempt will fail
+    save: async function () {},
+  };
+
+  t.mock.method(User, "findById", () => ({ select: async () => fakeUser }));
+
+  const req = baseReq({ body: { otp: "999999" } });
+  const res = createMockResponse();
+
+  await assert.rejects(
+    () => verifyEmailChange(req, res),
+    (err) => {
+      assert.equal(err.statusCode, 429);
+      assert.equal(err.code, "TOO_MANY_ATTEMPTS");
+      return true;
+    }
+  );
+
+  assert.equal(fakeUser.pendingEmail, null);
+  assert.equal(fakeUser.pendingEmailOtp, null);
+  assert.equal(fakeUser.pendingEmailOtpAttempts, 0);
+});
+
+// ==========================================
+// 2FA ENABLE OTP
+// ==========================================
+test("verifyEnable2FA verifies hashed OTP and enables 2FA", async (t) => {
+  const rawOtp = "654321";
+  const hashedOtp = crypto.createHash("sha256").update(rawOtp).digest("hex");
+  const fakeUser = {
+    _id: "user1",
+    twoFactorEnabled: false,
+    twoFactorSetupOtp: hashedOtp,
+    twoFactorSetupOtpExpiresAt: new Date(Date.now() + 60000),
+    twoFactorSetupOtpAttempts: 0,
+    save: async function () {},
+  };
+
+  t.mock.method(User, "findById", () => ({ select: async () => fakeUser }));
+
+  const req = baseReq({ body: { otp: rawOtp } });
+  const res = createMockResponse();
+
+  await verifyEnable2FA(req, res, () => {});
+
+  assert.equal(fakeUser.twoFactorEnabled, true);
+  assert.equal(fakeUser.twoFactorSetupOtp, null);
+  assert.equal(fakeUser.twoFactorSetupOtpAttempts, 0);
+  assert.equal(res.statusCode, 200);
+});
+
+test("verifyEnable2FA locks out after 5 failed attempts", async (t) => {
+  const fakeUser = {
+    _id: "user1",
+    twoFactorEnabled: false,
+    twoFactorSetupOtp: crypto.createHash("sha256").update("654321").digest("hex"),
+    twoFactorSetupOtpExpiresAt: new Date(Date.now() + 60000),
+    twoFactorSetupOtpAttempts: 4, // 5th attempt will fail
+    save: async function () {},
+  };
+
+  t.mock.method(User, "findById", () => ({ select: async () => fakeUser }));
+
+  const req = baseReq({ body: { otp: "000000" } });
+  const res = createMockResponse();
+
+  await assert.rejects(
+    () => verifyEnable2FA(req, res),
+    (err) => {
+      assert.equal(err.statusCode, 429);
+      assert.equal(err.code, "TOO_MANY_ATTEMPTS");
+      return true;
+    }
+  );
+
+  assert.equal(fakeUser.twoFactorSetupOtp, null);
+  assert.equal(fakeUser.twoFactorSetupOtpAttempts, 0);
+  assert.equal(fakeUser.twoFactorEnabled, false);
 });
 
 // ==========================================
