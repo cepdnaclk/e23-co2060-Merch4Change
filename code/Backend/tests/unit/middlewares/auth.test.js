@@ -104,3 +104,31 @@ test("protect returns INVALID_TOKEN when verification fails", async () => {
   assert.equal(nextArg.name, "AppError");
   assert.equal(nextArg.code, "INVALID_TOKEN");
 });
+
+test("protect rejects tokens issued before passwordChangedAt", async (t) => {
+  // Token issued at timestamp 1000
+  const token = jwt.sign({ userId: "user-1", iat: 1000 }, env.jwtSecret);
+  // Password changed at timestamp 2000 (after token was issued)
+  const passwordChangedAt = new Date(2000 * 1000);
+
+  t.mock.method(User, "findById", (id) => {
+    return {
+      select: async () => ({
+        _id: id,
+        isActive: true,
+        passwordChangedAt,
+      }),
+    };
+  });
+
+  const req = { headers: { authorization: `Bearer ${token}` } };
+  let nextArg;
+  protect(req, {}, (error) => {
+    nextArg = error;
+  });
+  await nextTick();
+
+  assert.equal(nextArg?.name, "AppError");
+  assert.equal(nextArg?.statusCode, 401);
+  assert.equal(nextArg?.code, "TOKEN_EXPIRED");
+});

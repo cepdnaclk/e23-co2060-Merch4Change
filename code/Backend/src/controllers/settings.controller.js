@@ -16,6 +16,9 @@ import { uploadBufferToCloudinary } from "../utils/uploadToCloudinary.js";
 import sendOtpEmail from "../utils/sendOtpEmail.js";
 import sendEmailChangeAlertEmail from "../utils/sendEmailChangeAlertEmail.js";
 import OtpResendRecord from "../models/OtpResendRecord.js";
+import ms from "ms";
+import env from "../config/env.js";
+import { createAccessToken, createRefreshToken } from "./auth.controller.js";
 
 const OTP_EXPIRE_MIN = Number(process.env.OTP_EXPIRE_MIN) || 5;
 
@@ -137,8 +140,9 @@ export const requestEmailChange = asyncHandler(async (req, res) => {
   const otpCode = crypto.randomInt(100000, 1000000).toString();
 
   user.pendingEmail = normalizedNewEmail;
-  user.pendingEmailOtp = otpCode;
+  user.pendingEmailOtp = crypto.createHash("sha256").update(otpCode).digest("hex");
   user.pendingEmailOtpExpiresAt = new Date(now + OTP_EXPIRE_MIN * 60 * 1000);
+  user.pendingEmailOtpAttempts = 0;
   await user.save();
 
   await sendOtpEmail(normalizedNewEmail, otpCode);
@@ -206,8 +210,9 @@ export const resendEmailChangeOtp = asyncHandler(async (req, res) => {
   }
 
   const otpCode = crypto.randomInt(100000, 1000000).toString();
-  user.pendingEmailOtp = otpCode;
+  user.pendingEmailOtp = crypto.createHash("sha256").update(otpCode).digest("hex");
   user.pendingEmailOtpExpiresAt = new Date(now + OTP_EXPIRE_MIN * 60 * 1000);
+  user.pendingEmailOtpAttempts = 0;
   await user.save();
 
   await sendOtpEmail(user.pendingEmail, otpCode);
@@ -238,7 +243,7 @@ export const verifyEmailChange = asyncHandler(async (req, res) => {
   }
 
   const user = await User.findById(req.user._id).select(
-    "+pendingEmailOtp +pendingEmailOtpExpiresAt"
+    "+pendingEmailOtp +pendingEmailOtpExpiresAt +pendingEmailOtpAttempts"
   );
 
   if (!user.pendingEmail || !user.pendingEmailOtp) {
@@ -253,6 +258,7 @@ export const verifyEmailChange = asyncHandler(async (req, res) => {
     user.pendingEmail = null;
     user.pendingEmailOtp = null;
     user.pendingEmailOtpExpiresAt = null;
+    user.pendingEmailOtpAttempts = 0;
     await user.save();
     throw new AppError(
       "This verification code has expired. Please request a new one.",
@@ -261,8 +267,28 @@ export const verifyEmailChange = asyncHandler(async (req, res) => {
     );
   }
 
-  if (user.pendingEmailOtp !== String(finalOtp).trim()) {
-    throw new AppError("Invalid verification code.", 400, "INVALID_OTP");
+  const hashedOtp = crypto.createHash("sha256").update(String(finalOtp).trim()).digest("hex");
+  if (user.pendingEmailOtp !== hashedOtp) {
+    user.pendingEmailOtpAttempts = (user.pendingEmailOtpAttempts || 0) + 1;
+    if (user.pendingEmailOtpAttempts >= 5) {
+      user.pendingEmail = null;
+      user.pendingEmailOtp = null;
+      user.pendingEmailOtpExpiresAt = null;
+      user.pendingEmailOtpAttempts = 0;
+      await user.save();
+      throw new AppError(
+        "Too many incorrect attempts. Verification code has been invalidated. Please request a new one.",
+        429,
+        "TOO_MANY_ATTEMPTS"
+      );
+    }
+    await user.save();
+    const remaining = 5 - user.pendingEmailOtpAttempts;
+    throw new AppError(
+      `Invalid verification code. You have ${remaining} ${remaining === 1 ? "attempt" : "attempts"} remaining.`,
+      400,
+      "INVALID_OTP"
+    );
   }
 
   // Guard against a race where someone else claimed the address in the meantime.
@@ -274,6 +300,7 @@ export const verifyEmailChange = asyncHandler(async (req, res) => {
     user.pendingEmail = null;
     user.pendingEmailOtp = null;
     user.pendingEmailOtpExpiresAt = null;
+    user.pendingEmailOtpAttempts = 0;
     await user.save();
     throw new AppError("That email address is already in use.", 409, "EMAIL_TAKEN");
   }
@@ -282,6 +309,7 @@ export const verifyEmailChange = asyncHandler(async (req, res) => {
   user.pendingEmail = null;
   user.pendingEmailOtp = null;
   user.pendingEmailOtpExpiresAt = null;
+  user.pendingEmailOtpAttempts = 0;
   await user.save();
 
   return successResponse(res, 200, "Email address updated successfully.", {
@@ -348,8 +376,9 @@ export const requestEnable2FA = asyncHandler(async (req, res) => {
   }
 
   const otpCode = crypto.randomInt(100000, 1000000).toString();
-  user.twoFactorSetupOtp = otpCode;
+  user.twoFactorSetupOtp = crypto.createHash("sha256").update(otpCode).digest("hex");
   user.twoFactorSetupOtpExpiresAt = new Date(now + OTP_EXPIRE_MIN * 60 * 1000);
+  user.twoFactorSetupOtpAttempts = 0;
   await user.save();
 
   await sendOtpEmail(user.email, otpCode);
@@ -380,7 +409,7 @@ export const verifyEnable2FA = asyncHandler(async (req, res) => {
   }
 
   const user = await User.findById(req.user._id).select(
-    "+twoFactorSetupOtp +twoFactorSetupOtpExpiresAt"
+    "+twoFactorSetupOtp +twoFactorSetupOtpExpiresAt +twoFactorSetupOtpAttempts"
   );
 
   if (!user.twoFactorSetupOtp) {
@@ -394,6 +423,7 @@ export const verifyEnable2FA = asyncHandler(async (req, res) => {
   if (user.twoFactorSetupOtpExpiresAt && user.twoFactorSetupOtpExpiresAt.getTime() < Date.now()) {
     user.twoFactorSetupOtp = null;
     user.twoFactorSetupOtpExpiresAt = null;
+    user.twoFactorSetupOtpAttempts = 0;
     await user.save();
     throw new AppError(
       "This verification code has expired. Please request a new one.",
@@ -402,13 +432,33 @@ export const verifyEnable2FA = asyncHandler(async (req, res) => {
     );
   }
 
-  if (user.twoFactorSetupOtp !== String(finalOtp).trim()) {
-    throw new AppError("Invalid verification code.", 400, "INVALID_OTP");
+  const hashedOtp = crypto.createHash("sha256").update(String(finalOtp).trim()).digest("hex");
+  if (user.twoFactorSetupOtp !== hashedOtp) {
+    user.twoFactorSetupOtpAttempts = (user.twoFactorSetupOtpAttempts || 0) + 1;
+    if (user.twoFactorSetupOtpAttempts >= 5) {
+      user.twoFactorSetupOtp = null;
+      user.twoFactorSetupOtpExpiresAt = null;
+      user.twoFactorSetupOtpAttempts = 0;
+      await user.save();
+      throw new AppError(
+        "Too many incorrect attempts. Verification code has been invalidated. Please request a new one.",
+        429,
+        "TOO_MANY_ATTEMPTS"
+      );
+    }
+    await user.save();
+    const remaining = 5 - user.twoFactorSetupOtpAttempts;
+    throw new AppError(
+      `Invalid verification code. You have ${remaining} ${remaining === 1 ? "attempt" : "attempts"} remaining.`,
+      400,
+      "INVALID_OTP"
+    );
   }
 
   user.twoFactorEnabled = true;
   user.twoFactorSetupOtp = null;
   user.twoFactorSetupOtpExpiresAt = null;
+  user.twoFactorSetupOtpAttempts = 0;
   await user.save();
 
   return successResponse(res, 200, "Two-factor authentication is now enabled.", {
@@ -475,12 +525,24 @@ export const changePassword = asyncHandler(async (req, res) => {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-  // Update password
+  // Update password and invalidate previous tokens
   user.password = hashedPassword;
+  user.passwordChangedAt = new Date();
   await user.save();
+
+  const accessToken = createAccessToken(user._id);
+  const refreshToken = createRefreshToken(user._id);
+
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: env.nodeEnv === "production",
+    sameSite: env.nodeEnv === "production" ? "none" : "lax",
+    maxAge: ms(env.jwtRefreshExpiresIn),
+  });
 
   return successResponse(res, 200, "Password changed successfully.", {
     message: "Your password has been updated.",
+    accessToken,
   });
 });
 
