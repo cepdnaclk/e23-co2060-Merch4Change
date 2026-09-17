@@ -10,45 +10,36 @@ vi.mock("../../src/api/apiClient", () => ({
   default: { get: apiGet, put: apiPut },
 }));
 
+const mockProfile = {
+  isPrivate: false,
+  showActivityStatus: true,
+  allowMessageRequests: true,
+  hideReadReceipts: false,
+  commentPermission: "following",
+};
+
 afterEach(cleanup);
 beforeEach(() => {
-  apiGet.mockReset().mockResolvedValue({
-    data: {
-      data: {
-        user: {
-          isPrivate: false,
-          showActivityStatus: true,
-          allowMessageRequests: true,
-          hideReadReceipts: false,
-          commentPermission: "following",
-        },
-      },
-    },
-  });
+  apiGet.mockReset();
   apiPut.mockReset().mockResolvedValue({ data: { success: true } });
 });
 
 describe("PrivacySection", () => {
-  it("loads the current privacy settings from the API", async () => {
-    render(<PrivacySection />);
+  it("loads the current privacy settings from the profileData prop", async () => {
+    render(<PrivacySection profileData={mockProfile} />);
 
-    await waitFor(() => expect(apiGet).toHaveBeenCalledWith("/api/v1/profile/me"));
     const checkboxes = await screen.findAllByRole("checkbox");
     expect(checkboxes).toHaveLength(4);
     expect(checkboxes[0]).not.toBeChecked(); // private
     expect(checkboxes[1]).toBeChecked(); // activity
+    expect(checkboxes[2]).toBeChecked(); // allowMessageRequests
+    expect(checkboxes[3]).not.toBeChecked(); // hideReadReceipts
     expect(screen.getByDisplayValue("People you follow")).toBeInTheDocument();
   });
 
-  it("shows an error toast when loading settings fails", async () => {
-    apiGet.mockRejectedValue({ response: { data: { message: "Network down" } } });
-    render(<PrivacySection />);
-
-    expect(await screen.findByText("Network down")).toBeInTheDocument();
-  });
-
   it("saves a toggle immediately and shows a success toast", async () => {
-    render(<PrivacySection />);
+    const onUpdate = vi.fn();
+    render(<PrivacySection profileData={mockProfile} onUpdate={onUpdate} />);
     const [privateToggle] = await screen.findAllByRole("checkbox");
 
     fireEvent.click(privateToggle);
@@ -64,11 +55,16 @@ describe("PrivacySection", () => {
     );
     expect(await screen.findByText("Privacy settings updated!")).toBeInTheDocument();
     expect(privateToggle).toBeChecked();
+    expect(onUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isPrivate: true,
+      })
+    );
   });
 
   it("rolls back a toggle and shows an error toast when the save fails", async () => {
     apiPut.mockRejectedValue({ response: { data: { message: "Could not save" } } });
-    render(<PrivacySection />);
+    render(<PrivacySection profileData={mockProfile} />);
     const [privateToggle] = await screen.findAllByRole("checkbox");
 
     fireEvent.click(privateToggle);
@@ -78,7 +74,8 @@ describe("PrivacySection", () => {
   });
 
   it("saves the comment-permission dropdown on change", async () => {
-    render(<PrivacySection />);
+    const onUpdate = vi.fn();
+    render(<PrivacySection profileData={mockProfile} onUpdate={onUpdate} />);
     await screen.findAllByRole("checkbox");
 
     fireEvent.change(screen.getByDisplayValue("People you follow"), {
@@ -92,11 +89,16 @@ describe("PrivacySection", () => {
       )
     );
     expect(await screen.findByText("Privacy settings updated!")).toBeInTheDocument();
+    expect(onUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        commentPermission: "everyone",
+      })
+    );
   });
 
   it("rolls back the comment-permission dropdown when the save fails", async () => {
     apiPut.mockRejectedValue({ response: { data: { message: "Error updating privacy" } } });
-    render(<PrivacySection />);
+    render(<PrivacySection profileData={mockProfile} />);
     await screen.findAllByRole("checkbox");
 
     fireEvent.change(screen.getByDisplayValue("People you follow"), {
