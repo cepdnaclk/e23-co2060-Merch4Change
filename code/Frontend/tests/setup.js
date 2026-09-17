@@ -2,6 +2,14 @@ import "@testing-library/jest-dom";
 import { vi } from "vitest";
 import enUS from "../src/i18n/translations/en-US.json";
 
+// jsdom doesn't implement scrollIntoView, but several components (Navbar's
+// in-page section links, HelpAndSupport's category/filter jumps) call it on
+// click. Without a stub, those clicks throw "scrollIntoView is not a
+// function" in every test that exercises them.
+if (typeof Element !== "undefined" && !Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = function () {};
+}
+
 function resolveTranslation(key) {
   if (!key) return "";
   const parts = key.split(".");
@@ -17,10 +25,16 @@ function resolveTranslation(key) {
 }
 
 const mockThemeValue = {
-  theme: "light",
+  get theme() {
+    return localStorage.getItem("m4c-theme") || "light";
+  },
   setTheme: vi.fn(),
-  resolvedTheme: "light",
-  fontSize: "medium",
+  get resolvedTheme() {
+    return localStorage.getItem("m4c-theme") || "light";
+  },
+  get fontSize() {
+    return localStorage.getItem("m4c-font-size") || "medium";
+  },
   setFontSize: vi.fn(),
 };
 
@@ -28,7 +42,16 @@ const mockI18nValue = {
   language: "en-US",
   setLanguage: vi.fn(),
   t: (key) => resolveTranslation(key),
-  supportedLanguages: [{ code: "en-US", label: "English (US)" }],
+  languages: [
+    { code: "en-US", label: "English (US)" },
+    { code: "si-LK", label: "සිංහල" },
+    { code: "ta-LK", label: "தமிழ்" },
+  ],
+  supportedLanguages: [
+    { code: "en-US", label: "English (US)" },
+    { code: "si-LK", label: "සිංහල" },
+    { code: "ta-LK", label: "தமிழ்" },
+  ],
 };
 
 vi.mock("../src/context/Context", async (importOriginal) => {
@@ -60,6 +83,14 @@ vi.mock("../src/i18n/I18nContext", async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,
-    useI18n: () => mockI18nValue,
+    useI18n: () => {
+      try {
+        const ctx = actual.useI18n();
+        if (ctx) return ctx;
+      } catch {
+        // fallback to mock
+      }
+      return mockI18nValue;
+    },
   };
 });

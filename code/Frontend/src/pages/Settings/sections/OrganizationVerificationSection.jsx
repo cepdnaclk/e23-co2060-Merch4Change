@@ -40,6 +40,12 @@ function OrganizationVerificationSection() {
   useEffect(() => {
     getMyCharity()
       .then((response) => setCharity(response?.data?.charity || null))
+      .catch(() => {
+        // No charity profile submitted yet (or a transient error) — fall
+        // back to the "unsubmitted" state below instead of leaving this
+        // request as an unhandled rejection.
+        setCharity(null);
+      })
       .finally(() => setLoading(false));
   }, []);
 

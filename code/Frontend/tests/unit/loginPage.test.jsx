@@ -2,11 +2,19 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import LoginPage from "../../src/pages/LoginPage/LoginPage.jsx";
 
+// LoginPage reads `login` from useAuth() (context/Context.tsx) to store the
+// access token/user after a successful sign-in. Mocking it here lets these
+// tests exercise the form itself without needing a real AuthProvider (which
+// pulls in a live /api/v1/auth/refresh fetch on mount).
+const { useAuth } = vi.hoisted(() => ({ useAuth: vi.fn() }));
+vi.mock("../../src/context/Context.tsx", () => ({ useAuth }));
+
 describe("LoginPage", () => {
   beforeEach(() => {
     localStorage.clear();
     sessionStorage.clear();
     vi.clearAllMocks();
+    useAuth.mockReturnValue({ login: vi.fn() });
   });
 
   it("renders the login form with email and password fields", () => {
@@ -32,7 +40,9 @@ describe("LoginPage", () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/Please enter both your email address and password/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Please enter both your email address and password/i)
+      ).toBeInTheDocument();
     });
   });
 
@@ -77,9 +87,7 @@ describe("LoginPage", () => {
       </MemoryRouter>,
     );
 
-    const signupLink = screen.queryByText(/don't have an account|sign up here/i);
-    if (signupLink) {
-      expect(signupLink).toBeInTheDocument();
-    }
+    expect(screen.getByText(/don't have an account/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /sign up free/i })).toBeInTheDocument();
   });
 });
