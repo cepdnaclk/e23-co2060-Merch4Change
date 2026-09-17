@@ -4,10 +4,13 @@ import assert from "node:assert/strict";
 import bcrypt from "bcryptjs";
 
 import { createMockResponse } from "../helpers/http.js";
+import { mockEmailTransport } from "../helpers/email.js";
 import OrganizationProfile from "../../../src/models/OrganizationProfile.js";
 import PendingUser from "../../../src/models/PendingUser.js";
 import User from "../../../src/models/User.js";
 import { createOrganizationProfile, createUserProfile } from "../../../src/constructors/profile.creator.js";
+
+mockEmailTransport();
 
 test("createUserProfile creates a pending user and sends OTP", async () => {
   const originalHash = bcrypt.hash;

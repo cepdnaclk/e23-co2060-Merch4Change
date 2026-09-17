@@ -1,6 +1,6 @@
 import { Router } from "express";
 import protect from "../middlewares/auth.js";
-import { upload } from "../middlewares/upload.js"; // <-- Add this import
+import { upload } from "../middlewares/upload.js";
 import validateRequest from "../middlewares/validateRequest.js";
 import { authRateLimiter } from "../middlewares/rateLimit.js";
 import {

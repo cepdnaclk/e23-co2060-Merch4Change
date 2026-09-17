@@ -1,13 +1,16 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { I18nProvider } from "../../src/i18n/I18nContext.jsx";
 import Navbar from "../../src/components/Navbar/Navbar.jsx";
 
 describe("Navbar", () => {
   it("renders the Merch4Change brand and navigation buttons", () => {
     render(
-      <MemoryRouter>
-        <Navbar />
-      </MemoryRouter>,
+      <I18nProvider>
+        <MemoryRouter>
+          <Navbar />
+        </MemoryRouter>
+      </I18nProvider>,
     );
 
     expect(screen.getByRole("button", { name: "Merch4Change" })).toBeInTheDocument();
@@ -17,9 +20,11 @@ describe("Navbar", () => {
 
   it("shows navigation links on the landing page", () => {
     render(
-      <MemoryRouter initialEntries={["/"]}>
-        <Navbar scrolled={false} />
-      </MemoryRouter>,
+      <I18nProvider>
+        <MemoryRouter initialEntries={["/"]}>
+          <Navbar scrolled={false} />
+        </MemoryRouter>
+      </I18nProvider>,
     );
 
     expect(screen.getByText("Marketplace")).toBeInTheDocument();
@@ -29,9 +34,11 @@ describe("Navbar", () => {
 
   it("toggles mobile menu when menu button is clicked", () => {
     render(
-      <MemoryRouter initialEntries={["/"]}>
-        <Navbar scrolled={false} />
-      </MemoryRouter>,
+      <I18nProvider>
+        <MemoryRouter initialEntries={["/"]}>
+          <Navbar scrolled={false} />
+        </MemoryRouter>
+      </I18nProvider>,
     );
 
     const toggleButton = screen.getByRole("button", { name: "Toggle menu" });
@@ -39,8 +46,8 @@ describe("Navbar", () => {
 
     fireEvent.click(toggleButton);
 
-    const allMarketplace = screen.getAllByText("Marketplace");
-    const mobileLink = allMarketplace.find(el => el.classList.contains("lp-navbar-mobile-link"));
+    const allMarketplaceLinks = screen.getAllByText("Marketplace");
+    const mobileLink = allMarketplaceLinks.find(el => el.classList.contains("lp-navbar-mobile-link"));
     expect(mobileLink).toBeInTheDocument();
 
     fireEvent.click(toggleButton);
@@ -48,9 +55,11 @@ describe("Navbar", () => {
 
   it("applies scrolled styling when scrolled prop is true", () => {
     render(
-      <MemoryRouter>
-        <Navbar scrolled={true} />
-      </MemoryRouter>,
+      <I18nProvider>
+        <MemoryRouter>
+          <Navbar scrolled={true} />
+        </MemoryRouter>
+      </I18nProvider>,
     );
 
     const navbar = screen.getByRole("button", { name: "Merch4Change" }).closest(".lp-navbar");
@@ -59,9 +68,11 @@ describe("Navbar", () => {
 
   it("does not render navigation links on non-landing pages", () => {
     render(
-      <MemoryRouter initialEntries={["/login"]}>
-        <Navbar scrolled={false} />
-      </MemoryRouter>,
+      <I18nProvider>
+        <MemoryRouter initialEntries={["/login"]}>
+          <Navbar scrolled={false} />
+        </MemoryRouter>
+      </I18nProvider>,
     );
 
     expect(screen.queryByText("Marketplace")).not.toBeInTheDocument();

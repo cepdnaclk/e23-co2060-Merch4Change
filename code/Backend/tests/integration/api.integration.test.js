@@ -203,6 +203,7 @@ test("GET /api/v1/profile/me returns current user for a valid token", async () =
       userName: "current-user",
       accountType: "individual",
       email: "current@example.com",
+      isActive: true,
     }),
   });
 
@@ -253,6 +254,7 @@ test("POST /api/v1/marketplace/products creates a product for individual account
       userName: "seller",
       accountType: "individual",
       email: "seller@example.com",
+      isActive: true,
     }),
   });
 
@@ -300,6 +302,7 @@ test("POST /api/v1/marketplace/checkout creates a paid order and order items", a
       userName: "buyer",
       accountType: "individual",
       email: "buyer@example.com",
+      isActive: true,
     }),
   });
 
