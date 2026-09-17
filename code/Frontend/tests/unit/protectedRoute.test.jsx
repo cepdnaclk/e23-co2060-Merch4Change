@@ -1,6 +1,14 @@
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { vi } from "vitest";
 import ProtectedRoute from "../../src/components/ProtectedRoute/ProtectedRoute.jsx";
+
+// ProtectedRoute reads its auth state from useAuth() (context/Context.tsx),
+// which itself is populated asynchronously from an http-only refresh cookie —
+// not from localStorage. Mocking the hook lets us test ProtectedRoute's own
+// redirect/render logic deterministically, independent of that network call.
+const { useAuth } = vi.hoisted(() => ({ useAuth: vi.fn() }));
+vi.mock("../../src/context/Context.tsx", () => ({ useAuth }));
 
 function renderProtectedRoute() {
   return render(
@@ -24,9 +32,12 @@ describe("ProtectedRoute", () => {
   beforeEach(() => {
     localStorage.clear();
     sessionStorage.clear();
+    useAuth.mockReset();
   });
 
   it("redirects unauthenticated users to the login page", () => {
+    useAuth.mockReturnValue({ accessToken: null, loading: false });
+
     renderProtectedRoute();
 
     expect(screen.getByText("Login page")).toBeInTheDocument();
@@ -34,7 +45,7 @@ describe("ProtectedRoute", () => {
   });
 
   it("renders protected content when a token exists in storage", () => {
-    localStorage.setItem("token", "test-token");
+    useAuth.mockReturnValue({ accessToken: "test-token", loading: false });
 
     renderProtectedRoute();
 

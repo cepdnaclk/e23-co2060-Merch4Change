@@ -1,91 +1,114 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import HelpAndSupport from "../../src/pages/HelpAndSupport/HelpAndSupport.jsx";
 
+function renderHelpAndSupport() {
+  return render(
+    <MemoryRouter>
+      <HelpAndSupport />
+    </MemoryRouter>,
+  );
+}
+
 describe("HelpAndSupport", () => {
   it("renders the help page heading", () => {
-    render(
-      <MemoryRouter>
-        <HelpAndSupport />
-      </MemoryRouter>,
-    );
+    renderHelpAndSupport();
 
     expect(screen.getByText("How can we help you today?")).toBeInTheDocument();
   });
 
   it("displays the search bar with placeholder text", () => {
-    render(
-      <MemoryRouter>
-        <HelpAndSupport />
-      </MemoryRouter>,
-    );
+    renderHelpAndSupport();
 
-    const searchInput = screen.getByPlaceholderText("Search for articles, guides or FAQs...");
+    const searchInput = screen.getByPlaceholderText(
+      "Search all 32 guides, shipping questions, verification...",
+    );
     expect(searchInput).toBeInTheDocument();
+    expect(searchInput).toHaveAccessibleName("Search help articles");
   });
 
-  it("displays help category cards with icons", () => {
-    render(
-      <MemoryRouter>
-        <HelpAndSupport />
-      </MemoryRouter>,
-    );
+  it("displays help category cards", () => {
+    renderHelpAndSupport();
 
-    expect(screen.getByText("Getting Started")).toBeInTheDocument();
-    expect(screen.getByText("FAQs")).toBeInTheDocument();
-    expect(screen.getByText("Contact Support")).toBeInTheDocument();
-    expect(screen.getByText("📚")).toBeInTheDocument();
-    expect(screen.getByText("❓")).toBeInTheDocument();
-    expect(screen.getByText("✉️")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Getting Started" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Orders & Shipping" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Causes & Impact" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Charity Verification" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Account & Security" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Direct Support" })).toBeInTheDocument();
   });
 
   it("displays help category descriptions", () => {
-    render(
-      <MemoryRouter>
-        <HelpAndSupport />
-      </MemoryRouter>,
-    );
+    renderHelpAndSupport();
 
-    expect(screen.getByText(/Learn the basics of using Merch4Change/)).toBeInTheDocument();
-    expect(screen.getByText(/Find answers to the most frequently asked questions/)).toBeInTheDocument();
-    expect(screen.getByText(/Can't find what you need/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Platform basics, creating your account/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Vetting standards, NGO legal requirements/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Get in touch with our dedicated support agents/),
+    ).toBeInTheDocument();
   });
 
-  it("displays popular guides section", () => {
-    render(
-      <MemoryRouter>
-        <HelpAndSupport />
-      </MemoryRouter>,
-    );
+  it("displays the guide directory for the default category", () => {
+    renderHelpAndSupport();
 
-    expect(screen.getByText("Popular Guides")).toBeInTheDocument();
-    expect(screen.getByText("How to setup your organization profile")).toBeInTheDocument();
-    expect(screen.getByText("Connecting with partner brands")).toBeInTheDocument();
-    expect(screen.getByText("Managing your charity campaigns")).toBeInTheDocument();
-    expect(screen.getByText("Understanding shipping and delivery")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Getting Started Guides (6)" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        name: "Welcome to Merch4Change: Platform Overview",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        name: "How to Create a Supporter Account with Email OTP",
+      }),
+    ).toBeInTheDocument();
   });
 
-  it("displays search button", () => {
-    render(
-      <MemoryRouter>
-        <HelpAndSupport />
-      </MemoryRouter>,
-    );
+  it("switches the guide directory when a filter pill is clicked", () => {
+    renderHelpAndSupport();
 
-    const searchButton = screen.getByRole("button", { name: "Search" });
-    expect(searchButton).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Orders & Shipping (9)" }));
+
+    expect(
+      screen.getByRole("heading", { name: "Orders & Shipping Guides (9)" }),
+    ).toBeInTheDocument();
   });
 
-  it("search input can be typed into", () => {
-    render(
-      <MemoryRouter>
-        <HelpAndSupport />
-      </MemoryRouter>,
-    );
+  it("search input can be typed into and filters the results heading", () => {
+    renderHelpAndSupport();
 
-    const searchInput = screen.getByPlaceholderText("Search for articles, guides or FAQs...");
+    const searchInput = screen.getByPlaceholderText(
+      "Search all 32 guides, shipping questions, verification...",
+    );
     fireEvent.change(searchInput, { target: { value: "account" } });
 
     expect(searchInput.value).toBe("account");
+    expect(
+      screen.getByRole("heading", { name: /Results for "account"/ }),
+    ).toBeInTheDocument();
+  });
+
+  it("renders the FAQ accordion and toggles an item", () => {
+    renderHelpAndSupport();
+
+    expect(screen.getByRole("heading", { name: "Frequently Asked Questions" })).toBeInTheDocument();
+
+    const secondQuestion = screen.getByRole("button", {
+      name: "How can I track where my donation goes?",
+    });
+    expect(secondQuestion).toHaveAttribute("aria-expanded", "false");
+
+    fireEvent.click(secondQuestion);
+
+    expect(secondQuestion).toHaveAttribute("aria-expanded", "true");
+    expect(
+      screen.getByText(/Your personal Profile and Donations tab record every rupee/),
+    ).toBeInTheDocument();
   });
 });

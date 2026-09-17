@@ -10,6 +10,10 @@ import {
   validateAppearanceSettingsBody,
   validateLanguageSettingsBody,
   validateDeleteAccountBody,
+  validateRequestEmailChangeBody,
+  validateVerifyEmailChangeBody,
+  validateVerifyEnable2FABody,
+  validateDisable2FABody,
 } from "../../../src/validators/settings.validator.js";
 
 // ==========================================
@@ -23,14 +27,12 @@ test("validateProfileSettingsBody accepts a valid payload and trims/normalizes f
     profileBio: "  Loves clean water projects  ",
     userLink: "https://example.com",
     location: "  Colombo  ",
-    email: "  JANE@EXAMPLE.COM  ",
   });
 
   assert.deepEqual(result.errors, []);
   assert.equal(result.value.firstName, "Jane");
   assert.equal(result.value.lastName, "Doe");
   assert.equal(result.value.userName, "jane_doe.99");
-  assert.equal(result.value.email, "jane@example.com");
   assert.equal(result.value.location, "Colombo");
 });
 
@@ -58,12 +60,6 @@ test("validateProfileSettingsBody rejects invalid userName characters and length
   );
 });
 
-test("validateProfileSettingsBody rejects an invalid email", () => {
-  const result = validateProfileSettingsBody({ email: "not-an-email" });
-
-  assert.equal(result.errors.some((m) => m.includes("email must be a valid email address")), true);
-});
-
 test("validateProfileSettingsBody rejects profileBio over 500 characters", () => {
   const result = validateProfileSettingsBody({
     profileBio: "y".repeat(501),
@@ -83,8 +79,8 @@ test("validateProfileSettingsBody rejects userLink without http(s) scheme", () =
 // ==========================================
 // SECURITY SETTINGS
 // ==========================================
-test("validateSecuritySettingsBody accepts valid boolean toggles", () => {
-  const result = validateSecuritySettingsBody({ twoFactorEnabled: true, loginActivityAlerts: false });
+test("validateSecuritySettingsBody accepts a valid boolean toggle", () => {
+  const result = validateSecuritySettingsBody({ loginActivityAlerts: false });
 
   assert.deepEqual(result.errors, []);
 });
@@ -95,11 +91,101 @@ test("validateSecuritySettingsBody accepts an empty payload", () => {
   assert.deepEqual(result.errors, []);
 });
 
-test("validateSecuritySettingsBody rejects non-boolean values", () => {
-  const result = validateSecuritySettingsBody({ twoFactorEnabled: "yes", loginActivityAlerts: 1 });
+test("validateSecuritySettingsBody rejects a non-boolean loginActivityAlerts", () => {
+  const result = validateSecuritySettingsBody({ loginActivityAlerts: 1 });
 
-  assert.equal(result.errors.some((m) => m.includes("twoFactorEnabled must be a boolean")), true);
   assert.equal(result.errors.some((m) => m.includes("loginActivityAlerts must be a boolean")), true);
+});
+
+test("validateSecuritySettingsBody does not validate twoFactorEnabled — it's not settable through this endpoint", () => {
+  // twoFactorEnabled only ever flips via the OTP-gated enable/disable flow
+  // (validateVerifyEnable2FABody / validateDisable2FABody below), so this
+  // validator intentionally has nothing to say about it either way.
+  const result = validateSecuritySettingsBody({ twoFactorEnabled: "not-a-boolean" });
+
+  assert.deepEqual(result.errors, []);
+});
+
+// ==========================================
+// TWO-FACTOR AUTHENTICATION (OTP-gated enable/disable)
+// ==========================================
+test("validateVerifyEnable2FABody accepts an otp string", () => {
+  const result = validateVerifyEnable2FABody({ otp: "123456" });
+
+  assert.deepEqual(result.errors, []);
+});
+
+test("validateVerifyEnable2FABody accepts the otpCode alias", () => {
+  const result = validateVerifyEnable2FABody({ otpCode: "123456" });
+
+  assert.deepEqual(result.errors, []);
+});
+
+test("validateVerifyEnable2FABody rejects a missing code", () => {
+  const result = validateVerifyEnable2FABody({});
+
+  assert.equal(result.errors.some((m) => m.includes("otp is required")), true);
+});
+
+test("validateDisable2FABody accepts a payload with currentPassword", () => {
+  const result = validateDisable2FABody({ currentPassword: "MyPassword123" });
+
+  assert.deepEqual(result.errors, []);
+});
+
+test("validateDisable2FABody rejects a missing currentPassword", () => {
+  const result = validateDisable2FABody({});
+
+  assert.equal(result.errors.some((m) => m.includes("currentPassword is required")), true);
+});
+
+// ==========================================
+// REQUEST EMAIL CHANGE
+// ==========================================
+test("validateRequestEmailChangeBody accepts a valid payload and lowercases/trims the email", () => {
+  const result = validateRequestEmailChangeBody({
+    newEmail: "  JANE@EXAMPLE.COM  ",
+    currentPassword: "MyPassword123",
+  });
+
+  assert.deepEqual(result.errors, []);
+  assert.equal(result.value.newEmail, "jane@example.com");
+});
+
+test("validateRequestEmailChangeBody rejects an invalid email", () => {
+  const result = validateRequestEmailChangeBody({
+    newEmail: "not-an-email",
+    currentPassword: "MyPassword123",
+  });
+
+  assert.equal(result.errors.some((m) => m.includes("newEmail must be a valid email address")), true);
+});
+
+test("validateRequestEmailChangeBody rejects a missing currentPassword", () => {
+  const result = validateRequestEmailChangeBody({ newEmail: "jane@example.com" });
+
+  assert.equal(result.errors.some((m) => m.includes("currentPassword is required")), true);
+});
+
+// ==========================================
+// VERIFY EMAIL CHANGE
+// ==========================================
+test("validateVerifyEmailChangeBody accepts an otp string", () => {
+  const result = validateVerifyEmailChangeBody({ otp: "123456" });
+
+  assert.deepEqual(result.errors, []);
+});
+
+test("validateVerifyEmailChangeBody accepts the otpCode alias", () => {
+  const result = validateVerifyEmailChangeBody({ otpCode: "123456" });
+
+  assert.deepEqual(result.errors, []);
+});
+
+test("validateVerifyEmailChangeBody rejects a missing code", () => {
+  const result = validateVerifyEmailChangeBody({});
+
+  assert.equal(result.errors.some((m) => m.includes("otp is required")), true);
 });
 
 // ==========================================

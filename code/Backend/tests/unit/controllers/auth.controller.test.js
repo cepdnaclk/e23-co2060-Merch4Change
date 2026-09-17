@@ -5,9 +5,12 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 import { createMockResponse } from "../helpers/http.js";
+import { mockEmailTransport } from "../helpers/email.js";
 import PendingUser from "../../../src/models/PendingUser.js";
 import User from "../../../src/models/User.js";
 import { login, register } from "../../../src/controllers/auth.controller.js";
+
+mockEmailTransport();
 
 test("register creates pending user and dispatches OTP", async () => {
   const originalHash = bcrypt.hash;
