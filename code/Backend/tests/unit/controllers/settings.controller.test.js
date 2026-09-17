@@ -716,7 +716,11 @@ test("deleteAccount cascades deletes across owned content and removes the user o
   const userBadgeDeleteMany = t.mock.method(UserBadge, "deleteMany", async () => ({}));
   const productDeleteMany = t.mock.method(Product, "deleteMany", async () => ({}));
   const notificationDeleteMany = t.mock.method(Notification, "deleteMany", async () => ({}));
+  const followFind = t.mock.method(Follow, "find", async () => [
+    { followerId: "follower1", followingId: "following1" },
+  ]);
   const followDeleteMany = t.mock.method(Follow, "deleteMany", async () => ({}));
+  const userUpdateMany = t.mock.method(User, "updateMany", async () => ({}));
   const postUpdateMany = t.mock.method(Post, "updateMany", async () => ({}));
   const userFindByIdAndDelete = t.mock.method(User, "findByIdAndDelete", async () => ({}));
 
@@ -732,8 +736,11 @@ test("deleteAccount cascades deletes across owned content and removes the user o
   assert.equal(userBadgeDeleteMany.mock.calls.length, 1);
   assert.equal(productDeleteMany.mock.calls.length, 1);
   assert.equal(notificationDeleteMany.mock.calls.length, 1);
+  assert.equal(followFind.mock.calls.length, 2);
+  assert.equal(userUpdateMany.mock.calls.length, 2);
   assert.equal(followDeleteMany.mock.calls.length, 1);
   assert.equal(postUpdateMany.mock.calls.length, 2);
   assert.equal(userFindByIdAndDelete.mock.calls.length, 1);
+  assert.equal(res.cookies.refreshToken, undefined);
   assert.equal(res.statusCode, 200);
 });
