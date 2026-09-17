@@ -7,12 +7,13 @@ const { apiGet, apiPut } = vi.hoisted(() => ({
   apiGet: vi.fn(),
   apiPut: vi.fn(),
 }));
+vi.mock("../../src/api/apiClient.js", () => ({
+  default: { get: apiGet, put: apiPut },
+}));
 vi.mock("../../src/api/apiClient", () => ({
   default: { get: apiGet, put: apiPut },
 }));
 
-// jsdom doesn't implement matchMedia; ThemeContext and the theme-change
-// handler both call it to resolve "system" and to watch for OS changes.
 function stubMatchMedia() {
   window.matchMedia = vi.fn().mockReturnValue({
     matches: false,
@@ -23,10 +24,10 @@ function stubMatchMedia() {
   });
 }
 
-function renderAppearanceSection() {
+function renderAppearanceSection(props = {}) {
   return render(
     <ThemeProvider>
-      <AppearanceSection />
+      <AppearanceSection {...props} />
     </ThemeProvider>
   );
 }
@@ -48,25 +49,28 @@ beforeEach(() => {
 });
 
 describe("AppearanceSection", () => {
-  it("adopts the account's saved theme and font size when nothing is cached locally", async () => {
-    renderAppearanceSection();
+  it("adopts the account's saved theme and font size from profileData", async () => {
+    renderAppearanceSection({
+      profileData: { appTheme: "dark", fontSize: "large" },
+    });
 
-    await waitFor(() => expect(screen.getByDisplayValue("Dark")).toBeInTheDocument());
+    expect(screen.getByDisplayValue("Dark")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Large")).toBeInTheDocument();
   });
 
-  it("prefers a locally cached theme over the account's saved value", async () => {
+  it("prefers a locally cached theme when profileData has no theme specified", async () => {
     localStorage.setItem("m4c-theme", "light");
-    renderAppearanceSection();
+    renderAppearanceSection({ profileData: {} });
 
-    await waitFor(() => expect(apiGet).toHaveBeenCalled());
     expect(screen.getByDisplayValue("Light")).toBeInTheDocument();
   });
 
-  it("previews a theme change immediately, without needing Save", async () => {
-    localStorage.setItem("m4c-theme", "light");
-    localStorage.setItem("m4c-font-size", "medium");
-    renderAppearanceSection();
+  it("previews and auto-saves a theme change immediately", async () => {
+    const onUpdate = vi.fn();
+    renderAppearanceSection({
+      profileData: { appTheme: "light", fontSize: "medium" },
+      onUpdate,
+    });
     await screen.findByDisplayValue("Light");
 
     fireEvent.change(screen.getByDisplayValue("Light"), { target: { value: "dark" } });
@@ -75,41 +79,34 @@ describe("AppearanceSection", () => {
     await waitFor(() =>
       expect(document.documentElement.getAttribute("data-theme")).toBe("dark")
     );
-  });
-
-  it("saves the selected theme and font size when Save preferences is clicked", async () => {
-    localStorage.setItem("m4c-theme", "light");
-    localStorage.setItem("m4c-font-size", "small");
-    renderAppearanceSection();
-    await screen.findByDisplayValue("Light");
-
-    fireEvent.click(screen.getByRole("button", { name: /save preferences/i }));
-
     await waitFor(() =>
-      expect(apiPut).toHaveBeenCalledWith("/api/v1/settings/appearance", {
-        appTheme: "light",
-        fontSize: "small",
-      })
+      expect(apiPut).toHaveBeenCalledWith("/api/v1/settings/appearance", { appTheme: "dark" })
     );
-    expect(await screen.findByText("Appearance settings saved!")).toBeInTheDocument();
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ appTheme: "dark" }));
   });
 
-  it("shows an error toast when saving fails", async () => {
-    localStorage.setItem("m4c-theme", "light");
-    localStorage.setItem("m4c-font-size", "small");
-    apiPut.mockRejectedValue({ response: { data: { message: "Could not save preferences" } } });
-    renderAppearanceSection();
-    await screen.findByDisplayValue("Light");
+  it("auto-saves font size changes immediately", async () => {
+    const onUpdate = vi.fn();
+    renderAppearanceSection({
+      profileData: { appTheme: "light", fontSize: "small" },
+      onUpdate,
+    });
+    await screen.findByDisplayValue("Small");
 
-    fireEvent.click(screen.getByRole("button", { name: /save preferences/i }));
+    fireEvent.change(screen.getByDisplayValue("Small"), { target: { value: "large" } });
 
-    expect(await screen.findByText("Could not save preferences")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("Large")).toBeInTheDocument();
+    await waitFor(() =>
+      expect(document.documentElement.getAttribute("data-font-size")).toBe("large")
+    );
+    await waitFor(() =>
+      expect(apiPut).toHaveBeenCalledWith("/api/v1/settings/appearance", { fontSize: "large" })
+    );
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ fontSize: "large" }));
   });
 
-  it("shows an error toast when loading appearance preferences fails", async () => {
-    apiGet.mockRejectedValue({ response: { data: { message: "Network down" } } });
+  it("displays auto-save notice to the user", async () => {
     renderAppearanceSection();
-
-    expect(await screen.findByText("Network down")).toBeInTheDocument();
+    expect(await screen.findByText(/Changes are saved automatically/i)).toBeInTheDocument();
   });
 });

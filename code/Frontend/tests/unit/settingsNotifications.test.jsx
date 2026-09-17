@@ -10,50 +10,36 @@ vi.mock("../../src/api/apiClient", () => ({
   default: { get: apiGet, put: apiPut },
 }));
 
+const mockProfile = {
+  notifyOnLikes: true,
+  notifyOnComments: true,
+  notifyOnNewFollowers: true,
+  notifyOnDMs: true,
+  emailNotifications: false,
+};
+
 afterEach(cleanup);
 beforeEach(() => {
-  apiGet.mockReset().mockResolvedValue({
-    data: {
-      data: {
-        user: {
-          notifyOnLikes: true,
-          notifyOnComments: true,
-          notifyOnNewFollowers: true,
-          notifyOnDMs: true,
-          emailNotifications: false,
-        },
-      },
-    },
-  });
+  apiGet.mockReset();
   apiPut.mockReset().mockResolvedValue({ data: { success: true } });
 });
 
 describe("NotificationsSection", () => {
-  it("shows a loading state before settings arrive", () => {
-    apiGet.mockReturnValue(new Promise(() => {})); // never resolves
-    render(<NotificationsSection />);
-    expect(screen.getByText("Loading notification preferences...")).toBeInTheDocument();
-  });
+  it("initializes toggle states from the profileData prop", async () => {
+    render(<NotificationsSection profileData={mockProfile} />);
 
-  it("loads the current notification preferences from the API", async () => {
-    render(<NotificationsSection />);
-
-    await waitFor(() => expect(apiGet).toHaveBeenCalledWith("/api/v1/profile/me"));
     const checkboxes = await screen.findAllByRole("checkbox");
     expect(checkboxes).toHaveLength(5);
     expect(checkboxes[0]).toBeChecked(); // likes
+    expect(checkboxes[1]).toBeChecked(); // comments
+    expect(checkboxes[2]).toBeChecked(); // followers
+    expect(checkboxes[3]).toBeChecked(); // dms
     expect(checkboxes[4]).not.toBeChecked(); // email
   });
 
-  it("shows an error toast when loading preferences fails", async () => {
-    apiGet.mockRejectedValue({ response: { data: { message: "Network down" } } });
-    render(<NotificationsSection />);
-
-    expect(await screen.findByText("Network down")).toBeInTheDocument();
-  });
-
-  it("saves a toggle and shows a success toast", async () => {
-    render(<NotificationsSection />);
+  it("saves a toggle and shows a success toast and calls onUpdate", async () => {
+    const onUpdate = vi.fn();
+    render(<NotificationsSection profileData={mockProfile} onUpdate={onUpdate} />);
     const [likesToggle] = await screen.findAllByRole("checkbox");
 
     fireEvent.click(likesToggle);
@@ -68,11 +54,16 @@ describe("NotificationsSection", () => {
       })
     );
     expect(await screen.findByText("Notification preference updated!")).toBeInTheDocument();
+    expect(onUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        notifyOnLikes: false,
+      })
+    );
   });
 
   it("reverts the toggle and shows an error toast when the save fails", async () => {
     apiPut.mockRejectedValue({ response: { data: { message: "Server exploded" } } });
-    render(<NotificationsSection />);
+    render(<NotificationsSection profileData={mockProfile} />);
     const [likesToggle] = await screen.findAllByRole("checkbox");
 
     fireEvent.click(likesToggle);
@@ -84,7 +75,7 @@ describe("NotificationsSection", () => {
   it("disables only the toggle currently being saved", async () => {
     let resolvePut;
     apiPut.mockReturnValue(new Promise((resolve) => (resolvePut = resolve)));
-    render(<NotificationsSection />);
+    render(<NotificationsSection profileData={mockProfile} />);
     const [likesToggle, commentsToggle] = await screen.findAllByRole("checkbox");
 
     fireEvent.click(likesToggle);

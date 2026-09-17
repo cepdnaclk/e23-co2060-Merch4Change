@@ -11,38 +11,35 @@ vi.mock("../../src/api/apiClient", () => ({
   default: { get: apiGet, put: apiPut, post: apiPost },
 }));
 
+const baseProfile = {
+  twoFactorEnabled: false,
+  loginActivityAlerts: true,
+};
+
 afterEach(cleanup);
 beforeEach(() => {
-  apiGet.mockReset().mockResolvedValue({
-    data: { data: { user: { twoFactorEnabled: false, loginActivityAlerts: true } } },
-  });
+  apiGet.mockReset();
   apiPut.mockReset().mockResolvedValue({ data: { success: true } });
   apiPost.mockReset().mockResolvedValue({ data: { success: true } });
 });
 
 describe("SecuritySection", () => {
-  it("loads the current 2FA and login-alert state from the API", async () => {
-    apiGet.mockResolvedValue({
-      data: { data: { user: { twoFactorEnabled: true, loginActivityAlerts: false } } },
-    });
-    render(<SecuritySection />);
+  it("initializes 2FA and login-alert state from profileData prop", async () => {
+    render(
+      <SecuritySection
+        profileData={{ twoFactorEnabled: true, loginActivityAlerts: false }}
+      />
+    );
 
-    await waitFor(() => expect(apiGet).toHaveBeenCalledWith("/api/v1/profile/me"));
     const [twoFAToggle, alertsToggle] = await screen.findAllByRole("checkbox");
     expect(twoFAToggle).toBeChecked();
     expect(alertsToggle).not.toBeChecked();
   });
 
-  it("shows an error toast when loading settings fails", async () => {
-    apiGet.mockRejectedValue({ response: { data: { message: "Network down" } } });
-    render(<SecuritySection />);
-
-    expect(await screen.findByText("Network down")).toBeInTheDocument();
-  });
-
   describe("login activity alerts toggle", () => {
     it("saves the new value and shows a success toast", async () => {
-      render(<SecuritySection />);
+      const onUpdate = vi.fn();
+      render(<SecuritySection profileData={baseProfile} onUpdate={onUpdate} />);
       const [, alertsToggle] = await screen.findAllByRole("checkbox");
 
       fireEvent.click(alertsToggle);
@@ -54,11 +51,14 @@ describe("SecuritySection", () => {
       );
       expect(await screen.findByText("Security settings updated!")).toBeInTheDocument();
       expect(alertsToggle).not.toBeChecked();
+      expect(onUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({ loginActivityAlerts: false })
+      );
     });
 
     it("rolls back the toggle and shows an error toast when the save fails", async () => {
       apiPut.mockRejectedValue({ response: { data: { message: "Could not save" } } });
-      render(<SecuritySection />);
+      render(<SecuritySection profileData={baseProfile} />);
       const [, alertsToggle] = await screen.findAllByRole("checkbox");
 
       fireEvent.click(alertsToggle);
@@ -70,7 +70,8 @@ describe("SecuritySection", () => {
 
   describe("enabling two-factor authentication", () => {
     it("requests a code, then confirms it to turn 2FA on", async () => {
-      render(<SecuritySection />);
+      const onUpdate = vi.fn();
+      render(<SecuritySection profileData={baseProfile} onUpdate={onUpdate} />);
       const [twoFAToggle] = await screen.findAllByRole("checkbox");
 
       fireEvent.click(twoFAToggle);
@@ -91,10 +92,13 @@ describe("SecuritySection", () => {
       expect(await screen.findByText("Two-factor authentication enabled!")).toBeInTheDocument();
       const [confirmedToggle] = screen.getAllByRole("checkbox");
       expect(confirmedToggle).toBeChecked();
+      expect(onUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({ twoFactorEnabled: true })
+      );
     });
 
     it("blocks confirmation until a code is entered", async () => {
-      render(<SecuritySection />);
+      render(<SecuritySection profileData={baseProfile} />);
       const [twoFAToggle] = await screen.findAllByRole("checkbox");
       fireEvent.click(twoFAToggle);
       await screen.findByText(/Enter the verification code/i);
@@ -106,7 +110,7 @@ describe("SecuritySection", () => {
     });
 
     it("can resend the code without leaving the OTP step", async () => {
-      render(<SecuritySection />);
+      render(<SecuritySection profileData={baseProfile} />);
       const [twoFAToggle] = await screen.findAllByRole("checkbox");
       fireEvent.click(twoFAToggle);
       await screen.findByText(/Enter the verification code/i);
@@ -119,19 +123,14 @@ describe("SecuritySection", () => {
   });
 
   describe("disabling two-factor authentication", () => {
-    beforeEach(() => {
-      apiGet.mockResolvedValue({
-        data: { data: { user: { twoFactorEnabled: true, loginActivityAlerts: true } } },
-      });
-    });
+    const twoFAEnabledProfile = { twoFactorEnabled: true, loginActivityAlerts: true };
 
     it("asks for the current password and turns 2FA off on success", async () => {
-      render(<SecuritySection />);
+      const onUpdate = vi.fn();
+      render(<SecuritySection profileData={twoFAEnabledProfile} onUpdate={onUpdate} />);
       const [twoFAToggle] = await screen.findAllByRole("checkbox");
-      expect(twoFAToggle).toBeChecked();
-
       fireEvent.click(twoFAToggle);
-      expect(await screen.findByText(/turn off two-factor authentication/i)).toBeInTheDocument();
+      await screen.findByText(/turn off two-factor authentication/i);
 
       fireEvent.change(screen.getByPlaceholderText("Enter your password"), {
         target: { value: "MyPassword123" },
@@ -146,10 +145,13 @@ describe("SecuritySection", () => {
       expect(await screen.findByText("Two-factor authentication disabled.")).toBeInTheDocument();
       const [confirmedToggle] = screen.getAllByRole("checkbox");
       expect(confirmedToggle).not.toBeChecked();
+      expect(onUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({ twoFactorEnabled: false })
+      );
     });
 
     it("requires a password before allowing the disable request", async () => {
-      render(<SecuritySection />);
+      render(<SecuritySection profileData={twoFAEnabledProfile} />);
       const [twoFAToggle] = await screen.findAllByRole("checkbox");
       fireEvent.click(twoFAToggle);
       await screen.findByText(/turn off two-factor authentication/i);
@@ -163,7 +165,7 @@ describe("SecuritySection", () => {
 
   describe("password change", () => {
     it("requires all three fields before submitting", async () => {
-      render(<SecuritySection />);
+      render(<SecuritySection profileData={baseProfile} />);
       await screen.findAllByRole("checkbox");
 
       fireEvent.click(screen.getByRole("button", { name: /update password/i }));
@@ -173,7 +175,7 @@ describe("SecuritySection", () => {
     });
 
     it("submits and clears the fields on success", async () => {
-      render(<SecuritySection />);
+      render(<SecuritySection profileData={baseProfile} />);
       await screen.findAllByRole("checkbox");
 
       fireEvent.change(screen.getByPlaceholderText("Enter current password"), {
@@ -202,7 +204,7 @@ describe("SecuritySection", () => {
 
     it("shows the server's error message when the change fails", async () => {
       apiPost.mockRejectedValue({ response: { data: { message: "Current password is incorrect" } } });
-      render(<SecuritySection />);
+      render(<SecuritySection profileData={baseProfile} />);
       await screen.findAllByRole("checkbox");
 
       fireEvent.change(screen.getByPlaceholderText("Enter current password"), {
