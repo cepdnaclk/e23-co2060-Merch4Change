@@ -28,16 +28,24 @@ const SECTIONS = {
 };
 
 function Settings() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { accessToken, logout } = useAuth();
-  const initialSection = searchParams.get("section") || "profile";
-  const [activeSection, setActiveSection] = useState(initialSection);
+  const { logout } = useAuth();
   const [profileData, setProfileData] = useState({
     firstName: "Guest",
     lastName: "User",
     userName: "guest",
   });
+
+  const sectionParam = searchParams.get("section") || "profile";
+  const isValidSection = SECTIONS[sectionParam];
+  const isOrgAllowed = profileData.accountType === "organization";
+  const activeSection =
+    sectionParam === "organization" && !isOrgAllowed
+      ? "profile"
+      : isValidSection
+      ? sectionParam
+      : "profile";
 
   useEffect(() => {
     apiClient
@@ -54,14 +62,8 @@ function Settings() {
   const handleLogout = async () => {
     if (!window.confirm("Do you want to logout?")) return;
 
-    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
-
     try {
-      await fetch(`${apiUrl}/api/v1/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-      });
+      await apiClient.post("/api/v1/auth/logout");
     } catch {
       // Clear client-side state even if request fails
     } finally {
@@ -75,7 +77,7 @@ function Settings() {
       handleLogout();
       return;
     }
-    setActiveSection(id);
+    setSearchParams({ section: id });
   };
 
   const ActiveSection = SECTIONS[activeSection] || ProfileSection;

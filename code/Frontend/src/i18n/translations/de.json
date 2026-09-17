@@ -1,0 +1,189 @@
+{
+  "common": {
+    "appName": "Merch4Change",
+    "save": "Speichern",
+    "saving": "Wird gespeichert...",
+    "cancel": "Abbrechen",
+    "close": "Schließen",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "loading": "Wird geladen...",
+    "search": "Suchen",
+    "seeAll": "Alle anzeigen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "submit": "Absenden",
+    "confirm": "Bestätigen",
+    "yes": "Ja",
+    "no": "Nein",
+    "signIn": "Anmelden",
+    "signUp": "Registrieren",
+    "getStarted": "Loslegen",
+    "logout": "Abmelden",
+    "viewAll": "Alle anzeigen",
+    "readMore": "Mehr lesen",
+    "logoutConfirm": "Möchtest du dich abmelden?"
+  },
+  "nav": {
+    "home": "Startseite",
+    "search": "Suchen",
+    "messages": "Nachrichten",
+    "notifications": "Benachrichtigungen",
+    "marketplace": "Marktplatz",
+    "collections": "Sammlungen",
+    "analytics": "Analysen",
+    "donations": "Spenden",
+    "leaderboard": "Bestenliste",
+    "charityVerification": "Verifizierung von Wohltätigkeitsorganisationen",
+    "settings": "Einstellungen",
+    "addProject": "Projekt hinzufügen",
+    "createPost": "Beitrag erstellen"
+  },
+  "publicNav": {
+    "marketplace": "Marktplatz",
+    "forOrganisations": "Für Organisationen",
+    "impact": "Wirkung"
+  },
+  "footer": {
+    "tagline": "Gemeinschaften durch wirkungsorientierten Handel stärken. Verbinde dich mit deinen Lieblingsmarken, um etwas zu bewirken.",
+    "aboutUs": "Über uns",
+    "ourStory": "Unsere Geschichte",
+    "ourMission": "Unsere Mission",
+    "teamAntigravity": "Team Antigravity",
+    "support": "Support",
+    "helpCenter": "Hilfecenter",
+    "howItWorks": "So funktioniert's",
+    "faqs": "Häufig gestellte Fragen",
+    "contactUs": "Kontaktiere uns",
+    "legal": "Rechtliches",
+    "privacyPolicy": "Datenschutzrichtlinie",
+    "termsOfService": "Nutzungsbedingungen",
+    "cookiePolicy": "Cookie-Richtlinie",
+    "rightsReserved": "Alle Rechte vorbehalten."
+  },
+  "settings": {
+    "sidebar": {
+      "account": "Konto",
+      "preferences": "Einstellungen",
+      "more": "Mehr",
+      "profile": "Profil",
+      "security": "Sicherheit",
+      "privacy": "Datenschutz",
+      "notifications": "Benachrichtigungen",
+      "appearance": "Erscheinungsbild",
+      "language": "Sprache",
+      "help": "Hilfe & Support",
+      "logout": "Abmelden",
+      "organizationVerification": "Verifizierung der Organisation",
+      "editProfile": "Profil bearbeiten",
+      "accountSecurity": "Kontosicherheit",
+      "header": "Einstellungen"
+    },
+    "language": {
+      "title": "Sprache",
+      "description": "Wähle deine bevorzugte Sprache für die App.",
+      "appLanguage": "App-Sprache",
+      "updateSuccess": "Spracheinstellung aktualisiert!",
+      "loadError": "Spracheinstellungen konnten nicht geladen werden"
+    },
+    "appearance": {
+      "title": "Erscheinungsbild",
+      "description": "Passe an, wie Merch4Change auf deinem Gerät aussieht.",
+      "theme": "Design",
+      "light": "Hell",
+      "dark": "Dunkel",
+      "system": "System",
+      "fontSize": "Schriftgröße",
+      "small": "Klein",
+      "medium": "Mittel",
+      "large": "Groß",
+      "updateSuccess": "Erscheinungsbild aktualisiert!"
+    },
+    "notifications": {
+      "title": "Benachrichtigungen",
+      "description": "Wähle aus, worüber du benachrichtigt werden möchtest."
+    },
+    "privacy": {
+      "title": "Datenschutz"
+    },
+    "security": {
+      "title": "Sicherheit"
+    },
+    "profile": {
+      "title": "Profil"
+    },
+    "help": {
+      "title": "Hilfe & Support"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Willkommen zurück",
+      "subtitle": "Melde dich an, um mit Merch4Change fortzufahren",
+      "email": "E-Mail",
+      "password": "Passwort",
+      "forgotPassword": "Passwort vergessen?",
+      "loginButton": "Anmelden",
+      "noAccount": "Noch kein Konto?",
+      "signUp": "Registrieren"
+    },
+    "signup": {
+      "title": "Erstelle dein Konto",
+      "haveAccount": "Bereits ein Konto?",
+      "logIn": "Anmelden"
+    }
+  },
+  "home": {
+    "title": "Startseite",
+    "trendingNow": "Gerade im Trend",
+    "forYou": "Für dich"
+  },
+  "marketplace": {
+    "title": "Marktplatz",
+    "trending": "Im Trend",
+    "guestBlockTitle": "Melde dich an, um im Marktplatz einzukaufen",
+    "emptyTitle": "Keine Produkte gefunden"
+  },
+  "leaderboard": {
+    "title": "Bestenliste",
+    "topDonors": "Top-Spender"
+  },
+  "donations": {
+    "title": "Spenden",
+    "donate": "Spenden",
+    "myDonations": "Meine Spenden"
+  },
+  "messaging": {
+    "title": "Nachrichten",
+    "noConversation": "Wähle eine Unterhaltung aus, um zu chatten"
+  },
+  "notificationsPage": {
+    "title": "Benachrichtigungen",
+    "empty": "Du bist auf dem neuesten Stand!"
+  },
+  "search": {
+    "title": "Suchen",
+    "placeholder": "Merch4Change durchsuchen"
+  },
+  "about": {
+    "ourStory": "Unsere Geschichte",
+    "ourMission": "Unsere Mission",
+    "team": "Team Antigravity"
+  },
+  "faq": {
+    "title": "Häufig gestellte Fragen"
+  },
+  "help": {
+    "title": "Hilfe & Support",
+    "contact": "Kontaktiere uns"
+  },
+  "profile": {
+    "posts": "Beiträge",
+    "followers": "Follower",
+    "following": "Folge ich"
+  },
+  "underConstruction": {
+    "title": "Demnächst verfügbar",
+    "message": "Wir bauen diese Seite noch. Schau bald wieder vorbei!"
+  }
+}

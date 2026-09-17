@@ -1,50 +1,56 @@
 import React from "react";
 import { User, Lock, Shield, Bell, Sun, Globe, HelpCircle, LogOut } from "lucide-react";
+import { useI18n } from "../../../i18n/I18nContext";
 import "./SettingsSidebar.css";
 
-const GROUPS = [
-  {
-    label: "Account",
-    items: [
-      { id: "profile", icon: <User size={16} />, label: "Edit profile" },
-      { id: "security", icon: <Lock size={16} />, label: "Account security" },
-      { id: "privacy", icon: <Shield size={16} />, label: "Privacy" },
-    ],
-  },
-  {
-    label: "Preferences",
-    items: [
-      { id: "notifications", icon: <Bell size={16} />, label: "Notifications" },
-      { id: "appearance", icon: <Sun size={16} />, label: "Appearance" },
-      { id: "language", icon: <Globe size={16} />, label: "Language" },
-    ],
-  },
-  {
-    label: "More",
-    items: [
-      { id: "help", icon: <HelpCircle size={16} />, label: "Help & support" },
-      { id: "logout", icon: <LogOut size={16} />, label: "Log out", isDanger: true },
-    ],
-  },
-];
-
 function SettingsSidebar({ activeSection, onSelect, showOrganization }) {
+  const { t } = useI18n();
+
+  const GROUPS = [
+    {
+      key: "account",
+      label: t("settings.sidebar.account"),
+      items: [
+        { id: "profile", icon: <User size={16} />, label: t("settings.sidebar.editProfile") },
+        { id: "security", icon: <Lock size={16} />, label: t("settings.sidebar.accountSecurity") },
+        { id: "privacy", icon: <Shield size={16} />, label: t("settings.sidebar.privacy") },
+      ],
+    },
+    {
+      key: "preferences",
+      label: t("settings.sidebar.preferences"),
+      items: [
+        { id: "notifications", icon: <Bell size={16} />, label: t("settings.sidebar.notifications") },
+        { id: "appearance", icon: <Sun size={16} />, label: t("settings.sidebar.appearance") },
+        { id: "language", icon: <Globe size={16} />, label: t("settings.sidebar.language") },
+      ],
+    },
+    {
+      key: "more",
+      label: t("settings.sidebar.more"),
+      items: [
+        { id: "help", icon: <HelpCircle size={16} />, label: t("settings.sidebar.help") },
+        { id: "logout", icon: <LogOut size={16} />, label: t("settings.sidebar.logout"), isDanger: true },
+      ],
+    },
+  ];
+
   const groups = GROUPS.map((group) => {
-    if (group.label !== "Account" || !showOrganization) return group;
+    if (group.key !== "account" || !showOrganization) return group;
     return {
       ...group,
       items: [
         ...group.items,
-        { id: "organization", icon: <Shield size={16} />, label: "Organization verification" },
+        { id: "organization", icon: <Shield size={16} />, label: t("settings.sidebar.organizationVerification") },
       ],
     };
   });
 
   return (
     <aside className="ss-nav">
-      <div className="ss-nav__header">Settings</div>
+      <div className="ss-nav__header">{t("settings.sidebar.header")}</div>
       {groups.map((group) => (
-        <div key={group.label} className="ss-nav__group">
+        <div key={group.key} className="ss-nav__group">
           <span className="ss-nav__group-label">{group.label}</span>
           {group.items.map((item) => (
             <button

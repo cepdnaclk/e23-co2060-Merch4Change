@@ -14,15 +14,30 @@ const protect = asyncHandler(async (req, res, next) => {
   }
 
   let user;
+  let decoded;
   try {
-    const decoded = jwt.verify(token, env.jwtSecret);
+    decoded = jwt.verify(token, env.jwtSecret);
     user = await User.findById(decoded.userId).select("-password");
 
     if (!user) {
       throw new AppError("User not found for token.", 401, "USER_NOT_FOUND");
     }
   } catch (verifyError) {
+    if (verifyError instanceof AppError) {
+      throw verifyError;
+    }
     throw new AppError("Not authorized. Invalid token.", 401, "INVALID_TOKEN");
+  }
+
+  if (user.passwordChangedAt) {
+    const changedTimestamp = parseInt(user.passwordChangedAt.getTime() / 1000, 10);
+    if (decoded.iat && decoded.iat < changedTimestamp) {
+      throw new AppError(
+        "Password was changed recently. Please log in again.",
+        401,
+        "TOKEN_EXPIRED",
+      );
+    }
   }
 
   if (!user.isActive) {

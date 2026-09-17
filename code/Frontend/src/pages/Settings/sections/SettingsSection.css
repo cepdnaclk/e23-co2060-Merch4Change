@@ -297,3 +297,74 @@
     transform: translateY(0);
   }
 }
+
+/* ===== Email change (OTP re-verification) ===== */
+.s-btn--link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--m4c-accent, #2563eb);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.s-btn--link:hover {
+  text-decoration: underline;
+}
+
+.s-btn--link:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.s-email-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.s-email-current {
+  font-size: calc(13.5px * var(--m4c-font-scale));
+  color: var(--m4c-text-primary);
+}
+
+.s-email-change-form,
+.s-email-otp-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.s-email-change-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.s-email-resend {
+  font-size: calc(12px * var(--m4c-font-scale));
+  color: var(--m4c-text-secondary);
+}
+
+.otp-inputs-container {
+  display: flex;
+  gap: 8px;
+}
+
+.otp-input {
+  width: 42px;
+  height: 48px;
+  text-align: center;
+  font-size: calc(18px * var(--m4c-font-scale));
+  font-weight: 600;
+  border: 1px solid var(--m4c-border-strong);
+  border-radius: 8px;
+  background: var(--m4c-bg-surface);
+  color: var(--m4c-text-primary);
+}
+
+.otp-input:focus {
+  outline: none;
+  border-color: var(--m4c-accent);
+}

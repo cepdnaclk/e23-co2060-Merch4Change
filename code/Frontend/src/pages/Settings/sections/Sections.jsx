@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import apiClient from "../../../api/apiClient.js";
+import apiClient, { setAccessToken } from "../../../api/apiClient.js";
 import { useTheme } from "../../../context/ThemeContext";
+import { useI18n } from "../../../i18n/I18nContext";
+import { useAuth } from "../../../context/Context";
 import "./SettingsSection.css";
 
 // Re-export ProfileSection from ProfileSection.jsx to maintain single source of truth
@@ -42,9 +44,9 @@ function Toggle({ label, desc, badge, checked, onChange, disabled }) {
 // ==========================================
 // SECURITY SECTION
 // ==========================================
-export function SecuritySection() {
-  const [twoFA, setTwoFA] = useState(false);
-  const [alerts, setAlerts] = useState(true);
+export function SecuritySection({ profileData, onUpdate }) {
+  const [twoFA, setTwoFA] = useState(profileData?.twoFactorEnabled ?? false);
+  const [alerts, setAlerts] = useState(profileData?.loginActivityAlerts ?? true);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -52,51 +54,143 @@ export function SecuritySection() {
   const [savingPassword, setSavingPassword] = useState(false);
   const [toast, setToast] = useState({ show: false, text: "", type: "" });
 
+  // ----- 2FA enable flow (OTP sent to the account's email) -----
+  const [twoFAStep, setTwoFAStep] = useState("idle"); // idle | awaiting-otp
+  const [enableOtp, setEnableOtp] = useState("");
+  const [confirmingOtp, setConfirmingOtp] = useState(false);
+  const [resendingOtp, setResendingOtp] = useState(false);
+
+  // ----- 2FA disable flow (requires current password) -----
+  const [showDisableConfirm, setShowDisableConfirm] = useState(false);
+  const [disablePassword, setDisablePassword] = useState("");
+  const [disabling, setDisabling] = useState(false);
+
   const showToast = (text, type = "info") => {
     setToast({ show: true, text, type });
     setTimeout(() => setToast({ show: false, text: "", type: "" }), 3500);
   };
 
   useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        const res = await apiClient.get("/api/v1/profile/me");
-        if (res.data?.data?.user) {
-          const user = res.data.data.user;
-          setTwoFA(user.twoFactorEnabled ?? false);
-          setAlerts(user.loginActivityAlerts ?? true);
-        }
-      } catch (err) {
-        showToast("Failed to load security settings", "error");
+    if (profileData) {
+      if (profileData.twoFactorEnabled !== undefined) {
+        setTwoFA(profileData.twoFactorEnabled);
       }
-    };
-    loadSettings();
-  }, []);
+      if (profileData.loginActivityAlerts !== undefined) {
+        setAlerts(profileData.loginActivityAlerts);
+      }
+    }
+  }, [profileData]);
 
-  const handleToggleSave = async (which, value) => {
-    const prevTwoFA = twoFA;
+  const handleAlertsToggle = async () => {
     const prevAlerts = alerts;
-
-    if (which === "2fa") setTwoFA(value);
-    if (which === "alerts") setAlerts(value);
+    const value = !alerts;
+    setAlerts(value);
     setSavingToggle(true);
 
     try {
-      const payload = {
-        twoFactorEnabled: which === "2fa" ? value : twoFA,
-        loginActivityAlerts: which === "alerts" ? value : alerts,
-      };
-
-      const res = await apiClient.put("/api/v1/settings/security", payload);
+      const res = await apiClient.put("/api/v1/settings/security", {
+        loginActivityAlerts: value,
+      });
       if (res.data?.success) {
+        onUpdate?.({ ...profileData, loginActivityAlerts: value });
         showToast("Security settings updated!", "success");
       }
     } catch (err) {
-      if (which === "2fa") setTwoFA(prevTwoFA);
-      if (which === "alerts") setAlerts(prevAlerts);
+      setAlerts(prevAlerts);
       showToast(err.response?.data?.message || err.message, "error");
     } finally {
       setSavingToggle(false);
+    }
+  };
+
+  // Turning the 2FA switch ON sends an OTP instead of flipping it directly.
+  const handleTwoFAToggleClick = () => {
+    if (twoFA) {
+      setShowDisableConfirm(true);
+      return;
+    }
+    handleRequestEnable2FA();
+  };
+
+  const handleRequestEnable2FA = async () => {
+    setSavingToggle(true);
+    try {
+      const res = await apiClient.post("/api/v1/settings/security/2fa/request-enable");
+      if (res.data?.success) {
+        setTwoFAStep("awaiting-otp");
+        showToast("Verification code sent to your email.", "success");
+      }
+    } catch (err) {
+      showToast(err.response?.data?.message || err.message, "error");
+    } finally {
+      setSavingToggle(false);
+    }
+  };
+
+  const handleResendEnable2FA = async () => {
+    setResendingOtp(true);
+    try {
+      const res = await apiClient.post("/api/v1/settings/security/2fa/request-enable");
+      if (res.data?.success) {
+        showToast("A new code has been sent.", "success");
+      }
+    } catch (err) {
+      showToast(err.response?.data?.message || err.message, "error");
+    } finally {
+      setResendingOtp(false);
+    }
+  };
+
+  const handleConfirmEnable2FA = async () => {
+    if (!enableOtp.trim()) {
+      showToast("Please enter the verification code.", "error");
+      return;
+    }
+    setConfirmingOtp(true);
+    try {
+      const res = await apiClient.post("/api/v1/settings/security/2fa/verify-enable", {
+        otp: enableOtp.trim(),
+      });
+      if (res.data?.success) {
+        setTwoFA(true);
+        setTwoFAStep("idle");
+        setEnableOtp("");
+        onUpdate?.({ ...profileData, twoFactorEnabled: true });
+        showToast("Two-factor authentication enabled!", "success");
+      }
+    } catch (err) {
+      showToast(err.response?.data?.message || err.message, "error");
+    } finally {
+      setConfirmingOtp(false);
+    }
+  };
+
+  const handleCancelEnable2FA = () => {
+    setTwoFAStep("idle");
+    setEnableOtp("");
+  };
+
+  const handleDisable2FA = async () => {
+    if (!disablePassword) {
+      showToast("Please enter your password to confirm.", "error");
+      return;
+    }
+    setDisabling(true);
+    try {
+      const res = await apiClient.post("/api/v1/settings/security/2fa/disable", {
+        currentPassword: disablePassword,
+      });
+      if (res.data?.success) {
+        setTwoFA(false);
+        setShowDisableConfirm(false);
+        setDisablePassword("");
+        onUpdate?.({ ...profileData, twoFactorEnabled: false });
+        showToast("Two-factor authentication disabled.", "success");
+      }
+    } catch (err) {
+      showToast(err.response?.data?.message || err.message, "error");
+    } finally {
+      setDisabling(false);
     }
   };
 
@@ -116,6 +210,9 @@ export function SecuritySection() {
       });
 
       if (res.data?.success) {
+        if (res.data?.data?.accessToken) {
+          setAccessToken(res.data.data.accessToken);
+        }
         showToast("Password changed successfully!", "success");
         setCurrentPassword("");
         setNewPassword("");
@@ -166,18 +263,106 @@ export function SecuritySection() {
       <div className="s-divider" />
       <Toggle
         label="Two-factor authentication"
-        desc="Require a code when logging in from a new device"
+        desc="Require a code sent to your email when logging in"
         badge="Recommended"
         checked={twoFA}
-        disabled={savingToggle}
-        onChange={() => handleToggleSave("2fa", !twoFA)}
+        disabled={savingToggle || twoFAStep === "awaiting-otp"}
+        onChange={handleTwoFAToggleClick}
       />
+
+      {twoFAStep === "awaiting-otp" && (
+        <div
+          style={{
+            padding: "15px",
+            backgroundColor: "#f0f6ff",
+            border: "1px solid #b6d4fe",
+            borderRadius: "4px",
+            marginTop: "-6px",
+            marginBottom: "18px",
+          }}
+        >
+          <p style={{ marginBottom: "10px" }}>
+            Enter the verification code we just emailed you to finish turning on 2FA.
+          </p>
+          <input
+            className="s-input"
+            type="text"
+            inputMode="numeric"
+            maxLength={6}
+            placeholder="123456"
+            value={enableOtp}
+            onChange={(e) => setEnableOtp(e.target.value.replace(/\D/g, ""))}
+          />
+          <div style={{ marginTop: "10px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
+            <button
+              className="s-btn s-btn--primary"
+              onClick={handleConfirmEnable2FA}
+              disabled={confirmingOtp}
+            >
+              {confirmingOtp ? "Confirming..." : "Confirm code"}
+            </button>
+            <button
+              className="s-btn s-btn--ghost"
+              onClick={handleResendEnable2FA}
+              disabled={resendingOtp}
+            >
+              {resendingOtp ? "Resending..." : "Resend code"}
+            </button>
+            <button className="s-btn s-btn--ghost" onClick={handleCancelEnable2FA}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showDisableConfirm && (
+        <div
+          style={{
+            padding: "15px",
+            backgroundColor: "#fff3cd",
+            border: "1px solid #ffc107",
+            borderRadius: "4px",
+            marginTop: "-6px",
+            marginBottom: "18px",
+          }}
+        >
+          <p style={{ color: "#856404", marginBottom: "10px" }}>
+            Enter your password to turn off two-factor authentication:
+          </p>
+          <input
+            type="password"
+            className="s-input"
+            placeholder="Enter your password"
+            value={disablePassword}
+            onChange={(e) => setDisablePassword(e.target.value)}
+          />
+          <div style={{ marginTop: "10px", display: "flex", gap: "10px" }}>
+            <button
+              className="s-btn s-btn--danger"
+              onClick={handleDisable2FA}
+              disabled={disabling}
+            >
+              {disabling ? "Disabling..." : "Disable 2FA"}
+            </button>
+            <button
+              className="s-btn s-btn--ghost"
+              onClick={() => {
+                setShowDisableConfirm(false);
+                setDisablePassword("");
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
       <Toggle
         label="Login activity alerts"
         desc="Get notified when your account is accessed from a new location"
         checked={alerts}
         disabled={savingToggle}
-        onChange={() => handleToggleSave("alerts", !alerts)}
+        onChange={handleAlertsToggle}
       />
       <div className="s-divider" />
       <button
@@ -194,13 +379,13 @@ export function SecuritySection() {
 // ==========================================
 // PRIVACY SECTION
 // ==========================================
-export function PrivacySection() {
+export function PrivacySection({ profileData, onUpdate }) {
   const [s, setS] = useState({
-    private: false,
-    activity: true,
-    messages: true,
-    receipts: false,
-    commentPermission: "following",
+    private: profileData?.isPrivate ?? false,
+    activity: profileData?.showActivityStatus ?? true,
+    messages: profileData?.allowMessageRequests ?? true,
+    receipts: profileData?.hideReadReceipts ?? false,
+    commentPermission: profileData?.commentPermission ?? "following",
   });
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState({ show: false, text: "", type: "" });
@@ -211,25 +396,16 @@ export function PrivacySection() {
   };
 
   useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        const res = await apiClient.get("/api/v1/profile/me");
-        if (res.data?.data?.user) {
-          const user = res.data.data.user;
-          setS({
-            private: user.isPrivate ?? false,
-            activity: user.showActivityStatus ?? true,
-            messages: user.allowMessageRequests ?? true,
-            receipts: user.hideReadReceipts ?? false,
-            commentPermission: user.commentPermission ?? "following",
-          });
-        }
-      } catch (err) {
-        showToast("Failed to load privacy settings", "error");
-      }
-    };
-    loadSettings();
-  }, []);
+    if (profileData) {
+      setS({
+        private: profileData.isPrivate ?? false,
+        activity: profileData.showActivityStatus ?? true,
+        messages: profileData.allowMessageRequests ?? true,
+        receipts: profileData.hideReadReceipts ?? false,
+        commentPermission: profileData.commentPermission ?? "following",
+      });
+    }
+  }, [profileData]);
 
   const tog = (k) => {
     const prev = s[k];
@@ -257,6 +433,14 @@ export function PrivacySection() {
       });
 
       if (res.data?.success) {
+        onUpdate?.({
+          ...profileData,
+          isPrivate: stateData.private,
+          showActivityStatus: stateData.activity,
+          allowMessageRequests: stateData.messages,
+          hideReadReceipts: stateData.receipts,
+          commentPermission: stateData.commentPermission,
+        });
         showToast("Privacy settings updated!", "success");
       }
     } catch (err) {
@@ -324,15 +508,14 @@ export function PrivacySection() {
 // ==========================================
 // NOTIFICATIONS SECTION
 // ==========================================
-export function NotificationsSection() {
+export function NotificationsSection({ profileData, onUpdate }) {
   const [s, setS] = useState({
-    likes: true,
-    comments: true,
-    followers: true,
-    dms: true,
-    email: false,
+    likes: profileData?.notifyOnLikes ?? true,
+    comments: profileData?.notifyOnComments ?? true,
+    followers: profileData?.notifyOnNewFollowers ?? true,
+    dms: profileData?.notifyOnDMs ?? true,
+    email: profileData?.emailNotifications ?? false,
   });
-  const [loading, setLoading] = useState(true);
   const [savingKey, setSavingKey] = useState(null);
   const [toast, setToast] = useState({ show: false, text: "", type: "" });
 
@@ -342,28 +525,16 @@ export function NotificationsSection() {
   };
 
   useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        setLoading(true);
-        const res = await apiClient.get("/api/v1/profile/me");
-        if (res.data?.data?.user) {
-          const user = res.data.data.user;
-          setS({
-            likes: user.notifyOnLikes ?? true,
-            comments: user.notifyOnComments ?? true,
-            followers: user.notifyOnNewFollowers ?? true,
-            dms: user.notifyOnDMs ?? true,
-            email: user.emailNotifications ?? false,
-          });
-        }
-      } catch (err) {
-        showToast("Failed to load notification preferences", "error");
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadSettings();
-  }, []);
+    if (profileData) {
+      setS({
+        likes: profileData.notifyOnLikes ?? true,
+        comments: profileData.notifyOnComments ?? true,
+        followers: profileData.notifyOnNewFollowers ?? true,
+        dms: profileData.notifyOnDMs ?? true,
+        email: profileData.emailNotifications ?? false,
+      });
+    }
+  }, [profileData]);
 
   const tog = async (k) => {
     const previousValue = s[k];
@@ -383,6 +554,14 @@ export function NotificationsSection() {
       });
 
       if (res.data?.success) {
+        onUpdate?.({
+          ...profileData,
+          notifyOnLikes: updatedState.likes,
+          notifyOnComments: updatedState.comments,
+          notifyOnNewFollowers: updatedState.followers,
+          notifyOnDMs: updatedState.dms,
+          emailNotifications: updatedState.email,
+        });
         showToast("Notification preference updated!", "success");
       }
     } catch (err) {
@@ -392,15 +571,6 @@ export function NotificationsSection() {
       setSavingKey(null);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="s-section">
-        <h2 className="s-section__title">Notifications</h2>
-        <p className="s-section__desc">Loading notification preferences...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="s-section">
@@ -450,60 +620,21 @@ export function NotificationsSection() {
 // ==========================================
 // APPEARANCE SECTION
 // ==========================================
-export function AppearanceSection() {
+export function AppearanceSection({ profileData, onUpdate }) {
   const { theme, fontSize, setTheme, setFontSize } = useTheme();
-  const [appTheme, setAppTheme] = useState(theme);
-  const [localFontSize, setLocalFontSize] = useState(fontSize);
-  const [saving, setSaving] = useState(false);
-  const [loaded, setLoaded] = useState(false);
-  const [toast, setToast] = useState({ show: false, text: "", type: "" });
+  const [appTheme, setAppTheme] = useState(profileData?.appTheme ?? theme);
+  const [localFontSize, setLocalFontSize] = useState(profileData?.fontSize ?? fontSize);
 
-  const showToast = (text, type = "info") => {
-    setToast({ show: true, text, type });
-    setTimeout(() => setToast({ show: false, text: "", type: "" }), 3500);
-  };
-
+  // Sync from parent whenever profileData is refreshed (e.g. initial load)
   useEffect(() => {
-    setAppTheme(theme);
-  }, [theme]);
-
-  useEffect(() => {
-    setLocalFontSize(fontSize);
-  }, [fontSize]);
-
-  useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        const res = await apiClient.get("/api/v1/profile/me");
-        if (res.data?.data?.user) {
-          const user = res.data.data.user;
-          const backendTheme = user.appTheme;
-          const backendFontSize = user.fontSize;
-
-          const storedLocalTheme = localStorage.getItem("m4c-theme");
-          const storedLocalFont = localStorage.getItem("m4c-font-size");
-
-          if (!storedLocalTheme && backendTheme) {
-            setAppTheme(backendTheme);
-            setTheme(backendTheme);
-          }
-          if (!storedLocalFont && backendFontSize) {
-            setLocalFontSize(backendFontSize);
-            setFontSize(backendFontSize);
-          }
-        }
-      } catch (err) {
-        showToast("Failed to load appearance preferences", "error");
-      } finally {
-        setLoaded(true);
-      }
-    };
-    loadSettings();
-  }, [setTheme, setFontSize]);
+    if (profileData?.appTheme) setAppTheme(profileData.appTheme);
+    if (profileData?.fontSize) setLocalFontSize(profileData.fontSize);
+  }, [profileData]);
 
   const handleThemeChange = (e) => {
     const next = e.target.value;
     setAppTheme(next);
+    // ThemeContext.setTheme auto-persists via PUT /api/v1/settings/appearance
     setTheme(next);
 
     const isDark =
@@ -518,35 +649,20 @@ export function AppearanceSection() {
       document.body.classList.toggle("dark", isDark);
       document.body.setAttribute("data-theme", isDark ? "dark" : "light");
     }
+
+    onUpdate?.({ ...profileData, appTheme: next });
   };
 
   const handleFontSizeChange = (e) => {
     const next = e.target.value;
     setLocalFontSize(next);
+    // ThemeContext.setFontSize auto-persists via PUT /api/v1/settings/appearance
     setFontSize(next);
-  };
-
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      const res = await apiClient.put("/api/v1/settings/appearance", {
-        appTheme,
-        fontSize: localFontSize,
-      });
-
-      if (res.data?.success) {
-        showToast("Appearance settings saved!", "success");
-      }
-    } catch (err) {
-      showToast(err.response?.data?.message || err.message, "error");
-    } finally {
-      setSaving(false);
-    }
+    onUpdate?.({ ...profileData, fontSize: next });
   };
 
   return (
     <div className="s-section">
-      <ToastBanner toast={toast} />
       <h2 className="s-section__title">Appearance</h2>
       <p className="s-section__desc">Customize how the app looks for you.</p>
       <div className="s-row">
@@ -555,7 +671,6 @@ export function AppearanceSection() {
           className="s-input s-input--select"
           value={appTheme}
           onChange={handleThemeChange}
-          disabled={!loaded || saving}
         >
           <option value="system">System default</option>
           <option value="light">Light</option>
@@ -568,7 +683,6 @@ export function AppearanceSection() {
           className="s-input s-input--select"
           value={localFontSize}
           onChange={handleFontSizeChange}
-          disabled={!loaded || saving}
         >
           <option value="small">Small</option>
           <option value="medium">Medium</option>
@@ -576,12 +690,8 @@ export function AppearanceSection() {
         </select>
       </div>
       <p className="s-section__desc" style={{ margin: "-8px 0 18px" }}>
-        Changes preview instantly — click save to keep them on your other devices.
+        ✓ Changes are saved automatically.
       </p>
-      <div className="s-divider" />
-      <button className="s-btn s-btn--primary" onClick={handleSave} disabled={saving}>
-        {saving ? "Saving..." : "Save preferences"}
-      </button>
     </div>
   );
 }
@@ -589,8 +699,11 @@ export function AppearanceSection() {
 // ==========================================
 // LANGUAGE SECTION
 // ==========================================
-export function LanguageSection() {
-  const [appLanguage, setAppLanguage] = useState("en-US");
+export function LanguageSection({ profileData, onUpdate }) {
+  const { language, setLanguage, t, languages } = useI18n();
+  // Local draft value so the dropdown can be changed without affecting the
+  // live app until the user hits Save (matches the rest of Settings' pattern).
+  const [appLanguage, setAppLanguage] = useState(profileData?.appLanguage ?? language);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState({ show: false, text: "", type: "" });
 
@@ -599,20 +712,13 @@ export function LanguageSection() {
     setTimeout(() => setToast({ show: false, text: "", type: "" }), 3500);
   };
 
+  // Sync from parent whenever profileData is refreshed (e.g. initial load)
   useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        const res = await apiClient.get("/api/v1/profile/me");
-        if (res.data?.data?.user) {
-          const user = res.data.data.user;
-          setAppLanguage(user.appLanguage ?? "en-US");
-        }
-      } catch (err) {
-        showToast("Failed to load language settings", "error");
-      }
-    };
-    loadSettings();
-  }, []);
+    if (profileData?.appLanguage) {
+      setAppLanguage(profileData.appLanguage);
+      setLanguage(profileData.appLanguage);
+    }
+  }, [profileData, setLanguage]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -622,7 +728,10 @@ export function LanguageSection() {
       });
 
       if (res.data?.success) {
-        showToast("Language preference updated!", "success");
+        // Apply immediately across the whole app (nav, sidebar, settings, etc.)
+        setLanguage(appLanguage);
+        onUpdate?.({ ...profileData, appLanguage });
+        showToast(t("settings.language.updateSuccess"), "success");
       }
     } catch (err) {
       showToast(err.response?.data?.message || err.message, "error");
@@ -634,38 +743,37 @@ export function LanguageSection() {
   return (
     <div className="s-section">
       <ToastBanner toast={toast} />
-      <h2 className="s-section__title">Language</h2>
-      <p className="s-section__desc">Choose your preferred language for the app.</p>
+      <h2 className="s-section__title">{t("settings.language.title")}</h2>
+      <p className="s-section__desc">{t("settings.language.description")}</p>
       <div className="s-row">
-        <label className="s-label">App language</label>
+        <label className="s-label">{t("settings.language.appLanguage")}</label>
         <select
           className="s-input s-input--select"
           value={appLanguage}
           onChange={(e) => setAppLanguage(e.target.value)}
           disabled={saving}
         >
-          <option value="en-US">English (US)</option>
-          <option value="en-UK">English (UK)</option>
-          <option value="si">Sinhala</option>
-          <option value="ta">Tamil</option>
-          <option value="es">Spanish</option>
-          <option value="fr">French</option>
-          <option value="de">German</option>
-          <option value="ja">Japanese</option>
+          {languages.map((lang) => (
+            <option key={lang.code} value={lang.code}>
+              {lang.label}
+            </option>
+          ))}
         </select>
       </div>
       <div className="s-divider" />
       <button className="s-btn s-btn--primary" onClick={handleSave} disabled={saving}>
-        {saving ? "Saving..." : "Save"}
+        {saving ? t("common.saving") : t("common.save")}
       </button>
     </div>
   );
 }
 
+
 // ==========================================
 // HELP & SUPPORT SECTION
 // ==========================================
 export function HelpSection() {
+  const { logout } = useAuth();
   const [deletePassword, setDeletePassword] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -694,6 +802,7 @@ export function HelpSection() {
 
       if (res.data?.success) {
         showToast("Account deleted. Redirecting...", "success");
+        logout();
         setTimeout(() => {
           window.location.href = "/";
         }, 1200);

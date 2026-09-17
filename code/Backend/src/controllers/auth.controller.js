@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import ms from "ms"; // millisecond convertor
 
 import env from "../config/env.js";
@@ -7,10 +8,16 @@ import User from "../models/User.js";
 import { successResponse } from "../utils/apiResponse.js";
 import AppError from "../utils/appError.js";
 import asyncHandler from "../utils/asyncHandler.js";
+import sendLoginAlertEmail from "../utils/sendLoginAlertEmail.js";
+import sendOtpEmail from "../utils/sendOtpEmail.js";
+import { logError } from "../utils/logger.js";
 import {
   createUserProfile,
   createOrganizationProfile,
 } from "../constructors/profile.creator.js";
+
+const OTP_EXPIRE_MIN = Number(process.env.OTP_EXPIRE_MIN) || 5;
+const LOGIN_2FA_TOKEN_EXPIRES_IN = "10m";
 
 const SUPPORTED_ACCOUNT_TYPES = ["individual", "organization"];
 const USERNAME_FORMAT = /^[a-zA-Z0-9._-]{2,30}$/;
@@ -59,16 +66,67 @@ const toLoginType = (accountType) => {
 
 // 3. create tokens
 // AccessToken: use for authenticate via endpoints
-const createAccessToken = (userId) => {
+export const createAccessToken = (userId) => {
   return jwt.sign({ userId }, env.jwtSecret, {
     expiresIn: env.jwtExpiresIn,
   });
 };
 
 // RefreshToken: use to get a new accessToken
-const createRefreshToken = (userId) => {
+export const createRefreshToken = (userId) => {
   return jwt.sign({ userId }, env.jwtRefreshSecret, {
     expiresIn: env.jwtRefreshExpiresIn,
+  });
+};
+
+// Short-lived token identifying an in-progress login that is waiting on a
+// 2FA code. It intentionally cannot be used as an access token — a separate
+// "purpose" claim keeps it from being accepted by the normal auth middleware.
+const createTwoFactorToken = (userId) => {
+  return jwt.sign({ userId, purpose: "login_2fa" }, env.jwtSecret, {
+    expiresIn: LOGIN_2FA_TOKEN_EXPIRES_IN,
+  });
+};
+
+// Builds the same success payload/cookie the old single-step login used,
+// shared by both the no-2FA login path and the post-OTP verification path.
+const finalizeLogin = async (req, res, user) => {
+  const loginType = toLoginType(user.accountType);
+
+  const accessToken = createAccessToken(user._id);
+  const refreshToken = createRefreshToken(user._id);
+
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: env.nodeEnv === "production",
+    sameSite: env.nodeEnv === "production" ? "none" : "lax",
+    maxAge: ms(env.jwtRefreshExpiresIn),
+  });
+
+  if (user.loginActivityAlerts) {
+    sendLoginAlertEmail(user.email, {
+      device: req.headers["user-agent"],
+      ip: req.ip,
+      time: new Date(),
+    }).catch((err) => {
+      logError("Failed to send login alert email", err, { userId: user._id });
+    });
+  }
+
+  return successResponse(res, 200, "Login successful.", {
+    accessToken,
+    loginType,
+    user: {
+      id: user._id,
+      userName: user.userName,
+      email: user.email,
+      accountType: user.accountType,
+      role: user.role,
+      coinBalance: user.coinBalance ?? 0,
+      isVerified: user.isVerified,
+      createdAt: user.createdAt,
+      profileImageUrl: user.profileImageUrl,
+    },
   });
 };
 
@@ -226,30 +284,129 @@ export const login = asyncHandler(async (req, res) => {
     );
   }
 
-  const accessToken = createAccessToken(user._id);
-  const refreshToken = createRefreshToken(user._id);
+  // If the account has 2FA turned on, don't hand out real tokens yet —
+  // email a one-time code and give the client a short-lived token that only
+  // lets it complete the /verify-login-otp step.
+  if (user.twoFactorEnabled) {
+    const otpCode = crypto.randomInt(100000, 1000000).toString();
 
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true, // not save in local storage, js cant access by getElement()
-    secure: env.nodeEnv === "production", // cookie only send through HTTPS, not over HTTP
-    sameSite: env.nodeEnv === "production" ? "none" : "lax",
-    maxAge: ms(env.jwtRefreshExpiresIn), // calculated in milliseconds
-  });
+    user.loginOtp = crypto.createHash("sha256").update(otpCode).digest("hex");
+    user.loginOtpExpiresAt = new Date(Date.now() + OTP_EXPIRE_MIN * 60 * 1000);
+    user.loginOtpAttempts = 0;
+    await user.save();
 
-  return successResponse(res, 200, "Login successful.", {
-    accessToken,
-    loginType,
-    user: {
-      id: user._id,
-      userName: user.userName,
+    await sendOtpEmail(user.email, otpCode);
+
+    const twoFactorToken = createTwoFactorToken(user._id);
+
+    return successResponse(res, 200, "A verification code has been sent to your email.", {
+      requiresTwoFactor: true,
+      twoFactorToken,
       email: user.email,
-      accountType: user.accountType,
-      role: user.role,
-      coinBalance: user.coinBalance ?? 0,
-      isVerified: user.isVerified,
-      createdAt: user.createdAt,
-      profileImageUrl: user.profileImageUrl,
-    },
+    });
+  }
+
+  return finalizeLogin(req, res, user);
+});
+
+// 3b. export: complete a login that was paused for a 2FA code
+export const verifyLoginOtp = asyncHandler(async (req, res) => {
+  const { twoFactorToken, otp } = req.body;
+
+  if (!twoFactorToken || !otp) {
+    throw new AppError("twoFactorToken and otp are required.", 400, "VALIDATION_ERROR");
+  }
+
+  let decoded;
+  try {
+    decoded = jwt.verify(twoFactorToken, env.jwtSecret);
+  } catch (error) {
+    throw new AppError("Verification session expired. Please log in again.", 401, "INVALID_2FA_TOKEN");
+  }
+
+  if (decoded.purpose !== "login_2fa") {
+    throw new AppError("Invalid verification token.", 401, "INVALID_2FA_TOKEN");
+  }
+
+  const user = await User.findById(decoded.userId).select("+loginOtp +loginOtpExpiresAt +loginOtpAttempts");
+
+  if (!user || !user.isActive) {
+    throw new AppError("User not found or inactive.", 401, "INVALID_2FA_TOKEN");
+  }
+
+  if (!user.loginOtp || !user.loginOtpExpiresAt || user.loginOtpExpiresAt.getTime() < Date.now()) {
+    throw new AppError("This code has expired. Please request a new one.", 400, "OTP_EXPIRED");
+  }
+
+  const hashedOtp = crypto.createHash("sha256").update(String(otp).trim()).digest("hex");
+  if (user.loginOtp !== hashedOtp) {
+    user.loginOtpAttempts = (user.loginOtpAttempts || 0) + 1;
+    if (user.loginOtpAttempts >= 5) {
+      user.loginOtp = null;
+      user.loginOtpExpiresAt = null;
+      user.loginOtpAttempts = 0;
+      await user.save();
+      throw new AppError(
+        "Too many incorrect attempts. Verification code has been invalidated. Please request a new one.",
+        429,
+        "TOO_MANY_ATTEMPTS",
+      );
+    }
+    await user.save();
+    const remaining = 5 - user.loginOtpAttempts;
+    throw new AppError(
+      `Invalid verification code. You have ${remaining} ${remaining === 1 ? "attempt" : "attempts"} remaining.`,
+      400,
+      "INVALID_OTP",
+    );
+  }
+
+  user.loginOtp = null;
+  user.loginOtpExpiresAt = null;
+  user.loginOtpAttempts = 0;
+  await user.save();
+
+  return finalizeLogin(req, res, user);
+});
+
+// 3c. export: resend the login 2FA code
+export const resendLoginOtp = asyncHandler(async (req, res) => {
+  const { twoFactorToken } = req.body;
+
+  if (!twoFactorToken) {
+    throw new AppError("twoFactorToken is required.", 400, "VALIDATION_ERROR");
+  }
+
+  let decoded;
+  try {
+    decoded = jwt.verify(twoFactorToken, env.jwtSecret);
+  } catch (error) {
+    throw new AppError("Verification session expired. Please log in again.", 401, "INVALID_2FA_TOKEN");
+  }
+
+  if (decoded.purpose !== "login_2fa") {
+    throw new AppError("Invalid verification token.", 401, "INVALID_2FA_TOKEN");
+  }
+
+  const user = await User.findById(decoded.userId);
+
+  if (!user || !user.isActive) {
+    throw new AppError("User not found or inactive.", 401, "INVALID_2FA_TOKEN");
+  }
+
+  const otpCode = crypto.randomInt(100000, 1000000).toString();
+  user.loginOtp = crypto.createHash("sha256").update(otpCode).digest("hex");
+  user.loginOtpExpiresAt = new Date(Date.now() + OTP_EXPIRE_MIN * 60 * 1000);
+  user.loginOtpAttempts = 0;
+  await user.save();
+
+  await sendOtpEmail(user.email, otpCode);
+
+  // Issue a fresh token too, so resending also extends the 10-minute window.
+  const newTwoFactorToken = createTwoFactorToken(user._id);
+
+  return successResponse(res, 200, "A new verification code has been sent.", {
+    twoFactorToken: newTwoFactorToken,
   });
 });
 
@@ -281,6 +438,17 @@ export const refresh = asyncHandler(async (req, res) => {
       401,
       "INVALID_REFRESH_TOKEN",
     );
+  }
+
+  if (user.passwordChangedAt) {
+    const changedTimestamp = parseInt(user.passwordChangedAt.getTime() / 1000, 10);
+    if (decoded.iat && decoded.iat < changedTimestamp) {
+      throw new AppError(
+        "Password was changed recently. Please log in again.",
+        401,
+        "TOKEN_EXPIRED",
+      );
+    }
   }
 
   const newAccessToken = createAccessToken(user._id);

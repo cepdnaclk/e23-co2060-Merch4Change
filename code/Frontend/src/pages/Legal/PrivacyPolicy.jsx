@@ -1,57 +1,52 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useTheme } from "../../context/ThemeContext";
 import "./PrivacyPolicy.css";
 
-const LAST_UPDATED = "September 2026";
+const LAST_UPDATED = "September 12, 2026";
 
 const SECTIONS = [
   {
-    title: "1. Information we collect",
-    body:
-      "When you create an account on Merch4Change, we collect information such as your name, username, email address, and account type (individual or organization). When you place an order, make a donation, or verify a charity, we may also collect payment details, delivery addresses, and verification documents.",
+    title: "1. Information We Collect",
+    body: "When you create an account on Merch4Change, we collect personal identity details including your name, username, email address, contact number, and account category (individual or organization). When you make purchases, contribute donations, or complete organization verification, we securely collect payment details, billing and shipping addresses, and legal identification or verification documentation.",
   },
   {
-    title: "2. How we use your information",
-    body:
-      "We use your information to operate your account, process orders and donations, verify organizations, personalize your experience, and communicate with you about activity on the platform. We do not sell your personal information to third parties.",
+    title: "2. How We Use Your Information",
+    body: "We process your data to maintain account security, process orders and donations, verify non-profit and organization authenticity, personalize platform engagement, and communicate critical updates regarding platform activities. We explicitly enforce a strict policy against selling or renting your personal data to third parties.",
   },
   {
-    title: "3. Sharing your information",
-    body:
-      "We share information only where necessary to run the platform — for example, with payment processors to complete transactions, with courier partners to fulfil deliveries, and with verified charities when you choose to donate to them. Service providers are only given the data they need to perform their function.",
+    title: "3. Information Sharing and Disclosure",
+    body: "We share necessary data solely with essential service providers operating under strict confidentiality protocols. This includes integrated payment gateways to process transactions, courier and fulfillment services to deliver merchandise, and verified charities when you direct donations to them.",
   },
   {
-    title: "4. Your privacy controls",
-    body:
-      "You can control who sees your activity, whether your account is private, who can message or comment on your posts, and what notifications you receive, all from Settings → Privacy and Settings → Notifications.",
+    title: "4. User Privacy & Access Controls",
+    body: "You maintain control over your account settings and visibility. Through Settings → Privacy and Settings → Notifications, you can manage public profile visibility, set account privacy levels, configure messaging permissions, and customize notification preferences.",
   },
   {
-    title: "5. Data security",
-    body:
-      "We use industry-standard practices such as encrypted connections and hashed passwords to protect your account. You can add an extra layer of protection at any time from Settings → Account security.",
+    title: "5. Data Security & Storage Practices",
+    body: "We employ industry-standard technical measures, including TLS/SSL encryption for data in transit and secure hashing algorithms for credential storage. Additional security options like Multi-Factor Authentication (MFA) can be enabled via Settings → Account Security.",
   },
   {
-    title: "6. Account deletion",
-    body:
-      "You may permanently delete your account and associated personal data at any time from Settings → Help & support. This action is irreversible.",
+    title: "6. Account Deletion & Data Retention",
+    body: "You retain the right to permanently delete your account and associated personal data at any time via Settings → Help & Support. Upon request, data deletion is executed permanently, preserving only anonymized transactional records where legally mandated.",
   },
   {
-    title: "7. Contact us",
-    body:
-      "If you have questions about this policy or how your data is handled, reach out through our Help & Support center and we'll get back to you.",
+    title: "7. Contact Us",
+    body: "If you have questions regarding this Privacy Policy or wish to exercise data subject rights, please reach out directly through our Help & Support center or submit an inquiry to our privacy team.",
   },
 ];
 
 function PrivacyPolicy() {
+  const { resolvedTheme } = useTheme();
+
   return (
-    <div className="privacy-page">
+    <div className="privacy-page" data-theme={resolvedTheme}>
       <div className="privacy-hero">
         <div className="privacy-hero-container">
           <h1>Privacy Policy</h1>
           <p className="privacy-updated">Last updated: {LAST_UPDATED}</p>
           <p className="privacy-intro">
-            This policy explains what information Merch4Change collects, how
-            it's used, and the choices you have about your data.
+            This policy outlines how Merch4Change collects, processes, and protects your personal data, along with your rights and privacy controls.
           </p>
         </div>
       </div>

@@ -1,15 +1,16 @@
-
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
 import "./Navbar.css";
 import BrandLogo from "../BrandLogo/BrandLogo";
+import { useI18n } from "../../i18n/I18nContext";
 
 function Navbar({ scrolled = false }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navbarRef = useRef(null);
+  const { t } = useI18n();
 
   const isLandingPage = location.pathname === "/";
 
@@ -51,7 +52,7 @@ function Navbar({ scrolled = false }) {
           aria-label="Merch4Change"
         >
           <BrandLogo size={34} className="lp-navbar-icon" />
-          <span className="lp-navbar-text">Merch4Change</span>
+          <span className="lp-navbar-text">{t("common.appName")}</span>
         </button>
 
         {/* Center: Navigation (desktop only) */}
@@ -61,19 +62,19 @@ function Navbar({ scrolled = false }) {
               className="lp-navbar-link"
               onClick={() => handleNavigation("/marketplace")}
             >
-              Marketplace
+              {t("publicNav.marketplace")}
             </button>
             <button
               className="lp-navbar-link"
               onClick={() => scrollTo("for-organisations")}
             >
-              For Organisations
+              {t("publicNav.forOrganisations")}
             </button>
             <button
               className="lp-navbar-link"
               onClick={() => scrollTo("impact-stats")}
             >
-              Impact
+              {t("publicNav.impact")}
             </button>
           </div>
         )}
@@ -84,13 +85,13 @@ function Navbar({ scrolled = false }) {
             className="lp-navbar-signin"
             onClick={() => handleNavigation("/login")}
           >
-            Sign in
+            {t("common.signIn")}
           </button>
           <button
             className="lp-navbar-getstarted"
             onClick={() => handleNavigation("/signup")}
           >
-            Get started
+            {t("common.getStarted")}
           </button>
         </div>
 
@@ -119,19 +120,19 @@ function Navbar({ scrolled = false }) {
             className="lp-navbar-mobile-link"
             onClick={() => handleNavigation("/marketplace")}
           >
-            Marketplace
+            {t("publicNav.marketplace")}
           </button>
           <button
             className="lp-navbar-mobile-link"
             onClick={() => scrollTo("for-organisations")}
           >
-            For Organisations
+            {t("publicNav.forOrganisations")}
           </button>
           <button
             className="lp-navbar-mobile-link"
             onClick={() => scrollTo("impact-stats")}
           >
-            Impact
+            {t("publicNav.impact")}
           </button>
 
           <div className="lp-navbar-mobile-divider"></div>
@@ -141,13 +142,13 @@ function Navbar({ scrolled = false }) {
               className="lp-navbar-signin"
               onClick={() => handleNavigation("/login")}
             >
-              Sign in
+              {t("common.signIn")}
             </button>
             <button
               className="lp-navbar-getstarted"
               onClick={() => handleNavigation("/signup")}
             >
-              Get started
+              {t("common.getStarted")}
             </button>
           </div>
         </div>
@@ -157,4 +158,3 @@ function Navbar({ scrolled = false }) {
 }
 
 export default Navbar;
-

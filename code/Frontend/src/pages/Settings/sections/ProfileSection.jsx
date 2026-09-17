@@ -26,10 +26,24 @@ function ProfileSection({ profileData = {}, onUpdate = () => {} }) {
   const [fullName, setFullName] = useState(
     `${profileData.firstName || ""} ${profileData.lastName || ""}`.trim()
   );
-  const [bio, setBio] = useState(profileData.profileBio || profileData.bio || "");
-  const [website, setWebsite] = useState(profileData.userLink || profileData.website || "");
+  const [bio, setBio] = useState(profileData.profileBio || "");
+  const [website, setWebsite] = useState(profileData.userLink || "");
   const [location, setLocation] = useState(profileData.location || "");
   const [email, setEmail] = useState(profileData.email || "");
+
+  // ── Email change (OTP re-verification) ──────────────────────────────
+  const [emailEditing, setEmailEditing] = useState(false); // shows the new-email + password form
+  const [emailStep, setEmailStep] = useState("form"); // "form" | "otp"
+  const [newEmail, setNewEmail] = useState("");
+  const [emailPassword, setEmailPassword] = useState("");
+  const [emailOtp, setEmailOtp] = useState(["", "", "", "", "", ""]);
+  const [pendingEmail, setPendingEmail] = useState("");
+  const [emailRequesting, setEmailRequesting] = useState(false);
+  const [emailVerifying, setEmailVerifying] = useState(false);
+  const [emailResending, setEmailResending] = useState(false);
+  const [emailResendTimer, setEmailResendTimer] = useState(0);
+  const emailOtpRefs = useRef([]);
+
   const [avatarUrl, setAvatarUrl] = useState(
     profileData.profileImageUrl || profileData.avatarUrl || ""
   );
@@ -47,8 +61,8 @@ function ProfileSection({ profileData = {}, onUpdate = () => {} }) {
   useEffect(() => {
     setUserName(profileData.userName || "");
     setFullName(`${profileData.firstName || ""} ${profileData.lastName || ""}`.trim());
-    setBio(profileData.profileBio || profileData.bio || "");
-    setWebsite(profileData.userLink || profileData.website || "");
+    setBio(profileData.profileBio || "");
+    setWebsite(profileData.userLink || "");
     setLocation(profileData.location || "");
     setEmail(profileData.email || "");
 
@@ -56,6 +70,14 @@ function ProfileSection({ profileData = {}, onUpdate = () => {} }) {
     setAvatarUrl(resolved);
     setImageError(false);
   }, [profileData]);
+
+  useEffect(() => {
+    let interval;
+    if (emailResendTimer > 0) {
+      interval = setInterval(() => setEmailResendTimer((t) => t - 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [emailResendTimer]);
 
   const handleSave = async (e) => {
     if (e) e.preventDefault();
@@ -65,22 +87,19 @@ function ProfileSection({ profileData = {}, onUpdate = () => {} }) {
       const firstName = parts.shift() || "";
       const lastName = parts.join(" ") || "";
 
+      // Note: email is deliberately excluded — it's changed via its own
+      // OTP-verified flow below, never through this general save.
       const body = {
         firstName,
         lastName,
         name: fullName.trim(),
         userName,
         profileBio: bio,
-        bio,
         userLink: website,
-        website,
         location,
-        email,
       };
 
-      const res = await apiClient.put("/api/v1/settings/profile", body).catch(() => {
-        return apiClient.put("/api/v1/profile/me", body);
-      });
+      const res = await apiClient.put("/api/v1/settings/profile", body);
 
       const data = res.data;
       if (!data?.success) throw new Error(data?.message || "Failed to update profile");
@@ -90,8 +109,8 @@ function ProfileSection({ profileData = {}, onUpdate = () => {} }) {
         onUpdate(updated);
         setUserName(updated.userName || userName);
         setFullName(`${updated.firstName || ""} ${updated.lastName || ""}`.trim());
-        setBio(updated.profileBio || updated.bio || bio);
-        setWebsite(updated.userLink || updated.website || website);
+        setBio(updated.profileBio || bio);
+        setWebsite(updated.userLink || website);
         setLocation(updated.location || location);
         setEmail(updated.email || email);
         showToast("Profile settings updated successfully!", "success");
@@ -112,33 +131,147 @@ function ProfileSection({ profileData = {}, onUpdate = () => {} }) {
     if (!file) return;
     setUploading(true);
     try {
-      const userId = profileData?._id || profileData?.id;
-      if (!userId) throw new Error("Missing user ID");
-
       const form = new FormData();
-      form.append("image", file);
+      form.append("avatar", file);
 
-      const res = await apiClient.post(`/api/v1/images/user/${userId}`, form);
+      const res = await apiClient.put("/api/v1/settings/profile", form, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
       const data = res.data;
-
       if (!data?.success) throw new Error(data?.message || "Failed to upload image");
 
-      // Refresh profile data from server to receive the newly generated image path
-      const profileRes = await apiClient.get("/api/v1/profile/me");
-      const profileJson = profileRes.data;
-      if (profileJson?.success && profileJson.data?.user) {
-        const freshUser = profileJson.data.user;
-        onUpdate(freshUser);
-        const newUrl = freshUser.profileImageUrl || freshUser.avatarUrl || "";
+      const updated = data.data?.user;
+      if (updated) {
+        onUpdate(updated);
+        const newUrl = updated.profileImageUrl || updated.avatarUrl || "";
         setAvatarUrl(newUrl);
         setImageError(false);
-        showToast("Profile photo updated!", "success");
+        showToast("Profile photo updated successfully!", "success");
       }
     } catch (err) {
       showToast(err.response?.data?.message || err.message || "Unable to upload photo", "error");
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = null;
+    }
+  };
+
+  const resetEmailFlow = () => {
+    setEmailEditing(false);
+    setEmailStep("form");
+    setNewEmail("");
+    setEmailPassword("");
+    setEmailOtp(["", "", "", "", "", ""]);
+    setPendingEmail("");
+    setEmailResendTimer(0);
+  };
+
+  const handleRequestEmailChange = async (e) => {
+    if (e) e.preventDefault();
+    if (!newEmail || !emailPassword) {
+      showToast("Enter the new email and your current password", "error");
+      return;
+    }
+    setEmailRequesting(true);
+    try {
+      const res = await apiClient.post("/api/v1/settings/email/request-change", {
+        newEmail,
+        currentPassword: emailPassword,
+      });
+      const data = res.data;
+      if (!data?.success) throw new Error(data?.message || "Failed to request email change");
+
+      setPendingEmail(data.data?.pendingEmail || newEmail);
+      setEmailStep("otp");
+      setEmailResendTimer(data.data?.nextCooldownSeconds || 60);
+      showToast("A verification code has been sent to your new email.", "success");
+    } catch (err) {
+      showToast(err.response?.data?.message || err.message || "Unable to start email change", "error");
+    } finally {
+      setEmailRequesting(false);
+    }
+  };
+
+  const handleEmailOtpChange = (e, index) => {
+    const value = e.target.value;
+    if (value && isNaN(value)) return;
+    const next = [...emailOtp];
+    next[index] = value.slice(-1);
+    setEmailOtp(next);
+    if (value && index < 5 && emailOtpRefs.current[index + 1]) {
+      emailOtpRefs.current[index + 1].focus();
+    }
+  };
+
+  const handleEmailOtpKeyDown = (e, index) => {
+    if (e.key === "Backspace" && !emailOtp[index] && index > 0 && emailOtpRefs.current[index - 1]) {
+      emailOtpRefs.current[index - 1].focus();
+    }
+  };
+
+  const handleEmailOtpPaste = (e) => {
+    e.preventDefault();
+    const pastedText = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (!pastedText) return;
+
+    const next = [...emailOtp];
+    for (let i = 0; i < 6; i++) {
+      next[i] = pastedText[i] || "";
+    }
+    setEmailOtp(next);
+
+    const focusIndex = Math.min(pastedText.length, 5);
+    if (emailOtpRefs.current[focusIndex]) {
+      emailOtpRefs.current[focusIndex].focus();
+    }
+  };
+
+  const handleVerifyEmailChange = async (e) => {
+    if (e) e.preventDefault();
+    const code = emailOtp.join("");
+    if (code.length !== 6) {
+      showToast("Enter the 6-digit code", "error");
+      return;
+    }
+    setEmailVerifying(true);
+    try {
+      const res = await apiClient.post("/api/v1/settings/email/verify", { otp: code });
+      const data = res.data;
+      if (!data?.success) throw new Error(data?.message || "Verification failed");
+
+      const updated = data.data?.user;
+      if (updated) {
+        onUpdate(updated);
+        setEmail(updated.email || pendingEmail);
+      }
+      showToast("Email address updated successfully!", "success");
+      resetEmailFlow();
+    } catch (err) {
+      showToast(err.response?.data?.message || err.message || "Invalid or expired code", "error");
+    } finally {
+      setEmailVerifying(false);
+    }
+  };
+
+  const handleResendEmailOtp = async () => {
+    if (emailResendTimer > 0 || emailResending) return;
+    setEmailResending(true);
+    try {
+      const res = await apiClient.post("/api/v1/settings/email/resend-otp");
+      const data = res.data;
+      if (!data?.success) throw new Error(data?.message || "Failed to resend code");
+      setEmailResendTimer(data.data?.nextCooldownSeconds || 60);
+      showToast("A new code has been sent.", "success");
+    } catch (err) {
+      if (err.response?.status === 429 && err.response?.data?.error?.details?.remainingSeconds) {
+        setEmailResendTimer(err.response.data.error.details.remainingSeconds);
+      }
+      showToast(err.response?.data?.message || err.message || "Unable to resend code", "error");
+    } finally {
+      setEmailResending(false);
     }
   };
 
@@ -234,12 +367,102 @@ function ProfileSection({ profileData = {}, onUpdate = () => {} }) {
       </div>
       <div className="s-row">
         <label className="s-label">Email</label>
-        <input
-          className="s-input"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        {!emailEditing ? (
+          <div className="s-email-display">
+            <span className="s-email-current">{email}</span>
+            <button
+              type="button"
+              className="s-btn s-btn--ghost"
+              onClick={() => setEmailEditing(true)}
+            >
+              Change email
+            </button>
+          </div>
+        ) : emailStep === "form" ? (
+          <div className="s-email-change-form">
+            <input
+              className="s-input"
+              type="email"
+              placeholder="New email address"
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+            />
+            <input
+              className="s-input"
+              type="password"
+              placeholder="Current password"
+              value={emailPassword}
+              onChange={(e) => setEmailPassword(e.target.value)}
+            />
+            <p className="s-section__desc">
+              We'll send a 6-digit code to the new address to confirm it's yours.
+            </p>
+            <div className="s-email-change-actions">
+              <button
+                type="button"
+                className="s-btn s-btn--primary"
+                onClick={handleRequestEmailChange}
+                disabled={emailRequesting}
+              >
+                {emailRequesting ? "Sending code..." : "Send code"}
+              </button>
+              <button type="button" className="s-btn s-btn--ghost" onClick={resetEmailFlow}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="s-email-otp-form">
+            <p className="s-section__desc">
+              Enter the code sent to <strong>{pendingEmail}</strong>
+            </p>
+            <div className="otp-inputs-container">
+              {emailOtp.map((digit, index) => (
+                <input
+                  key={index}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength="1"
+                  value={digit}
+                  onChange={(e) => handleEmailOtpChange(e, index)}
+                  onKeyDown={(e) => handleEmailOtpKeyDown(e, index)}
+                  onPaste={handleEmailOtpPaste}
+                  ref={(el) => (emailOtpRefs.current[index] = el)}
+                  className="otp-input"
+                  aria-label={`Verification code digit ${index + 1}`}
+                />
+              ))}
+            </div>
+            <div className="s-email-change-actions">
+              <button
+                type="button"
+                className="s-btn s-btn--primary"
+                onClick={handleVerifyEmailChange}
+                disabled={emailVerifying}
+              >
+                {emailVerifying ? "Verifying..." : "Confirm"}
+              </button>
+              <button type="button" className="s-btn s-btn--ghost" onClick={resetEmailFlow}>
+                Cancel
+              </button>
+            </div>
+            <p className="s-email-resend">
+              Didn't get it?{" "}
+              {emailResendTimer > 0 ? (
+                <span>Resend in {emailResendTimer}s</span>
+              ) : (
+                <button
+                  type="button"
+                  className="s-btn s-btn--link"
+                  onClick={handleResendEmailOtp}
+                  disabled={emailResending}
+                >
+                  {emailResending ? "Sending..." : "Resend code"}
+                </button>
+              )}
+            </p>
+          </div>
+        )}
       </div>
       <div className="s-divider" />
       <button

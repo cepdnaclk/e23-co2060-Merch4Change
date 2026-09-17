@@ -1,27 +1,86 @@
+/* ============================================
+   LIGHT MODE VARIABLES (DEFAULT)
+   ============================================ */
 .create-post-overlay {
+  --overlay-bg: rgba(0, 0, 0, 0.5);
+  --modal-bg: #ffffff;
+  --modal-border: #e5e7eb;
+  --text-main: #111827;
+  --text-muted: #6b7280;
+  --placeholder-text: #9ca3af;
+  
+  --hover-bg: #f3f4f6;
+  --footer-bg: #f9fafb;
+  
+  --brand: #4a24e1;
+  --brand-hover: #3a1cbf;
+  --brand-light-bg: rgba(74, 36, 225, 0.1);
+  --brand-shadow: rgba(74, 36, 225, 0.25);
+  
+  --disabled-bg: #e5e7eb;
+  --disabled-text: #9ca3af;
+  
+  --error-bg: #fee2e2;
+  --error-text: #dc2626;
+
   position: fixed;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: var(--overlay-bg);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 9999;
   padding: 1rem;
+  box-sizing: border-box;
 }
 
+/* ============================================
+   DARK MODE VARIABLES (HIGH SPECIFICITY)
+   ============================================ */
+html.dark .create-post-overlay,
+body.dark .create-post-overlay,
+html[data-theme="dark"] .create-post-overlay,
+body[data-theme="dark"] .create-post-overlay,
+.create-post-overlay.dark {
+  --overlay-bg: rgba(0, 0, 0, 0.75);
+  --modal-bg: #1f2937;
+  --modal-border: #374151;
+  --text-main: #f9fafb;
+  --text-muted: #9ca3af;
+  --placeholder-text: #6b7280;
+  
+  --hover-bg: #374151;
+  --footer-bg: #111827;
+  
+  --brand: #6366f1;
+  --brand-hover: #818cf8;
+  --brand-light-bg: rgba(99, 102, 241, 0.2);
+  --brand-shadow: rgba(99, 102, 241, 0.3);
+  
+  --disabled-bg: #374151;
+  --disabled-text: #6b7280;
+  
+  --error-bg: rgba(239, 68, 68, 0.2);
+  --error-text: #fca5a5;
+}
+
+/* ============================================
+   MODAL COMPONENT STYLES
+   ============================================ */
 .create-post-modal {
-  background-color: #ffffff;
+  background-color: var(--modal-bg) !important;
+  border: 1px solid var(--modal-border);
   border-radius: 16px;
   width: 100%;
   max-width: 550px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   animation: modalFadeIn 0.2s ease-out;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 @keyframes modalFadeIn {
@@ -40,22 +99,23 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #eaeaea;
+  border-bottom: 1px solid var(--modal-border);
+  background-color: var(--modal-bg);
 }
 
 .create-post-header h2 {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
-  color: #333333;
+  color: var(--text-main);
 }
 
 .close-btn {
   background: none;
   border: none;
-  color: #888888;
+  color: var(--text-muted);
   cursor: pointer;
-  padding: 0.25rem;
+  padding: 0.35rem;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -64,8 +124,8 @@
 }
 
 .close-btn:hover:not(:disabled) {
-  background-color: #f8f9fb;
-  color: #333333;
+  background-color: var(--hover-bg);
+  color: var(--text-main);
 }
 
 .close-btn:disabled {
@@ -76,22 +136,24 @@
 .create-post-form {
   display: flex;
   flex-direction: column;
+  background-color: var(--modal-bg);
 }
 
 .create-post-textarea {
   width: 100%;
   border: none;
   padding: 1.5rem;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   resize: none;
-  background-color: transparent;
-  color: #333333;
+  background-color: transparent !important;
+  color: var(--text-main) !important;
   outline: none;
   font-family: inherit;
+  box-sizing: border-box;
 }
 
 .create-post-textarea::placeholder {
-  color: #aaaaaa;
+  color: var(--placeholder-text);
 }
 
 .create-post-image-preview {
@@ -107,7 +169,7 @@
   aspect-ratio: 1;
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid #eaeaea;
+  border: 1px solid var(--modal-border);
 }
 
 .preview-item img {
@@ -121,7 +183,7 @@
   top: 4px;
   right: 4px;
   background-color: rgba(0, 0, 0, 0.6);
-  color: white;
+  color: #ffffff;
   border: none;
   border-radius: 50%;
   padding: 4px;
@@ -136,18 +198,13 @@
   background-color: rgba(0, 0, 0, 0.8);
 }
 
-.remove-image-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
 .create-post-error {
   margin: 0 1.5rem 1rem;
   padding: 0.75rem 1rem;
-  background-color: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  background-color: var(--error-bg);
+  color: var(--error-text);
   border-radius: 8px;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
 }
 
 .create-post-footer {
@@ -155,8 +212,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1.5rem;
-  border-top: 1px solid #eaeaea;
-  background-color: #f4f5f8;
+  border-top: 1px solid var(--modal-border);
+  background-color: var(--footer-bg);
 }
 
 .create-post-actions {
@@ -172,7 +229,7 @@
 .add-image-btn {
   background: none;
   border: none;
-  color: #4a24e1;
+  color: var(--brand);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -184,7 +241,7 @@
 }
 
 .add-image-btn:hover:not(:disabled) {
-  background-color: rgba(74, 36, 225, 0.1);
+  background-color: var(--brand-light-bg);
 }
 
 .add-image-btn:disabled {
@@ -194,12 +251,12 @@
 
 .image-count-text {
   font-size: 0.85rem;
-  color: #888888;
+  color: var(--text-muted);
 }
 
 .submit-post-btn {
-  background-color: #4a24e1;
-  color: white;
+  background-color: var(--brand);
+  color: #ffffff;
   border: none;
   padding: 0.6rem 1.5rem;
   border-radius: 20px;
@@ -210,17 +267,17 @@
   align-items: center;
   gap: 0.5rem;
   transition: all 0.2s;
-  box-shadow: 0 5px 15px rgba(74, 36, 225, 0.3);
+  box-shadow: 0 4px 12px var(--brand-shadow);
 }
 
 .submit-post-btn:hover:not(:disabled) {
-  background-color: #3a1cbf;
+  background-color: var(--brand-hover);
   transform: translateY(-1px);
 }
 
 .submit-post-btn:disabled {
-  background-color: #e0e0e0;
-  color: #888888;
+  background-color: var(--disabled-bg);
+  color: var(--disabled-text);
   cursor: not-allowed;
   transform: none;
   box-shadow: none;

@@ -15,7 +15,7 @@ export const getOrgProfileByUsername = asyncHandler(async (req, res) => {
 
   const cleanParam = decodeURIComponent(username || "").trim();
   const alphanumericOnly = cleanParam.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const fuzzyPattern = cleanParam.replace(/[-_]/g, "[\\s-_]*");
+  const fuzzyPattern = cleanParam.replace(/[-_]/g, "[\\s\\-_]*");
   const fuzzyRegex = new RegExp(`^${fuzzyPattern}$`, "i");
 
   let user = await User.findOne({

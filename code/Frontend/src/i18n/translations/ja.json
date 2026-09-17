@@ -1,0 +1,189 @@
+{
+  "common": {
+    "appName": "Merch4Change",
+    "save": "保存",
+    "saving": "保存中...",
+    "cancel": "キャンセル",
+    "close": "閉じる",
+    "edit": "編集",
+    "delete": "削除",
+    "loading": "読み込み中...",
+    "search": "検索",
+    "seeAll": "すべて見る",
+    "back": "戻る",
+    "next": "次へ",
+    "submit": "送信",
+    "confirm": "確認",
+    "yes": "はい",
+    "no": "いいえ",
+    "signIn": "ログイン",
+    "signUp": "登録",
+    "getStarted": "はじめる",
+    "logout": "ログアウト",
+    "viewAll": "すべて見る",
+    "readMore": "続きを読む",
+    "logoutConfirm": "ログアウトしますか？"
+  },
+  "nav": {
+    "home": "ホーム",
+    "search": "検索",
+    "messages": "メッセージ",
+    "notifications": "通知",
+    "marketplace": "マーケットプレイス",
+    "collections": "コレクション",
+    "analytics": "アナリティクス",
+    "donations": "寄付",
+    "leaderboard": "リーダーボード",
+    "charityVerification": "チャリティ認証",
+    "settings": "設定",
+    "addProject": "プロジェクトを追加",
+    "createPost": "投稿を作成"
+  },
+  "publicNav": {
+    "marketplace": "マーケットプレイス",
+    "forOrganisations": "団体向け",
+    "impact": "インパクト"
+  },
+  "footer": {
+    "tagline": "インパクト主導の商取引でコミュニティに力を。お気に入りのブランドとつながり、変化を生み出しましょう。",
+    "aboutUs": "私たちについて",
+    "ourStory": "私たちのストーリー",
+    "ourMission": "私たちのミッション",
+    "teamAntigravity": "Team Antigravity",
+    "support": "サポート",
+    "helpCenter": "ヘルプセンター",
+    "howItWorks": "利用方法",
+    "faqs": "よくある質問",
+    "contactUs": "お問い合わせ",
+    "legal": "法的情報",
+    "privacyPolicy": "プライバシーポリシー",
+    "termsOfService": "利用規約",
+    "cookiePolicy": "クッキーポリシー",
+    "rightsReserved": "全著作権所有。"
+  },
+  "settings": {
+    "sidebar": {
+      "account": "アカウント",
+      "preferences": "環境設定",
+      "more": "その他",
+      "profile": "プロフィール",
+      "security": "セキュリティ",
+      "privacy": "プライバシー",
+      "notifications": "通知",
+      "appearance": "外観",
+      "language": "言語",
+      "help": "ヘルプとサポート",
+      "logout": "ログアウト",
+      "organizationVerification": "団体認証",
+      "editProfile": "プロフィールを編集",
+      "accountSecurity": "アカウントセキュリティ",
+      "header": "設定"
+    },
+    "language": {
+      "title": "言語",
+      "description": "アプリで使用する言語を選択してください。",
+      "appLanguage": "アプリの言語",
+      "updateSuccess": "言語設定を更新しました！",
+      "loadError": "言語設定の読み込みに失敗しました"
+    },
+    "appearance": {
+      "title": "外観",
+      "description": "デバイス上でのMerch4Changeの表示方法をカスタマイズします。",
+      "theme": "テーマ",
+      "light": "ライト",
+      "dark": "ダーク",
+      "system": "システム",
+      "fontSize": "文字サイズ",
+      "small": "小",
+      "medium": "中",
+      "large": "大",
+      "updateSuccess": "外観を更新しました！"
+    },
+    "notifications": {
+      "title": "通知",
+      "description": "通知を受け取る内容を選択してください。"
+    },
+    "privacy": {
+      "title": "プライバシー"
+    },
+    "security": {
+      "title": "セキュリティ"
+    },
+    "profile": {
+      "title": "プロフィール"
+    },
+    "help": {
+      "title": "ヘルプとサポート"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "おかえりなさい",
+      "subtitle": "Merch4Changeを続けるにはログインしてください",
+      "email": "メールアドレス",
+      "password": "パスワード",
+      "forgotPassword": "パスワードをお忘れですか？",
+      "loginButton": "ログイン",
+      "noAccount": "アカウントをお持ちでないですか？",
+      "signUp": "登録"
+    },
+    "signup": {
+      "title": "アカウントを作成",
+      "haveAccount": "すでにアカウントをお持ちですか？",
+      "logIn": "ログイン"
+    }
+  },
+  "home": {
+    "title": "ホーム",
+    "trendingNow": "今のトレンド",
+    "forYou": "あなたへのおすすめ"
+  },
+  "marketplace": {
+    "title": "マーケットプレイス",
+    "trending": "トレンド",
+    "guestBlockTitle": "マーケットプレイスで購入するにはログインしてください",
+    "emptyTitle": "商品が見つかりません"
+  },
+  "leaderboard": {
+    "title": "リーダーボード",
+    "topDonors": "トップ寄付者"
+  },
+  "donations": {
+    "title": "寄付",
+    "donate": "寄付する",
+    "myDonations": "自分の寄付"
+  },
+  "messaging": {
+    "title": "メッセージ",
+    "noConversation": "チャットを始めるには会話を選択してください"
+  },
+  "notificationsPage": {
+    "title": "通知",
+    "empty": "新しい通知はありません！"
+  },
+  "search": {
+    "title": "検索",
+    "placeholder": "Merch4Changeを検索"
+  },
+  "about": {
+    "ourStory": "私たちのストーリー",
+    "ourMission": "私たちのミッション",
+    "team": "Team Antigravity"
+  },
+  "faq": {
+    "title": "よくある質問"
+  },
+  "help": {
+    "title": "ヘルプとサポート",
+    "contact": "お問い合わせ"
+  },
+  "profile": {
+    "posts": "投稿",
+    "followers": "フォロワー",
+    "following": "フォロー中"
+  },
+  "underConstruction": {
+    "title": "近日公開",
+    "message": "このページはまだ作成中です。またお越しください！"
+  }
+}

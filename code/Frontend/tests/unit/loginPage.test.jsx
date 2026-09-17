@@ -32,7 +32,7 @@ describe("LoginPage", () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/Please enter your email and password/i)).toBeInTheDocument();
+      expect(screen.getByText(/Please enter both your email address and password/i)).toBeInTheDocument();
     });
   });
 

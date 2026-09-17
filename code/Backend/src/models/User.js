@@ -37,6 +37,10 @@ const userSchema = new mongoose.Schema(
       minlength: 8,
       select: false, // default do not return pw in querying
     },
+    passwordChangedAt: {
+      type: Date,
+      default: null,
+    },
     accountType: {
       type: String,
       enum: ["individual", "organization"],
@@ -97,15 +101,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    bio: {
-      type: String,
-      default: "",
-    },
-    website: {
-      type: String,
-      default: "",
-      trim: true,
-    },
     location: {
       type: String,
       default: "",
@@ -120,6 +115,31 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
 
+    // ===== PENDING EMAIL CHANGE (OTP re-verification) =====
+    // Holds state for an in-progress email change. `email` above is only
+    // ever updated once the OTP sent to `pendingEmail` is verified.
+    pendingEmail: {
+      type: String,
+      default: null,
+      lowercase: true,
+      trim: true,
+    },
+    pendingEmailOtp: {
+      type: String,
+      default: null,
+      select: false,
+    },
+    pendingEmailOtpExpiresAt: {
+      type: Date,
+      default: null,
+      select: false,
+    },
+    pendingEmailOtpAttempts: {
+      type: Number,
+      default: 0,
+      select: false,
+    },
+
     // ===== SECURITY SETTINGS =====
     twoFactorEnabled: {
       type: Boolean,
@@ -128,6 +148,40 @@ const userSchema = new mongoose.Schema(
     loginActivityAlerts: {
       type: Boolean,
       default: true,
+    },
+
+    // ===== 2FA — ENABLING (OTP sent to confirm turning it on) =====
+    twoFactorSetupOtp: {
+      type: String,
+      default: null,
+      select: false,
+    },
+    twoFactorSetupOtpExpiresAt: {
+      type: Date,
+      default: null,
+      select: false,
+    },
+    twoFactorSetupOtpAttempts: {
+      type: Number,
+      default: 0,
+      select: false,
+    },
+
+    // ===== 2FA — LOGIN CHALLENGE (OTP sent at login time) =====
+    loginOtp: {
+      type: String,
+      default: null,
+      select: false,
+    },
+    loginOtpExpiresAt: {
+      type: Date,
+      default: null,
+      select: false,
+    },
+    loginOtpAttempts: {
+      type: Number,
+      default: 0,
+      select: false,
     },
 
     // ===== PRIVACY SETTINGS =====
