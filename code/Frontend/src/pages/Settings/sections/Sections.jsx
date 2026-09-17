@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import apiClient, { setAccessToken } from "../../../api/apiClient.js";
 import { useTheme } from "../../../context/ThemeContext";
 import { useI18n } from "../../../i18n/I18nContext";
+import { useAuth } from "../../../context/Context";
 import "./SettingsSection.css";
 
 // Re-export ProfileSection from ProfileSection.jsx to maintain single source of truth
@@ -772,6 +773,7 @@ export function LanguageSection({ profileData, onUpdate }) {
 // HELP & SUPPORT SECTION
 // ==========================================
 export function HelpSection() {
+  const { logout } = useAuth();
   const [deletePassword, setDeletePassword] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -800,6 +802,7 @@ export function HelpSection() {
 
       if (res.data?.success) {
         showToast("Account deleted. Redirecting...", "success");
+        logout();
         setTimeout(() => {
           window.location.href = "/";
         }, 1200);
