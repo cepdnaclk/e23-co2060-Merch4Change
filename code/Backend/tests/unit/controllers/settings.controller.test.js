@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import bcrypt from "bcryptjs";
 
 import { createMockResponse } from "../helpers/http.js";
+import { mockEmailTransport } from "../helpers/email.js";
 import User from "../../../src/models/User.js";
 import Post from "../../../src/models/Post.js";
 import Like from "../../../src/models/Like.js";
@@ -12,14 +13,17 @@ import Story from "../../../src/models/Story.js";
 import StoryCollection from "../../../src/models/StoryCollection.js";
 import UserBadge from "../../../src/models/UserBadge.js";
 import Product from "../../../src/models/Product.js";
+import OtpResendRecord from "../../../src/models/OtpResendRecord.js";
 import crypto from "crypto";
 import {
   updateProfileSettings,
   requestEmailChange,
+  resendEmailChangeOtp,
   verifyEmailChange,
   updateSecuritySettings,
   requestEnable2FA,
   verifyEnable2FA,
+  disable2FA,
   changePassword,
   updatePrivacySettings,
   updateNotificationSettings,
@@ -27,6 +31,8 @@ import {
   updateLanguageSettings,
   deleteAccount,
 } from "../../../src/controllers/settings.controller.js";
+
+mockEmailTransport();
 
 const baseReq = (overrides = {}) => ({
   user: { _id: "user1" },
@@ -70,13 +76,311 @@ test("updateProfileSettings falls back to the avatarUrl string when there is no 
 test("updateSecuritySettings only sets fields that are actual booleans", async (t) => {
   const update = t.mock.method(User, "findByIdAndUpdate", async (id, data) => ({ _id: id, ...data }));
 
-  const req = baseReq({ body: { loginActivityAlerts: true, bogusField: "not-a-boolean" } });
+  const req = baseReq({ body: { loginActivityAlerts: true } });
   const res = createMockResponse();
 
   await updateSecuritySettings(req, res, () => {});
 
   const [, updateData] = update.mock.calls[0].arguments;
   assert.deepEqual(updateData, { loginActivityAlerts: true });
+  assert.equal(res.statusCode, 200);
+});
+
+test("updateSecuritySettings ignores twoFactorEnabled — that's only settable via the OTP-gated 2FA endpoints", async (t) => {
+  const update = t.mock.method(User, "findByIdAndUpdate", async (id, data) => ({ _id: id, ...data }));
+
+  const req = baseReq({ body: { twoFactorEnabled: true, loginActivityAlerts: "not-a-boolean" } });
+  const res = createMockResponse();
+
+  await updateSecuritySettings(req, res, () => {});
+
+  const [, updateData] = update.mock.calls[0].arguments;
+  assert.deepEqual(updateData, {});
+  assert.equal(res.statusCode, 200);
+});
+
+// ==========================================
+// EMAIL CHANGE (OTP re-verification)
+// ==========================================
+test("requestEmailChange rejects an incorrect current password", async (t) => {
+  t.mock.method(User, "findById", () => ({
+    select: async () => ({ _id: "user1", email: "old@example.com", password: "hashed-old" }),
+  }));
+  t.mock.method(bcrypt, "compare", async () => false);
+
+  const req = baseReq({ body: { newEmail: "new@example.com", currentPassword: "wrong" } });
+  const res = createMockResponse();
+
+  await assert.rejects(
+    () => requestEmailChange(req, res),
+    (err) => {
+      assert.equal(err.code, "INVALID_PASSWORD");
+      return true;
+    }
+  );
+});
+
+test("requestEmailChange rejects when the new email matches the current one", async (t) => {
+  t.mock.method(User, "findById", () => ({
+    select: async () => ({ _id: "user1", email: "same@example.com", password: "hashed" }),
+  }));
+  t.mock.method(bcrypt, "compare", async () => true);
+
+  const req = baseReq({ body: { newEmail: "same@example.com", currentPassword: "correct" } });
+  const res = createMockResponse();
+
+  await assert.rejects(
+    () => requestEmailChange(req, res),
+    (err) => {
+      assert.equal(err.code, "SAME_EMAIL");
+      return true;
+    }
+  );
+});
+
+test("requestEmailChange rejects an email already taken by another account", async (t) => {
+  t.mock.method(User, "findById", () => ({
+    select: async () => ({ _id: "user1", email: "old@example.com", password: "hashed" }),
+  }));
+  t.mock.method(bcrypt, "compare", async () => true);
+  t.mock.method(User, "findOne", async () => ({ _id: "user2", email: "new@example.com" }));
+
+  const req = baseReq({ body: { newEmail: "new@example.com", currentPassword: "correct" } });
+  const res = createMockResponse();
+
+  await assert.rejects(
+    () => requestEmailChange(req, res),
+    (err) => {
+      assert.equal(err.code, "EMAIL_TAKEN");
+      return true;
+    }
+  );
+});
+
+test("requestEmailChange rejects a request made before the resend cooldown has elapsed", async (t) => {
+  t.mock.method(User, "findById", () => ({
+    select: async () => ({ _id: "user1", email: "old@example.com", password: "hashed" }),
+  }));
+  t.mock.method(bcrypt, "compare", async () => true);
+  t.mock.method(User, "findOne", async () => null);
+  t.mock.method(OtpResendRecord, "findOne", async () => ({
+    email: "new@example.com",
+    count: 1, // one request already sent — next one is throttled for 120s
+    lastRequestAt: new Date(), // just now
+  }));
+
+  const req = baseReq({ body: { newEmail: "new@example.com", currentPassword: "correct" } });
+  const res = createMockResponse();
+
+  await assert.rejects(
+    () => requestEmailChange(req, res),
+    (err) => {
+      assert.equal(err.code, "RATE_LIMIT_EXCEEDED");
+      assert.equal(err.statusCode, 429);
+      return true;
+    }
+  );
+});
+
+test("resendEmailChangeOtp rejects when there is no pending email change", async (t) => {
+  t.mock.method(User, "findById", () => ({ select: async () => ({ pendingEmail: null }) }));
+
+  const req = baseReq();
+  const res = createMockResponse();
+
+  await assert.rejects(
+    () => resendEmailChangeOtp(req, res),
+    (err) => {
+      assert.equal(err.code, "NO_PENDING_EMAIL_CHANGE");
+      return true;
+    }
+  );
+});
+
+test("verifyEmailChange rejects a missing OTP code", async () => {
+  const req = baseReq({ body: {} });
+  const res = createMockResponse();
+
+  await assert.rejects(
+    () => verifyEmailChange(req, res),
+    (err) => {
+      assert.equal(err.code, "VALIDATION_ERROR");
+      return true;
+    }
+  );
+});
+
+test("verifyEmailChange rejects when there is no pending email change", async (t) => {
+  t.mock.method(User, "findById", () => ({
+    select: async () => ({ pendingEmail: null, pendingEmailOtp: null }),
+  }));
+
+  const req = baseReq({ body: { otp: "123456" } });
+  const res = createMockResponse();
+
+  await assert.rejects(
+    () => verifyEmailChange(req, res),
+    (err) => {
+      assert.equal(err.code, "NO_PENDING_EMAIL_CHANGE");
+      return true;
+    }
+  );
+});
+
+test("verifyEmailChange rejects an expired code and clears the pending state", async (t) => {
+  const savedUser = {
+    pendingEmail: "new@example.com",
+    pendingEmailOtp: "111111",
+    pendingEmailOtpExpiresAt: new Date(Date.now() - 1000),
+    save: async function () {},
+  };
+  t.mock.method(User, "findById", () => ({ select: async () => savedUser }));
+
+  const req = baseReq({ body: { otp: "111111" } });
+  const res = createMockResponse();
+
+  await assert.rejects(
+    () => verifyEmailChange(req, res),
+    (err) => {
+      assert.equal(err.code, "OTP_EXPIRED");
+      return true;
+    }
+  );
+  assert.equal(savedUser.pendingEmail, null);
+});
+
+test("verifyEmailChange rejects an incorrect code", async (t) => {
+  const savedUser = {
+    pendingEmail: "new@example.com",
+    pendingEmailOtp: "111111",
+    pendingEmailOtpExpiresAt: new Date(Date.now() + 60000),
+    save: async function () {},
+  };
+  t.mock.method(User, "findById", () => ({ select: async () => savedUser }));
+
+  const req = baseReq({ body: { otp: "000000" } });
+  const res = createMockResponse();
+
+  await assert.rejects(
+    () => verifyEmailChange(req, res),
+    (err) => {
+      assert.equal(err.code, "INVALID_OTP");
+      return true;
+    }
+  );
+});
+
+test("verifyEmailChange commits the new email on a correct, unexpired code", async (t) => {
+  const savedUser = {
+    _id: "user1",
+    pendingEmail: "new@example.com",
+    pendingEmailOtp: crypto.createHash("sha256").update("111111").digest("hex"),
+    pendingEmailOtpExpiresAt: new Date(Date.now() + 60000),
+    save: async function () {},
+  };
+  t.mock.method(User, "findById", () => ({ select: async () => savedUser }));
+  t.mock.method(User, "findOne", async () => null);
+
+  const req = baseReq({ body: { otp: "111111" } });
+  const res = createMockResponse();
+
+  await verifyEmailChange(req, res, () => {});
+
+  assert.equal(savedUser.email, "new@example.com");
+  assert.equal(savedUser.pendingEmail, null);
+  assert.equal(res.statusCode, 200);
+});
+
+// ==========================================
+// TWO-FACTOR AUTHENTICATION (enable/disable)
+// ==========================================
+test("requestEnable2FA rejects when 2FA is already enabled", async (t) => {
+  t.mock.method(User, "findById", async () => ({ twoFactorEnabled: true }));
+
+  const req = baseReq();
+  const res = createMockResponse();
+
+  await assert.rejects(
+    () => requestEnable2FA(req, res),
+    (err) => {
+      assert.equal(err.code, "2FA_ALREADY_ENABLED");
+      return true;
+    }
+  );
+});
+
+test("verifyEnable2FA rejects a missing OTP code", async () => {
+  const req = baseReq({ body: {} });
+  const res = createMockResponse();
+
+  await assert.rejects(
+    () => verifyEnable2FA(req, res),
+    (err) => {
+      assert.equal(err.code, "VALIDATION_ERROR");
+      return true;
+    }
+  );
+});
+
+test("verifyEnable2FA turns on 2FA for a correct code", async (t) => {
+  const savedUser = {
+    twoFactorSetupOtp: crypto.createHash("sha256").update("222222").digest("hex"),
+    twoFactorSetupOtpExpiresAt: new Date(Date.now() + 60000),
+    twoFactorEnabled: false,
+    save: async function () {},
+  };
+  t.mock.method(User, "findById", () => ({ select: async () => savedUser }));
+
+  const req = baseReq({ body: { otp: "222222" } });
+  const res = createMockResponse();
+
+  await verifyEnable2FA(req, res, () => {});
+
+  assert.equal(savedUser.twoFactorEnabled, true);
+  assert.equal(savedUser.twoFactorSetupOtp, null);
+  assert.equal(res.statusCode, 200);
+});
+
+test("disable2FA rejects a missing current password", async () => {
+  const req = baseReq({ body: {} });
+  const res = createMockResponse();
+
+  await assert.rejects(
+    () => disable2FA(req, res),
+    (err) => {
+      assert.equal(err.code, "VALIDATION_ERROR");
+      return true;
+    }
+  );
+});
+
+test("disable2FA rejects an incorrect password", async (t) => {
+  t.mock.method(User, "findById", () => ({ select: async () => ({ password: "hashed" }) }));
+  t.mock.method(bcrypt, "compare", async () => false);
+
+  const req = baseReq({ body: { currentPassword: "wrong" } });
+  const res = createMockResponse();
+
+  await assert.rejects(
+    () => disable2FA(req, res),
+    (err) => {
+      assert.equal(err.code, "INVALID_PASSWORD");
+      return true;
+    }
+  );
+});
+
+test("disable2FA turns off 2FA on a correct password", async (t) => {
+  const savedUser = { password: "hashed", twoFactorEnabled: true, save: async function () {} };
+  t.mock.method(User, "findById", () => ({ select: async () => savedUser }));
+  t.mock.method(bcrypt, "compare", async () => true);
+
+  const req = baseReq({ body: { currentPassword: "correct" } });
+  const res = createMockResponse();
+
+  await disable2FA(req, res, () => {});
+
+  assert.equal(savedUser.twoFactorEnabled, false);
   assert.equal(res.statusCode, 200);
 });
 

@@ -23,6 +23,45 @@ import { createAccessToken, createRefreshToken } from "./auth.controller.js";
 const OTP_EXPIRE_MIN = Number(process.env.OTP_EXPIRE_MIN) || 5;
 
 // ==========================================
+// SHARED OTP RESEND COOLDOWN HELPERS
+// Every OTP-request endpoint below (email change, 2FA enable) throttles
+// repeated requests with the same escalating backoff, keyed by an
+// OtpResendRecord. Centralized here so the schedule only lives in one place.
+// ==========================================
+const cooldownSecondsForCount = (count) => {
+  if (count === 1) return 120;
+  if (count === 2) return 300;
+  if (count >= 3) return 600;
+  return 60;
+};
+
+// Throws a 429 AppError if the record is still within its cooldown window.
+const assertOtpCooldownElapsed = (record) => {
+  const cooldownSeconds = cooldownSecondsForCount(record.count);
+  const lastRequestTime = record.lastRequestAt ? record.lastRequestAt.getTime() : 0;
+  const elapsedSeconds = Math.floor((Date.now() - lastRequestTime) / 1000);
+
+  if (record.count > 0 && elapsedSeconds < cooldownSeconds) {
+    const remainingSeconds = cooldownSeconds - elapsedSeconds;
+    throw new AppError(
+      `Please wait ${remainingSeconds} seconds before requesting another code.`,
+      429,
+      "RATE_LIMIT_EXCEEDED",
+      { remainingSeconds }
+    );
+  }
+};
+
+// Bumps the resend counter/timestamp and returns the cooldown the client
+// should wait before its *next* request.
+const registerOtpRequest = async (record) => {
+  record.count += 1;
+  record.lastRequestAt = new Date();
+  await record.save();
+  return cooldownSecondsForCount(record.count);
+};
+
+// ==========================================
 // PROFILE SETTINGS CONTROLLER
 // ==========================================
 export const updateProfileSettings = asyncHandler(async (req, res) => {
@@ -117,31 +156,12 @@ export const requestEmailChange = asyncHandler(async (req, res) => {
   if (!record) {
     record = new OtpResendRecord({ email: normalizedNewEmail, count: 0 });
   }
-
-  let cooldownSeconds = 60;
-  if (record.count === 1) cooldownSeconds = 120;
-  else if (record.count === 2) cooldownSeconds = 300;
-  else if (record.count >= 3) cooldownSeconds = 600;
-
-  const now = Date.now();
-  const lastRequestTime = record.lastRequestAt ? record.lastRequestAt.getTime() : 0;
-  const elapsedSeconds = Math.floor((now - lastRequestTime) / 1000);
-
-  if (elapsedSeconds < cooldownSeconds && record.count > 0) {
-    const remainingSeconds = cooldownSeconds - elapsedSeconds;
-    throw new AppError(
-      `Please wait ${remainingSeconds} seconds before requesting another code.`,
-      429,
-      "RATE_LIMIT_EXCEEDED",
-      { remainingSeconds }
-    );
-  }
+  assertOtpCooldownElapsed(record);
 
   const otpCode = crypto.randomInt(100000, 1000000).toString();
 
-  user.pendingEmail = normalizedNewEmail;
   user.pendingEmailOtp = crypto.createHash("sha256").update(otpCode).digest("hex");
-  user.pendingEmailOtpExpiresAt = new Date(now + OTP_EXPIRE_MIN * 60 * 1000);
+  user.pendingEmailOtpExpiresAt = new Date(Date.now() + OTP_EXPIRE_MIN * 60 * 1000);
   user.pendingEmailOtpAttempts = 0;
   await user.save();
 
@@ -154,14 +174,7 @@ export const requestEmailChange = asyncHandler(async (req, res) => {
     console.error("Failed to send email-change alert:", error.message);
   }
 
-  record.count += 1;
-  record.lastRequestAt = new Date();
-  await record.save();
-
-  let nextCooldown = 60;
-  if (record.count === 1) nextCooldown = 120;
-  else if (record.count === 2) nextCooldown = 300;
-  else if (record.count >= 3) nextCooldown = 600;
+  const nextCooldown = await registerOtpRequest(record);
 
   return successResponse(res, 200, "A verification code has been sent to your new email.", {
     pendingEmail: normalizedNewEmail,
@@ -189,42 +202,17 @@ export const resendEmailChangeOtp = asyncHandler(async (req, res) => {
   if (!record) {
     record = new OtpResendRecord({ email: user.pendingEmail, count: 0 });
   }
-
-  let cooldownSeconds = 60;
-  if (record.count === 1) cooldownSeconds = 120;
-  else if (record.count === 2) cooldownSeconds = 300;
-  else if (record.count >= 3) cooldownSeconds = 600;
-
-  const now = Date.now();
-  const lastRequestTime = record.lastRequestAt ? record.lastRequestAt.getTime() : 0;
-  const elapsedSeconds = Math.floor((now - lastRequestTime) / 1000);
-
-  if (elapsedSeconds < cooldownSeconds && record.count > 0) {
-    const remainingSeconds = cooldownSeconds - elapsedSeconds;
-    throw new AppError(
-      `Please wait ${remainingSeconds} seconds before requesting another code.`,
-      429,
-      "RATE_LIMIT_EXCEEDED",
-      { remainingSeconds }
-    );
-  }
+  assertOtpCooldownElapsed(record);
 
   const otpCode = crypto.randomInt(100000, 1000000).toString();
   user.pendingEmailOtp = crypto.createHash("sha256").update(otpCode).digest("hex");
-  user.pendingEmailOtpExpiresAt = new Date(now + OTP_EXPIRE_MIN * 60 * 1000);
+  user.pendingEmailOtpExpiresAt = new Date(Date.now() + OTP_EXPIRE_MIN * 60 * 1000);
   user.pendingEmailOtpAttempts = 0;
   await user.save();
 
   await sendOtpEmail(user.pendingEmail, otpCode);
 
-  record.count += 1;
-  record.lastRequestAt = new Date();
-  await record.save();
-
-  let nextCooldown = 60;
-  if (record.count === 1) nextCooldown = 120;
-  else if (record.count === 2) nextCooldown = 300;
-  else if (record.count >= 3) nextCooldown = 600;
+  const nextCooldown = await registerOtpRequest(record);
 
   return successResponse(res, 200, "A new verification code has been sent.", {
     nextCooldownSeconds: nextCooldown,
@@ -355,42 +343,17 @@ export const requestEnable2FA = asyncHandler(async (req, res) => {
   if (!record) {
     record = new OtpResendRecord({ email: user.email, count: 0 });
   }
-
-  let cooldownSeconds = 60;
-  if (record.count === 1) cooldownSeconds = 120;
-  else if (record.count === 2) cooldownSeconds = 300;
-  else if (record.count >= 3) cooldownSeconds = 600;
-
-  const now = Date.now();
-  const lastRequestTime = record.lastRequestAt ? record.lastRequestAt.getTime() : 0;
-  const elapsedSeconds = Math.floor((now - lastRequestTime) / 1000);
-
-  if (elapsedSeconds < cooldownSeconds && record.count > 0) {
-    const remainingSeconds = cooldownSeconds - elapsedSeconds;
-    throw new AppError(
-      `Please wait ${remainingSeconds} seconds before requesting another code.`,
-      429,
-      "RATE_LIMIT_EXCEEDED",
-      { remainingSeconds }
-    );
-  }
+  assertOtpCooldownElapsed(record);
 
   const otpCode = crypto.randomInt(100000, 1000000).toString();
   user.twoFactorSetupOtp = crypto.createHash("sha256").update(otpCode).digest("hex");
-  user.twoFactorSetupOtpExpiresAt = new Date(now + OTP_EXPIRE_MIN * 60 * 1000);
+  user.twoFactorSetupOtpExpiresAt = new Date(Date.now() + OTP_EXPIRE_MIN * 60 * 1000);
   user.twoFactorSetupOtpAttempts = 0;
   await user.save();
 
   await sendOtpEmail(user.email, otpCode);
 
-  record.count += 1;
-  record.lastRequestAt = new Date();
-  await record.save();
-
-  let nextCooldown = 60;
-  if (record.count === 1) nextCooldown = 120;
-  else if (record.count === 2) nextCooldown = 300;
-  else if (record.count >= 3) nextCooldown = 600;
+  const nextCooldown = await registerOtpRequest(record);
 
   return successResponse(res, 200, "A verification code has been sent to your email.", {
     nextCooldownSeconds: nextCooldown,
