@@ -654,7 +654,7 @@ export const deleteAccount = asyncHandler(async (req, res) => {
   if (!password) {
     throw new AppError("Password is required to delete account.", 400, "VALIDATION_ERROR");
   }
-
+cd
   // Get user with password field
   const user = await User.findById(req.user._id).select("+password");
 
@@ -676,6 +676,18 @@ export const deleteAccount = asyncHandler(async (req, res) => {
 
   // Notifications addressed to this user.
   await Notification.deleteMany({ userId });
+
+  // Update user following and followers list after deletion
+  // remove deleted user from the following list of others
+  const followingByUser = await Follow.find({ followerId: userId });
+  const idArray = followingByUser.map(f => f.followingId);
+  // update followings of the user
+  await User.updateMany({ _id: { $in: idArray } }, { $inc: { followersCount: -1 } });
+
+  const followersOfUser = await Follow.find({ followingId: userId });
+  const idFollowersArray = followersOfUser.map(f => f.followerId);
+  // update followings of the user
+  await User.updateMany({ _id: { $in: idFollowersArray } }, { $inc: { followingCount: -1 } });
 
   // Follow relationships in either direction.
   await Follow.deleteMany({ $or: [{ followerId: userId }, { followingId: userId }] });
