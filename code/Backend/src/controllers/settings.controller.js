@@ -654,7 +654,6 @@ export const deleteAccount = asyncHandler(async (req, res) => {
   if (!password) {
     throw new AppError("Password is required to delete account.", 400, "VALIDATION_ERROR");
   }
-cd
   // Get user with password field
   const user = await User.findById(req.user._id).select("+password");
 
@@ -714,6 +713,12 @@ cd
 
   // Finally, delete the user account itself.
   await User.findByIdAndDelete(userId);
+
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: env.nodeEnv === "production",
+    sameSite: env.nodeEnv === "production" ? "none" : "lax",
+  });
 
   return successResponse(res, 200, "Account deleted successfully.", {
     message: "Your account has been permanently deleted.",
