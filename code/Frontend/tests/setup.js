@@ -75,7 +75,15 @@ vi.mock("../src/context/ThemeContext", async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,
-    useTheme: () => mockThemeValue,
+    useTheme: () => {
+      try {
+        const ctx = actual.useTheme();
+        if (ctx) return ctx;
+      } catch {
+        // fallback to mock
+      }
+      return mockThemeValue;
+    },
   };
 });
 
