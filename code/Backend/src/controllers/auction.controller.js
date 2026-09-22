@@ -42,7 +42,8 @@ export const createAuction = async (req, res) => {
             startTime: startTime,
             endTime: endTime, 
             createdBy: req.user._id,
-            status: status
+            status: status,
+            bidIncrement: bidIncrement || undefined,
         });
 
         res.status(201).json({success: true, auction});
