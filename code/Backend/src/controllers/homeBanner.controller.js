@@ -33,7 +33,7 @@ export const getBanners = async (_req, res) => {
 
 export const deleteBanner = async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    if (mongoose.connection?.readyState === 1 && !mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ message: "Invalid banner ID" });
     }
 

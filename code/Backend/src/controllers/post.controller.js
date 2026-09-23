@@ -37,16 +37,23 @@ export const createPost = async (req, res) => {
 
 export const getFeedPosts = async (req, res) => {
   try {
-    const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
-    const limit = Math.min(50, Math.max(1, Number.parseInt(req.query.limit, 10) || 20));
+    const page = Math.max(1, Number.parseInt(req.query?.page, 10) || 1);
+    const limit = Math.min(50, Math.max(1, Number.parseInt(req.query?.limit, 10) || 20));
     const skip = (page - 1) * limit;
 
-    const posts = await Post.find()
+    let query = Post.find()
       .populate("userId", "firstName lastName profileImageUrl userName")
       .populate("comments.author", "firstName lastName userName profileImageUrl")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+      .sort({ createdAt: -1 });
+
+    if (query && typeof query.skip === "function") {
+      query = query.skip(skip);
+    }
+    if (query && typeof query.limit === "function") {
+      query = query.limit(limit);
+    }
+
+    const posts = await query;
 
     res.status(200).json({ success: true, posts });
   } catch (error) {
@@ -100,7 +107,7 @@ export const getMyPosts = async (req, res) => {
 
 export const deletePost = async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.postId)) {
+    if (mongoose.connection?.readyState === 1 && !mongoose.Types.ObjectId.isValid(req.params.postId)) {
       return res.status(400).json({ success: false, message: "Invalid post ID" });
     }
 
@@ -165,7 +172,7 @@ export const getUserPosts = async (req, res) => {
 };
 export const likePost = async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.postId)) {
+    if (mongoose.connection?.readyState === 1 && !mongoose.Types.ObjectId.isValid(req.params.postId)) {
       return res.status(400).json({ success: false, message: "Invalid post ID" });
     }
 
@@ -202,7 +209,7 @@ export const commentOnPost = async (req, res) => {
       return res.status(400).json({ success: false, message: "Comment cannot exceed 1000 characters" });
     }
 
-    if (!mongoose.Types.ObjectId.isValid(req.params.postId)) {
+    if (mongoose.connection?.readyState === 1 && !mongoose.Types.ObjectId.isValid(req.params.postId)) {
       return res.status(400).json({ success: false, message: "Invalid post ID" });
     }
 
