@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Post from "../models/Post.js";
 import User from "../models/User.js";
 import { getRecommendedPostsForUser } from "../services/postRecommendation.service.js";
@@ -5,8 +6,16 @@ import { uploadBufferToCloudinary } from "../utils/uploadToCloudinary.js";
 
 export const createPost = async (req, res) => {
   try {
-    const { content } = req.body;
+    const content = typeof req.body.content === "string" ? req.body.content.trim() : "";
     const userId = req.user._id;
+
+    if (!content && (!req.files || req.files.length === 0)) {
+      return res.status(400).json({ success: false, message: "Post must have either text content or an image" });
+    }
+
+    if (content.length > 5000) {
+      return res.status(400).json({ success: false, message: "Post content cannot exceed 5000 characters" });
+    }
 
     let images = [];
 
@@ -91,17 +100,23 @@ export const getMyPosts = async (req, res) => {
 
 export const deletePost = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.postId)) {
+      return res.status(400).json({ success: false, message: "Invalid post ID" });
+    }
+
     const post = await Post.findById(req.params.postId);
 
     if (!post) {
       return res.status(404).json({ success: false, message: "Post not found" });
     }
 
-    if (String(post.userId) !== String(req.user._id)) {
+    const isOwner = String(post.userId) === String(req.user._id);
+    const isAdmin = req.user.role === "admin";
+    if (!isOwner && !isAdmin) {
       return res.status(403).json({ success: false, message: "Forbidden" });
     }
 
-    await Post.findOneAndDelete({ _id: req.params.postId, userId: req.user._id });
+    await Post.findByIdAndDelete(req.params.postId);
 
     return res.status(200).json({ success: true, message: "Post deleted successfully" });
   } catch (error) {
@@ -150,6 +165,10 @@ export const getUserPosts = async (req, res) => {
 };
 export const likePost = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.postId)) {
+      return res.status(400).json({ success: false, message: "Invalid post ID" });
+    }
+
     const post = await Post.findById(req.params.postId);
     if (!post) {
       return res.status(404).json({ success: false, message: "Post not found" });
@@ -174,9 +193,17 @@ export const likePost = async (req, res) => {
 
 export const commentOnPost = async (req, res) => {
   try {
-    const { text } = req.body;
-    if (!text || text.trim() === "") {
+    const text = typeof req.body.text === "string" ? req.body.text.trim() : "";
+    if (!text) {
       return res.status(400).json({ success: false, message: "Comment text is required" });
+    }
+
+    if (text.length > 1000) {
+      return res.status(400).json({ success: false, message: "Comment cannot exceed 1000 characters" });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(req.params.postId)) {
+      return res.status(400).json({ success: false, message: "Invalid post ID" });
     }
 
     const post = await Post.findById(req.params.postId);
@@ -186,7 +213,7 @@ export const commentOnPost = async (req, res) => {
 
     const newComment = {
       author: req.user._id,
-      text: text.trim(),
+      text,
     };
 
     post.comments.push(newComment);
