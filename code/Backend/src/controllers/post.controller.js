@@ -150,10 +150,11 @@ export const likePost = async (req, res) => {
     }
 
     const userId = req.user._id;
-    const hasLiked = post.likes.includes(userId);
+    const userIdStr = String(userId);
+    const hasLiked = post.likes.some((id) => String(id) === userIdStr);
 
     if (hasLiked) {
-      post.likes = post.likes.filter((id) => id.toString() !== userId.toString());
+      post.likes = post.likes.filter((id) => String(id) !== userIdStr);
     } else {
       post.likes.push(userId);
     }
