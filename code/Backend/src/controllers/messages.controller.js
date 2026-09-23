@@ -273,7 +273,10 @@ export const createConversation = asyncHandler(async (req, res) => {
 export const getConversationThread = asyncHandler(async (req, res) => {
   const conversation = await getConversationForCurrentUser(req.params.conversationId, req.user._id);
 
-  const messages = await Message.find({ conversationId: conversation._id }).sort({ createdAt: 1 });
+  const limit = Math.min(100, Math.max(1, Number.parseInt(req.query.limit, 10) || 50));
+  const messages = await Message.find({ conversationId: conversation._id })
+    .sort({ createdAt: 1 })
+    .limit(limit);
   const otherUser = conversation.participants.find(
     (participant) => String(participant._id) !== String(req.user._id),
   );

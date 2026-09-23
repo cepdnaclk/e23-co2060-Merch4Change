@@ -53,16 +53,18 @@ export const createDonation = asyncHandler(async (req, res) => {
   }
 
   let charity = null;
-  try {
-    charity = await Charity.findById(charityId);
-  } catch {
-    charity = null;
-  }
-  if (!charity) {
+  if (mongoose.isValidObjectId(charityId)) {
     try {
-      charity = await Charity.findOne({ ownerUserId: charityId });
+      charity = await Charity.findById(charityId);
     } catch {
       charity = null;
+    }
+    if (!charity) {
+      try {
+        charity = await Charity.findOne({ ownerUserId: charityId });
+      } catch {
+        charity = null;
+      }
     }
   }
   if (!charity) {

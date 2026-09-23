@@ -132,3 +132,18 @@ test("protect rejects tokens issued before passwordChangedAt", async (t) => {
   assert.equal(nextArg?.statusCode, 401);
   assert.equal(nextArg?.code, "TOKEN_EXPIRED");
 });
+
+test("protect rejects tokens with purpose claim (e.g. login_2fa)", async () => {
+  const token = jwt.sign({ userId: "user-1", purpose: "login_2fa" }, env.jwtSecret);
+  const req = { headers: { authorization: `Bearer ${token}` } };
+  let nextArg;
+  protect(req, {}, (error) => {
+    nextArg = error;
+  });
+  await nextTick();
+
+  assert.equal(nextArg?.name, "AppError");
+  assert.equal(nextArg?.statusCode, 401);
+  assert.equal(nextArg?.code, "INVALID_TOKEN");
+});
+

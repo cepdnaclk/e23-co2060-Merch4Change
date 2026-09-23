@@ -28,10 +28,16 @@ export const createPost = async (req, res) => {
 
 export const getFeedPosts = async (req, res) => {
   try {
+    const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(50, Math.max(1, Number.parseInt(req.query.limit, 10) || 20));
+    const skip = (page - 1) * limit;
+
     const posts = await Post.find()
-      .populate("userId", "firstName lastName profileImage profileImageUrl userName")
+      .populate("userId", "firstName lastName profileImageUrl userName")
       .populate("comments.author", "firstName lastName userName profileImageUrl")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
     res.status(200).json({ success: true, posts });
   } catch (error) {
@@ -150,10 +156,11 @@ export const likePost = async (req, res) => {
     }
 
     const userId = req.user._id;
-    const hasLiked = post.likes.includes(userId);
+    const userIdStr = String(userId);
+    const hasLiked = post.likes.some((id) => String(id) === userIdStr);
 
     if (hasLiked) {
-      post.likes = post.likes.filter((id) => id.toString() !== userId.toString());
+      post.likes = post.likes.filter((id) => String(id) !== userIdStr);
     } else {
       post.likes.push(userId);
     }

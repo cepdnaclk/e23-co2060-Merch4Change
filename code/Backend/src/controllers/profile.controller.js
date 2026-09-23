@@ -12,6 +12,7 @@ import Donation from "../models/Donation.js";
 import Project from "../models/Project.js";
 import mongoose from "mongoose";
 import AppError from "../utils/appError.js";
+import escapeRegex from "../utils/escapeRegex.js";
 
 export const me = asyncHandler(async (req, res) => {
   const userObj = req.user.toObject ? req.user.toObject() : { ...req.user };
@@ -89,16 +90,17 @@ export const getProfileByUsername = asyncHandler(async (req, res) => {
   const { username } = req.params;
 
   const cleanParam = decodeURIComponent(username || "").trim();
+  const escapedParam = escapeRegex(cleanParam);
   const alphanumericOnly = cleanParam.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const fuzzyPattern = cleanParam.replace(/[-_]/g, "[\\s\\-_]*");
+  const fuzzyPattern = escapedParam.replace(/[-_]/g, "[\\s\\-_]*");
   const fuzzyRegex = new RegExp(`^${fuzzyPattern}$`, "i");
 
   let user = await User.findOne({
     $or: [
-      { userName: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
-      { userName: { $regex: new RegExp(`^${alphanumericOnly}$`, "i") } },
+      { userName: { $regex: new RegExp(`^${escapedParam}$`, "i") } },
+      { userName: { $regex: new RegExp(`^${escapeRegex(alphanumericOnly)}$`, "i") } },
       { userName: { $regex: fuzzyRegex } },
-      { firstName: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
+      { firstName: { $regex: new RegExp(`^${escapedParam}$`, "i") } },
       { firstName: { $regex: fuzzyRegex } },
       ...(mongoose.isValidObjectId(cleanParam) ? [{ _id: cleanParam }] : []),
     ],
@@ -110,7 +112,7 @@ export const getProfileByUsername = asyncHandler(async (req, res) => {
   } else {
     charity = await Charity.findOne({
       $or: [
-        { publicName: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
+        { publicName: { $regex: new RegExp(`^${escapedParam}$`, "i") } },
         { publicName: { $regex: fuzzyRegex } },
         ...(mongoose.isValidObjectId(cleanParam) ? [{ _id: cleanParam }, { ownerUserId: cleanParam }] : []),
       ],
@@ -176,10 +178,11 @@ export const getProfileByUsername = asyncHandler(async (req, res) => {
 
 export const followUser = asyncHandler(async (req, res) => {
   const { username } = req.params;
+  const escapedUsername = escapeRegex(username);
 
   const userToFollow = await User.findOne({
     $or: [
-      { userName: { $regex: new RegExp(`^${username}$`, "i") } },
+      { userName: { $regex: new RegExp(`^${escapedUsername}$`, "i") } },
       ...(mongoose.isValidObjectId(username) ? [{ _id: username }] : []),
     ],
   });
@@ -228,10 +231,11 @@ export const followUser = asyncHandler(async (req, res) => {
 
 export const unfollowUser = asyncHandler(async (req, res) => {
   const { username } = req.params;
+  const escapedUsername = escapeRegex(username);
 
   const userToUnfollow = await User.findOne({
     $or: [
-      { userName: { $regex: new RegExp(`^${username}$`, "i") } },
+      { userName: { $regex: new RegExp(`^${escapedUsername}$`, "i") } },
       ...(mongoose.isValidObjectId(username) ? [{ _id: username }] : []),
     ],
   });
@@ -266,11 +270,25 @@ export const getSuggestedUsers = asyncHandler(async (req, res) => {
   // Add the current user to the exclusion list
   followingIds.push(req.user._id);
 
-  // Fetch up to 5 random users not in the exclusion list
+  // Fetch up to 5 random users not in the exclusion list with safe public fields only
   const suggestedUsers = await User.aggregate([
-    { $match: { _id: { $nin: followingIds } } },
+    { $match: { _id: { $nin: followingIds }, isActive: true } },
     { $sample: { size: 5 } },
-    { $project: { password: 0, email: 0, resetPasswordToken: 0, resetPasswordExpires: 0, accountType: 0 } }
+    {
+      $project: {
+        _id: 1,
+        firstName: 1,
+        lastName: 1,
+        userName: 1,
+        profileImageUrl: 1,
+        avatarUrl: 1,
+        role: 1,
+        isVerified: 1,
+        profileBio: 1,
+        followersCount: 1,
+        followingCount: 1,
+      },
+    },
   ]);
 
   return successResponse(res, 200, "Suggested users fetched successfully.", {
@@ -283,8 +301,9 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
 
   let targetUser = null;
   const cleanParam = decodeURIComponent(username || "").trim();
+  const escapedParam = escapeRegex(cleanParam);
   const alphanumericOnly = cleanParam.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const fuzzyPattern = cleanParam.replace(/[-_]/g, "[\\s\\-_]*");
+  const fuzzyPattern = escapedParam.replace(/[-_]/g, "[\\s\\-_]*");
   const fuzzyRegex = new RegExp(`^${fuzzyPattern}$`, "i");
 
   if (username === "me" && req.user) {
@@ -292,10 +311,10 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
   } else if (username) {
     targetUser = await User.findOne({
       $or: [
-        { userName: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
-        { userName: { $regex: new RegExp(`^${alphanumericOnly}$`, "i") } },
+        { userName: { $regex: new RegExp(`^${escapedParam}$`, "i") } },
+        { userName: { $regex: new RegExp(`^${escapeRegex(alphanumericOnly)}$`, "i") } },
         { userName: { $regex: fuzzyRegex } },
-        { firstName: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
+        { firstName: { $regex: new RegExp(`^${escapedParam}$`, "i") } },
         { firstName: { $regex: fuzzyRegex } },
         ...(mongoose.isValidObjectId(cleanParam) ? [{ _id: cleanParam }] : []),
       ],
@@ -314,7 +333,7 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
   } else if (username) {
     charity = await Charity.findOne({
       $or: [
-        { publicName: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
+        { publicName: { $regex: new RegExp(`^${escapedParam}$`, "i") } },
         { publicName: { $regex: fuzzyRegex } },
         ...(mongoose.isValidObjectId(cleanParam) ? [{ _id: cleanParam }, { ownerUserId: cleanParam }] : []),
       ],
