@@ -54,10 +54,33 @@ export const getProduct = asyncHandler(async (req, res) => {
   });
 });
 
+const ALLOWED_PRODUCT_FIELDS = [
+  "name",
+  "description",
+  "price",
+  "stock",
+  "currency",
+  "images",
+  "imageUrl",
+  "isPublished",
+  "isLimitedEdition",
+];
+
+const pickProductFields = (source = {}) => {
+  const clean = {};
+  for (const field of ALLOWED_PRODUCT_FIELDS) {
+    if (Object.prototype.hasOwnProperty.call(source, field)) {
+      clean[field] = source[field];
+    }
+  }
+  return clean;
+};
+
 export const createProduct = asyncHandler(async (req, res) => {
   const brand = await resolveBrandForUser(req.user);
+  const cleanData = pickProductFields(req.body);
   const product = await Product.create({
-    ...req.body,
+    ...cleanData,
     brandId: brand._id,
     ownerUserId: req.user._id,
   });
@@ -76,7 +99,8 @@ export const updateProduct = asyncHandler(async (req, res) => {
 
   await ensureProductOwnership(product, req.user);
 
-  Object.assign(product, req.body);
+  const cleanData = pickProductFields(req.body);
+  Object.assign(product, cleanData);
   const updatedProduct = await product.save();
 
   return successResponse(res, 200, "Product updated successfully.", {
