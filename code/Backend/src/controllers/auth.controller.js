@@ -5,6 +5,7 @@ import ms from "ms"; // millisecond convertor
 
 import env from "../config/env.js";
 import User from "../models/User.js";
+import OtpResendRecord from "../models/OtpResendRecord.js";
 import { successResponse } from "../utils/apiResponse.js";
 import AppError from "../utils/appError.js";
 import asyncHandler from "../utils/asyncHandler.js";
@@ -295,6 +296,15 @@ export const login = asyncHandler(async (req, res) => {
     user.loginOtpAttempts = 0;
     await user.save();
 
+    const normalizedEmail = user.email.toLowerCase().trim();
+    let record = await OtpResendRecord.findOne({ email: normalizedEmail });
+    if (!record) {
+      record = new OtpResendRecord({ email: normalizedEmail, count: 0 });
+    }
+    record.count = 1;
+    record.lastRequestAt = new Date();
+    await record.save();
+
     await sendOtpEmail(user.email, otpCode);
 
     const twoFactorToken = createTwoFactorToken(user._id);
@@ -366,6 +376,8 @@ export const verifyLoginOtp = asyncHandler(async (req, res) => {
   user.loginOtpAttempts = 0;
   await user.save();
 
+  await OtpResendRecord.deleteOne({ email: user.email.toLowerCase().trim() });
+
   return finalizeLogin(req, res, user);
 });
 
@@ -394,11 +406,39 @@ export const resendLoginOtp = asyncHandler(async (req, res) => {
     throw new AppError("User not found or inactive.", 401, "INVALID_2FA_TOKEN");
   }
 
+  const normalizedEmail = user.email.toLowerCase().trim();
+  let record = await OtpResendRecord.findOne({ email: normalizedEmail });
+  if (!record) {
+    record = new OtpResendRecord({ email: normalizedEmail, count: 0 });
+  }
+
+  let cooldownSeconds = 60;
+  if (record.count === 1) cooldownSeconds = 120;
+  else if (record.count === 2) cooldownSeconds = 300;
+  else if (record.count >= 3) cooldownSeconds = 600;
+
+  const lastRequestTime = record.lastRequestAt ? record.lastRequestAt.getTime() : 0;
+  const elapsedSeconds = Math.floor((Date.now() - lastRequestTime) / 1000);
+
+  if (record.count > 0 && elapsedSeconds < cooldownSeconds) {
+    const remainingSeconds = cooldownSeconds - elapsedSeconds;
+    throw new AppError(
+      `Please wait ${remainingSeconds} seconds before requesting another code.`,
+      429,
+      "RATE_LIMIT_EXCEEDED",
+      { remainingSeconds }
+    );
+  }
+
   const otpCode = crypto.randomInt(100000, 1000000).toString();
   user.loginOtp = crypto.createHash("sha256").update(otpCode).digest("hex");
   user.loginOtpExpiresAt = new Date(Date.now() + OTP_EXPIRE_MIN * 60 * 1000);
   user.loginOtpAttempts = 0;
   await user.save();
+
+  record.count += 1;
+  record.lastRequestAt = new Date();
+  await record.save();
 
   await sendOtpEmail(user.email, otpCode);
 

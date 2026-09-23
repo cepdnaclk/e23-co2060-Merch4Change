@@ -1,4 +1,4 @@
-// src/controllers/homeBanner.controller.js
+import mongoose from "mongoose";
 import HomeBanner from "../models/HomeBanner.js";
 import { uploadBufferToCloudinary } from "../utils/uploadToCloudinary.js";
 
@@ -33,6 +33,10 @@ export const getBanners = async (_req, res) => {
 
 export const deleteBanner = async (req, res) => {
   try {
+    if (mongoose.connection?.readyState === 1 && !mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid banner ID" });
+    }
+
     const banner = await HomeBanner.findByIdAndDelete(req.params.id);
     if (!banner) return res.status(404).json({ message: "Not found" });
     res.json({ message: "Deleted" });

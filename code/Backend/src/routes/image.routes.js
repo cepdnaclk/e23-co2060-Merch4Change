@@ -9,16 +9,18 @@ import { uploadBufferToCloudinary } from "../utils/uploadToCloudinary.js";
 
 const router = express.Router();
 
+const ALLOWED_IMAGE_MIMES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+
 // Multer setup: store file in memory as Buffer (max 2MB)
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,
   limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith("image/")) {
+    if (ALLOWED_IMAGE_MIMES.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error("Only image files are allowed"), false);
+      cb(new Error("Only JPEG, PNG, WEBP, and GIF images are allowed"), false);
     }
   },
 });
@@ -75,6 +77,8 @@ router.get("/product/:id", async (req, res) => {
     }
 
     res.set("Content-Type", product.image.contentType);
+    res.set("X-Content-Type-Options", "nosniff");
+    res.set("Content-Security-Policy", "default-src 'none'");
     res.send(product.image.data);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -139,6 +143,8 @@ router.get("/user/:id", async (req, res) => {
     }
 
     res.set("Content-Type", user.profileImage.contentType);
+    res.set("X-Content-Type-Options", "nosniff");
+    res.set("Content-Security-Policy", "default-src 'none'");
     res.send(user.profileImage.data);
   } catch (err) {
     res.status(500).json({ message: err.message });

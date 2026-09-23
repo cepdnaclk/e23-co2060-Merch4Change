@@ -106,6 +106,10 @@ const buildConversationSummary = (conversation, currentUserId, otherUser, unread
 });
 
 const getConversationForCurrentUser = async (conversationId, currentUserId) => {
+  if (!mongoose.Types.ObjectId.isValid(conversationId)) {
+    throw new AppError("Invalid conversation ID.", 400, "VALIDATION_ERROR");
+  }
+
   const conversation = await Conversation.findById(conversationId).populate(
     "participants",
     "firstName lastName userName accountType isActive",
@@ -227,7 +231,6 @@ export const getConversations = asyncHandler(async (req, res) => {
       );
     })
     .filter(Boolean);
-
   return successResponse(res, 200, "Conversations fetched successfully.", {
     conversations: summaries,
   });
@@ -240,13 +243,23 @@ export const createConversation = asyncHandler(async (req, res) => {
     throw new AppError("participantUserId is required.", 400, "VALIDATION_ERROR");
   }
 
+  if (!mongoose.Types.ObjectId.isValid(participantUserId)) {
+    throw new AppError("Invalid participant user ID.", 400, "VALIDATION_ERROR");
+  }
+
   if (String(participantUserId) === String(req.user._id)) {
     throw new AppError("You cannot start a conversation with yourself.", 400, "VALIDATION_ERROR");
   }
 
-  const participant = await User.findById(participantUserId).select("firstName lastName userName accountType isActive");
+  const participant = await User.findById(participantUserId).select(
+    "firstName lastName userName accountType isActive allowMessageRequests",
+  );
   if (!participant) {
     throw new AppError("Participant not found.", 404, "USER_NOT_FOUND");
+  }
+
+  if (participant.allowMessageRequests === false && req.user.role !== "admin") {
+    throw new AppError("This user does not accept direct message requests.", 403, "FORBIDDEN");
   }
 
   const participantKey = buildParticipantKey([req.user._id, participant._id]);
@@ -295,6 +308,10 @@ export const sendMessage = asyncHandler(async (req, res) => {
 
   if (!body) {
     throw new AppError("Message body is required.", 400, "VALIDATION_ERROR");
+  }
+
+  if (body.length > 5000) {
+    throw new AppError("Message body cannot exceed 5000 characters.", 400, "VALIDATION_ERROR");
   }
 
   const conversation = await getConversationForCurrentUser(req.params.conversationId, req.user._id);
