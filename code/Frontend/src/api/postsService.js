@@ -20,6 +20,10 @@ export const getFeedPosts = () => {
   return apiClient.get(`${PREFIX}/`);
 };
 
+export const getRecommendedPosts = (params = {}) => {
+  return apiClient.get(`${PREFIX}/recommended`, { params });
+};
+
 export const likePost = (postId) => {
   return apiClient.post(`${PREFIX}/${postId}/like`);
 };

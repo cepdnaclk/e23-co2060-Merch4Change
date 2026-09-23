@@ -1,7 +1,7 @@
 import express from "express";
 import protect from "../middlewares/auth.js";
 import { upload } from "../middlewares/upload.js";
-import { createPost, deletePost, getFeedPosts, getMyPosts, getUserPosts, likePost, commentOnPost } from "../controllers/post.controller.js";
+import { createPost, deletePost, getFeedPosts, getRecommendedPosts, getMyPosts, getUserPosts, likePost, commentOnPost } from "../controllers/post.controller.js";
 
 const router = express.Router();
 
@@ -10,6 +10,9 @@ router.post("/", protect, upload.array("images", 5), createPost);
 
 // get feed posts
 router.get("/", protect, getFeedPosts);
+
+// ranked recommendations for the authenticated user (does not replace GET /)
+router.get("/recommended", protect, getRecommendedPosts);
 
 // get the authenticated user's posts for the profile page
 router.get("/me", protect, getMyPosts);
