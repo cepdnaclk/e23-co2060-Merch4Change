@@ -2,14 +2,28 @@ import User from "../models/User.js"
 
 // validate start time and endtime
 export const validateTime = (startTime, endTime) => {
+    const start =  new Date(startTime);
+    const end = new Date(endTime);
     const now = new Date();
-    return startTime >= now && endTime > startTime;
+    const start_buffer = new Date(now.getTime() - (5 * 60 * 1000));
+    
+    if (isNaN(start.getTime()) || isNaN(end.getTime())){
+        return false;
+    }
+
+    return start >= start_buffer && (end > start && end > now);
 }
 
 // validate is for auction status 
 export const isStarted = (startTime) => {
+    const start =  new Date(startTime);
     const now = new Date();
-    return startTime <= now;
+
+    if (isNaN(start.getTime())){
+        return false;
+    }
+
+    return start <= now;
 }
 
 // validate the bid 

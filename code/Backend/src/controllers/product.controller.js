@@ -1,10 +1,26 @@
 import Product from "../models/Product.js";
 import { uploadBufferToCloudinary } from "../utils/uploadToCloudinary.js";
+import escapeRegex from "../utils/escapeRegex.js";
 
 
 export const createProduct = async (req, res) => {
   try {
-    const { name, price, description } = req.body;
+    const name = typeof req.body.name === "string" ? req.body.name.trim() : "";
+    const description = typeof req.body.description === "string" ? req.body.description.trim() : "";
+    const parsedPrice = Number(req.body.price);
+    const stock = req.body.stock !== undefined ? Math.max(0, Number.parseInt(req.body.stock, 10) || 0) : 0;
+
+    if (!name || name.length < 2 || name.length > 200) {
+      return res.status(400).json({ success: false, message: "Product name must be between 2 and 200 characters" });
+    }
+
+    if (!description || description.length > 5000) {
+      return res.status(400).json({ success: false, message: "Product description is required and cannot exceed 5000 characters" });
+    }
+
+    if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
+      return res.status(400).json({ success: false, message: "Valid positive product price is required" });
+    }
 
     // req.files comes from multer (array of files)
     let images = [];
@@ -19,8 +35,9 @@ export const createProduct = async (req, res) => {
 
     const product = await Product.create({
       name,
-      price,
+      price: parsedPrice,
       description,
+      stock,
       images,
       ownerUserId: req.user._id,
     });
@@ -35,8 +52,9 @@ export const getUserProducts = async (req, res) => {
   try {
     const { username } = req.params;
     const cleanParam = decodeURIComponent(username || "").trim();
+    const escapedParam = escapeRegex(cleanParam);
     const alphanumericOnly = cleanParam.toLowerCase().replace(/[^a-z0-9]/g, "");
-    const fuzzyPattern = cleanParam.replace(/[-_]/g, "[\\s\\-_]*");
+    const fuzzyPattern = escapedParam.replace(/[-_]/g, "[\\s\\-_]*");
     const fuzzyRegex = new RegExp(`^${fuzzyPattern}$`, "i");
 
     const User = (await import("../models/User.js")).default;
@@ -44,10 +62,10 @@ export const getUserProducts = async (req, res) => {
     
     let user = await User.findOne({
       $or: [
-        { userName: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
-        { userName: { $regex: new RegExp(`^${alphanumericOnly}$`, "i") } },
+        { userName: { $regex: new RegExp(`^${escapedParam}$`, "i") } },
+        { userName: { $regex: new RegExp(`^${escapeRegex(alphanumericOnly)}$`, "i") } },
         { userName: { $regex: fuzzyRegex } },
-        { firstName: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
+        { firstName: { $regex: new RegExp(`^${escapedParam}$`, "i") } },
         { firstName: { $regex: fuzzyRegex } },
         ...(mongoose.isValidObjectId(cleanParam) ? [{ _id: cleanParam }] : []),
       ],

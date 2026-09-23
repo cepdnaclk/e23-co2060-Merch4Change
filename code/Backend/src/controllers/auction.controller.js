@@ -42,7 +42,8 @@ export const createAuction = async (req, res) => {
             startTime: startTime,
             endTime: endTime, 
             createdBy: req.user._id,
-            status: status
+            status: status,
+            bidIncrement: bidIncrement || undefined,
         });
 
         res.status(201).json({success: true, auction});
@@ -92,5 +93,61 @@ export const placeBid = async (req, res) => {
         return res.status(201).json({ success:true, auction});
     } catch(err) {
         res.status(500).json({ success: false, message: err.message });
+    }
+}
+
+// GET api/auctions
+export const listAuctions = async (req, res) => {
+    try{
+        const { status='active' } = req.query;
+
+        const auctions = await Auction.find({status: status}).populate("productId").sort({ endTime: 1 });
+
+        return res.status(200).json({
+            success: true, auctions
+        })
+
+    }catch(err){
+        res.status(500).json({ success: false, message:err.message });
+    }
+}
+
+// GET api/auctions/:id
+export const getAuction = async (req, res) => {
+    try{
+        const { id } = req.params;
+
+        if(!id){
+            return res.status(404).json({ success: false, message: "Invalid id"});
+        }
+
+        const auction = await Auction.findById(id).populate("productId");
+
+        if (!auction){
+            return res.status(404).json({ success: false, message: "No acution found"})
+        }
+
+        return res.status(200).json({ success: true, auction})
+
+    }catch(err){
+        res.status(500).json({ success: false, message:err.message });
+    }
+}
+
+// GET api/auctions/:id/bids
+export const getBids = async (req, res) => {
+    try{
+        const { id } = req.params;
+
+        if(!id){
+            return res.status(404).json({ success: false, message: "Invalid id"});
+        }
+
+        const bids = await Bid.find({auctionId: id}).sort({createdAt: -1}).populate("userId", { userName: 1, firstName: 1, lastName: 1});
+
+        return res.status(200).json({ success: true, bids})
+
+    }catch(err){
+        res.status(500).json({ success: false, message: err.message })
     }
 }

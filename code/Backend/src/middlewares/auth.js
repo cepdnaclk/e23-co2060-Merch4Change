@@ -17,6 +17,11 @@ const protect = asyncHandler(async (req, res, next) => {
   let decoded;
   try {
     decoded = jwt.verify(token, env.jwtSecret);
+
+    if (decoded.purpose) {
+      throw new AppError("Not authorized. Invalid token.", 401, "INVALID_TOKEN");
+    }
+
     user = await User.findById(decoded.userId).select("-password");
 
     if (!user) {

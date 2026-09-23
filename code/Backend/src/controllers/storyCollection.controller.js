@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { successResponse } from "../utils/apiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import StoryCollection from "../models/StoryCollection.js";
@@ -10,7 +11,7 @@ import AppError from "../utils/appError.js";
 export const getUserCollections = asyncHandler(async (req, res) => {
   const { username } = req.params;
 
-  const user = await User.findOne({ userName: username });
+  const user = await User.findOne({ userName: String(username).trim() });
   if (!user) {
     throw new AppError("User not found", 404, "USER_NOT_FOUND");
   }
@@ -24,10 +25,15 @@ export const getUserCollections = asyncHandler(async (req, res) => {
 // @route   POST /api/v1/collections
 // @access  Private
 export const createCollection = asyncHandler(async (req, res) => {
-  const { title, image } = req.body;
+  const title = typeof req.body.title === "string" ? req.body.title.trim() : "";
+  const image = typeof req.body.image === "string" ? req.body.image.trim() : "";
 
-  if (!title) {
-    throw new AppError("Collection title is required", 400, "MISSING_TITLE");
+  if (!title || title.length > 100) {
+    throw new AppError("Collection title is required and cannot exceed 100 characters", 400, "VALIDATION_ERROR");
+  }
+
+  if (image.length > 1000) {
+    throw new AppError("Story image URL cannot exceed 1000 characters", 400, "VALIDATION_ERROR");
   }
 
   const newCollection = new StoryCollection({
@@ -46,16 +52,24 @@ export const createCollection = asyncHandler(async (req, res) => {
 // @access  Private
 export const saveStoryToCollection = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { image } = req.body;
+  const image = typeof req.body.image === "string" ? req.body.image.trim() : "";
 
-  if (!image) {
-    throw new AppError("Story image is required", 400, "MISSING_IMAGE");
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new AppError("Invalid collection ID", 400, "VALIDATION_ERROR");
+  }
+
+  if (!image || image.length > 1000) {
+    throw new AppError("Story image is required and cannot exceed 1000 characters", 400, "VALIDATION_ERROR");
   }
 
   const collection = await StoryCollection.findOne({ _id: id, userId: req.user._id });
   
   if (!collection) {
     throw new AppError("Collection not found or unauthorized", 404, "COLLECTION_NOT_FOUND");
+  }
+
+  if (collection.stories.length >= 100) {
+    throw new AppError("Collection cannot hold more than 100 stories", 400, "COLLECTION_LIMIT_REACHED");
   }
 
   // Check if image already exists in collection
