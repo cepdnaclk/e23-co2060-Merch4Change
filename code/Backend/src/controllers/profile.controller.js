@@ -270,11 +270,25 @@ export const getSuggestedUsers = asyncHandler(async (req, res) => {
   // Add the current user to the exclusion list
   followingIds.push(req.user._id);
 
-  // Fetch up to 5 random users not in the exclusion list
+  // Fetch up to 5 random users not in the exclusion list with safe public fields only
   const suggestedUsers = await User.aggregate([
-    { $match: { _id: { $nin: followingIds } } },
+    { $match: { _id: { $nin: followingIds }, isActive: true } },
     { $sample: { size: 5 } },
-    { $project: { password: 0, email: 0, resetPasswordToken: 0, resetPasswordExpires: 0, accountType: 0 } }
+    {
+      $project: {
+        _id: 1,
+        firstName: 1,
+        lastName: 1,
+        userName: 1,
+        profileImageUrl: 1,
+        avatarUrl: 1,
+        role: 1,
+        isVerified: 1,
+        profileBio: 1,
+        followersCount: 1,
+        followingCount: 1,
+      },
+    },
   ]);
 
   return successResponse(res, 200, "Suggested users fetched successfully.", {
