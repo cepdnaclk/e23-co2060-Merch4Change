@@ -8,6 +8,7 @@ import { successResponse } from "../utils/apiResponse.js";
 import AppError from "../utils/appError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import sendOtpEmail from "../utils/sendOtpEmail.js";
+import env from "../config/env.js";
 
 const generateOTP = () => {
   return crypto.randomInt(100000, 1000000).toString();
@@ -33,6 +34,7 @@ export const createUserProfile = asyncHandler(async (req, res) => {
 
   const hashedPassword = await bcrypt.hash(password, 10);
   const otpCode = generateOTP();
+  const hashedOtp = crypto.createHash("sha256").update(otpCode).digest("hex");
 
   try {
     await PendingUser.create({
@@ -40,7 +42,8 @@ export const createUserProfile = asyncHandler(async (req, res) => {
       password: hashedPassword,
       userName: userName.trim(),
       accountType: "individual",
-      otpCode,
+      otpCode: hashedOtp,
+      otpAttempts: 0,
       profileData: {
         firstName,
         lastName
@@ -51,7 +54,9 @@ export const createUserProfile = asyncHandler(async (req, res) => {
     throw new AppError("Failed to initiate registration. Please try again.", 500, "DB_ERROR");
   }
 
-  console.log(`\n[DEV MODE] OTP for ${normalizedEmail} is: ${otpCode}\n`);
+  if (env.nodeEnv !== "production") {
+    console.log(`\n[DEV MODE] OTP for ${normalizedEmail} is: ${otpCode}\n`);
+  }
   try {
     await sendOtpEmail(normalizedEmail, otpCode);
   } catch (error) {
@@ -97,6 +102,7 @@ export const createOrganizationProfile = asyncHandler(async (req, res) => {
 
   const hashedPassword = await bcrypt.hash(password, 10);
   const otpCode = generateOTP();
+  const hashedOtp = crypto.createHash("sha256").update(otpCode).digest("hex");
 
   try {
     await PendingUser.create({
@@ -104,7 +110,8 @@ export const createOrganizationProfile = asyncHandler(async (req, res) => {
       password: hashedPassword,
       userName,
       accountType: "organization",
-      otpCode,
+      otpCode: hashedOtp,
+      otpAttempts: 0,
       profileData: {
         orgName,
         phone,
@@ -120,7 +127,9 @@ export const createOrganizationProfile = asyncHandler(async (req, res) => {
     throw new AppError("Failed to initiate registration. Please try again.", 500, "DB_ERROR");
   }
 
-  console.log(`\n[DEV MODE] OTP for ${normalizedEmail} is: ${otpCode}\n`);
+  if (env.nodeEnv !== "production") {
+    console.log(`\n[DEV MODE] OTP for ${normalizedEmail} is: ${otpCode}\n`);
+  }
   try {
     await sendOtpEmail(normalizedEmail, otpCode);
   } catch (error) {

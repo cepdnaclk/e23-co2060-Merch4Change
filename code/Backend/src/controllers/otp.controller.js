@@ -55,9 +55,27 @@ export const verifyRegisterOtp = asyncHandler(async (req, res) => {
     );
   }
 
-  // 2. Verify the OTP code
-  if (pendingUser.otpCode !== String(finalOtp).trim()) {
-    throw new AppError("Invalid OTP code.", 400, "INVALID_OTP");
+  // 2. Verify the OTP code with attempt lockout
+  const hashedInputOtp = crypto.createHash("sha256").update(String(finalOtp).trim()).digest("hex");
+  const isMatch = pendingUser.otpCode === hashedInputOtp || pendingUser.otpCode === String(finalOtp).trim();
+
+  if (!isMatch) {
+    pendingUser.otpAttempts = (pendingUser.otpAttempts || 0) + 1;
+    if (pendingUser.otpAttempts >= 5) {
+      await PendingUser.deleteOne({ _id: pendingUser._id });
+      throw new AppError(
+        "Too many incorrect attempts. Registration session has been invalidated. Please register again.",
+        429,
+        "TOO_MANY_ATTEMPTS",
+      );
+    }
+    await pendingUser.save();
+    const remaining = 5 - pendingUser.otpAttempts;
+    throw new AppError(
+      `Invalid OTP code. You have ${remaining} ${remaining === 1 ? "attempt" : "attempts"} remaining.`,
+      400,
+      "INVALID_OTP",
+    );
   }
 
   // 3. Move data to the permanent User collection
@@ -173,10 +191,13 @@ export const resendRegisterOtp = asyncHandler(async (req, res) => {
 
   // Generate new OTP
   const otpCode = crypto.randomInt(100000, 1000000).toString();
-  pendingUser.otpCode = otpCode;
+  pendingUser.otpCode = crypto.createHash("sha256").update(otpCode).digest("hex");
+  pendingUser.otpAttempts = 0;
   await pendingUser.save();
 
-  console.log(`\n[DEV MODE] Resent OTP for ${normalizedEmail} is: ${otpCode}\n`);
+  if (env.nodeEnv !== "production") {
+    console.log(`\n[DEV MODE] Resent OTP for ${normalizedEmail} is: ${otpCode}\n`);
+  }
   try {
     await sendOtpEmail(normalizedEmail, otpCode);
   } catch (error) {
