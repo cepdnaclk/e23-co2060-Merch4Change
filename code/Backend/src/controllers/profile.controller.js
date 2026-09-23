@@ -12,6 +12,7 @@ import Donation from "../models/Donation.js";
 import Project from "../models/Project.js";
 import mongoose from "mongoose";
 import AppError from "../utils/appError.js";
+import escapeRegex from "../utils/escapeRegex.js";
 
 export const me = asyncHandler(async (req, res) => {
   const userObj = req.user.toObject ? req.user.toObject() : { ...req.user };
@@ -89,16 +90,17 @@ export const getProfileByUsername = asyncHandler(async (req, res) => {
   const { username } = req.params;
 
   const cleanParam = decodeURIComponent(username || "").trim();
+  const escapedParam = escapeRegex(cleanParam);
   const alphanumericOnly = cleanParam.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const fuzzyPattern = cleanParam.replace(/[-_]/g, "[\\s\\-_]*");
+  const fuzzyPattern = escapedParam.replace(/[-_]/g, "[\\s\\-_]*");
   const fuzzyRegex = new RegExp(`^${fuzzyPattern}$`, "i");
 
   let user = await User.findOne({
     $or: [
-      { userName: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
-      { userName: { $regex: new RegExp(`^${alphanumericOnly}$`, "i") } },
+      { userName: { $regex: new RegExp(`^${escapedParam}$`, "i") } },
+      { userName: { $regex: new RegExp(`^${escapeRegex(alphanumericOnly)}$`, "i") } },
       { userName: { $regex: fuzzyRegex } },
-      { firstName: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
+      { firstName: { $regex: new RegExp(`^${escapedParam}$`, "i") } },
       { firstName: { $regex: fuzzyRegex } },
       ...(mongoose.isValidObjectId(cleanParam) ? [{ _id: cleanParam }] : []),
     ],
@@ -110,7 +112,7 @@ export const getProfileByUsername = asyncHandler(async (req, res) => {
   } else {
     charity = await Charity.findOne({
       $or: [
-        { publicName: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
+        { publicName: { $regex: new RegExp(`^${escapedParam}$`, "i") } },
         { publicName: { $regex: fuzzyRegex } },
         ...(mongoose.isValidObjectId(cleanParam) ? [{ _id: cleanParam }, { ownerUserId: cleanParam }] : []),
       ],
@@ -176,10 +178,11 @@ export const getProfileByUsername = asyncHandler(async (req, res) => {
 
 export const followUser = asyncHandler(async (req, res) => {
   const { username } = req.params;
+  const escapedUsername = escapeRegex(username);
 
   const userToFollow = await User.findOne({
     $or: [
-      { userName: { $regex: new RegExp(`^${username}$`, "i") } },
+      { userName: { $regex: new RegExp(`^${escapedUsername}$`, "i") } },
       ...(mongoose.isValidObjectId(username) ? [{ _id: username }] : []),
     ],
   });
@@ -228,10 +231,11 @@ export const followUser = asyncHandler(async (req, res) => {
 
 export const unfollowUser = asyncHandler(async (req, res) => {
   const { username } = req.params;
+  const escapedUsername = escapeRegex(username);
 
   const userToUnfollow = await User.findOne({
     $or: [
-      { userName: { $regex: new RegExp(`^${username}$`, "i") } },
+      { userName: { $regex: new RegExp(`^${escapedUsername}$`, "i") } },
       ...(mongoose.isValidObjectId(username) ? [{ _id: username }] : []),
     ],
   });
@@ -283,8 +287,9 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
 
   let targetUser = null;
   const cleanParam = decodeURIComponent(username || "").trim();
+  const escapedParam = escapeRegex(cleanParam);
   const alphanumericOnly = cleanParam.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const fuzzyPattern = cleanParam.replace(/[-_]/g, "[\\s\\-_]*");
+  const fuzzyPattern = escapedParam.replace(/[-_]/g, "[\\s\\-_]*");
   const fuzzyRegex = new RegExp(`^${fuzzyPattern}$`, "i");
 
   if (username === "me" && req.user) {
@@ -292,10 +297,10 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
   } else if (username) {
     targetUser = await User.findOne({
       $or: [
-        { userName: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
-        { userName: { $regex: new RegExp(`^${alphanumericOnly}$`, "i") } },
+        { userName: { $regex: new RegExp(`^${escapedParam}$`, "i") } },
+        { userName: { $regex: new RegExp(`^${escapeRegex(alphanumericOnly)}$`, "i") } },
         { userName: { $regex: fuzzyRegex } },
-        { firstName: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
+        { firstName: { $regex: new RegExp(`^${escapedParam}$`, "i") } },
         { firstName: { $regex: fuzzyRegex } },
         ...(mongoose.isValidObjectId(cleanParam) ? [{ _id: cleanParam }] : []),
       ],
@@ -314,7 +319,7 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
   } else if (username) {
     charity = await Charity.findOne({
       $or: [
-        { publicName: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
+        { publicName: { $regex: new RegExp(`^${escapedParam}$`, "i") } },
         { publicName: { $regex: fuzzyRegex } },
         ...(mongoose.isValidObjectId(cleanParam) ? [{ _id: cleanParam }, { ownerUserId: cleanParam }] : []),
       ],

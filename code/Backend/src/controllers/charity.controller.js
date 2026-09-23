@@ -5,6 +5,7 @@ import AppError from "../utils/appError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { successResponse } from "../utils/apiResponse.js";
 import { uploadBufferToCloudinary } from "../utils/uploadToCloudinary.js";
+import escapeRegex from "../utils/escapeRegex.js";
 
 export const submitVerification = asyncHandler(async (req, res) => {
   if (req.user.accountType !== "organization") {
@@ -73,17 +74,19 @@ export const getMyCharity = asyncHandler(async (req, res) => {
 
 export const listVerifiedCharities = asyncHandler(async (req, res) => {
   const { category, q, page = 1, limit = 20 } = req.query;
+  const cleanLimit = Math.min(100, Math.max(1, Number(limit) || 20));
+  const cleanPage = Math.max(1, Number(page) || 1);
   const filter = { verificationStatus: "verified" };
   if (category) filter.category = category;
-  if (q) filter.publicName = { $regex: q, $options: "i" };
+  if (q) filter.publicName = { $regex: escapeRegex(String(q).trim()), $options: "i" };
 
-  const skip = (Number(page) - 1) * Number(limit);
+  const skip = (cleanPage - 1) * cleanLimit;
   const [items, total] = await Promise.all([
     Charity.find(filter)
       .select("publicName description logoUrl category website ownerUserId")
       .populate("ownerUserId", "userName")
       .skip(skip)
-      .limit(Number(limit))
+      .limit(cleanLimit)
       .sort({ verifiedAt: -1 })
       .lean(),
     Charity.countDocuments(filter),
