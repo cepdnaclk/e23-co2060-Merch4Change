@@ -27,17 +27,25 @@ followSchema.index({ followerId: 1, followingId: 1 }, { unique: true });
 followSchema.post("save", async function () {
   const User = mongoose.model("User");
   // The person who followed gains 1 'following'
-  await User.findByIdAndUpdate(this.followerId, { $inc: { followingCount: 1 } });
+  await User.findByIdAndUpdate(this.followerId, {
+    $inc: { followingCount: 1 },
+  });
   // The person being followed gains 1 'follower'
-  await User.findByIdAndUpdate(this.followingId, { $inc: { followersCount: 1 } });
+  await User.findByIdAndUpdate(this.followingId, {
+    $inc: { followersCount: 1 },
+  });
 });
 
 // Middleware: Update User Stats on Unfollow
 followSchema.post("findOneAndDelete", async function (doc) {
   if (doc) {
     const User = mongoose.model("User");
-    await User.findByIdAndUpdate(doc.followerId, { $inc: { followingCount: -1 } });
-    await User.findByIdAndUpdate(doc.followingId, { $inc: { followersCount: -1 } });
+    await User.findByIdAndUpdate(doc.followerId, {
+      $inc: { followingCount: -1 },
+    });
+    await User.findByIdAndUpdate(doc.followingId, {
+      $inc: { followersCount: -1 },
+    });
   }
 });
 

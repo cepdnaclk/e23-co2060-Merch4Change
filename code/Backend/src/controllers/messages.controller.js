@@ -27,7 +27,11 @@ const getDisplayName = (user) => {
     return String(user.firstName || user.userName || "Organization").trim();
   }
 
-  return String(`${user.firstName || ""} ${user.lastName || ""}`.trim() || user.userName || "User").trim();
+  return String(
+    `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+      user.userName ||
+      "User",
+  ).trim();
 };
 
 const getInitials = (name) => {
@@ -41,10 +45,14 @@ const getInitials = (name) => {
     return "??";
   }
 
-  return parts.map((part) => part.charAt(0)).join("").toUpperCase();
+  return parts
+    .map((part) => part.charAt(0))
+    .join("")
+    .toUpperCase();
 };
 
-const getContactType = (user) => (user.accountType === "organization" ? "org" : "user");
+const getContactType = (user) =>
+  user.accountType === "organization" ? "org" : "user";
 
 const getColorForUser = (userId) => {
   const seed = String(userId || "");
@@ -92,7 +100,12 @@ const mapMessage = (message, currentUserId) => ({
   }),
 });
 
-const buildConversationSummary = (conversation, currentUserId, otherUser, unreadCount = 0) => ({
+const buildConversationSummary = (
+  conversation,
+  currentUserId,
+  otherUser,
+  unreadCount = 0,
+) => ({
   id: String(otherUser._id),
   name: getDisplayName(otherUser),
   initials: getInitials(getDisplayName(otherUser)),
@@ -112,12 +125,22 @@ const getConversationForCurrentUser = async (conversationId, currentUserId) => {
   );
 
   if (!conversation) {
-    throw new AppError("Conversation not found.", 404, "CONVERSATION_NOT_FOUND");
+    throw new AppError(
+      "Conversation not found.",
+      404,
+      "CONVERSATION_NOT_FOUND",
+    );
   }
 
-  const participantIds = conversation.participants.map((participant) => String(participant._id));
+  const participantIds = conversation.participants.map((participant) =>
+    String(participant._id),
+  );
   if (!participantIds.includes(String(currentUserId))) {
-    throw new AppError("You do not have access to this conversation.", 403, "FORBIDDEN");
+    throw new AppError(
+      "You do not have access to this conversation.",
+      403,
+      "FORBIDDEN",
+    );
   }
 
   return conversation;
@@ -151,9 +174,14 @@ const buildUnreadCountMap = async (conversationIds, currentUserId) => {
 };
 
 const buildContactList = async (currentUser) => {
-  const conversations = await Conversation.find({ participants: currentUser._id })
+  const conversations = await Conversation.find({
+    participants: currentUser._id,
+  })
     .sort({ lastMessageAt: -1, updatedAt: -1 })
-    .populate("participants", "firstName lastName userName accountType isActive");
+    .populate(
+      "participants",
+      "firstName lastName userName accountType isActive",
+    );
 
   const unreadCountMap = await buildUnreadCountMap(
     conversations.map((conversation) => conversation._id),
@@ -202,7 +230,10 @@ export const getContacts = asyncHandler(async (req, res) => {
 export const getConversations = asyncHandler(async (req, res) => {
   const conversations = await Conversation.find({ participants: req.user._id })
     .sort({ lastMessageAt: -1, updatedAt: -1 })
-    .populate("participants", "firstName lastName userName accountType isActive");
+    .populate(
+      "participants",
+      "firstName lastName userName accountType isActive",
+    );
 
   const unreadCountMap = await buildUnreadCountMap(
     conversations.map((conversation) => conversation._id),
@@ -237,14 +268,24 @@ export const createConversation = asyncHandler(async (req, res) => {
   const participantUserId = String(req.body.participantUserId || "").trim();
 
   if (!participantUserId) {
-    throw new AppError("participantUserId is required.", 400, "VALIDATION_ERROR");
+    throw new AppError(
+      "participantUserId is required.",
+      400,
+      "VALIDATION_ERROR",
+    );
   }
 
   if (String(participantUserId) === String(req.user._id)) {
-    throw new AppError("You cannot start a conversation with yourself.", 400, "VALIDATION_ERROR");
+    throw new AppError(
+      "You cannot start a conversation with yourself.",
+      400,
+      "VALIDATION_ERROR",
+    );
   }
 
-  const participant = await User.findById(participantUserId).select("firstName lastName userName accountType isActive");
+  const participant = await User.findById(participantUserId).select(
+    "firstName lastName userName accountType isActive",
+  );
   if (!participant) {
     throw new AppError("Participant not found.", 404, "USER_NOT_FOUND");
   }
@@ -266,25 +307,40 @@ export const createConversation = asyncHandler(async (req, res) => {
       id: String(conversation._id),
       participantUserId: String(participant._id),
     },
-    contact: buildConversationSummary(conversation, req.user._id, participant, 0),
+    contact: buildConversationSummary(
+      conversation,
+      req.user._id,
+      participant,
+      0,
+    ),
   });
 });
 
 export const getConversationThread = asyncHandler(async (req, res) => {
-  const conversation = await getConversationForCurrentUser(req.params.conversationId, req.user._id);
+  const conversation = await getConversationForCurrentUser(
+    req.params.conversationId,
+    req.user._id,
+  );
 
-  const messages = await Message.find({ conversationId: conversation._id }).sort({ createdAt: 1 });
+  const messages = await Message.find({
+    conversationId: conversation._id,
+  }).sort({ createdAt: 1 });
   const otherUser = conversation.participants.find(
     (participant) => String(participant._id) !== String(req.user._id),
   );
 
-  return successResponse(res, 200, "Conversation thread fetched successfully.", {
-    conversation: {
-      id: String(conversation._id),
-      participantUserId: otherUser ? String(otherUser._id) : null,
+  return successResponse(
+    res,
+    200,
+    "Conversation thread fetched successfully.",
+    {
+      conversation: {
+        id: String(conversation._id),
+        participantUserId: otherUser ? String(otherUser._id) : null,
+      },
+      messages: messages.map((message) => mapMessage(message, req.user._id)),
     },
-    messages: messages.map((message) => mapMessage(message, req.user._id)),
-  });
+  );
 });
 
 export const sendMessage = asyncHandler(async (req, res) => {
@@ -294,13 +350,20 @@ export const sendMessage = asyncHandler(async (req, res) => {
     throw new AppError("Message body is required.", 400, "VALIDATION_ERROR");
   }
 
-  const conversation = await getConversationForCurrentUser(req.params.conversationId, req.user._id);
+  const conversation = await getConversationForCurrentUser(
+    req.params.conversationId,
+    req.user._id,
+  );
   const recipientUser = conversation.participants.find(
     (participant) => String(participant._id) !== String(req.user._id),
   );
 
   if (!recipientUser) {
-    throw new AppError("Conversation recipient not found.", 404, "USER_NOT_FOUND");
+    throw new AppError(
+      "Conversation recipient not found.",
+      404,
+      "USER_NOT_FOUND",
+    );
   }
 
   const message = await Message.create({
@@ -318,7 +381,8 @@ export const sendMessage = asyncHandler(async (req, res) => {
 
   if (mongoose.Types.ObjectId.isValid(recipientUser._id)) {
     const senderName = getDisplayName(req.user);
-    const messagePreview = body.length > 60 ? `${body.substring(0, 57)}...` : body;
+    const messagePreview =
+      body.length > 60 ? `${body.substring(0, 57)}...` : body;
     await Notification.create({
       userId: recipientUser._id,
       type: "message",
@@ -337,7 +401,10 @@ export const sendMessage = asyncHandler(async (req, res) => {
 });
 
 export const markConversationRead = asyncHandler(async (req, res) => {
-  const conversation = await getConversationForCurrentUser(req.params.conversationId, req.user._id);
+  const conversation = await getConversationForCurrentUser(
+    req.params.conversationId,
+    req.user._id,
+  );
 
   const result = await Message.updateMany(
     {

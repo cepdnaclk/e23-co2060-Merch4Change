@@ -17,14 +17,23 @@ export const markAsRead = asyncHandler(async (req, res) => {
   const notification = await Notification.findOneAndUpdate(
     { _id: id, userId: req.user._id },
     { isRead: true },
-    { new: true }
+    { new: true },
   );
 
   if (!notification) {
-    throw new AppError("Notification not found.", 404, "NOTIFICATION_NOT_FOUND");
+    throw new AppError(
+      "Notification not found.",
+      404,
+      "NOTIFICATION_NOT_FOUND",
+    );
   }
 
-  return successResponse(res, 200, "Notification marked as read successfully.", {
-    notification,
-  });
+  return successResponse(
+    res,
+    200,
+    "Notification marked as read successfully.",
+    {
+      notification,
+    },
+  );
 });

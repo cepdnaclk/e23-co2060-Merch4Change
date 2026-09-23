@@ -21,7 +21,10 @@ const SENSITIVE_KEYS = new Set([
 const timestamp = () => new Date().toISOString();
 
 const parseMaxLogFileSize = () => {
-  const configuredSize = Number.parseInt(process.env.BACKEND_LOG_MAX_SIZE_BYTES ?? "", 10);
+  const configuredSize = Number.parseInt(
+    process.env.BACKEND_LOG_MAX_SIZE_BYTES ?? "",
+    10,
+  );
 
   if (Number.isFinite(configuredSize) && configuredSize > 0) {
     return configuredSize;
@@ -39,7 +42,11 @@ export const isSensitiveKey = (key) => {
     return true;
   }
 
-  return normalizedKey.includes("password") || normalizedKey.includes("token") || normalizedKey.includes("secret");
+  return (
+    normalizedKey.includes("password") ||
+    normalizedKey.includes("token") ||
+    normalizedKey.includes("secret")
+  );
 };
 
 export const redactSensitiveData = (value, seen = new WeakSet()) => {
@@ -61,14 +68,15 @@ export const redactSensitiveData = (value, seen = new WeakSet()) => {
 
   seen.add(value);
 
-  const source = value instanceof Error
-    ? {
-      name: value.name,
-      message: value.message,
-      stack: value.stack,
-      ...value,
-    }
-    : value;
+  const source =
+    value instanceof Error
+      ? {
+          name: value.name,
+          message: value.message,
+          stack: value.stack,
+          ...value,
+        }
+      : value;
 
   const redacted = {};
 
@@ -120,7 +128,11 @@ export const rotateLogFile = (filePath) => {
   fs.renameSync(filePath, rotatedFilePath);
 };
 
-export const enforceLogFileSizeLimit = (filePath, bytesToWrite = 0, maxBytes = MAX_LOG_FILE_SIZE_BYTES) => {
+export const enforceLogFileSizeLimit = (
+  filePath,
+  bytesToWrite = 0,
+  maxBytes = MAX_LOG_FILE_SIZE_BYTES,
+) => {
   if (!fs.existsSync(filePath)) {
     return;
   }

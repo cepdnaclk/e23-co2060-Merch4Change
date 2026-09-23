@@ -42,12 +42,17 @@ export const getOrgProfileByUsername = asyncHandler(async (req, res) => {
       $or: [
         { publicName: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
         { publicName: { $regex: fuzzyRegex } },
-        ...(mongoose.isValidObjectId(cleanParam) ? [{ _id: cleanParam }, { ownerUserId: cleanParam }] : []),
+        ...(mongoose.isValidObjectId(cleanParam)
+          ? [{ _id: cleanParam }, { ownerUserId: cleanParam }]
+          : []),
       ],
     }).populate("ownerUserId");
 
     if (charity?.ownerUserId) {
-      user = typeof charity.ownerUserId === "object" ? charity.ownerUserId : await User.findById(charity.ownerUserId);
+      user =
+        typeof charity.ownerUserId === "object"
+          ? charity.ownerUserId
+          : await User.findById(charity.ownerUserId);
     }
   }
 
@@ -59,19 +64,29 @@ export const getOrgProfileByUsername = asyncHandler(async (req, res) => {
     throw new AppError("Charity profile not found for this organization.", 404);
   }
 
-  const projects = await Project.find({ charityId: charity._id }).sort({ createdAt: -1 });
+  const projects = await Project.find({ charityId: charity._id }).sort({
+    createdAt: -1,
+  });
   const projectIds = projects.map((p) => p._id);
 
   const donations = await Donation.find({
     status: "completed",
     $or: [
       { charityId: charity._id },
-      ...(projectIds.length > 0 ? [{ charityProjectId: { $in: projectIds } }] : []),
+      ...(projectIds.length > 0
+        ? [{ charityProjectId: { $in: projectIds } }]
+        : []),
     ],
   });
 
-  const totalDonationsAmount = donations.reduce((sum, d) => sum + (d.coinAmount || 0), 0);
-  const totalProjectCollected = projects.reduce((sum, p) => sum + (p.collectedAmount || 0), 0);
+  const totalDonationsAmount = donations.reduce(
+    (sum, d) => sum + (d.coinAmount || 0),
+    0,
+  );
+  const totalProjectCollected = projects.reduce(
+    (sum, p) => sum + (p.collectedAmount || 0),
+    0,
+  );
   const totalRaised = Math.max(totalDonationsAmount, totalProjectCollected);
   const totalGoal = projects.reduce((sum, p) => sum + (p.goalAmount || 0), 0);
 
@@ -115,7 +130,12 @@ export const getOrgProfileByUsername = asyncHandler(async (req, res) => {
     })),
   };
 
-  return successResponse(res, 200, "Organization profile fetched successfully.", data);
+  return successResponse(
+    res,
+    200,
+    "Organization profile fetched successfully.",
+    data,
+  );
 });
 
 /**
@@ -123,23 +143,39 @@ export const getOrgProfileByUsername = asyncHandler(async (req, res) => {
  */
 export const addProject = asyncHandler(async (req, res) => {
   if (req.user.accountType !== "organization") {
-    throw new AppError("Only organization accounts can create projects.", 403, "FORBIDDEN");
+    throw new AppError(
+      "Only organization accounts can create projects.",
+      403,
+      "FORBIDDEN",
+    );
   }
 
   const charity = await Charity.findOne({ ownerUserId: req.user._id });
-  
+
   if (!charity) {
-    throw new AppError("You must complete your charity profile verification before adding projects.", 403, "CHARITY_PROFILE_REQUIRED");
+    throw new AppError(
+      "You must complete your charity profile verification before adding projects.",
+      403,
+      "CHARITY_PROFILE_REQUIRED",
+    );
   }
 
   if (charity.verificationStatus !== "verified") {
-    throw new AppError("Your organization must be verified by an admin to add projects.", 403, "NOT_VERIFIED");
+    throw new AppError(
+      "Your organization must be verified by an admin to add projects.",
+      403,
+      "NOT_VERIFIED",
+    );
   }
 
   const { title, description, goalAmount } = req.body;
 
   if (!title || !description || !goalAmount) {
-    throw new AppError("Title, description, and goal amount are required.", 400, "VALIDATION_ERROR");
+    throw new AppError(
+      "Title, description, and goal amount are required.",
+      400,
+      "VALIDATION_ERROR",
+    );
   }
 
   const project = await Project.create({
@@ -148,7 +184,7 @@ export const addProject = asyncHandler(async (req, res) => {
     description: description.trim(),
     goalAmount: Number(goalAmount),
     collectedAmount: 0,
-    status: "active"
+    status: "active",
   });
 
   const formattedProject = {
@@ -157,10 +193,12 @@ export const addProject = asyncHandler(async (req, res) => {
     description: project.description,
     goalAmount: project.goalAmount,
     collectedAmount: project.collectedAmount,
-    status: project.status
+    status: project.status,
   };
 
-  return successResponse(res, 201, "Project created successfully.", { project: formattedProject });
+  return successResponse(res, 201, "Project created successfully.", {
+    project: formattedProject,
+  });
 });
 
 export default {

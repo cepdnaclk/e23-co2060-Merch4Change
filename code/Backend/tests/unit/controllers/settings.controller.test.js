@@ -44,7 +44,10 @@ const baseReq = (overrides = {}) => ({
 // PROFILE SETTINGS
 // ==========================================
 test("updateProfileSettings only forwards fields that were actually sent", async (t) => {
-  const update = t.mock.method(User, "findByIdAndUpdate", async (id, data) => ({ _id: id, ...data }));
+  const update = t.mock.method(User, "findByIdAndUpdate", async (id, data) => ({
+    _id: id,
+    ...data,
+  }));
 
   const req = baseReq({ body: { firstName: "Jane", profileBio: "Hello" } });
   const res = createMockResponse();
@@ -59,7 +62,10 @@ test("updateProfileSettings only forwards fields that were actually sent", async
 });
 
 test("updateProfileSettings falls back to the avatarUrl string when there is no uploaded file", async (t) => {
-  t.mock.method(User, "findByIdAndUpdate", async (id, data) => ({ _id: id, ...data }));
+  t.mock.method(User, "findByIdAndUpdate", async (id, data) => ({
+    _id: id,
+    ...data,
+  }));
 
   const req = baseReq({ body: { avatarUrl: "https://example.com/pic.jpg" } });
   const res = createMockResponse();
@@ -67,14 +73,20 @@ test("updateProfileSettings falls back to the avatarUrl string when there is no 
   await updateProfileSettings(req, res, () => {});
 
   assert.equal(res.payload.data.user.avatarUrl, "https://example.com/pic.jpg");
-  assert.equal(res.payload.data.user.profileImageUrl, "https://example.com/pic.jpg");
+  assert.equal(
+    res.payload.data.user.profileImageUrl,
+    "https://example.com/pic.jpg",
+  );
 });
 
 // ==========================================
 // SECURITY SETTINGS
 // ==========================================
 test("updateSecuritySettings only sets fields that are actual booleans", async (t) => {
-  const update = t.mock.method(User, "findByIdAndUpdate", async (id, data) => ({ _id: id, ...data }));
+  const update = t.mock.method(User, "findByIdAndUpdate", async (id, data) => ({
+    _id: id,
+    ...data,
+  }));
 
   const req = baseReq({ body: { loginActivityAlerts: true } });
   const res = createMockResponse();
@@ -87,9 +99,14 @@ test("updateSecuritySettings only sets fields that are actual booleans", async (
 });
 
 test("updateSecuritySettings ignores twoFactorEnabled — that's only settable via the OTP-gated 2FA endpoints", async (t) => {
-  const update = t.mock.method(User, "findByIdAndUpdate", async (id, data) => ({ _id: id, ...data }));
+  const update = t.mock.method(User, "findByIdAndUpdate", async (id, data) => ({
+    _id: id,
+    ...data,
+  }));
 
-  const req = baseReq({ body: { twoFactorEnabled: true, loginActivityAlerts: "not-a-boolean" } });
+  const req = baseReq({
+    body: { twoFactorEnabled: true, loginActivityAlerts: "not-a-boolean" },
+  });
   const res = createMockResponse();
 
   await updateSecuritySettings(req, res, () => {});
@@ -104,11 +121,17 @@ test("updateSecuritySettings ignores twoFactorEnabled — that's only settable v
 // ==========================================
 test("requestEmailChange rejects an incorrect current password", async (t) => {
   t.mock.method(User, "findById", () => ({
-    select: async () => ({ _id: "user1", email: "old@example.com", password: "hashed-old" }),
+    select: async () => ({
+      _id: "user1",
+      email: "old@example.com",
+      password: "hashed-old",
+    }),
   }));
   t.mock.method(bcrypt, "compare", async () => false);
 
-  const req = baseReq({ body: { newEmail: "new@example.com", currentPassword: "wrong" } });
+  const req = baseReq({
+    body: { newEmail: "new@example.com", currentPassword: "wrong" },
+  });
   const res = createMockResponse();
 
   await assert.rejects(
@@ -116,17 +139,23 @@ test("requestEmailChange rejects an incorrect current password", async (t) => {
     (err) => {
       assert.equal(err.code, "INVALID_PASSWORD");
       return true;
-    }
+    },
   );
 });
 
 test("requestEmailChange rejects when the new email matches the current one", async (t) => {
   t.mock.method(User, "findById", () => ({
-    select: async () => ({ _id: "user1", email: "same@example.com", password: "hashed" }),
+    select: async () => ({
+      _id: "user1",
+      email: "same@example.com",
+      password: "hashed",
+    }),
   }));
   t.mock.method(bcrypt, "compare", async () => true);
 
-  const req = baseReq({ body: { newEmail: "same@example.com", currentPassword: "correct" } });
+  const req = baseReq({
+    body: { newEmail: "same@example.com", currentPassword: "correct" },
+  });
   const res = createMockResponse();
 
   await assert.rejects(
@@ -134,18 +163,27 @@ test("requestEmailChange rejects when the new email matches the current one", as
     (err) => {
       assert.equal(err.code, "SAME_EMAIL");
       return true;
-    }
+    },
   );
 });
 
 test("requestEmailChange rejects an email already taken by another account", async (t) => {
   t.mock.method(User, "findById", () => ({
-    select: async () => ({ _id: "user1", email: "old@example.com", password: "hashed" }),
+    select: async () => ({
+      _id: "user1",
+      email: "old@example.com",
+      password: "hashed",
+    }),
   }));
   t.mock.method(bcrypt, "compare", async () => true);
-  t.mock.method(User, "findOne", async () => ({ _id: "user2", email: "new@example.com" }));
+  t.mock.method(User, "findOne", async () => ({
+    _id: "user2",
+    email: "new@example.com",
+  }));
 
-  const req = baseReq({ body: { newEmail: "new@example.com", currentPassword: "correct" } });
+  const req = baseReq({
+    body: { newEmail: "new@example.com", currentPassword: "correct" },
+  });
   const res = createMockResponse();
 
   await assert.rejects(
@@ -153,13 +191,17 @@ test("requestEmailChange rejects an email already taken by another account", asy
     (err) => {
       assert.equal(err.code, "EMAIL_TAKEN");
       return true;
-    }
+    },
   );
 });
 
 test("requestEmailChange rejects a request made before the resend cooldown has elapsed", async (t) => {
   t.mock.method(User, "findById", () => ({
-    select: async () => ({ _id: "user1", email: "old@example.com", password: "hashed" }),
+    select: async () => ({
+      _id: "user1",
+      email: "old@example.com",
+      password: "hashed",
+    }),
   }));
   t.mock.method(bcrypt, "compare", async () => true);
   t.mock.method(User, "findOne", async () => null);
@@ -169,7 +211,9 @@ test("requestEmailChange rejects a request made before the resend cooldown has e
     lastRequestAt: new Date(), // just now
   }));
 
-  const req = baseReq({ body: { newEmail: "new@example.com", currentPassword: "correct" } });
+  const req = baseReq({
+    body: { newEmail: "new@example.com", currentPassword: "correct" },
+  });
   const res = createMockResponse();
 
   await assert.rejects(
@@ -178,12 +222,14 @@ test("requestEmailChange rejects a request made before the resend cooldown has e
       assert.equal(err.code, "RATE_LIMIT_EXCEEDED");
       assert.equal(err.statusCode, 429);
       return true;
-    }
+    },
   );
 });
 
 test("resendEmailChangeOtp rejects when there is no pending email change", async (t) => {
-  t.mock.method(User, "findById", () => ({ select: async () => ({ pendingEmail: null }) }));
+  t.mock.method(User, "findById", () => ({
+    select: async () => ({ pendingEmail: null }),
+  }));
 
   const req = baseReq();
   const res = createMockResponse();
@@ -193,7 +239,7 @@ test("resendEmailChangeOtp rejects when there is no pending email change", async
     (err) => {
       assert.equal(err.code, "NO_PENDING_EMAIL_CHANGE");
       return true;
-    }
+    },
   );
 });
 
@@ -206,7 +252,7 @@ test("verifyEmailChange rejects a missing OTP code", async () => {
     (err) => {
       assert.equal(err.code, "VALIDATION_ERROR");
       return true;
-    }
+    },
   );
 });
 
@@ -223,7 +269,7 @@ test("verifyEmailChange rejects when there is no pending email change", async (t
     (err) => {
       assert.equal(err.code, "NO_PENDING_EMAIL_CHANGE");
       return true;
-    }
+    },
   );
 });
 
@@ -244,7 +290,7 @@ test("verifyEmailChange rejects an expired code and clears the pending state", a
     (err) => {
       assert.equal(err.code, "OTP_EXPIRED");
       return true;
-    }
+    },
   );
   assert.equal(savedUser.pendingEmail, null);
 });
@@ -266,7 +312,7 @@ test("verifyEmailChange rejects an incorrect code", async (t) => {
     (err) => {
       assert.equal(err.code, "INVALID_OTP");
       return true;
-    }
+    },
   );
 });
 
@@ -305,7 +351,7 @@ test("requestEnable2FA rejects when 2FA is already enabled", async (t) => {
     (err) => {
       assert.equal(err.code, "2FA_ALREADY_ENABLED");
       return true;
-    }
+    },
   );
 });
 
@@ -318,13 +364,16 @@ test("verifyEnable2FA rejects a missing OTP code", async () => {
     (err) => {
       assert.equal(err.code, "VALIDATION_ERROR");
       return true;
-    }
+    },
   );
 });
 
 test("verifyEnable2FA turns on 2FA for a correct code", async (t) => {
   const savedUser = {
-    twoFactorSetupOtp: crypto.createHash("sha256").update("222222").digest("hex"),
+    twoFactorSetupOtp: crypto
+      .createHash("sha256")
+      .update("222222")
+      .digest("hex"),
     twoFactorSetupOtpExpiresAt: new Date(Date.now() + 60000),
     twoFactorEnabled: false,
     save: async function () {},
@@ -350,12 +399,14 @@ test("disable2FA rejects a missing current password", async () => {
     (err) => {
       assert.equal(err.code, "VALIDATION_ERROR");
       return true;
-    }
+    },
   );
 });
 
 test("disable2FA rejects an incorrect password", async (t) => {
-  t.mock.method(User, "findById", () => ({ select: async () => ({ password: "hashed" }) }));
+  t.mock.method(User, "findById", () => ({
+    select: async () => ({ password: "hashed" }),
+  }));
   t.mock.method(bcrypt, "compare", async () => false);
 
   const req = baseReq({ body: { currentPassword: "wrong" } });
@@ -366,12 +417,16 @@ test("disable2FA rejects an incorrect password", async (t) => {
     (err) => {
       assert.equal(err.code, "INVALID_PASSWORD");
       return true;
-    }
+    },
   );
 });
 
 test("disable2FA turns off 2FA on a correct password", async (t) => {
-  const savedUser = { password: "hashed", twoFactorEnabled: true, save: async function () {} };
+  const savedUser = {
+    password: "hashed",
+    twoFactorEnabled: true,
+    save: async function () {},
+  };
   t.mock.method(User, "findById", () => ({ select: async () => savedUser }));
   t.mock.method(bcrypt, "compare", async () => true);
 
@@ -388,7 +443,9 @@ test("disable2FA turns off 2FA on a correct password", async (t) => {
 // CHANGE PASSWORD
 // ==========================================
 test("changePassword rejects when a field is missing", async () => {
-  const req = baseReq({ body: { currentPassword: "old", newPassword: "newpass1" } });
+  const req = baseReq({
+    body: { currentPassword: "old", newPassword: "newpass1" },
+  });
   const res = createMockResponse();
 
   await assert.rejects(
@@ -397,13 +454,17 @@ test("changePassword rejects when a field is missing", async () => {
       assert.equal(err.name, "AppError");
       assert.equal(err.code, "VALIDATION_ERROR");
       return true;
-    }
+    },
   );
 });
 
 test("changePassword rejects when new and confirm passwords differ", async () => {
   const req = baseReq({
-    body: { currentPassword: "oldpass1", newPassword: "newpass1", confirmPassword: "different1" },
+    body: {
+      currentPassword: "oldpass1",
+      newPassword: "newpass1",
+      confirmPassword: "different1",
+    },
   });
   const res = createMockResponse();
 
@@ -412,13 +473,17 @@ test("changePassword rejects when new and confirm passwords differ", async () =>
     (err) => {
       assert.equal(err.code, "PASSWORD_MISMATCH");
       return true;
-    }
+    },
   );
 });
 
 test("changePassword rejects a new password shorter than 8 characters", async () => {
   const req = baseReq({
-    body: { currentPassword: "oldpass1", newPassword: "short1", confirmPassword: "short1" },
+    body: {
+      currentPassword: "oldpass1",
+      newPassword: "short1",
+      confirmPassword: "short1",
+    },
   });
   const res = createMockResponse();
 
@@ -427,7 +492,7 @@ test("changePassword rejects a new password shorter than 8 characters", async ()
     (err) => {
       assert.equal(err.code, "WEAK_PASSWORD");
       return true;
-    }
+    },
   );
 });
 
@@ -438,7 +503,11 @@ test("changePassword rejects when currentPassword does not match the stored hash
   t.mock.method(bcrypt, "compare", async () => false);
 
   const req = baseReq({
-    body: { currentPassword: "wrongpass1", newPassword: "newpass123", confirmPassword: "newpass123" },
+    body: {
+      currentPassword: "wrongpass1",
+      newPassword: "newpass123",
+      confirmPassword: "newpass123",
+    },
   });
   const res = createMockResponse();
 
@@ -447,7 +516,7 @@ test("changePassword rejects when currentPassword does not match the stored hash
     (err) => {
       assert.equal(err.code, "INVALID_PASSWORD");
       return true;
-    }
+    },
   );
 });
 
@@ -467,7 +536,11 @@ test("changePassword hashes and saves the new password on success", async (t) =>
   t.mock.method(bcrypt, "hash", async () => "hashed-new");
 
   const req = baseReq({
-    body: { currentPassword: "oldpass1", newPassword: "newpass123", confirmPassword: "newpass123" },
+    body: {
+      currentPassword: "oldpass1",
+      newPassword: "newpass123",
+      confirmPassword: "newpass123",
+    },
   });
   const res = createMockResponse();
 
@@ -531,7 +604,7 @@ test("verifyEmailChange locks out after 5 failed attempts", async (t) => {
       assert.equal(err.statusCode, 429);
       assert.equal(err.code, "TOO_MANY_ATTEMPTS");
       return true;
-    }
+    },
   );
 
   assert.equal(fakeUser.pendingEmail, null);
@@ -571,7 +644,10 @@ test("verifyEnable2FA locks out after 5 failed attempts", async (t) => {
   const fakeUser = {
     _id: "user1",
     twoFactorEnabled: false,
-    twoFactorSetupOtp: crypto.createHash("sha256").update("654321").digest("hex"),
+    twoFactorSetupOtp: crypto
+      .createHash("sha256")
+      .update("654321")
+      .digest("hex"),
     twoFactorSetupOtpExpiresAt: new Date(Date.now() + 60000),
     twoFactorSetupOtpAttempts: 4, // 5th attempt will fail
     save: async function () {},
@@ -588,7 +664,7 @@ test("verifyEnable2FA locks out after 5 failed attempts", async (t) => {
       assert.equal(err.statusCode, 429);
       assert.equal(err.code, "TOO_MANY_ATTEMPTS");
       return true;
-    }
+    },
   );
 
   assert.equal(fakeUser.twoFactorSetupOtp, null);
@@ -600,26 +676,41 @@ test("verifyEnable2FA locks out after 5 failed attempts", async (t) => {
 // PRIVACY SETTINGS
 // ==========================================
 test("updatePrivacySettings forwards booleans and commentPermission only", async (t) => {
-  const update = t.mock.method(User, "findByIdAndUpdate", async (id, data) => ({ _id: id, ...data }));
+  const update = t.mock.method(User, "findByIdAndUpdate", async (id, data) => ({
+    _id: id,
+    ...data,
+  }));
 
   const req = baseReq({
-    body: { isPrivate: true, commentPermission: "followers", showActivityStatus: "nope" },
+    body: {
+      isPrivate: true,
+      commentPermission: "followers",
+      showActivityStatus: "nope",
+    },
   });
   const res = createMockResponse();
 
   await updatePrivacySettings(req, res, () => {});
 
   const [, updateData] = update.mock.calls[0].arguments;
-  assert.deepEqual(updateData, { isPrivate: true, commentPermission: "followers" });
+  assert.deepEqual(updateData, {
+    isPrivate: true,
+    commentPermission: "followers",
+  });
 });
 
 // ==========================================
 // NOTIFICATION SETTINGS
 // ==========================================
 test("updateNotificationSettings forwards only boolean fields", async (t) => {
-  const update = t.mock.method(User, "findByIdAndUpdate", async (id, data) => ({ _id: id, ...data }));
+  const update = t.mock.method(User, "findByIdAndUpdate", async (id, data) => ({
+    _id: id,
+    ...data,
+  }));
 
-  const req = baseReq({ body: { notifyOnLikes: false, notifyOnDMs: true, notifyOnComments: "x" } });
+  const req = baseReq({
+    body: { notifyOnLikes: false, notifyOnDMs: true, notifyOnComments: "x" },
+  });
   const res = createMockResponse();
 
   await updateNotificationSettings(req, res, () => {});
@@ -632,7 +723,10 @@ test("updateNotificationSettings forwards only boolean fields", async (t) => {
 // APPEARANCE SETTINGS
 // ==========================================
 test("updateAppearanceSettings forwards appTheme and fontSize when present", async (t) => {
-  const update = t.mock.method(User, "findByIdAndUpdate", async (id, data) => ({ _id: id, ...data }));
+  const update = t.mock.method(User, "findByIdAndUpdate", async (id, data) => ({
+    _id: id,
+    ...data,
+  }));
 
   const req = baseReq({ body: { appTheme: "dark" } });
   const res = createMockResponse();
@@ -655,12 +749,15 @@ test("updateLanguageSettings rejects a missing appLanguage", async () => {
     (err) => {
       assert.equal(err.code, "VALIDATION_ERROR");
       return true;
-    }
+    },
   );
 });
 
 test("updateLanguageSettings updates appLanguage on success", async (t) => {
-  const update = t.mock.method(User, "findByIdAndUpdate", async (id, data) => ({ _id: id, ...data }));
+  const update = t.mock.method(User, "findByIdAndUpdate", async (id, data) => ({
+    _id: id,
+    ...data,
+  }));
 
   const req = baseReq({ body: { appLanguage: "si" } });
   const res = createMockResponse();
@@ -683,12 +780,14 @@ test("deleteAccount rejects when no password is provided", async () => {
     (err) => {
       assert.equal(err.code, "VALIDATION_ERROR");
       return true;
-    }
+    },
   );
 });
 
 test("deleteAccount rejects an incorrect password and does not delete anything", async (t) => {
-  t.mock.method(User, "findById", () => ({ select: async () => ({ password: "hashed" }) }));
+  t.mock.method(User, "findById", () => ({
+    select: async () => ({ password: "hashed" }),
+  }));
   t.mock.method(bcrypt, "compare", async () => false);
   const postDelete = t.mock.method(Post, "deleteMany", async () => ({}));
 
@@ -700,29 +799,55 @@ test("deleteAccount rejects an incorrect password and does not delete anything",
     (err) => {
       assert.equal(err.code, "INVALID_PASSWORD");
       return true;
-    }
+    },
   );
   assert.equal(postDelete.mock.calls.length, 0);
 });
 
 test("deleteAccount cascades deletes across owned content and removes the user on success", async (t) => {
-  t.mock.method(User, "findById", () => ({ select: async () => ({ password: "hashed" }) }));
+  t.mock.method(User, "findById", () => ({
+    select: async () => ({ password: "hashed" }),
+  }));
   t.mock.method(bcrypt, "compare", async () => true);
 
   const postDeleteMany = t.mock.method(Post, "deleteMany", async () => ({}));
   const likeDeleteMany = t.mock.method(Like, "deleteMany", async () => ({}));
   const storyDeleteMany = t.mock.method(Story, "deleteMany", async () => ({}));
-  const storyCollectionDeleteMany = t.mock.method(StoryCollection, "deleteMany", async () => ({}));
-  const userBadgeDeleteMany = t.mock.method(UserBadge, "deleteMany", async () => ({}));
-  const productDeleteMany = t.mock.method(Product, "deleteMany", async () => ({}));
-  const notificationDeleteMany = t.mock.method(Notification, "deleteMany", async () => ({}));
+  const storyCollectionDeleteMany = t.mock.method(
+    StoryCollection,
+    "deleteMany",
+    async () => ({}),
+  );
+  const userBadgeDeleteMany = t.mock.method(
+    UserBadge,
+    "deleteMany",
+    async () => ({}),
+  );
+  const productDeleteMany = t.mock.method(
+    Product,
+    "deleteMany",
+    async () => ({}),
+  );
+  const notificationDeleteMany = t.mock.method(
+    Notification,
+    "deleteMany",
+    async () => ({}),
+  );
   const followFind = t.mock.method(Follow, "find", async () => [
     { followerId: "follower1", followingId: "following1" },
   ]);
-  const followDeleteMany = t.mock.method(Follow, "deleteMany", async () => ({}));
+  const followDeleteMany = t.mock.method(
+    Follow,
+    "deleteMany",
+    async () => ({}),
+  );
   const userUpdateMany = t.mock.method(User, "updateMany", async () => ({}));
   const postUpdateMany = t.mock.method(Post, "updateMany", async () => ({}));
-  const userFindByIdAndDelete = t.mock.method(User, "findByIdAndDelete", async () => ({}));
+  const userFindByIdAndDelete = t.mock.method(
+    User,
+    "findByIdAndDelete",
+    async () => ({}),
+  );
 
   const req = baseReq({ body: { password: "correct" } });
   const res = createMockResponse();

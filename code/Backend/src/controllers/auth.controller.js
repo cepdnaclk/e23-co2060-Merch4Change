@@ -299,11 +299,16 @@ export const login = asyncHandler(async (req, res) => {
 
     const twoFactorToken = createTwoFactorToken(user._id);
 
-    return successResponse(res, 200, "A verification code has been sent to your email.", {
-      requiresTwoFactor: true,
-      twoFactorToken,
-      email: user.email,
-    });
+    return successResponse(
+      res,
+      200,
+      "A verification code has been sent to your email.",
+      {
+        requiresTwoFactor: true,
+        twoFactorToken,
+        email: user.email,
+      },
+    );
   }
 
   return finalizeLogin(req, res, user);
@@ -314,31 +319,52 @@ export const verifyLoginOtp = asyncHandler(async (req, res) => {
   const { twoFactorToken, otp } = req.body;
 
   if (!twoFactorToken || !otp) {
-    throw new AppError("twoFactorToken and otp are required.", 400, "VALIDATION_ERROR");
+    throw new AppError(
+      "twoFactorToken and otp are required.",
+      400,
+      "VALIDATION_ERROR",
+    );
   }
 
   let decoded;
   try {
     decoded = jwt.verify(twoFactorToken, env.jwtSecret);
   } catch (error) {
-    throw new AppError("Verification session expired. Please log in again.", 401, "INVALID_2FA_TOKEN");
+    throw new AppError(
+      "Verification session expired. Please log in again.",
+      401,
+      "INVALID_2FA_TOKEN",
+    );
   }
 
   if (decoded.purpose !== "login_2fa") {
     throw new AppError("Invalid verification token.", 401, "INVALID_2FA_TOKEN");
   }
 
-  const user = await User.findById(decoded.userId).select("+loginOtp +loginOtpExpiresAt +loginOtpAttempts");
+  const user = await User.findById(decoded.userId).select(
+    "+loginOtp +loginOtpExpiresAt +loginOtpAttempts",
+  );
 
   if (!user || !user.isActive) {
     throw new AppError("User not found or inactive.", 401, "INVALID_2FA_TOKEN");
   }
 
-  if (!user.loginOtp || !user.loginOtpExpiresAt || user.loginOtpExpiresAt.getTime() < Date.now()) {
-    throw new AppError("This code has expired. Please request a new one.", 400, "OTP_EXPIRED");
+  if (
+    !user.loginOtp ||
+    !user.loginOtpExpiresAt ||
+    user.loginOtpExpiresAt.getTime() < Date.now()
+  ) {
+    throw new AppError(
+      "This code has expired. Please request a new one.",
+      400,
+      "OTP_EXPIRED",
+    );
   }
 
-  const hashedOtp = crypto.createHash("sha256").update(String(otp).trim()).digest("hex");
+  const hashedOtp = crypto
+    .createHash("sha256")
+    .update(String(otp).trim())
+    .digest("hex");
   if (user.loginOtp !== hashedOtp) {
     user.loginOtpAttempts = (user.loginOtpAttempts || 0) + 1;
     if (user.loginOtpAttempts >= 5) {
@@ -381,7 +407,11 @@ export const resendLoginOtp = asyncHandler(async (req, res) => {
   try {
     decoded = jwt.verify(twoFactorToken, env.jwtSecret);
   } catch (error) {
-    throw new AppError("Verification session expired. Please log in again.", 401, "INVALID_2FA_TOKEN");
+    throw new AppError(
+      "Verification session expired. Please log in again.",
+      401,
+      "INVALID_2FA_TOKEN",
+    );
   }
 
   if (decoded.purpose !== "login_2fa") {
@@ -441,7 +471,10 @@ export const refresh = asyncHandler(async (req, res) => {
   }
 
   if (user.passwordChangedAt) {
-    const changedTimestamp = parseInt(user.passwordChangedAt.getTime() / 1000, 10);
+    const changedTimestamp = parseInt(
+      user.passwordChangedAt.getTime() / 1000,
+      10,
+    );
     if (decoded.iat && decoded.iat < changedTimestamp) {
       throw new AppError(
         "Password was changed recently. Please log in again.",

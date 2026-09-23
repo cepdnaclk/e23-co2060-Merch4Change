@@ -15,9 +15,13 @@ export const getUserCollections = asyncHandler(async (req, res) => {
     throw new AppError("User not found", 404, "USER_NOT_FOUND");
   }
 
-  const collections = await StoryCollection.find({ userId: user._id }).sort({ createdAt: -1 });
+  const collections = await StoryCollection.find({ userId: user._id }).sort({
+    createdAt: -1,
+  });
 
-  return successResponse(res, 200, "Collections fetched successfully", { collections });
+  return successResponse(res, 200, "Collections fetched successfully", {
+    collections,
+  });
 });
 
 // @desc    Create a new story collection
@@ -38,7 +42,9 @@ export const createCollection = asyncHandler(async (req, res) => {
 
   await newCollection.save();
 
-  return successResponse(res, 201, "Collection created successfully", { collection: newCollection });
+  return successResponse(res, 201, "Collection created successfully", {
+    collection: newCollection,
+  });
 });
 
 // @desc    Add a story to an existing collection
@@ -52,14 +58,21 @@ export const saveStoryToCollection = asyncHandler(async (req, res) => {
     throw new AppError("Story image is required", 400, "MISSING_IMAGE");
   }
 
-  const collection = await StoryCollection.findOne({ _id: id, userId: req.user._id });
-  
+  const collection = await StoryCollection.findOne({
+    _id: id,
+    userId: req.user._id,
+  });
+
   if (!collection) {
-    throw new AppError("Collection not found or unauthorized", 404, "COLLECTION_NOT_FOUND");
+    throw new AppError(
+      "Collection not found or unauthorized",
+      404,
+      "COLLECTION_NOT_FOUND",
+    );
   }
 
   // Check if image already exists in collection
-  const alreadySaved = collection.stories.some(s => s.image === image);
+  const alreadySaved = collection.stories.some((s) => s.image === image);
   if (!alreadySaved) {
     collection.stories.push({ image });
     await collection.save();

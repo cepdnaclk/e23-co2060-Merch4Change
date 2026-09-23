@@ -2,7 +2,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { createMockResponse, nextTick } from "../helpers/http.js";
-import { me, getTopDonors } from "../../../src/controllers/profile.controller.js";
+import {
+  me,
+  getTopDonors,
+} from "../../../src/controllers/profile.controller.js";
 import User from "../../../src/models/User.js";
 import Charity from "../../../src/models/Charity.js";
 import Project from "../../../src/models/Project.js";
@@ -39,7 +42,9 @@ test("getTopDonors returns donors with standardized tiers (Diamond, Platinum, Go
 
   Charity.findOne = () => ({
     lean: async () => ({ _id: "c1", publicName: "Hope Charity" }),
-    populate: () => ({ lean: async () => ({ _id: "c1", publicName: "Hope Charity" }) }),
+    populate: () => ({
+      lean: async () => ({ _id: "c1", publicName: "Hope Charity" }),
+    }),
     then: (resolve) => resolve({ _id: "c1", publicName: "Hope Charity" }),
   });
 
@@ -62,35 +67,60 @@ test("getTopDonors returns donors with standardized tiers (Diamond, Platinum, Go
         _id: "d1",
         coinAmount: 6000,
         createdAt: new Date(),
-        donorUserId: { _id: "d_user_1", userName: "alice", firstName: "Alice", lastName: "Smith" },
+        donorUserId: {
+          _id: "d_user_1",
+          userName: "alice",
+          firstName: "Alice",
+          lastName: "Smith",
+        },
         charityProjectId: { title: "Clean Water" },
       },
       {
         _id: "d2",
         coinAmount: 2500,
         createdAt: new Date(),
-        donorUserId: { _id: "d_user_2", userName: "bob", firstName: "Bob", lastName: "Jones" },
+        donorUserId: {
+          _id: "d_user_2",
+          userName: "bob",
+          firstName: "Bob",
+          lastName: "Jones",
+        },
         charityProjectId: { title: "Clean Water" },
       },
       {
         _id: "d3",
         coinAmount: 600,
         createdAt: new Date(),
-        donorUserId: { _id: "d_user_3", userName: "charlie", firstName: "Charlie", lastName: "Brown" },
+        donorUserId: {
+          _id: "d_user_3",
+          userName: "charlie",
+          firstName: "Charlie",
+          lastName: "Brown",
+        },
         charityProjectId: { title: "Clean Water" },
       },
       {
         _id: "d4",
         coinAmount: 150,
         createdAt: new Date(),
-        donorUserId: { _id: "d_user_4", userName: "diana", firstName: "Diana", lastName: "Prince" },
+        donorUserId: {
+          _id: "d_user_4",
+          userName: "diana",
+          firstName: "Diana",
+          lastName: "Prince",
+        },
         charityProjectId: { title: "Clean Water" },
       },
       {
         _id: "d5",
         coinAmount: 50,
         createdAt: new Date(),
-        donorUserId: { _id: "d_user_5", userName: "evan", firstName: "Evan", lastName: "Wright" },
+        donorUserId: {
+          _id: "d_user_5",
+          userName: "evan",
+          firstName: "Evan",
+          lastName: "Wright",
+        },
         charityProjectId: { title: "Clean Water" },
       },
     ],

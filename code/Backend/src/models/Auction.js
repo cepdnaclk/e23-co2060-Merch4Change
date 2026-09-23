@@ -12,7 +12,7 @@ const auctionSchema = new mongoose.Schema(
       type: Number,
       required: true,
       min: 0,
-    },  
+    },
     currentPrice: {
       type: Number,
       required: true,
@@ -20,7 +20,7 @@ const auctionSchema = new mongoose.Schema(
     },
     currentBidder: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",     
+      ref: "User",
       default: null,
     },
     startTime: {
@@ -43,7 +43,7 @@ const auctionSchema = new mongoose.Schema(
       enum: ["scheduled", "active", "ended", "cancelled"],
       default: "scheduled",
     },
-    bidIncrement:{
+    bidIncrement: {
       type: Number,
       required: true,
       default: 10,
@@ -59,4 +59,3 @@ const auctionSchema = new mongoose.Schema(
 const Auction = mongoose.model("Auction", auctionSchema);
 
 export default Auction;
-

@@ -29,7 +29,10 @@ export const connectDatabase = async () => {
   }
 
   // 1 = connected, 2 = connecting
-  if (mongoose.connection.readyState === 1 || mongoose.connection.readyState === 2) {
+  if (
+    mongoose.connection.readyState === 1 ||
+    mongoose.connection.readyState === 2
+  ) {
     logInfo("MongoDB is already connected or connecting.");
     return;
   }

@@ -48,11 +48,17 @@ test("protect attaches user and calls next for valid token", async () => {
   }
 
   assert.equal(nextArg, undefined);
-  assert.deepEqual(req.user, { _id: "user-1", fullName: "Jane", isActive: true });
+  assert.deepEqual(req.user, {
+    _id: "user-1",
+    fullName: "Jane",
+    isActive: true,
+  });
 });
 
 test("protect rejects the same unexpired token after account suspension", async (t) => {
-  const token = jwt.sign({ userId: "user-1" }, env.jwtSecret, { expiresIn: "5m" });
+  const token = jwt.sign({ userId: "user-1" }, env.jwtSecret, {
+    expiresIn: "5m",
+  });
   let isActive = true;
   const lookup = t.mock.method(User, "findById", (id) => {
     assert.equal(id, "user-1");

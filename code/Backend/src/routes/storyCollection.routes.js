@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { getUserCollections, createCollection, saveStoryToCollection } from "../controllers/storyCollection.controller.js";
+import {
+  getUserCollections,
+  createCollection,
+  saveStoryToCollection,
+} from "../controllers/storyCollection.controller.js";
 import protect from "../middlewares/auth.js";
 
 const router = Router();

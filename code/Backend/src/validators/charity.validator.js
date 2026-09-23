@@ -27,10 +27,14 @@ export const validateCharityVerificationBody = (payload = {}) => {
   const legalName = String(payload.legalName ?? "").trim();
   const description = String(payload.description ?? "").trim();
   const logoUrl = String(payload.logoUrl ?? "").trim();
-  const contactEmail = String(payload.contactEmail ?? "").trim().toLowerCase();
+  const contactEmail = String(payload.contactEmail ?? "")
+    .trim()
+    .toLowerCase();
   const website = String(payload.website ?? "").trim();
   const registrationNumber = String(payload.registrationNumber ?? "").trim();
-  const category = String(payload.category ?? "other").trim().toLowerCase();
+  const category = String(payload.category ?? "other")
+    .trim()
+    .toLowerCase();
   const country = String(payload.country ?? "").trim();
   const address = String(payload.address ?? "").trim();
   const proofDocuments = normalizeProofDocuments(payload.proofDocuments);

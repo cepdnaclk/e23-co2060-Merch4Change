@@ -1,49 +1,49 @@
-import User from "../models/User.js"
+import User from "../models/User.js";
 
 // validate start time and endtime
 export const validateTime = (startTime, endTime) => {
-    const start =  new Date(startTime);
-    const end = new Date(endTime);
-    const now = new Date();
-    const start_buffer = new Date(now.getTime() - (5 * 60 * 1000));
-    
-    if (isNaN(start.getTime()) || isNaN(end.getTime())){
-        return false;
-    }
+  const start = new Date(startTime);
+  const end = new Date(endTime);
+  const now = new Date();
+  const start_buffer = new Date(now.getTime() - 5 * 60 * 1000);
 
-    return start >= start_buffer && (end > start && end > now);
-}
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    return false;
+  }
 
-// validate is for auction status 
+  return start >= start_buffer && end > start && end > now;
+};
+
+// validate is for auction status
 export const isStarted = (startTime) => {
-    const start =  new Date(startTime);
-    const now = new Date();
+  const start = new Date(startTime);
+  const now = new Date();
 
-    if (isNaN(start.getTime())){
-        return false;
-    }
+  if (isNaN(start.getTime())) {
+    return false;
+  }
 
-    return start <= now;
-}
+  return start <= now;
+};
 
-// validate the bid 
+// validate the bid
 export const validBid = async (auction, amount, userId) => {
-    // check acution is statred?
-    const isActive = auction.status === "active" ? true: false;
-    
-    // check is auction ended?
-    const now = new Date();
-    const isNotExpired = auction.endTime > now? true: false;
+  // check acution is statred?
+  const isActive = auction.status === "active" ? true : false;
 
-    // validate bid amount 
-    const newVal = auction.currentPrice + auction.bidIncrement;
-    const isAmount = amount >= newVal ? true: false;
+  // check is auction ended?
+  const now = new Date();
+  const isNotExpired = auction.endTime > now ? true : false;
 
-    // validate bidder have enough coins
-    const user = await User.findById(userId);
-    const userBalance = user.coinBalance;
+  // validate bid amount
+  const newVal = auction.currentPrice + auction.bidIncrement;
+  const isAmount = amount >= newVal ? true : false;
 
-    const isUserHaveCoin = userBalance >= amount ? true: false;
+  // validate bidder have enough coins
+  const user = await User.findById(userId);
+  const userBalance = user.coinBalance;
 
-    return { isActive, isNotExpired, isAmount, isUserHaveCoin };
-}
+  const isUserHaveCoin = userBalance >= amount ? true : false;
+
+  return { isActive, isNotExpired, isAmount, isUserHaveCoin };
+};

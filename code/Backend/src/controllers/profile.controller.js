@@ -15,7 +15,10 @@ import AppError from "../utils/appError.js";
 
 export const me = asyncHandler(async (req, res) => {
   const userObj = req.user.toObject ? req.user.toObject() : { ...req.user };
-  if (mongoose.connection?.readyState === 1 && (req.user.accountType === "organization" || req.user.role === "charity")) {
+  if (
+    mongoose.connection?.readyState === 1 &&
+    (req.user.accountType === "organization" || req.user.role === "charity")
+  ) {
     const charity = await Charity.findOne({ ownerUserId: req.user._id });
     const possibleCharityIds = [req.user._id];
     if (charity?._id) possibleCharityIds.push(charity._id);
@@ -33,7 +36,11 @@ export const me = asyncHandler(async (req, res) => {
     }
   }
 
-  if (mongoose.connection?.readyState === 1 && req.user._id && mongoose.isValidObjectId(req.user._id)) {
+  if (
+    mongoose.connection?.readyState === 1 &&
+    req.user._id &&
+    mongoose.isValidObjectId(req.user._id)
+  ) {
     const [followersCount, followingCount] = await Promise.all([
       Follow.countDocuments({ followingId: req.user._id }),
       Follow.countDocuments({ followerId: req.user._id }),
@@ -65,16 +72,27 @@ export const updateMe = asyncHandler(async (req, res) => {
   // NOTE: "email" is intentionally excluded — changing the account email now
   // requires OTP re-verification via /api/v1/settings/email/request-change
   // and /verify, so it can no longer be set directly through this endpoint.
-  const allowed = ["firstName", "lastName", "userName", "profileBio", "userLink"];
+  const allowed = [
+    "firstName",
+    "lastName",
+    "userName",
+    "profileBio",
+    "userLink",
+  ];
   const updateData = {};
   for (const k of allowed) {
-    if (Object.prototype.hasOwnProperty.call(payload, k)) updateData[k] = payload[k];
+    if (Object.prototype.hasOwnProperty.call(payload, k))
+      updateData[k] = payload[k];
   }
 
   // If username is changing, ensure uniqueness
   if (updateData.userName && updateData.userName !== req.user.userName) {
-    const exists = await User.findOne({ userName: updateData.userName, _id: { $ne: req.user._id } });
-    if (exists) throw new AppError("Username already taken.", 409, "USERNAME_TAKEN");
+    const exists = await User.findOne({
+      userName: updateData.userName,
+      _id: { $ne: req.user._id },
+    });
+    if (exists)
+      throw new AppError("Username already taken.", 409, "USERNAME_TAKEN");
   }
 
   Object.assign(req.user, updateData);
@@ -112,12 +130,17 @@ export const getProfileByUsername = asyncHandler(async (req, res) => {
       $or: [
         { publicName: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
         { publicName: { $regex: fuzzyRegex } },
-        ...(mongoose.isValidObjectId(cleanParam) ? [{ _id: cleanParam }, { ownerUserId: cleanParam }] : []),
+        ...(mongoose.isValidObjectId(cleanParam)
+          ? [{ _id: cleanParam }, { ownerUserId: cleanParam }]
+          : []),
       ],
     }).populate("ownerUserId");
 
     if (charity?.ownerUserId) {
-      user = typeof charity.ownerUserId === "object" ? charity.ownerUserId : await User.findById(charity.ownerUserId);
+      user =
+        typeof charity.ownerUserId === "object"
+          ? charity.ownerUserId
+          : await User.findById(charity.ownerUserId);
     }
   }
 
@@ -138,7 +161,12 @@ export const getProfileByUsername = asyncHandler(async (req, res) => {
   }
 
   const userObj = user.toObject ? user.toObject() : { ...user };
-  if (dbReady && (userObj.accountType === "organization" || userObj.role === "charity" || charity)) {
+  if (
+    dbReady &&
+    (userObj.accountType === "organization" ||
+      userObj.role === "charity" ||
+      charity)
+  ) {
     const possibleCharityIds = [user._id];
     if (charity?._id) possibleCharityIds.push(charity._id);
     const projectsCount = await Project.countDocuments({
@@ -188,7 +216,11 @@ export const followUser = asyncHandler(async (req, res) => {
   }
 
   if (String(userToFollow._id) === String(req.user._id)) {
-    throw new AppError("You cannot follow yourself.", 400, "SELF_FOLLOW_FORBIDDEN");
+    throw new AppError(
+      "You cannot follow yourself.",
+      400,
+      "SELF_FOLLOW_FORBIDDEN",
+    );
   }
 
   // Find or create follow record
@@ -198,7 +230,9 @@ export const followUser = asyncHandler(async (req, res) => {
   });
 
   if (existingFollow) {
-    return successResponse(res, 200, "Already following this user.", { isFollowing: true });
+    return successResponse(res, 200, "Already following this user.", {
+      isFollowing: true,
+    });
   }
 
   await Follow.create({
@@ -207,13 +241,16 @@ export const followUser = asyncHandler(async (req, res) => {
   });
 
   if (mongoose.connection?.readyState === 1) {
-    await User.findByIdAndUpdate(userToFollow._id, { $inc: { followersCount: 1 } });
+    await User.findByIdAndUpdate(userToFollow._id, {
+      $inc: { followersCount: 1 },
+    });
     await User.findByIdAndUpdate(req.user._id, { $inc: { followingCount: 1 } });
 
     if (mongoose.Types.ObjectId.isValid(userToFollow._id)) {
-      const followerName = req.user.firstName && req.user.lastName
-        ? `${req.user.firstName} ${req.user.lastName}`.trim()
-        : (req.user.firstName || req.user.userName || "Someone");
+      const followerName =
+        req.user.firstName && req.user.lastName
+          ? `${req.user.firstName} ${req.user.lastName}`.trim()
+          : req.user.firstName || req.user.userName || "Someone";
       await Notification.create({
         userId: userToFollow._id,
         type: "follow",
@@ -223,7 +260,9 @@ export const followUser = asyncHandler(async (req, res) => {
     }
   }
 
-  return successResponse(res, 200, "Successfully followed user.", { isFollowing: true });
+  return successResponse(res, 200, "Successfully followed user.", {
+    isFollowing: true,
+  });
 });
 
 export const unfollowUser = asyncHandler(async (req, res) => {
@@ -245,11 +284,17 @@ export const unfollowUser = asyncHandler(async (req, res) => {
   });
 
   if (deleted && mongoose.connection?.readyState === 1) {
-    await User.findByIdAndUpdate(userToUnfollow._id, { $inc: { followersCount: -1 } });
-    await User.findByIdAndUpdate(req.user._id, { $inc: { followingCount: -1 } });
+    await User.findByIdAndUpdate(userToUnfollow._id, {
+      $inc: { followersCount: -1 },
+    });
+    await User.findByIdAndUpdate(req.user._id, {
+      $inc: { followingCount: -1 },
+    });
   }
 
-  return successResponse(res, 200, "Successfully unfollowed user.", { isFollowing: false });
+  return successResponse(res, 200, "Successfully unfollowed user.", {
+    isFollowing: false,
+  });
 });
 
 export const getSuggestedUsers = asyncHandler(async (req, res) => {
@@ -260,8 +305,10 @@ export const getSuggestedUsers = asyncHandler(async (req, res) => {
   }
 
   // Find users the current user is already following
-  const followingRecords = await Follow.find({ followerId: req.user._id }).select("followingId");
-  const followingIds = followingRecords.map(record => record.followingId);
+  const followingRecords = await Follow.find({
+    followerId: req.user._id,
+  }).select("followingId");
+  const followingIds = followingRecords.map((record) => record.followingId);
 
   // Add the current user to the exclusion list
   followingIds.push(req.user._id);
@@ -270,11 +317,19 @@ export const getSuggestedUsers = asyncHandler(async (req, res) => {
   const suggestedUsers = await User.aggregate([
     { $match: { _id: { $nin: followingIds } } },
     { $sample: { size: 5 } },
-    { $project: { password: 0, email: 0, resetPasswordToken: 0, resetPasswordExpires: 0, accountType: 0 } }
+    {
+      $project: {
+        password: 0,
+        email: 0,
+        resetPasswordToken: 0,
+        resetPasswordExpires: 0,
+        accountType: 0,
+      },
+    },
   ]);
 
   return successResponse(res, 200, "Suggested users fetched successfully.", {
-    suggestedUsers
+    suggestedUsers,
   });
 });
 
@@ -308,7 +363,9 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
     charity = await Charity.findOne({
       $or: [
         { ownerUserId: targetUser._id },
-        ...(mongoose.isValidObjectId(targetUser._id) ? [{ _id: targetUser._id }] : []),
+        ...(mongoose.isValidObjectId(targetUser._id)
+          ? [{ _id: targetUser._id }]
+          : []),
       ],
     });
   } else if (username) {
@@ -316,24 +373,36 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
       $or: [
         { publicName: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
         { publicName: { $regex: fuzzyRegex } },
-        ...(mongoose.isValidObjectId(cleanParam) ? [{ _id: cleanParam }, { ownerUserId: cleanParam }] : []),
+        ...(mongoose.isValidObjectId(cleanParam)
+          ? [{ _id: cleanParam }, { ownerUserId: cleanParam }]
+          : []),
       ],
     }).populate("ownerUserId");
 
     if (charity?.ownerUserId) {
-      targetUser = typeof charity.ownerUserId === "object" ? charity.ownerUserId : await User.findById(charity.ownerUserId);
+      targetUser =
+        typeof charity.ownerUserId === "object"
+          ? charity.ownerUserId
+          : await User.findById(charity.ownerUserId);
     }
   }
 
   if (!targetUser && !charity) {
-    throw new AppError("User or organization profile not found.", 404, "USER_NOT_FOUND");
+    throw new AppError(
+      "User or organization profile not found.",
+      404,
+      "USER_NOT_FOUND",
+    );
   }
 
   const possibleCharityIds = [];
   if (charity?._id) possibleCharityIds.push(charity._id);
   if (targetUser?._id) possibleCharityIds.push(targetUser._id);
   if (charity?.ownerUserId) {
-    const ownerId = typeof charity.ownerUserId === "object" ? charity.ownerUserId._id : charity.ownerUserId;
+    const ownerId =
+      typeof charity.ownerUserId === "object"
+        ? charity.ownerUserId._id
+        : charity.ownerUserId;
     if (ownerId) possibleCharityIds.push(ownerId);
   }
   if (mongoose.isValidObjectId(username)) {
@@ -343,7 +412,9 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
   // Query projects owned by this charity to catch all project-specific donations
   const projects = await Project.find({
     $or: [
-      ...(possibleCharityIds.length > 0 ? [{ charityId: { $in: possibleCharityIds } }] : []),
+      ...(possibleCharityIds.length > 0
+        ? [{ charityId: { $in: possibleCharityIds } }]
+        : []),
       ...(targetUser?._id ? [{ charityId: targetUser._id }] : []),
       ...(charity?._id ? [{ charityId: charity._id }] : []),
     ],
@@ -380,7 +451,10 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
         status: { $nin: ["failed", "cancelled", "rejected"] },
       })
         .select("_id donorUserId charityProjectId coinAmount createdAt")
-        .populate("donorUserId", "firstName lastName userName profileImageUrl isVerified")
+        .populate(
+          "donorUserId",
+          "firstName lastName userName profileImageUrl isVerified",
+        )
         .populate("charityProjectId", "title")
         .sort({ createdAt: -1 })
         .lean();
@@ -392,7 +466,11 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
         entity: {
           id: charity?._id || targetUser?._id,
           userName: targetUser?.userName || username,
-          name: charity?.publicName || (targetUser?.firstName ? `${targetUser.firstName} ${targetUser.lastName}`.trim() : targetUser?.userName || username),
+          name:
+            charity?.publicName ||
+            (targetUser?.firstName
+              ? `${targetUser.firstName} ${targetUser.lastName}`.trim()
+              : targetUser?.userName || username),
           accountType: "organization",
           logoUrl: charity?.logoUrl || targetUser?.profileImageUrl || "",
           description: charity?.description || targetUser?.profileBio || "",
@@ -420,7 +498,11 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
       let donorIdStr = null;
       let u = null;
 
-      if (d.donorUserId && typeof d.donorUserId === "object" && (d.donorUserId._id || d.donorUserId.id)) {
+      if (
+        d.donorUserId &&
+        typeof d.donorUserId === "object" &&
+        (d.donorUserId._id || d.donorUserId.id)
+      ) {
         donorIdStr = (d.donorUserId._id || d.donorUserId.id).toString();
         u = d.donorUserId;
       } else if (d.donorUserId) {
@@ -428,7 +510,11 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
         missingUserIds.add(donorIdStr);
       } else {
         donorIdStr = `anon-${d._id?.toString() || Math.random().toString(36).substring(2, 9)}`;
-        u = { userName: "anonymous", firstName: "Community", lastName: "Donor" };
+        u = {
+          userName: "anonymous",
+          firstName: "Community",
+          lastName: "Donor",
+        };
       }
 
       if (!donorIdStr) continue;
@@ -476,7 +562,9 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
 
     // Populate any missing user details
     if (missingUserIds.size > 0) {
-      const fetchedUsers = await User.find({ _id: { $in: Array.from(missingUserIds) } })
+      const fetchedUsers = await User.find({
+        _id: { $in: Array.from(missingUserIds) },
+      })
         .select("firstName lastName userName profileImageUrl isVerified")
         .lean();
       for (const fu of fetchedUsers) {
@@ -488,11 +576,45 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
     }
 
     const getDonorTier = (totalCoins) => {
-      if (totalCoins >= 5000) return { tier: "Diamond", title: "Diamond Donor", icon: "💎", color: "#60A5FA", bg: "#EFF6FF" };
-      if (totalCoins >= 2000) return { tier: "Platinum", title: "Platinum Donor", icon: "👑", color: "#A855F7", bg: "#FAF5FF" };
-      if (totalCoins >= 500) return { tier: "Gold", title: "Gold Donor", icon: "🥇", color: "#D97706", bg: "#FFFBEB" };
-      if (totalCoins >= 100) return { tier: "Silver", title: "Silver Donor", icon: "🥈", color: "#4B5563", bg: "#F3F4F6" };
-      return { tier: "Bronze", title: "Bronze Donor", icon: "🥉", color: "#92400E", bg: "#FEF3C7" };
+      if (totalCoins >= 5000)
+        return {
+          tier: "Diamond",
+          title: "Diamond Donor",
+          icon: "💎",
+          color: "#60A5FA",
+          bg: "#EFF6FF",
+        };
+      if (totalCoins >= 2000)
+        return {
+          tier: "Platinum",
+          title: "Platinum Donor",
+          icon: "👑",
+          color: "#A855F7",
+          bg: "#FAF5FF",
+        };
+      if (totalCoins >= 500)
+        return {
+          tier: "Gold",
+          title: "Gold Donor",
+          icon: "🥇",
+          color: "#D97706",
+          bg: "#FFFBEB",
+        };
+      if (totalCoins >= 100)
+        return {
+          tier: "Silver",
+          title: "Silver Donor",
+          icon: "🥈",
+          color: "#4B5563",
+          bg: "#F3F4F6",
+        };
+      return {
+        tier: "Bronze",
+        title: "Bronze Donor",
+        icon: "🥉",
+        color: "#92400E",
+        bg: "#FEF3C7",
+      };
     };
 
     const sortedDonors = Array.from(donorMap.values())
@@ -501,13 +623,16 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
           b.totalCoinsDonated - a.totalCoinsDonated ||
           b.donationsCount - a.donationsCount ||
           new Date(b.lastDonatedAt || 0) - new Date(a.lastDonatedAt || 0) ||
-          String(a.userId).localeCompare(String(b.userId))
+          String(a.userId).localeCompare(String(b.userId)),
       )
       .map((item, index) => {
         const u = item.user || {};
         const rank = index + 1;
         const tier = getDonorTier(item.totalCoinsDonated);
-        const name = u.firstName && u.lastName ? `${u.firstName} ${u.lastName}`.trim() : (u.userName || `Donor #${rank}`);
+        const name =
+          u.firstName && u.lastName
+            ? `${u.firstName} ${u.lastName}`.trim()
+            : u.userName || `Donor #${rank}`;
 
         return {
           rank,
@@ -538,10 +663,16 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
     const recentActivity = [];
     for (const d of donations) {
       if (recentActivity.length >= 15) break;
-      const donorIdStr = d.donorUserId?._id?.toString() || d.donorUserId?.toString();
+      const donorIdStr =
+        d.donorUserId?._id?.toString() || d.donorUserId?.toString();
       const donorItem = donorMap.get(donorIdStr);
-      const u = donorItem?.user || (typeof d.donorUserId === "object" ? d.donorUserId : {});
-      const donorName = u.firstName && u.lastName ? `${u.firstName} ${u.lastName}`.trim() : (u.userName || "Community Donor");
+      const u =
+        donorItem?.user ||
+        (typeof d.donorUserId === "object" ? d.donorUserId : {});
+      const donorName =
+        u.firstName && u.lastName
+          ? `${u.firstName} ${u.lastName}`.trim()
+          : u.userName || "Community Donor";
 
       recentActivity.push({
         id: d._id,
@@ -557,7 +688,10 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
       });
     }
 
-    const totalCoins = sortedDonors.reduce((sum, d) => sum + d.totalCoinsDonated, 0);
+    const totalCoins = sortedDonors.reduce(
+      (sum, d) => sum + d.totalCoinsDonated,
+      0,
+    );
     const totalDonations = donations.length;
 
     return successResponse(res, 200, "Top donors fetched successfully.", {
@@ -565,7 +699,11 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
       entity: {
         id: charity?._id || targetUser?._id,
         userName: targetUser?.userName || username,
-        name: charity?.publicName || (targetUser?.firstName ? `${targetUser.firstName} ${targetUser.lastName}`.trim() : targetUser?.userName || username),
+        name:
+          charity?.publicName ||
+          (targetUser?.firstName
+            ? `${targetUser.firstName} ${targetUser.lastName}`.trim()
+            : targetUser?.userName || username),
         accountType: "organization",
         logoUrl: charity?.logoUrl || targetUser?.profileImageUrl || "",
         description: charity?.description || targetUser?.profileBio || "",
@@ -605,7 +743,9 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
       type: "customers",
       seller: {
         userName: targetUser.userName,
-        name: targetUser.firstName ? `${targetUser.firstName} ${targetUser.lastName}`.trim() : targetUser.userName,
+        name: targetUser.firstName
+          ? `${targetUser.firstName} ${targetUser.lastName}`.trim()
+          : targetUser.userName,
         accountType: targetUser.accountType,
       },
       topSupporters: [],
@@ -676,10 +816,33 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
   const userMap = new Map(customerUsers.map((u) => [u._id.toString(), u]));
 
   const getCustomerTier = (rank) => {
-    if (rank === 1) return { title: "Champion Patron", icon: "🥇", color: "#D97706", bg: "#FEF3C7" };
-    if (rank === 2) return { title: "Elite Supporter", icon: "🥈", color: "#4B5563", bg: "#F3F4F6" };
-    if (rank === 3) return { title: "Dedicated Buyer", icon: "🥉", color: "#92400E", bg: "#FEF3C7" };
-    return { title: "Loyal Customer", icon: "🎖️", color: "#0D6B5E", bg: "#E1F5EE" };
+    if (rank === 1)
+      return {
+        title: "Champion Patron",
+        icon: "🥇",
+        color: "#D97706",
+        bg: "#FEF3C7",
+      };
+    if (rank === 2)
+      return {
+        title: "Elite Supporter",
+        icon: "🥈",
+        color: "#4B5563",
+        bg: "#F3F4F6",
+      };
+    if (rank === 3)
+      return {
+        title: "Dedicated Buyer",
+        icon: "🥉",
+        color: "#92400E",
+        bg: "#FEF3C7",
+      };
+    return {
+      title: "Loyal Customer",
+      icon: "🎖️",
+      color: "#0D6B5E",
+      bg: "#E1F5EE",
+    };
   };
 
   const sortedCustomers = Array.from(customerMap.values())
@@ -689,14 +852,17 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
         b.ordersCount - a.ordersCount ||
         b.itemsCount - a.itemsCount ||
         new Date(b.lastPurchasedAt || 0) - new Date(a.lastPurchasedAt || 0) ||
-        String(a.userId).localeCompare(String(b.userId))
+        String(a.userId).localeCompare(String(b.userId)),
     )
     .map((item, index) => {
       const u = userMap.get(item.userId.toString());
       if (!u) return null;
       const rank = index + 1;
       const tier = getCustomerTier(rank);
-      const name = u.firstName && u.lastName ? `${u.firstName} ${u.lastName}`.trim() : u.userName;
+      const name =
+        u.firstName && u.lastName
+          ? `${u.firstName} ${u.lastName}`.trim()
+          : u.userName;
 
       return {
         rank,
@@ -719,13 +885,18 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
     })
     .filter(Boolean);
 
-  const totalRevenue = sortedCustomers.reduce((sum, c) => sum + c.totalSpent, 0);
+  const totalRevenue = sortedCustomers.reduce(
+    (sum, c) => sum + c.totalSpent,
+    0,
+  );
 
   return successResponse(res, 200, "Top customers fetched successfully.", {
     type: "customers",
     seller: {
       userName: targetUser.userName,
-      name: targetUser.firstName ? `${targetUser.firstName} ${targetUser.lastName}`.trim() : targetUser.userName,
+      name: targetUser.firstName
+        ? `${targetUser.firstName} ${targetUser.lastName}`.trim()
+        : targetUser.userName,
       accountType: targetUser.accountType,
     },
     topSupporters: sortedCustomers,

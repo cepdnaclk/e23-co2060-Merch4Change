@@ -12,10 +12,14 @@ import { successResponse } from "../utils/apiResponse.js";
  * Computes donor tier label based on total coins donated.
  */
 const getDonorTier = (totalCoins) => {
-  if (totalCoins >= 5000) return { tier: "Diamond", color: "#60A5FA", bg: "#EFF6FF", icon: "💎" };
-  if (totalCoins >= 2000) return { tier: "Platinum", color: "#A855F7", bg: "#FAF5FF", icon: "👑" };
-  if (totalCoins >= 500) return { tier: "Gold", color: "#D97706", bg: "#FFFBEB", icon: "🥇" };
-  if (totalCoins >= 100) return { tier: "Silver", color: "#4B5563", bg: "#F3F4F6", icon: "🥈" };
+  if (totalCoins >= 5000)
+    return { tier: "Diamond", color: "#60A5FA", bg: "#EFF6FF", icon: "💎" };
+  if (totalCoins >= 2000)
+    return { tier: "Platinum", color: "#A855F7", bg: "#FAF5FF", icon: "👑" };
+  if (totalCoins >= 500)
+    return { tier: "Gold", color: "#D97706", bg: "#FFFBEB", icon: "🥇" };
+  if (totalCoins >= 100)
+    return { tier: "Silver", color: "#4B5563", bg: "#F3F4F6", icon: "🥈" };
   return { tier: "Bronze", color: "#92400E", bg: "#FEF3C7", icon: "🥉" };
 };
 
@@ -23,10 +27,21 @@ const getDonorTier = (totalCoins) => {
  * Calculates start date based on timeframe string aligned to UTC boundaries.
  */
 export const getTimeframeFilter = (timeframe, referenceDate = new Date()) => {
-  const now = referenceDate instanceof Date ? referenceDate : new Date(referenceDate);
+  const now =
+    referenceDate instanceof Date ? referenceDate : new Date(referenceDate);
 
   if (timeframe === "today" || timeframe === "day") {
-    const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
+    const startOfDay = new Date(
+      Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate(),
+        0,
+        0,
+        0,
+        0,
+      ),
+    );
     return { createdAt: { $gte: startOfDay } };
   }
 
@@ -34,13 +49,25 @@ export const getTimeframeFilter = (timeframe, referenceDate = new Date()) => {
     // Current calendar week starting Monday 00:00:00.000 UTC
     const day = now.getUTCDay();
     const diff = day === 0 ? 6 : day - 1;
-    const startOfWeek = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - diff, 0, 0, 0, 0));
+    const startOfWeek = new Date(
+      Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate() - diff,
+        0,
+        0,
+        0,
+        0,
+      ),
+    );
     return { createdAt: { $gte: startOfWeek } };
   }
 
   if (timeframe === "month") {
     // Current calendar month starting 1st of month 00:00:00.000 UTC
-    const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0));
+    const startOfMonth = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0),
+    );
     return { createdAt: { $gte: startOfMonth } };
   }
 
@@ -77,7 +104,13 @@ export const getDonorLeaderboard = asyncHandler(async (req, res) => {
   const timeFilter = getTimeframeFilter(timeframe);
 
   const rankedDonors = await Donation.aggregate([
-    { $match: { status: "completed", donorUserId: { $ne: null }, ...timeFilter } },
+    {
+      $match: {
+        status: "completed",
+        donorUserId: { $ne: null },
+        ...timeFilter,
+      },
+    },
     {
       $group: {
         _id: "$donorUserId",
@@ -108,16 +141,19 @@ export const getDonorLeaderboard = asyncHandler(async (req, res) => {
 
   const leaderboard = donorList
     .map((item) => {
-      const user = item.userId ? userDetailMap.get(item.userId.toString()) : null;
+      const user = item.userId
+        ? userDetailMap.get(item.userId.toString())
+        : null;
       if (!user) return null;
       return { item, user };
     })
     .filter(Boolean)
     .map(({ item, user }, index) => {
       const tierInfo = getDonorTier(item.totalCoins);
-      const name = user.firstName && user.lastName
-        ? `${user.firstName} ${user.lastName}`.trim()
-        : user.userName || `Donor #${skip + index + 1}`;
+      const name =
+        user.firstName && user.lastName
+          ? `${user.firstName} ${user.lastName}`.trim()
+          : user.userName || `Donor #${skip + index + 1}`;
 
       return {
         rank: skip + index + 1,
@@ -157,16 +193,24 @@ export const getCompanyLeaderboard = asyncHandler(async (req, res) => {
 
   // 1. Fetch all brands
   const brands = await Brand.find({})
-    .populate("ownerUserId", "firstName lastName userName profileImageUrl isVerified salesCount")
+    .populate(
+      "ownerUserId",
+      "firstName lastName userName profileImageUrl isVerified salesCount",
+    )
     .lean();
 
   if (!brands || brands.length === 0) {
-    return successResponse(res, 200, "Company leaderboard fetched successfully.", {
-      timeframe,
-      page,
-      limit,
-      leaderboard: [],
-    });
+    return successResponse(
+      res,
+      200,
+      "Company leaderboard fetched successfully.",
+      {
+        timeframe,
+        page,
+        limit,
+        leaderboard: [],
+      },
+    );
   }
 
   // 2. Fetch all products associated with brands
@@ -175,7 +219,9 @@ export const getCompanyLeaderboard = asyncHandler(async (req, res) => {
     .select("_id brandId price")
     .lean();
 
-  const productToBrandMap = new Map(products.map((p) => [p._id.toString(), p.brandId.toString()]));
+  const productToBrandMap = new Map(
+    products.map((p) => [p._id.toString(), p.brandId.toString()]),
+  );
 
   // 3. Aggregate orders within timeframe using database-level aggregation pipeline
   const brandSalesMap = new Map();
@@ -247,7 +293,9 @@ export const getCompanyLeaderboard = asyncHandler(async (req, res) => {
       const totalRevenue = stats.totalRevenue;
       const unitsSold = stats.totalUnitsSold;
       const impactCoinsGenerated = stats.impactCoinsGenerated;
-      const impactScore = Math.round(impactCoinsGenerated * 1.5 + unitsSold * 10);
+      const impactScore = Math.round(
+        impactCoinsGenerated * 1.5 + unitsSold * 10,
+      );
 
       return {
         brandId: brand._id,
@@ -272,7 +320,7 @@ export const getCompanyLeaderboard = asyncHandler(async (req, res) => {
         b.unitsSold - a.unitsSold ||
         b.totalRevenue - a.totalRevenue ||
         String(a.brandName || "").localeCompare(String(b.brandName || "")) ||
-        String(a.brandId).localeCompare(String(b.brandId))
+        String(a.brandId).localeCompare(String(b.brandId)),
     )
     .slice(skip, skip + limit)
     .map((company, index) => ({
@@ -280,12 +328,17 @@ export const getCompanyLeaderboard = asyncHandler(async (req, res) => {
       ...company,
     }));
 
-  return successResponse(res, 200, "Company leaderboard fetched successfully.", {
-    timeframe,
-    page,
-    limit,
-    leaderboard: rankedCompanies,
-  });
+  return successResponse(
+    res,
+    200,
+    "Company leaderboard fetched successfully.",
+    {
+      timeframe,
+      page,
+      limit,
+      leaderboard: rankedCompanies,
+    },
+  );
 });
 
 /**
@@ -305,12 +358,17 @@ export const getCharityLeaderboard = asyncHandler(async (req, res) => {
     .lean();
 
   if (!charities || charities.length === 0) {
-    return successResponse(res, 200, "Charity leaderboard fetched successfully.", {
-      timeframe,
-      page,
-      limit,
-      leaderboard: [],
-    });
+    return successResponse(
+      res,
+      200,
+      "Charity leaderboard fetched successfully.",
+      {
+        timeframe,
+        page,
+        limit,
+        leaderboard: [],
+      },
+    );
   }
 
   // 2. Aggregate donations per charity within timeframe.
@@ -377,9 +435,11 @@ export const getCharityLeaderboard = asyncHandler(async (req, res) => {
   // 3. Build ranked charity leaderboard
   const rankedCharities = charities
     .map((charity) => {
-      const stats =
-        donationStatsMap.get(charity._id.toString()) ||
-        donationStatsMap.get(charity.ownerUserId?._id?.toString() || charity.ownerUserId?.toString()) || {
+      const stats = donationStatsMap.get(charity._id.toString()) ||
+        donationStatsMap.get(
+          charity.ownerUserId?._id?.toString() ||
+            charity.ownerUserId?.toString(),
+        ) || {
           totalCoins: 0,
           donationCount: 0,
           donorCount: 0,
@@ -410,7 +470,7 @@ export const getCharityLeaderboard = asyncHandler(async (req, res) => {
         b.donorCount - a.donorCount ||
         b.donationCount - a.donationCount ||
         String(a.name || "").localeCompare(String(b.name || "")) ||
-        String(a.charityId).localeCompare(String(b.charityId))
+        String(a.charityId).localeCompare(String(b.charityId)),
     )
     .slice(skip, skip + limit)
     .map((charity, index) => ({
@@ -418,12 +478,17 @@ export const getCharityLeaderboard = asyncHandler(async (req, res) => {
       ...charity,
     }));
 
-  return successResponse(res, 200, "Charity leaderboard fetched successfully.", {
-    timeframe,
-    page,
-    limit,
-    leaderboard: rankedCharities,
-  });
+  return successResponse(
+    res,
+    200,
+    "Charity leaderboard fetched successfully.",
+    {
+      timeframe,
+      page,
+      limit,
+      leaderboard: rankedCharities,
+    },
+  );
 });
 
 /**
@@ -431,7 +496,12 @@ export const getCharityLeaderboard = asyncHandler(async (req, res) => {
  * Returns aggregate platform community statistics.
  */
 export const getLeaderboardStats = asyncHandler(async (req, res) => {
-  const [standardTotal, distinctDonorsResult, verifiedCharitiesCount, totalBrandsCount] = await Promise.all([
+  const [
+    standardTotal,
+    distinctDonorsResult,
+    verifiedCharitiesCount,
+    totalBrandsCount,
+  ] = await Promise.all([
     Donation.aggregate([
       { $match: { status: "completed" } },
       { $group: { _id: null, total: { $sum: "$coinAmount" } } },

@@ -1,5 +1,8 @@
 import { Router } from "express";
-import { getOrgProfileByUsername, addProject } from "../controllers/org.controller.js";
+import {
+  getOrgProfileByUsername,
+  addProject,
+} from "../controllers/org.controller.js";
 import protect from "../middlewares/auth.js";
 
 const router = Router();

@@ -26,15 +26,21 @@ export const listCharitiesForReview = asyncHandler(async (req, res) => {
 });
 
 export const getCharityForReview = asyncHandler(async (req, res) => {
-  const charity = await Charity.findById(req.params.id)
-    .populate("ownerUserId", "userName email firstName lastName");
-  if (!charity) throw new AppError("Charity not found.", 404, "CHARITY_NOT_FOUND");
-  return successResponse(res, 200, "Charity fetched successfully.", { charity });
+  const charity = await Charity.findById(req.params.id).populate(
+    "ownerUserId",
+    "userName email firstName lastName",
+  );
+  if (!charity)
+    throw new AppError("Charity not found.", 404, "CHARITY_NOT_FOUND");
+  return successResponse(res, 200, "Charity fetched successfully.", {
+    charity,
+  });
 });
 
 export const approveCharity = asyncHandler(async (req, res) => {
   const charity = await Charity.findById(req.params.id);
-  if (!charity) throw new AppError("Charity not found.", 404, "CHARITY_NOT_FOUND");
+  if (!charity)
+    throw new AppError("Charity not found.", 404, "CHARITY_NOT_FOUND");
   if (charity.verificationStatus === "verified") {
     throw new AppError("Already verified.", 409, "ALREADY_VERIFIED");
   }
@@ -52,17 +58,21 @@ export const approveCharity = asyncHandler(async (req, res) => {
   await Notification.create({
     userId: charity.ownerUserId,
     type: "CharityVerification",
-    message: "Your organization has been verified. You can now receive donations on Merch4Change.",
+    message:
+      "Your organization has been verified. You can now receive donations on Merch4Change.",
   });
 
-  return successResponse(res, 200, "Charity approved successfully.", { charity });
+  return successResponse(res, 200, "Charity approved successfully.", {
+    charity,
+  });
 });
 
 export const rejectCharity = asyncHandler(async (req, res) => {
   const { reason } = req.body;
 
   const charity = await Charity.findById(req.params.id);
-  if (!charity) throw new AppError("Charity not found.", 404, "CHARITY_NOT_FOUND");
+  if (!charity)
+    throw new AppError("Charity not found.", 404, "CHARITY_NOT_FOUND");
 
   charity.verificationStatus = "rejected";
   charity.rejectionReason = reason;
@@ -76,5 +86,7 @@ export const rejectCharity = asyncHandler(async (req, res) => {
     message: `Your verification was rejected: ${reason}`,
   });
 
-  return successResponse(res, 200, "Charity rejected successfully.", { charity });
+  return successResponse(res, 200, "Charity rejected successfully.", {
+    charity,
+  });
 });

@@ -24,8 +24,11 @@ const storyCollectionSchema = new mongoose.Schema(
   {
     timestamps: true,
     versionKey: false,
-  }
+  },
 );
 
-const StoryCollection = mongoose.model("StoryCollection", storyCollectionSchema);
+const StoryCollection = mongoose.model(
+  "StoryCollection",
+  storyCollectionSchema,
+);
 export default StoryCollection;

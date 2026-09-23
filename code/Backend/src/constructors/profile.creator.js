@@ -25,7 +25,11 @@ export const createUserProfile = asyncHandler(async (req, res) => {
   }
 
   if (existingUserName) {
-    throw new AppError("Username is already in use.", 409, "USERNAME_ALREADY_IN_USE");
+    throw new AppError(
+      "Username is already in use.",
+      409,
+      "USERNAME_ALREADY_IN_USE",
+    );
   }
 
   // Delete any existing pending registration for this email (handles re-registration)
@@ -43,12 +47,20 @@ export const createUserProfile = asyncHandler(async (req, res) => {
       otpCode,
       profileData: {
         firstName,
-        lastName
-      }
+        lastName,
+      },
     });
   } catch (dbError) {
-    console.error("[PendingUser.create] Failed to save pending user record:", dbError.message, dbError);
-    throw new AppError("Failed to initiate registration. Please try again.", 500, "DB_ERROR");
+    console.error(
+      "[PendingUser.create] Failed to save pending user record:",
+      dbError.message,
+      dbError,
+    );
+    throw new AppError(
+      "Failed to initiate registration. Please try again.",
+      500,
+      "DB_ERROR",
+    );
   }
 
   console.log(`\n[DEV MODE] OTP for ${normalizedEmail} is: ${otpCode}\n`);
@@ -58,7 +70,11 @@ export const createUserProfile = asyncHandler(async (req, res) => {
     console.error("Failed to send OTP email:", error.message);
   }
 
-  return successResponse(res, 200, "Verification code sent to your email. Please verify to complete registration.");
+  return successResponse(
+    res,
+    200,
+    "Verification code sent to your email. Please verify to complete registration.",
+  );
 });
 
 export const createOrganizationProfile = asyncHandler(async (req, res) => {
@@ -77,11 +93,17 @@ export const createOrganizationProfile = asyncHandler(async (req, res) => {
   const userName = orgName.trim().toLowerCase().replace(/\s+/g, "");
 
   const existingUser = await User.findOne({ email: normalizedEmail });
-  const existingOrgName = await OrganizationProfile.findOne({ orgName: orgName.trim() });
+  const existingOrgName = await OrganizationProfile.findOne({
+    orgName: orgName.trim(),
+  });
   const existingUserName = await User.findOne({ userName });
 
   if (existingOrgName) {
-    throw new AppError("Organization name is already in use.", 409, "ORGNAME_ALREADY_IN_USE");
+    throw new AppError(
+      "Organization name is already in use.",
+      409,
+      "ORGNAME_ALREADY_IN_USE",
+    );
   }
 
   if (existingUser) {
@@ -89,7 +111,11 @@ export const createOrganizationProfile = asyncHandler(async (req, res) => {
   }
 
   if (existingUserName) {
-    throw new AppError("Username generated from organization name is already in use.", 409, "USERNAME_ALREADY_IN_USE");
+    throw new AppError(
+      "Username generated from organization name is already in use.",
+      409,
+      "USERNAME_ALREADY_IN_USE",
+    );
   }
 
   // Delete any existing pending registration for this email (handles re-registration)
@@ -112,12 +138,20 @@ export const createOrganizationProfile = asyncHandler(async (req, res) => {
         website,
         orgType,
         country,
-        registrationNumber
-      }
+        registrationNumber,
+      },
     });
   } catch (dbError) {
-    console.error("[PendingUser.create] Failed to save pending org record:", dbError.message, dbError);
-    throw new AppError("Failed to initiate registration. Please try again.", 500, "DB_ERROR");
+    console.error(
+      "[PendingUser.create] Failed to save pending org record:",
+      dbError.message,
+      dbError,
+    );
+    throw new AppError(
+      "Failed to initiate registration. Please try again.",
+      500,
+      "DB_ERROR",
+    );
   }
 
   console.log(`\n[DEV MODE] OTP for ${normalizedEmail} is: ${otpCode}\n`);
@@ -127,5 +161,9 @@ export const createOrganizationProfile = asyncHandler(async (req, res) => {
     console.error("Failed to send OTP email:", error.message);
   }
 
-  return successResponse(res, 200, "Verification code sent to your email. Please verify to complete registration.");
+  return successResponse(
+    res,
+    200,
+    "Verification code sent to your email. Please verify to complete registration.",
+  );
 });

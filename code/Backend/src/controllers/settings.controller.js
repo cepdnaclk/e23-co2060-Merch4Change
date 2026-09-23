@@ -38,7 +38,9 @@ const cooldownSecondsForCount = (count) => {
 // Throws a 429 AppError if the record is still within its cooldown window.
 const assertOtpCooldownElapsed = (record) => {
   const cooldownSeconds = cooldownSecondsForCount(record.count);
-  const lastRequestTime = record.lastRequestAt ? record.lastRequestAt.getTime() : 0;
+  const lastRequestTime = record.lastRequestAt
+    ? record.lastRequestAt.getTime()
+    : 0;
   const elapsedSeconds = Math.floor((Date.now() - lastRequestTime) / 1000);
 
   if (record.count > 0 && elapsedSeconds < cooldownSeconds) {
@@ -47,7 +49,7 @@ const assertOtpCooldownElapsed = (record) => {
       `Please wait ${remainingSeconds} seconds before requesting another code.`,
       429,
       "RATE_LIMIT_EXCEEDED",
-      { remainingSeconds }
+      { remainingSeconds },
     );
   }
 };
@@ -93,7 +95,10 @@ export const updateProfileSettings = asyncHandler(async (req, res) => {
 
   // Handle image upload from multipart form or fallback URL string
   if (req.file) {
-    const uploadResult = await uploadBufferToCloudinary(req.file.buffer, "avatars");
+    const uploadResult = await uploadBufferToCloudinary(
+      req.file.buffer,
+      "avatars",
+    );
     updateData.avatarUrl = uploadResult.secure_url;
     updateData.profileImageUrl = uploadResult.secure_url;
   } else if (avatarUrl !== undefined) {
@@ -121,7 +126,7 @@ export const requestEmailChange = asyncHandler(async (req, res) => {
     throw new AppError(
       "New email and current password are required.",
       400,
-      "VALIDATION_ERROR"
+      "VALIDATION_ERROR",
     );
   }
 
@@ -129,25 +134,36 @@ export const requestEmailChange = asyncHandler(async (req, res) => {
 
   // Get user with password field to confirm identity before starting the change.
   const user = await User.findById(req.user._id).select(
-    "+password +pendingEmailOtp +pendingEmailOtpExpiresAt"
+    "+password +pendingEmailOtp +pendingEmailOtpExpiresAt",
   );
 
-  const isPasswordCorrect = await bcrypt.compare(currentPassword, user.password);
+  const isPasswordCorrect = await bcrypt.compare(
+    currentPassword,
+    user.password,
+  );
   if (!isPasswordCorrect) {
-    throw new AppError("Current password is incorrect.", 401, "INVALID_PASSWORD");
+    throw new AppError(
+      "Current password is incorrect.",
+      401,
+      "INVALID_PASSWORD",
+    );
   }
 
   if (normalizedNewEmail === user.email) {
     throw new AppError(
       "That's already your current email address.",
       400,
-      "SAME_EMAIL"
+      "SAME_EMAIL",
     );
   }
 
   const emailTaken = await User.findOne({ email: normalizedNewEmail });
   if (emailTaken) {
-    throw new AppError("That email address is already in use.", 409, "EMAIL_TAKEN");
+    throw new AppError(
+      "That email address is already in use.",
+      409,
+      "EMAIL_TAKEN",
+    );
   }
 
   // Resend-style cooldown, same pattern as registration OTP, keyed by the
@@ -160,8 +176,13 @@ export const requestEmailChange = asyncHandler(async (req, res) => {
 
   const otpCode = crypto.randomInt(100000, 1000000).toString();
 
-  user.pendingEmailOtp = crypto.createHash("sha256").update(otpCode).digest("hex");
-  user.pendingEmailOtpExpiresAt = new Date(Date.now() + OTP_EXPIRE_MIN * 60 * 1000);
+  user.pendingEmailOtp = crypto
+    .createHash("sha256")
+    .update(otpCode)
+    .digest("hex");
+  user.pendingEmailOtpExpiresAt = new Date(
+    Date.now() + OTP_EXPIRE_MIN * 60 * 1000,
+  );
   user.pendingEmailOtpAttempts = 0;
   await user.save();
 
@@ -176,10 +197,15 @@ export const requestEmailChange = asyncHandler(async (req, res) => {
 
   const nextCooldown = await registerOtpRequest(record);
 
-  return successResponse(res, 200, "A verification code has been sent to your new email.", {
-    pendingEmail: normalizedNewEmail,
-    nextCooldownSeconds: nextCooldown,
-  });
+  return successResponse(
+    res,
+    200,
+    "A verification code has been sent to your new email.",
+    {
+      pendingEmail: normalizedNewEmail,
+      nextCooldownSeconds: nextCooldown,
+    },
+  );
 });
 
 // ==========================================
@@ -187,14 +213,14 @@ export const requestEmailChange = asyncHandler(async (req, res) => {
 // ==========================================
 export const resendEmailChangeOtp = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id).select(
-    "+pendingEmailOtp +pendingEmailOtpExpiresAt"
+    "+pendingEmailOtp +pendingEmailOtpExpiresAt",
   );
 
   if (!user.pendingEmail) {
     throw new AppError(
       "No pending email change found. Please start again.",
       400,
-      "NO_PENDING_EMAIL_CHANGE"
+      "NO_PENDING_EMAIL_CHANGE",
     );
   }
 
@@ -205,8 +231,13 @@ export const resendEmailChangeOtp = asyncHandler(async (req, res) => {
   assertOtpCooldownElapsed(record);
 
   const otpCode = crypto.randomInt(100000, 1000000).toString();
-  user.pendingEmailOtp = crypto.createHash("sha256").update(otpCode).digest("hex");
-  user.pendingEmailOtpExpiresAt = new Date(Date.now() + OTP_EXPIRE_MIN * 60 * 1000);
+  user.pendingEmailOtp = crypto
+    .createHash("sha256")
+    .update(otpCode)
+    .digest("hex");
+  user.pendingEmailOtpExpiresAt = new Date(
+    Date.now() + OTP_EXPIRE_MIN * 60 * 1000,
+  );
   user.pendingEmailOtpAttempts = 0;
   await user.save();
 
@@ -231,18 +262,21 @@ export const verifyEmailChange = asyncHandler(async (req, res) => {
   }
 
   const user = await User.findById(req.user._id).select(
-    "+pendingEmailOtp +pendingEmailOtpExpiresAt +pendingEmailOtpAttempts"
+    "+pendingEmailOtp +pendingEmailOtpExpiresAt +pendingEmailOtpAttempts",
   );
 
   if (!user.pendingEmail || !user.pendingEmailOtp) {
     throw new AppError(
       "No pending email change found. Please start again.",
       400,
-      "NO_PENDING_EMAIL_CHANGE"
+      "NO_PENDING_EMAIL_CHANGE",
     );
   }
 
-  if (user.pendingEmailOtpExpiresAt && user.pendingEmailOtpExpiresAt.getTime() < Date.now()) {
+  if (
+    user.pendingEmailOtpExpiresAt &&
+    user.pendingEmailOtpExpiresAt.getTime() < Date.now()
+  ) {
     user.pendingEmail = null;
     user.pendingEmailOtp = null;
     user.pendingEmailOtpExpiresAt = null;
@@ -251,11 +285,14 @@ export const verifyEmailChange = asyncHandler(async (req, res) => {
     throw new AppError(
       "This verification code has expired. Please request a new one.",
       400,
-      "OTP_EXPIRED"
+      "OTP_EXPIRED",
     );
   }
 
-  const hashedOtp = crypto.createHash("sha256").update(String(finalOtp).trim()).digest("hex");
+  const hashedOtp = crypto
+    .createHash("sha256")
+    .update(String(finalOtp).trim())
+    .digest("hex");
   if (user.pendingEmailOtp !== hashedOtp) {
     user.pendingEmailOtpAttempts = (user.pendingEmailOtpAttempts || 0) + 1;
     if (user.pendingEmailOtpAttempts >= 5) {
@@ -267,7 +304,7 @@ export const verifyEmailChange = asyncHandler(async (req, res) => {
       throw new AppError(
         "Too many incorrect attempts. Verification code has been invalidated. Please request a new one.",
         429,
-        "TOO_MANY_ATTEMPTS"
+        "TOO_MANY_ATTEMPTS",
       );
     }
     await user.save();
@@ -275,7 +312,7 @@ export const verifyEmailChange = asyncHandler(async (req, res) => {
     throw new AppError(
       `Invalid verification code. You have ${remaining} ${remaining === 1 ? "attempt" : "attempts"} remaining.`,
       400,
-      "INVALID_OTP"
+      "INVALID_OTP",
     );
   }
 
@@ -290,7 +327,11 @@ export const verifyEmailChange = asyncHandler(async (req, res) => {
     user.pendingEmailOtpExpiresAt = null;
     user.pendingEmailOtpAttempts = 0;
     await user.save();
-    throw new AppError("That email address is already in use.", 409, "EMAIL_TAKEN");
+    throw new AppError(
+      "That email address is already in use.",
+      409,
+      "EMAIL_TAKEN",
+    );
   }
 
   user.email = user.pendingEmail;
@@ -336,7 +377,11 @@ export const requestEnable2FA = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 
   if (user.twoFactorEnabled) {
-    throw new AppError("Two-factor authentication is already enabled.", 400, "2FA_ALREADY_ENABLED");
+    throw new AppError(
+      "Two-factor authentication is already enabled.",
+      400,
+      "2FA_ALREADY_ENABLED",
+    );
   }
 
   let record = await OtpResendRecord.findOne({ email: user.email });
@@ -346,8 +391,13 @@ export const requestEnable2FA = asyncHandler(async (req, res) => {
   assertOtpCooldownElapsed(record);
 
   const otpCode = crypto.randomInt(100000, 1000000).toString();
-  user.twoFactorSetupOtp = crypto.createHash("sha256").update(otpCode).digest("hex");
-  user.twoFactorSetupOtpExpiresAt = new Date(Date.now() + OTP_EXPIRE_MIN * 60 * 1000);
+  user.twoFactorSetupOtp = crypto
+    .createHash("sha256")
+    .update(otpCode)
+    .digest("hex");
+  user.twoFactorSetupOtpExpiresAt = new Date(
+    Date.now() + OTP_EXPIRE_MIN * 60 * 1000,
+  );
   user.twoFactorSetupOtpAttempts = 0;
   await user.save();
 
@@ -355,9 +405,14 @@ export const requestEnable2FA = asyncHandler(async (req, res) => {
 
   const nextCooldown = await registerOtpRequest(record);
 
-  return successResponse(res, 200, "A verification code has been sent to your email.", {
-    nextCooldownSeconds: nextCooldown,
-  });
+  return successResponse(
+    res,
+    200,
+    "A verification code has been sent to your email.",
+    {
+      nextCooldownSeconds: nextCooldown,
+    },
+  );
 });
 
 // ==========================================
@@ -372,18 +427,21 @@ export const verifyEnable2FA = asyncHandler(async (req, res) => {
   }
 
   const user = await User.findById(req.user._id).select(
-    "+twoFactorSetupOtp +twoFactorSetupOtpExpiresAt +twoFactorSetupOtpAttempts"
+    "+twoFactorSetupOtp +twoFactorSetupOtpExpiresAt +twoFactorSetupOtpAttempts",
   );
 
   if (!user.twoFactorSetupOtp) {
     throw new AppError(
       "No pending 2FA setup found. Please start again.",
       400,
-      "NO_PENDING_2FA_SETUP"
+      "NO_PENDING_2FA_SETUP",
     );
   }
 
-  if (user.twoFactorSetupOtpExpiresAt && user.twoFactorSetupOtpExpiresAt.getTime() < Date.now()) {
+  if (
+    user.twoFactorSetupOtpExpiresAt &&
+    user.twoFactorSetupOtpExpiresAt.getTime() < Date.now()
+  ) {
     user.twoFactorSetupOtp = null;
     user.twoFactorSetupOtpExpiresAt = null;
     user.twoFactorSetupOtpAttempts = 0;
@@ -391,11 +449,14 @@ export const verifyEnable2FA = asyncHandler(async (req, res) => {
     throw new AppError(
       "This verification code has expired. Please request a new one.",
       400,
-      "OTP_EXPIRED"
+      "OTP_EXPIRED",
     );
   }
 
-  const hashedOtp = crypto.createHash("sha256").update(String(finalOtp).trim()).digest("hex");
+  const hashedOtp = crypto
+    .createHash("sha256")
+    .update(String(finalOtp).trim())
+    .digest("hex");
   if (user.twoFactorSetupOtp !== hashedOtp) {
     user.twoFactorSetupOtpAttempts = (user.twoFactorSetupOtpAttempts || 0) + 1;
     if (user.twoFactorSetupOtpAttempts >= 5) {
@@ -406,7 +467,7 @@ export const verifyEnable2FA = asyncHandler(async (req, res) => {
       throw new AppError(
         "Too many incorrect attempts. Verification code has been invalidated. Please request a new one.",
         429,
-        "TOO_MANY_ATTEMPTS"
+        "TOO_MANY_ATTEMPTS",
       );
     }
     await user.save();
@@ -414,7 +475,7 @@ export const verifyEnable2FA = asyncHandler(async (req, res) => {
     throw new AppError(
       `Invalid verification code. You have ${remaining} ${remaining === 1 ? "attempt" : "attempts"} remaining.`,
       400,
-      "INVALID_OTP"
+      "INVALID_OTP",
     );
   }
 
@@ -424,9 +485,14 @@ export const verifyEnable2FA = asyncHandler(async (req, res) => {
   user.twoFactorSetupOtpAttempts = 0;
   await user.save();
 
-  return successResponse(res, 200, "Two-factor authentication is now enabled.", {
-    user,
-  });
+  return successResponse(
+    res,
+    200,
+    "Two-factor authentication is now enabled.",
+    {
+      user,
+    },
+  );
 });
 
 // ==========================================
@@ -436,14 +502,25 @@ export const disable2FA = asyncHandler(async (req, res) => {
   const { currentPassword } = req.body;
 
   if (!currentPassword) {
-    throw new AppError("Current password is required.", 400, "VALIDATION_ERROR");
+    throw new AppError(
+      "Current password is required.",
+      400,
+      "VALIDATION_ERROR",
+    );
   }
 
   const user = await User.findById(req.user._id).select("+password");
 
-  const isPasswordCorrect = await bcrypt.compare(currentPassword, user.password);
+  const isPasswordCorrect = await bcrypt.compare(
+    currentPassword,
+    user.password,
+  );
   if (!isPasswordCorrect) {
-    throw new AppError("Current password is incorrect.", 401, "INVALID_PASSWORD");
+    throw new AppError(
+      "Current password is incorrect.",
+      401,
+      "INVALID_PASSWORD",
+    );
   }
 
   user.twoFactorEnabled = false;
@@ -451,9 +528,14 @@ export const disable2FA = asyncHandler(async (req, res) => {
   user.loginOtpExpiresAt = null;
   await user.save();
 
-  return successResponse(res, 200, "Two-factor authentication is now disabled.", {
-    user,
-  });
+  return successResponse(
+    res,
+    200,
+    "Two-factor authentication is now disabled.",
+    {
+      user,
+    },
+  );
 });
 
 // ==========================================
@@ -464,7 +546,11 @@ export const changePassword = asyncHandler(async (req, res) => {
 
   // Validate inputs
   if (!currentPassword || !newPassword || !confirmPassword) {
-    throw new AppError("All password fields are required.", 400, "VALIDATION_ERROR");
+    throw new AppError(
+      "All password fields are required.",
+      400,
+      "VALIDATION_ERROR",
+    );
   }
 
   if (newPassword !== confirmPassword) {
@@ -472,16 +558,27 @@ export const changePassword = asyncHandler(async (req, res) => {
   }
 
   if (newPassword.length < 8) {
-    throw new AppError("New password must be at least 8 characters.", 400, "WEAK_PASSWORD");
+    throw new AppError(
+      "New password must be at least 8 characters.",
+      400,
+      "WEAK_PASSWORD",
+    );
   }
 
   // Get user with password field
   const user = await User.findById(req.user._id).select("+password");
 
   // Verify current password
-  const isPasswordCorrect = await bcrypt.compare(currentPassword, user.password);
+  const isPasswordCorrect = await bcrypt.compare(
+    currentPassword,
+    user.password,
+  );
   if (!isPasswordCorrect) {
-    throw new AppError("Current password is incorrect.", 401, "INVALID_PASSWORD");
+    throw new AppError(
+      "Current password is incorrect.",
+      401,
+      "INVALID_PASSWORD",
+    );
   }
 
   // Hash new password
@@ -523,9 +620,12 @@ export const updatePrivacySettings = asyncHandler(async (req, res) => {
 
   const updateData = {};
   if (typeof isPrivate === "boolean") updateData.isPrivate = isPrivate;
-  if (typeof showActivityStatus === "boolean") updateData.showActivityStatus = showActivityStatus;
-  if (typeof allowMessageRequests === "boolean") updateData.allowMessageRequests = allowMessageRequests;
-  if (typeof hideReadReceipts === "boolean") updateData.hideReadReceipts = hideReadReceipts;
+  if (typeof showActivityStatus === "boolean")
+    updateData.showActivityStatus = showActivityStatus;
+  if (typeof allowMessageRequests === "boolean")
+    updateData.allowMessageRequests = allowMessageRequests;
+  if (typeof hideReadReceipts === "boolean")
+    updateData.hideReadReceipts = hideReadReceipts;
   if (commentPermission) updateData.commentPermission = commentPermission;
 
   const updatedUser = await User.findByIdAndUpdate(req.user._id, updateData, {
@@ -551,20 +651,29 @@ export const updateNotificationSettings = asyncHandler(async (req, res) => {
   } = req.body;
 
   const updateData = {};
-  if (typeof notifyOnLikes === "boolean") updateData.notifyOnLikes = notifyOnLikes;
-  if (typeof notifyOnComments === "boolean") updateData.notifyOnComments = notifyOnComments;
-  if (typeof notifyOnNewFollowers === "boolean") updateData.notifyOnNewFollowers = notifyOnNewFollowers;
+  if (typeof notifyOnLikes === "boolean")
+    updateData.notifyOnLikes = notifyOnLikes;
+  if (typeof notifyOnComments === "boolean")
+    updateData.notifyOnComments = notifyOnComments;
+  if (typeof notifyOnNewFollowers === "boolean")
+    updateData.notifyOnNewFollowers = notifyOnNewFollowers;
   if (typeof notifyOnDMs === "boolean") updateData.notifyOnDMs = notifyOnDMs;
-  if (typeof emailNotifications === "boolean") updateData.emailNotifications = emailNotifications;
+  if (typeof emailNotifications === "boolean")
+    updateData.emailNotifications = emailNotifications;
 
   const updatedUser = await User.findByIdAndUpdate(req.user._id, updateData, {
     new: true,
     runValidators: true,
   });
 
-  return successResponse(res, 200, "Notification settings updated successfully.", {
-    user: updatedUser,
-  });
+  return successResponse(
+    res,
+    200,
+    "Notification settings updated successfully.",
+    {
+      user: updatedUser,
+    },
+  );
 });
 
 // ==========================================
@@ -582,9 +691,14 @@ export const updateAppearanceSettings = asyncHandler(async (req, res) => {
     runValidators: true,
   });
 
-  return successResponse(res, 200, "Appearance settings updated successfully.", {
-    user: updatedUser,
-  });
+  return successResponse(
+    res,
+    200,
+    "Appearance settings updated successfully.",
+    {
+      user: updatedUser,
+    },
+  );
 });
 
 // ==========================================
@@ -600,12 +714,17 @@ export const updateLanguageSettings = asyncHandler(async (req, res) => {
   const updatedUser = await User.findByIdAndUpdate(
     req.user._id,
     { appLanguage },
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   );
 
-  return successResponse(res, 200, "Language preference updated successfully.", {
-    user: updatedUser,
-  });
+  return successResponse(
+    res,
+    200,
+    "Language preference updated successfully.",
+    {
+      user: updatedUser,
+    },
+  );
 });
 
 // ==========================================
@@ -615,7 +734,11 @@ export const deleteAccount = asyncHandler(async (req, res) => {
   const { password } = req.body;
 
   if (!password) {
-    throw new AppError("Password is required to delete account.", 400, "VALIDATION_ERROR");
+    throw new AppError(
+      "Password is required to delete account.",
+      400,
+      "VALIDATION_ERROR",
+    );
   }
   // Get user with password field
   const user = await User.findById(req.user._id).select("+password");
@@ -623,7 +746,11 @@ export const deleteAccount = asyncHandler(async (req, res) => {
   // Verify password
   const isPasswordCorrect = await bcrypt.compare(password, user.password);
   if (!isPasswordCorrect) {
-    throw new AppError("Incorrect password. Account not deleted.", 401, "INVALID_PASSWORD");
+    throw new AppError(
+      "Incorrect password. Account not deleted.",
+      401,
+      "INVALID_PASSWORD",
+    );
   }
 
   const userId = req.user._id;
@@ -642,28 +769,33 @@ export const deleteAccount = asyncHandler(async (req, res) => {
   // Update user following and followers list after deletion
   // remove deleted user from the following list of others
   const followingByUser = await Follow.find({ followerId: userId });
-  const idArray = followingByUser.map(f => f.followingId);
+  const idArray = followingByUser.map((f) => f.followingId);
   // update followings of the user
-  await User.updateMany({ _id: { $in: idArray } }, { $inc: { followersCount: -1 } });
+  await User.updateMany(
+    { _id: { $in: idArray } },
+    { $inc: { followersCount: -1 } },
+  );
 
   const followersOfUser = await Follow.find({ followingId: userId });
-  const idFollowersArray = followersOfUser.map(f => f.followerId);
+  const idFollowersArray = followersOfUser.map((f) => f.followerId);
   // update followings of the user
-  await User.updateMany({ _id: { $in: idFollowersArray } }, { $inc: { followingCount: -1 } });
+  await User.updateMany(
+    { _id: { $in: idFollowersArray } },
+    { $inc: { followingCount: -1 } },
+  );
 
   // Follow relationships in either direction.
-  await Follow.deleteMany({ $or: [{ followerId: userId }, { followingId: userId }] });
+  await Follow.deleteMany({
+    $or: [{ followerId: userId }, { followingId: userId }],
+  });
 
   // Remove the user's footprint from other people's posts (likes + comments)
   // instead of deleting those posts, since the post itself still belongs to
   // someone else.
-  await Post.updateMany(
-    { likes: userId },
-    { $pull: { likes: userId } }
-  );
+  await Post.updateMany({ likes: userId }, { $pull: { likes: userId } });
   await Post.updateMany(
     { "comments.author": userId },
-    { $pull: { comments: { author: userId } } }
+    { $pull: { comments: { author: userId } } },
   );
 
   // Note: Donation, CoinTransaction, Order, Auction, Bid, Review, Message/

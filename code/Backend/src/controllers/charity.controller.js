@@ -17,10 +17,18 @@ export const submitVerification = asyncHandler(async (req, res) => {
 
   const existing = await Charity.findOne({ ownerUserId: req.user._id });
   if (existing?.verificationStatus === "pending") {
-    throw new AppError("Your verification is already under review.", 409, "ALREADY_PENDING");
+    throw new AppError(
+      "Your verification is already under review.",
+      409,
+      "ALREADY_PENDING",
+    );
   }
   if (existing?.verificationStatus === "verified") {
-    throw new AppError("Your organization is already verified.", 409, "ALREADY_VERIFIED");
+    throw new AppError(
+      "Your organization is already verified.",
+      409,
+      "ALREADY_VERIFIED",
+    );
   }
 
   const {
@@ -63,12 +71,16 @@ export const submitVerification = asyncHandler(async (req, res) => {
     { new: true, upsert: true, setDefaultsOnInsert: true, runValidators: true },
   );
 
-  return successResponse(res, 200, "Verification submitted successfully.", { charity });
+  return successResponse(res, 200, "Verification submitted successfully.", {
+    charity,
+  });
 });
 
 export const getMyCharity = asyncHandler(async (req, res) => {
   const charity = await Charity.findOne({ ownerUserId: req.user._id });
-  return successResponse(res, 200, "Charity record fetched successfully.", { charity });
+  return successResponse(res, 200, "Charity record fetched successfully.", {
+    charity,
+  });
 });
 
 export const listVerifiedCharities = asyncHandler(async (req, res) => {
@@ -95,11 +107,23 @@ export const listVerifiedCharities = asyncHandler(async (req, res) => {
   const [donationTotals, projectTotals] = await Promise.all([
     Donation.aggregate([
       { $match: { charityId: { $in: charityIds }, status: "completed" } },
-      { $group: { _id: "$charityId", totalRaised: { $sum: "$coinAmount" }, count: { $sum: 1 } } },
+      {
+        $group: {
+          _id: "$charityId",
+          totalRaised: { $sum: "$coinAmount" },
+          count: { $sum: 1 },
+        },
+      },
     ]),
     Project.aggregate([
       { $match: { charityId: { $in: charityIds }, status: "active" } },
-      { $group: { _id: "$charityId", totalGoal: { $sum: "$goalAmount" }, totalCollected: { $sum: "$collectedAmount" } } },
+      {
+        $group: {
+          _id: "$charityId",
+          totalGoal: { $sum: "$goalAmount" },
+          totalCollected: { $sum: "$collectedAmount" },
+        },
+      },
     ]),
   ]);
 
@@ -111,7 +135,10 @@ export const listVerifiedCharities = asyncHandler(async (req, res) => {
     const pInfo = projectMap.get(c._id.toString());
     const totalRaised = dInfo?.totalRaised || pInfo?.totalCollected || 0;
     const totalGoal = pInfo?.totalGoal || 10000;
-    const percent = totalGoal > 0 ? Math.min(100, Math.round((totalRaised / totalGoal) * 100)) : 0;
+    const percent =
+      totalGoal > 0
+        ? Math.min(100, Math.round((totalRaised / totalGoal) * 100))
+        : 0;
 
     return {
       ...c,
@@ -131,15 +158,24 @@ export const listVerifiedCharities = asyncHandler(async (req, res) => {
 
 export const uploadProofDocument = asyncHandler(async (req, res) => {
   if (req.user.accountType !== "organization") {
-    throw new AppError("Only organization accounts can upload proof documents.", 403, "FORBIDDEN");
+    throw new AppError(
+      "Only organization accounts can upload proof documents.",
+      403,
+      "FORBIDDEN",
+    );
   }
 
   if (!req.file) {
     throw new AppError("No file uploaded.", 400, "VALIDATION_ERROR");
   }
 
-  const result = await uploadBufferToCloudinary(req.file.buffer, "charity-proofs");
-  const label = String(req.body?.label ?? req.file.originalname ?? "Document").trim();
+  const result = await uploadBufferToCloudinary(
+    req.file.buffer,
+    "charity-proofs",
+  );
+  const label = String(
+    req.body?.label ?? req.file.originalname ?? "Document",
+  ).trim();
 
   return successResponse(res, 200, "Document uploaded successfully.", {
     label,

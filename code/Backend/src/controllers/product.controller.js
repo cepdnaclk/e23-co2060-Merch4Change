@@ -1,7 +1,6 @@
 import Product from "../models/Product.js";
 import { uploadBufferToCloudinary } from "../utils/uploadToCloudinary.js";
 
-
 export const createProduct = async (req, res) => {
   try {
     const { name, price, description } = req.body;
@@ -11,8 +10,8 @@ export const createProduct = async (req, res) => {
     if (req.files && req.files.length > 0) {
       const uploads = await Promise.all(
         req.files.map((file) =>
-          uploadBufferToCloudinary(file.buffer, "merch4change/products")
-        )
+          uploadBufferToCloudinary(file.buffer, "merch4change/products"),
+        ),
       );
       images = uploads.map((upload) => upload.secure_url); // Extract secure_url
     }
@@ -41,7 +40,7 @@ export const getUserProducts = async (req, res) => {
 
     const User = (await import("../models/User.js")).default;
     const mongoose = (await import("mongoose")).default;
-    
+
     let user = await User.findOne({
       $or: [
         { userName: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
@@ -60,7 +59,9 @@ export const getUserProducts = async (req, res) => {
           { brandName: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
           { brandName: { $regex: fuzzyRegex } },
           { slug: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
-          ...(mongoose.isValidObjectId(cleanParam) ? [{ _id: cleanParam }, { ownerUserId: cleanParam }] : []),
+          ...(mongoose.isValidObjectId(cleanParam)
+            ? [{ _id: cleanParam }, { ownerUserId: cleanParam }]
+            : []),
         ],
       });
       if (brand?.ownerUserId) {
@@ -69,7 +70,9 @@ export const getUserProducts = async (req, res) => {
     }
 
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
 
     const Brand = (await import("../models/Brand.js")).default;

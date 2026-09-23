@@ -15,8 +15,12 @@ const resolveBrandForUser = async (user) => {
     return existing;
   }
 
-  const label = (user.userName && String(user.userName).trim()) || user.firstName || "Store";
-  const brandName = label.length >= 2 ? label : `Store ${String(user._id).slice(-8)}`;
+  const label =
+    (user.userName && String(user.userName).trim()) ||
+    user.firstName ||
+    "Store";
+  const brandName =
+    label.length >= 2 ? label : `Store ${String(user._id).slice(-8)}`;
 
   return Brand.create({
     ownerUserId: user._id,
@@ -30,12 +34,19 @@ const ensureProductOwnership = async (product, user) => {
   }
   const brand = await Brand.findById(product.brandId);
   if (!brand || String(brand.ownerUserId) !== String(user._id)) {
-    throw new AppError("You do not have permission to manage this product.", 403, "FORBIDDEN");
+    throw new AppError(
+      "You do not have permission to manage this product.",
+      403,
+      "FORBIDDEN",
+    );
   }
 };
 
 export const listProducts = asyncHandler(async (req, res) => {
-  const products = await Product.find({}).populate("brandId", "brandName logoUrl slug");
+  const products = await Product.find({}).populate(
+    "brandId",
+    "brandName logoUrl slug",
+  );
 
   return successResponse(res, 200, "Products fetched successfully.", {
     products,
@@ -43,7 +54,10 @@ export const listProducts = asyncHandler(async (req, res) => {
 });
 
 export const getProduct = asyncHandler(async (req, res) => {
-  const product = await Product.findById(req.params.productId).populate("brandId", "brandName logoUrl slug");
+  const product = await Product.findById(req.params.productId).populate(
+    "brandId",
+    "brandName logoUrl slug",
+  );
 
   if (!product) {
     throw new AppError("Product not found.", 404, "PRODUCT_NOT_FOUND");
@@ -109,11 +123,19 @@ export const checkout = asyncHandler(async (req, res) => {
     const product = await Product.findById(requestedItem.productId);
 
     if (!product) {
-      throw new AppError(`Product not found for id ${requestedItem.productId}.`, 404, "PRODUCT_NOT_FOUND");
+      throw new AppError(
+        `Product not found for id ${requestedItem.productId}.`,
+        404,
+        "PRODUCT_NOT_FOUND",
+      );
     }
 
     if (product.stock < requestedItem.quantity) {
-      throw new AppError(`Insufficient stock for ${product.name}.`, 409, "INSUFFICIENT_STOCK");
+      throw new AppError(
+        `Insufficient stock for ${product.name}.`,
+        409,
+        "INSUFFICIENT_STOCK",
+      );
     }
 
     const lineTotal = product.price * requestedItem.quantity;
@@ -141,10 +163,10 @@ export const checkout = asyncHandler(async (req, res) => {
   });
 
   // Update buyer coinBalance
-  await User.findByIdAndUpdate(req.user._id, { 
-    $inc: { 
-      coinBalance: coinsEarned 
-    } 
+  await User.findByIdAndUpdate(req.user._id, {
+    $inc: {
+      coinBalance: coinsEarned,
+    },
   });
 
   if (coinsEarned > 0) {
@@ -167,9 +189,10 @@ export const checkout = asyncHandler(async (req, res) => {
     });
   }
 
-  const buyerName = req.user.firstName && req.user.lastName
-    ? `${req.user.firstName} ${req.user.lastName}`.trim()
-    : (req.user.firstName || req.user.userName || "A customer");
+  const buyerName =
+    req.user.firstName && req.user.lastName
+      ? `${req.user.firstName} ${req.user.lastName}`.trim()
+      : req.user.firstName || req.user.userName || "A customer";
 
   for (const requestedItem of requestedItems) {
     const product = await Product.findById(requestedItem.productId);
@@ -201,7 +224,9 @@ export const checkout = asyncHandler(async (req, res) => {
 });
 
 export const listMyOrders = asyncHandler(async (req, res) => {
-  const orders = await Order.find({ userId: req.user._id }).sort({ createdAt: -1 });
+  const orders = await Order.find({ userId: req.user._id }).sort({
+    createdAt: -1,
+  });
 
   return successResponse(res, 200, "Orders fetched successfully.", {
     orders,
@@ -216,7 +241,11 @@ export const getMyOrder = asyncHandler(async (req, res) => {
   }
 
   if (String(order.userId) !== String(req.user._id)) {
-    throw new AppError("You do not have permission to view this order.", 403, "FORBIDDEN");
+    throw new AppError(
+      "You do not have permission to view this order.",
+      403,
+      "FORBIDDEN",
+    );
   }
 
   return successResponse(res, 200, "Order fetched successfully.", {
@@ -233,12 +262,26 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     throw new AppError("Status is required.", 400, "VALIDATION_ERROR");
   }
 
-  const validStatuses = ["pending", "paid", "shipped", "completed", "cancelled", "refunded"];
+  const validStatuses = [
+    "pending",
+    "paid",
+    "shipped",
+    "completed",
+    "cancelled",
+    "refunded",
+  ];
   if (!validStatuses.includes(status)) {
-    throw new AppError(`Invalid status. Allowed values: ${validStatuses.join(", ")}`, 400, "VALIDATION_ERROR");
+    throw new AppError(
+      `Invalid status. Allowed values: ${validStatuses.join(", ")}`,
+      400,
+      "VALIDATION_ERROR",
+    );
   }
 
-  const order = await Order.findById(orderId).populate("userId", "firstName lastName userName email");
+  const order = await Order.findById(orderId).populate(
+    "userId",
+    "firstName lastName userName email",
+  );
   if (!order) {
     throw new AppError("Order not found.", 404, "ORDER_NOT_FOUND");
   }
@@ -255,10 +298,15 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     }
   }
 
-  const isBuyer = String(order.userId._id || order.userId) === String(req.user._id);
+  const isBuyer =
+    String(order.userId._id || order.userId) === String(req.user._id);
 
   if (!isBuyer && !isSeller) {
-    throw new AppError("You do not have permission to update this order.", 403, "FORBIDDEN");
+    throw new AppError(
+      "You do not have permission to update this order.",
+      403,
+      "FORBIDDEN",
+    );
   }
 
   const oldStatus = order.status;
@@ -278,15 +326,20 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     }
 
     // Notify seller(s)
-    const buyerName = order.userId.firstName && order.userId.lastName
-      ? `${order.userId.firstName} ${order.userId.lastName}`.trim()
-      : (order.userId.firstName || order.userId.userName || "Customer");
+    const buyerName =
+      order.userId.firstName && order.userId.lastName
+        ? `${order.userId.firstName} ${order.userId.lastName}`.trim()
+        : order.userId.firstName || order.userId.userName || "Customer";
 
     for (const item of order.items) {
       const product = await Product.findById(item.productId);
       if (product) {
         const brand = await Brand.findById(product.brandId);
-        if (brand && brand.ownerUserId && mongoose.Types.ObjectId.isValid(brand.ownerUserId)) {
+        if (
+          brand &&
+          brand.ownerUserId &&
+          mongoose.Types.ObjectId.isValid(brand.ownerUserId)
+        ) {
           await Notification.create({
             userId: brand.ownerUserId,
             type: "order",

@@ -7,10 +7,16 @@ import asyncHandler from "../utils/asyncHandler.js";
 
 const protect = asyncHandler(async (req, res, next) => {
   const authHeader = req.headers.authorization || "";
-  const token = authHeader.startsWith("Bearer ") ? authHeader.split(" ")[1] : null;
+  const token = authHeader.startsWith("Bearer ")
+    ? authHeader.split(" ")[1]
+    : null;
 
   if (!token) {
-    throw new AppError("Not authorized. Token is missing.", 401, "TOKEN_MISSING");
+    throw new AppError(
+      "Not authorized. Token is missing.",
+      401,
+      "TOKEN_MISSING",
+    );
   }
 
   let user;
@@ -30,7 +36,10 @@ const protect = asyncHandler(async (req, res, next) => {
   }
 
   if (user.passwordChangedAt) {
-    const changedTimestamp = parseInt(user.passwordChangedAt.getTime() / 1000, 10);
+    const changedTimestamp = parseInt(
+      user.passwordChangedAt.getTime() / 1000,
+      10,
+    );
     if (decoded.iat && decoded.iat < changedTimestamp) {
       throw new AppError(
         "Password was changed recently. Please log in again.",

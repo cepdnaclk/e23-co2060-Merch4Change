@@ -29,8 +29,14 @@ export const createPost = async (req, res) => {
 export const getFeedPosts = async (req, res) => {
   try {
     const posts = await Post.find()
-      .populate("userId", "firstName lastName profileImage profileImageUrl userName")
-      .populate("comments.author", "firstName lastName userName profileImageUrl")
+      .populate(
+        "userId",
+        "firstName lastName profileImage profileImageUrl userName",
+      )
+      .populate(
+        "comments.author",
+        "firstName lastName userName profileImageUrl",
+      )
       .sort({ createdAt: -1 });
 
     res.status(200).json({ success: true, posts });
@@ -41,7 +47,10 @@ export const getFeedPosts = async (req, res) => {
 
 export const getRecommendedPosts = async (req, res) => {
   try {
-    const { posts, pagination } = await getRecommendedPostsForUser(req.user._id, req.query);
+    const { posts, pagination } = await getRecommendedPostsForUser(
+      req.user._id,
+      req.query,
+    );
     res.status(200).json({ success: true, posts, pagination });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -51,8 +60,14 @@ export const getRecommendedPosts = async (req, res) => {
 export const getMyPosts = async (req, res) => {
   try {
     const posts = await Post.find({ userId: req.user._id })
-      .populate("userId", "firstName lastName userName profileImage profileImageUrl")
-      .populate("comments.author", "firstName lastName userName profileImageUrl")
+      .populate(
+        "userId",
+        "firstName lastName userName profileImage profileImageUrl",
+      )
+      .populate(
+        "comments.author",
+        "firstName lastName userName profileImageUrl",
+      )
       .sort({ createdAt: -1 });
 
     const normalizedPosts = posts.map((post) => ({
@@ -88,16 +103,23 @@ export const deletePost = async (req, res) => {
     const post = await Post.findById(req.params.postId);
 
     if (!post) {
-      return res.status(404).json({ success: false, message: "Post not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Post not found" });
     }
 
     if (String(post.userId) !== String(req.user._id)) {
       return res.status(403).json({ success: false, message: "Forbidden" });
     }
 
-    await Post.findOneAndDelete({ _id: req.params.postId, userId: req.user._id });
+    await Post.findOneAndDelete({
+      _id: req.params.postId,
+      userId: req.user._id,
+    });
 
-    return res.status(200).json({ success: true, message: "Post deleted successfully" });
+    return res
+      .status(200)
+      .json({ success: true, message: "Post deleted successfully" });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
@@ -108,11 +130,19 @@ export const getUserPosts = async (req, res) => {
     const { username } = req.params;
     const user = await User.findOne({ userName: username });
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
     const posts = await Post.find({ userId: user._id })
-      .populate("userId", "firstName lastName userName profileImage profileImageUrl")
-      .populate("comments.author", "firstName lastName userName profileImageUrl")
+      .populate(
+        "userId",
+        "firstName lastName userName profileImage profileImageUrl",
+      )
+      .populate(
+        "comments.author",
+        "firstName lastName userName profileImageUrl",
+      )
       .sort({ createdAt: -1 });
 
     const normalizedPosts = posts.map((post) => ({
@@ -146,14 +176,18 @@ export const likePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.postId);
     if (!post) {
-      return res.status(404).json({ success: false, message: "Post not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Post not found" });
     }
 
     const userId = req.user._id;
     const hasLiked = post.likes.includes(userId);
 
     if (hasLiked) {
-      post.likes = post.likes.filter((id) => id.toString() !== userId.toString());
+      post.likes = post.likes.filter(
+        (id) => id.toString() !== userId.toString(),
+      );
     } else {
       post.likes.push(userId);
     }
@@ -169,12 +203,16 @@ export const commentOnPost = async (req, res) => {
   try {
     const { text } = req.body;
     if (!text || text.trim() === "") {
-      return res.status(400).json({ success: false, message: "Comment text is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Comment text is required" });
     }
 
     const post = await Post.findById(req.params.postId);
     if (!post) {
-      return res.status(404).json({ success: false, message: "Post not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Post not found" });
     }
 
     const newComment = {
@@ -186,7 +224,10 @@ export const commentOnPost = async (req, res) => {
     await post.save();
 
     // Populate the author so frontend has name/image immediately
-    await post.populate("comments.author", "firstName lastName userName profileImageUrl");
+    await post.populate(
+      "comments.author",
+      "firstName lastName userName profileImageUrl",
+    );
 
     res.status(201).json({ success: true, comments: post.comments });
   } catch (error) {

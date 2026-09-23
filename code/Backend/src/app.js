@@ -53,11 +53,11 @@ app.use(helmet());
 app.use(
   cors({
     origin: env.frontendUrl,
-    credentials: true,          // Allow cookies to flow cross-origin
+    credentials: true, // Allow cookies to flow cross-origin
   }),
 );
 
-// decode the raw bytes from the req.body to json type 
+// decode the raw bytes from the req.body to json type
 app.use(express.json({ limit: "1mb" }));
 
 app.use(cookieParser());

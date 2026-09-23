@@ -36,6 +36,9 @@ const coinTransactionSchema = new mongoose.Schema(
 
 coinTransactionSchema.index({ userId: 1, createdAt: -1 });
 
-const CoinTransaction = mongoose.model("CoinTransaction", coinTransactionSchema);
+const CoinTransaction = mongoose.model(
+  "CoinTransaction",
+  coinTransactionSchema,
+);
 
 export default CoinTransaction;

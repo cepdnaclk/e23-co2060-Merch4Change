@@ -8,12 +8,12 @@ Ranks social feed posts for the currently authenticated user using MongoDB aggre
 
 ## Signals used (existing data only)
 
-| Signal | Source |
-| --- | --- |
-| Relationship | `Follow` (`followerId` / `followingId`). Own posts get a small boost. |
-| Engagement | `Post.likes` length and `Post.comments` length |
-| Recency | `Post.createdAt` exponential decay |
-| Interaction | Authors the user has already liked or commented on; extra weight if they liked/commented on this post |
+| Signal       | Source                                                                                                |
+| ------------ | ----------------------------------------------------------------------------------------------------- |
+| Relationship | `Follow` (`followerId` / `followingId`). Own posts get a small boost.                                 |
+| Engagement   | `Post.likes` length and `Post.comments` length                                                        |
+| Recency      | `Post.createdAt` exponential decay                                                                    |
+| Interaction  | Authors the user has already liked or commented on; extra weight if they liked/commented on this post |
 
 Posts have no tags/categories. The separate `Like` collection is not used because likes are stored on `Post.likes`. User-suggestion (`GET /api/v1/profile/suggested`) is unrelated.
 
