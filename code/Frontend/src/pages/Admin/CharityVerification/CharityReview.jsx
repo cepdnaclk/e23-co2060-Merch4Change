@@ -84,7 +84,7 @@ export default function CharityReview() {
             <ul className="charity-review-docs">
               {charity.proofDocuments.map((doc, index) => (
                 <li key={`${doc.label}-${index}`}>
-                  <a href={doc.url} target="_blank" rel="noreferrer">{doc.label}</a>
+                  <a href={doc.url} target="_blank" rel="noreferrer noopener">{doc.label}</a>
                 </li>
               ))}
             </ul>
