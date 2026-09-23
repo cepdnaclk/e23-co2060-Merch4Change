@@ -12,8 +12,8 @@ const escapeRegex = (s = "") => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 export const searchAll = asyncHandler(async (req, res) => {
   const q = String(req.query.q || "").trim();
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 8;
+  const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+  const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 8));
   const skip = (page - 1) * limit;
 
   if (q.length < 2) throw new AppError("Query must be at least 2 characters.", 400, "VALIDATION_ERROR");
