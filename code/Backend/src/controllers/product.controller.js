@@ -5,7 +5,22 @@ import escapeRegex from "../utils/escapeRegex.js";
 
 export const createProduct = async (req, res) => {
   try {
-    const { name, price, description } = req.body;
+    const name = typeof req.body.name === "string" ? req.body.name.trim() : "";
+    const description = typeof req.body.description === "string" ? req.body.description.trim() : "";
+    const parsedPrice = Number(req.body.price);
+    const stock = req.body.stock !== undefined ? Math.max(0, Number.parseInt(req.body.stock, 10) || 0) : 0;
+
+    if (!name || name.length < 2 || name.length > 200) {
+      return res.status(400).json({ success: false, message: "Product name must be between 2 and 200 characters" });
+    }
+
+    if (!description || description.length > 5000) {
+      return res.status(400).json({ success: false, message: "Product description is required and cannot exceed 5000 characters" });
+    }
+
+    if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
+      return res.status(400).json({ success: false, message: "Valid positive product price is required" });
+    }
 
     // req.files comes from multer (array of files)
     let images = [];
@@ -20,8 +35,9 @@ export const createProduct = async (req, res) => {
 
     const product = await Product.create({
       name,
-      price,
+      price: parsedPrice,
       description,
+      stock,
       images,
       ownerUserId: req.user._id,
     });
