@@ -256,9 +256,24 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
   }
 
   const isBuyer = String(order.userId._id || order.userId) === String(req.user._id);
+  const isAdmin = req.user.role === "admin";
 
-  if (!isBuyer && !isSeller) {
+  if (!isBuyer && !isSeller && !isAdmin) {
     throw new AppError("You do not have permission to update this order.", 403, "FORBIDDEN");
+  }
+
+  // Restrict buyer capabilities: buyers may only cancel an order that is still pending or paid
+  if (isBuyer && !isSeller && !isAdmin) {
+    if (status !== "cancelled") {
+      throw new AppError("Buyers are only permitted to cancel their orders.", 403, "FORBIDDEN");
+    }
+    if (!["pending", "paid"].includes(order.status)) {
+      throw new AppError(
+        "Orders that are already shipped, completed, or cancelled cannot be modified.",
+        400,
+        "INVALID_ORDER_STATE",
+      );
+    }
   }
 
   const oldStatus = order.status;
