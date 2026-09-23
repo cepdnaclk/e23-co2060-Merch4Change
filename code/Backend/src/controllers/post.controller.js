@@ -1,5 +1,6 @@
 import Post from "../models/Post.js";
 import User from "../models/User.js";
+import { getRecommendedPostsForUser } from "../services/postRecommendation.service.js";
 import { uploadBufferToCloudinary } from "../utils/uploadToCloudinary.js";
 
 export const createPost = async (req, res) => {
@@ -33,6 +34,15 @@ export const getFeedPosts = async (req, res) => {
       .sort({ createdAt: -1 });
 
     res.status(200).json({ success: true, posts });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const getRecommendedPosts = async (req, res) => {
+  try {
+    const { posts, pagination } = await getRecommendedPostsForUser(req.user._id, req.query);
+    res.status(200).json({ success: true, posts, pagination });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
