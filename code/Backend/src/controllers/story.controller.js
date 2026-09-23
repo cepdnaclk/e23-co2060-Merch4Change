@@ -42,7 +42,8 @@ export const getStories = asyncHandler(async (req, res) => {
 
   const stories = await Story.find({ userId: { $in: targetUserIds } })
     .populate("userId", "firstName lastName profileImageUrl accountType")
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .limit(100);
 
   return successResponse(res, 200, "Stories retrieved successfully", {
     stories,
