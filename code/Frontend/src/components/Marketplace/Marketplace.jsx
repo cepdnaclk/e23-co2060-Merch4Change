@@ -66,6 +66,10 @@ export default function Marketplace() {
       const res = await apiClient.post("/api/v1/marketplace/checkout", { items: [{ productId: product._id, quantity: 1 }] });
       const data = res.data;
       if (data.success) {
+        if (data.data?.checkoutUrl) {
+          window.location.href = data.data.checkoutUrl;
+          return;
+        }
         const coins = data.data?.coinsEarned ?? data.data?.order?.coinsEarned ?? coinsFor(product.price);
         showToast("success", `✅ Purchased! You earned ${coins} coins.`);
         setProducts((prev) => prev.map((p) => p._id === product._id ? { ...p, stock: p.stock - 1 } : p));
