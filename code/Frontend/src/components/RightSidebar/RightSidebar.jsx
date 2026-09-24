@@ -6,7 +6,7 @@ import './RightSidebar.css';
 import defaultUserPic from '../../assets/user.svg';
 import test from '../../assets/test.jpg';
 
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { getSuggestedUsers, followUser } from '../../api/profileService';
 import { getLiveAuctionFeed } from '../../services/auctionApi';
 import toast from 'react-hot-toast';
@@ -482,11 +482,14 @@ function RightSidebar({ page = "home" }) {
       <LiveCommunityAuctionsSection />
 
       <div className="rs-footer">
-        <a href="#">About</a>
-        <a href="#">Accessibility</a>
-        <a href="#">Help Center</a>
-        <a href="#">Privacy & Terms</a>
-        <a href="#">Advertising</a>
+        <Link to="/about/story">About Us</Link>
+        <Link to="/about/mission">Mission</Link>
+        <Link to="/about/team">Team</Link>
+        <Link to="/help">Help Center</Link>
+        <Link to="/faq">FAQs</Link>
+        <Link to="/help/contact">Contact</Link>
+        <Link to="/privacy">Privacy Policy</Link>
+        <Link to="/leaderboard">Leaderboard</Link>
         <p>© 2026 Merch4Change</p>
       </div>
     </div>
