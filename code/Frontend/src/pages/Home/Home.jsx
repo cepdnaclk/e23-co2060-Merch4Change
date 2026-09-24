@@ -63,6 +63,10 @@ function Home() {
     }
   }, [navigate, setSearchParams]);
 
+  const handlePostCreated = useCallback((newPost) => {
+    window.dispatchEvent(new CustomEvent("post-created", { detail: newPost }));
+  }, []);
+
   return (
     <div className={`luminous-app ${effectiveSidebarCollapsed ? "sidebar-collapsed" : ""}`}>
       <TopNavbar
@@ -77,6 +81,7 @@ function Home() {
           profileData={profileData}
           setIsSidebarCollapsed={setIsSidebarCollapsed}
           isSidebarCollapsed={effectiveSidebarCollapsed}
+          onPostCreated={handlePostCreated}
         />
 
         <main className="lum-main-content home-main-content">

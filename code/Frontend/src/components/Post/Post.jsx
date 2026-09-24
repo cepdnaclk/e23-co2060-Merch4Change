@@ -110,26 +110,82 @@ function Post({ post, onOpen }) {
       </div>
 
       {(isLive ? images.length > 0 : true) && (
-        <div className="post-image-grid">
-          <div
-            className="main-image"
-            style={images[0] ? { backgroundImage: `url(${images[0]})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
-          />
-          <div className="side-images">
+        <div
+          className={`post-image-grid ${
+            isLive && images.length === 1
+              ? "single-image"
+              : isLive && images.length === 2
+                ? "two-images"
+                : "three-images"
+          }`}
+        >
+          {isLive && images.length === 1 ? (
             <div
-              className="side-image top-side"
-              style={images[1] ? { backgroundImage: `url(${images[1]})` } : undefined}
+              className="main-image full-width"
+              style={{
+                backgroundImage: `url(${images[0]})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
             />
-            <div
-              className="side-image bottom-side"
-              style={images[2] ? { backgroundImage: `url(${images[2]})` } : undefined}
-            >
-              {images.length > 3 && (
-                <div className="image-overlay">+{images.length - 3} items</div>
-              )}
-              {!isLive && <div className="image-overlay">+4 items</div>}
-            </div>
-          </div>
+          ) : isLive && images.length === 2 ? (
+            <>
+              <div
+                className="main-image"
+                style={{
+                  backgroundImage: `url(${images[0]})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+              />
+              <div
+                className="main-image"
+                style={{
+                  backgroundImage: `url(${images[1]})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+              />
+            </>
+          ) : (
+            <>
+              <div
+                className="main-image"
+                style={
+                  images[0]
+                    ? {
+                        backgroundImage: `url(${images[0]})`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                      }
+                    : undefined
+                }
+              />
+              <div className="side-images">
+                <div
+                  className="side-image top-side"
+                  style={
+                    images[1]
+                      ? { backgroundImage: `url(${images[1]})` }
+                      : undefined
+                  }
+                />
+                <div
+                  className="side-image bottom-side"
+                  style={
+                    images[2]
+                      ? { backgroundImage: `url(${images[2]})` }
+                      : undefined
+                  }
+                >
+                  {images.length > 3 && (
+                    <div className="image-overlay">+{images.length - 3} items</div>
+                  )}
+                  {!isLive && <div className="image-overlay">+4 items</div>}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
 
