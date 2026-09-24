@@ -9,6 +9,7 @@ import {
   getAuction,
   getBids,
   listAuctions,
+  getLiveAuctionFeed,
 } from "../../../src/controllers/auction.controller.js";
 
 test("createAuction rejects request missing productId", async () => {
@@ -121,4 +122,50 @@ test("getBids returns list of bids for specified auction", async (t) => {
   assert.equal(res.statusCode, 200);
   assert.equal(res.payload.success, true);
   assert.equal(res.payload.bids.length, 2);
+});
+
+test("getLiveAuctionFeed returns active auctions, recent bids, and community stats", async (t) => {
+  const mockAuctions = [
+    { _id: "auc1", currentPrice: 250, status: "active", productId: { name: "Rolex Watch" } },
+  ];
+  const mockBids = [
+    { _id: "b1", amount: 250, auctionId: { productId: { name: "Rolex Watch" } }, userId: { userName: "bidder1" } },
+  ];
+
+  t.mock.method(Auction, "updateMany", async () => ({ modifiedCount: 0 }));
+  t.mock.method(Auction, "find", (query) => {
+    if (query?.status === "active" && query?.endTime?.$lte) {
+      return { populate: () => [] };
+    }
+    return {
+      populate: () => ({
+        populate: () => ({
+          sort: () => ({
+            limit: () => mockAuctions,
+          }),
+        }),
+      }),
+    };
+  });
+  t.mock.method(Bid, "find", () => ({
+    sort: () => ({
+      limit: () => ({
+        populate: () => ({
+          populate: () => mockBids,
+        }),
+      }),
+    }),
+  }));
+  t.mock.method(Auction, "countDocuments", async () => 1);
+
+  const req = {};
+  const res = createMockResponse();
+
+  await getLiveAuctionFeed(req, res);
+
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.payload.success, true);
+  assert.equal(res.payload.auctions.length, 1);
+  assert.equal(res.payload.recentBids.length, 1);
+  assert.equal(res.payload.stats.totalActive, 1);
 });
