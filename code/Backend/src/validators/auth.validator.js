@@ -5,9 +5,6 @@ import {
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const normalizeString = (value) =>
-  typeof value === "string" ? value.trim() : value;
-
 const normalizeAccountType = (accountType) => {
   if (typeof accountType !== "string") {
     return accountType;

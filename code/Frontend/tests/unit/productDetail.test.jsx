@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { vi, describe, it, expect, beforeEach } from "vitest";
-import { BrowserRouter, MemoryRouter } from "react-router-dom";
+import { MemoryRouter } from "react-router-dom";
 import { ProductCard } from "../../src/components/Marketplace/components/ProductCard";
 import ProductDetailPage from "../../src/pages/ProductDetail/ProductDetailPage";
 import apiClient from "../../src/api/apiClient";
