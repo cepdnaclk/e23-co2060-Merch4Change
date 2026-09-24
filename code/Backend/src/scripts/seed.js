@@ -1,3 +1,4 @@
+import dotenv from "dotenv";
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
@@ -12,7 +13,10 @@ import CoinTransaction from "../models/CoinTransaction.js";
 import Auction from "../models/Auction.js";
 import Bid from "../models/Bid.js";
 
-const MONGO_URI = "mongodb://127.0.0.1:27017/merch4change";
+dotenv.config();
+
+const MONGO_URI =
+  process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/merch4change";
 
 const luxuryProductsData = [
   {
@@ -101,20 +105,25 @@ async function seed() {
     await mongoose.connect(MONGO_URI);
     console.log("Connected to MongoDB");
 
-    // 1. Clear existing collections
-    console.log("Clearing existing data...");
-    await User.deleteMany({});
-    await OrganizationProfile.deleteMany({});
-    await Brand.deleteMany({});
-    await Charity.deleteMany({});
-    await Product.deleteMany({});
-    await Project.deleteMany({});
-    await Donation.deleteMany({});
-    await Order.deleteMany({});
-    await CoinTransaction.deleteMany({});
-    await Auction.deleteMany({});
-    await Bid.deleteMany({});
-    console.log("Existing data cleared.");
+    // 1. Delete database from scratch
+    console.log("Dropping database from scratch...");
+    try {
+      await mongoose.connection.db.dropDatabase();
+      console.log("✅ Database dropped from scratch successfully.");
+    } catch (dropErr) {
+      console.log("Drop database fallback, clearing all collections:", dropErr.message);
+      await User.deleteMany({});
+      await OrganizationProfile.deleteMany({});
+      await Brand.deleteMany({});
+      await Charity.deleteMany({});
+      await Product.deleteMany({});
+      await Project.deleteMany({});
+      await Donation.deleteMany({});
+      await Order.deleteMany({});
+      await CoinTransaction.deleteMany({});
+      await Auction.deleteMany({});
+      await Bid.deleteMany({});
+    }
 
     // 2. Hash standard password
     const standardPassword = await bcrypt.hash("Password123!", 10);
