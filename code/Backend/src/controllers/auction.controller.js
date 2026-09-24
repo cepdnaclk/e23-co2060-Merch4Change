@@ -2,6 +2,7 @@ import Auction from "../models/Auction.js";
 import Bid from "../models/Bid.js";
 import Product from "../models/Product.js";
 import Notification from "../models/Notification.js";
+import User from "../models/User.js";
 import {
   validateTime,
   isStarted,
@@ -109,24 +110,42 @@ export const placeBid = async (req, res) => {
 
     const prevBidder = auction.currentBidder;
 
-    if (prevBidder && prevBidder.toString() !== userId.toString()) {
-      await Notification.create({
-        userId: prevBidder,
-        type: "bet",
-        message: "You have been outbid! The current highest bid is now $" + amount,
-        isRead: false,
+    // 1. If there was a previous leading bidder, refund their coins and notify them if outbid
+    const lastBid = await Bid.findOne({ auctionId: id, status: "active" }).sort({ createdAt: -1 });
+    if (prevBidder && lastBid) {
+      // Refund the previous bidder's coins
+      await User.findByIdAndUpdate(prevBidder, {
+        $inc: { coinBalance: lastBid.amount },
       });
+
+      // Notify previous bidder if someone else outbid them
+      if (prevBidder.toString() !== userId.toString()) {
+        await Notification.create({
+          userId: prevBidder,
+          type: "bet",
+          message: `You have been outbid! The current highest bid is now $${amount}`,
+          isRead: false,
+        });
+      }
     }
 
-    const lastBid = await Bid.findOne({ auctionId: id }).sort({ createdAt: -1 });
-    if (lastBid){
-        await Bid.updateOne({ _id: lastBid._id }, { $set: {status: "outbid"}});
-    }
+    // 2. Mark previous active bids for this auction as outbid
+    await Bid.updateMany(
+      { auctionId: id, status: "active" },
+      { $set: { status: "outbid" } }
+    );
 
+    // 3. Deduct coins from the new bidder
+    await User.findByIdAndUpdate(userId, {
+      $inc: { coinBalance: -amount },
+    });
+
+    // 4. Update the auction leading price and bidder
     auction.currentPrice = amount;
     auction.currentBidder = userId;
     await auction.save();
 
+    // 5. Create the new active bid record
     const bid = await Bid.create({
       auctionId: id,
       userId: userId,
@@ -134,7 +153,7 @@ export const placeBid = async (req, res) => {
       status: "active",
     });
 
-    return res.status(201).json({ success: true, auction });
+    return res.status(201).json({ success: true, auction, bid });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -200,31 +219,3 @@ export const getBids = async (req, res) => {
   }
 };
 
-// GET api/notification
-/*export const outBid = async ( req, res ) => {
-    try{
-        const { id } = req.params;
-        const userId = req.user._id;
-
-        if (!userId){
-            return res.status(404).json({ success: false, message: "Invalid id"});
-        }
-
-        if(!id){
-            return res.status(404).json({ success: false, message: "Invalid id"});
-        }
-
-        const auction = await Auction.findById(id);
-        const lastBidder = auction.currentBidder;
-
-        if ( userId != lastBidder._id){
-            return res.status(200).json({ success: true, message: "Someone have bid now "})
-        }
-
-
-
-    }catch(err){
-        res.status(500).json({ success: false, message: err.message })
-    }
-}
-*/
