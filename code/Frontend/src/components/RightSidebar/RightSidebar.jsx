@@ -109,7 +109,23 @@ function SuggestedSection({ showViewAll = false }) {
   );
 }
 
+const LUXURY_TRENDING_TAGS = [
+  { tag: "#LuxuryWatches", query: "Watch" },
+  { tag: "#SustainableLuxury", query: "Luxury" },
+  { tag: "#DesignerLeather", query: "Leather" },
+  { tag: "#CashmereCollection", query: "Cashmere" },
+  { tag: "#FineJewelry", query: "Jewelry" },
+  { tag: "#SilkApparel", query: "Silk" },
+  { tag: "#HandcraftedArt", query: "Crafted" },
+];
+
 function RightSidebar({ page = "home" }) {
+  const navigate = useNavigate();
+
+  const handleTagClick = (query) => {
+    navigate(`/search?q=${encodeURIComponent(query)}`);
+  };
+
   if (page === "profile") {
     return (
       <aside className="right-sidebar right-sidebar-profile">
@@ -175,11 +191,17 @@ function RightSidebar({ page = "home" }) {
           <h3>Trending Topics</h3>
         </div>
         <div className="rs-tags">
-          <span className="rs-tag">#CyberMondayEarly</span>
-          <span className="rs-tag">#LinenSummer</span>
-          <span className="rs-tag">#SustainableLux</span>
-          <span className="rs-tag">#MinimalistDecor</span>
-          <span className="rs-tag">#SneakerHead2025</span>
+          {LUXURY_TRENDING_TAGS.map((item) => (
+            <button
+              key={item.tag}
+              type="button"
+              className="rs-tag"
+              onClick={() => handleTagClick(item.query)}
+              title={`Search for ${item.query}`}
+            >
+              {item.tag}
+            </button>
+          ))}
         </div>
       </div>
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import TopNavbar from "../../components/TopNavbar/TopNavbar";
 import { useSearch } from "../../hooks/useSearch";
@@ -9,8 +9,16 @@ import { searchAll } from "../../api/searchService";
 import "./SearchPage.css";
 
 export default function SearchPage() {
+  const [searchParams] = useSearchParams();
   const { query, setQuery, results, loading, hasMore, loadMore } = useSearch();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q && q !== query) {
+      setQuery(q);
+    }
+  }, [searchParams]);
 
   const observer = useRef();
   const lastElementRef = useCallback(node => {

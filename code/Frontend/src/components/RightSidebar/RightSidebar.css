@@ -117,17 +117,42 @@
 .rs-tag {
   background: var(--m4c-bg-surface);
   color: var(--m4c-text-secondary);
-  padding: 8px 16px;
+  padding: 7px 14px;
   border-radius: 20px;
   font-size: 13px;
   font-weight: 600;
-  border: 1px solid #eaeaea;
+  border: 1px solid var(--m4c-border, #eaeaea);
   cursor: pointer;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+  user-select: none;
 }
 
 .rs-tag:hover {
-  background: var(--m4c-bg-surface-alt);
+  background: var(--m4c-accent, #4a24e1);
+  color: #ffffff !important;
+  border-color: var(--m4c-accent, #4a24e1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(74, 36, 225, 0.2);
+}
+
+.rs-tag:active {
+  transform: translateY(0);
+}
+
+.dark .rs-tag,
+[data-theme="dark"] .rs-tag {
+  background: var(--m4c-bg-surface-alt, #232329);
+  color: var(--m4c-text-secondary, #a0a0ab);
+  border-color: var(--m4c-border, #2c2c33);
+}
+
+.dark .rs-tag:hover,
+[data-theme="dark"] .rs-tag:hover {
+  background: var(--m4c-accent, #8a6bff);
+  color: #ffffff !important;
+  border-color: var(--m4c-accent, #8a6bff);
 }
 
 .rs-live-header {
