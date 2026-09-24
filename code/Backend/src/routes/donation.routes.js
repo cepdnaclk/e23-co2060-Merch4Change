@@ -23,8 +23,8 @@ const donationRateLimiter = rateLimit({
       new AppError(
         "Donation limit reached. Try again later.",
         429,
-        "TOO_MANY_REQUESTS"
-      )
+        "TOO_MANY_REQUESTS",
+      ),
     );
   },
 });

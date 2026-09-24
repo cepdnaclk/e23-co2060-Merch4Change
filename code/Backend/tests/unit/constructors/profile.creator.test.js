@@ -8,7 +8,10 @@ import { mockEmailTransport } from "../helpers/email.js";
 import OrganizationProfile from "../../../src/models/OrganizationProfile.js";
 import PendingUser from "../../../src/models/PendingUser.js";
 import User from "../../../src/models/User.js";
-import { createOrganizationProfile, createUserProfile } from "../../../src/constructors/profile.creator.js";
+import {
+  createOrganizationProfile,
+  createUserProfile,
+} from "../../../src/constructors/profile.creator.js";
 
 mockEmailTransport();
 
@@ -57,7 +60,10 @@ test("createUserProfile creates a pending user and sends OTP", async () => {
   assert.equal(createdPendingUser.email, "jane@example.com");
   assert.equal(createdPendingUser.userName, "jane");
   assert.equal(createdPendingUser.accountType, "individual");
-  assert.deepEqual(findQueries, [{ email: "jane@example.com" }, { userName: "jane" }]);
+  assert.deepEqual(findQueries, [
+    { email: "jane@example.com" },
+    { userName: "jane" },
+  ]);
 });
 
 test("createUserProfile rejects duplicate username", async () => {
@@ -92,7 +98,7 @@ test("createUserProfile rejects duplicate username", async () => {
         assert.equal(err.name, "AppError");
         assert.equal(err.code, "USERNAME_ALREADY_IN_USE");
         return true;
-      }
+      },
     );
   } finally {
     User.findOne = originalFindOne;
@@ -153,7 +159,10 @@ test("createOrganizationProfile creates a pending organization user and sends OT
   assert.equal(createdPendingOrg.userName, "charityorg");
   assert.equal(createdPendingOrg.accountType, "organization");
   assert.equal(createdPendingOrg.profileData.orgName, "Charity Org");
-  assert.deepEqual(userQueries, [{ email: "org@example.com" }, { userName: "charityorg" }]);
+  assert.deepEqual(userQueries, [
+    { email: "org@example.com" },
+    { userName: "charityorg" },
+  ]);
   assert.deepEqual(orgQueries, [{ orgName: "Charity Org" }]);
 });
 
@@ -183,7 +192,7 @@ test("createOrganizationProfile rejects duplicate organization name", async () =
         assert.equal(err.name, "AppError");
         assert.equal(err.code, "ORGNAME_ALREADY_IN_USE");
         return true;
-      }
+      },
     );
   } finally {
     User.findOne = originalFindOne;

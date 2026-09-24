@@ -37,33 +37,65 @@ test("validateProfileSettingsBody accepts a valid payload and trims/normalizes f
 });
 
 test("validateProfileSettingsBody allows a partial payload (all fields optional)", () => {
-  const result = validateProfileSettingsBody({ profileBio: "Just updating my bio" });
+  const result = validateProfileSettingsBody({
+    profileBio: "Just updating my bio",
+  });
 
   assert.deepEqual(result.errors, []);
 });
 
 test("validateProfileSettingsBody rejects invalid firstName/lastName length", () => {
-  const result = validateProfileSettingsBody({ firstName: "J", lastName: "x".repeat(121) });
+  const result = validateProfileSettingsBody({
+    firstName: "J",
+    lastName: "x".repeat(121),
+  });
 
-  assert.equal(result.errors.some((m) => m.includes("firstName must be a string between 2 and 120")), true);
-  assert.equal(result.errors.some((m) => m.includes("lastName must be a string between 2 and 120")), true);
+  assert.equal(
+    result.errors.some((m) =>
+      m.includes("firstName must be a string between 2 and 120"),
+    ),
+    true,
+  );
+  assert.equal(
+    result.errors.some((m) =>
+      m.includes("lastName must be a string between 2 and 120"),
+    ),
+    true,
+  );
 });
 
 test("validateProfileSettingsBody rejects invalid userName characters and length", () => {
   const short = validateProfileSettingsBody({ userName: "a" });
-  assert.equal(short.errors.some((m) => m.includes("userName must be a string between 2 and 30")), true);
+  assert.equal(
+    short.errors.some((m) =>
+      m.includes("userName must be a string between 2 and 30"),
+    ),
+    true,
+  );
 
   const badChars = validateProfileSettingsBody({ userName: "jane doe!" });
   assert.equal(
-    badChars.errors.some((m) => m.includes("userName can only contain letters, numbers, periods, and underscores")),
-    true
+    badChars.errors.some((m) =>
+      m.includes(
+        "userName can only contain letters, numbers, periods, and underscores",
+      ),
+    ),
+    true,
   );
 });
 
 test("validateRequestEmailChangeBody rejects an invalid email", () => {
-  const result = validateRequestEmailChangeBody({ newEmail: "not-an-email", currentPassword: "pass" });
+  const result = validateRequestEmailChangeBody({
+    newEmail: "not-an-email",
+    currentPassword: "pass",
+  });
 
-  assert.equal(result.errors.some((m) => m.includes("newEmail must be a valid email address")), true);
+  assert.equal(
+    result.errors.some((m) =>
+      m.includes("newEmail must be a valid email address"),
+    ),
+    true,
+  );
 });
 
 test("validateProfileSettingsBody rejects profileBio over 500 characters", () => {
@@ -71,7 +103,12 @@ test("validateProfileSettingsBody rejects profileBio over 500 characters", () =>
     profileBio: "y".repeat(501),
   });
 
-  assert.equal(result.errors.some((m) => m.includes("profileBio must not exceed 500 characters")), true);
+  assert.equal(
+    result.errors.some((m) =>
+      m.includes("profileBio must not exceed 500 characters"),
+    ),
+    true,
+  );
 });
 
 test("validateProfileSettingsBody rejects userLink without http(s) scheme", () => {
@@ -79,7 +116,10 @@ test("validateProfileSettingsBody rejects userLink without http(s) scheme", () =
     userLink: "ftp://example.com",
   });
 
-  assert.equal(result.errors.some((m) => m.includes("userLink must be a valid URL")), true);
+  assert.equal(
+    result.errors.some((m) => m.includes("userLink must be a valid URL")),
+    true,
+  );
 });
 
 // ==========================================
@@ -98,16 +138,25 @@ test("validateSecuritySettingsBody accepts an empty payload", () => {
 });
 
 test("validateSecuritySettingsBody rejects a non-boolean loginActivityAlerts", () => {
-  const result = validateSecuritySettingsBody({ loginActivityAlerts: "not-a-boolean" });
+  const result = validateSecuritySettingsBody({
+    loginActivityAlerts: "not-a-boolean",
+  });
 
-  assert.equal(result.errors.some((m) => m.includes("loginActivityAlerts must be a boolean")), true);
+  assert.equal(
+    result.errors.some((m) =>
+      m.includes("loginActivityAlerts must be a boolean"),
+    ),
+    true,
+  );
 });
 
 test("validateSecuritySettingsBody does not validate twoFactorEnabled — it's not settable through this endpoint", () => {
   // twoFactorEnabled only ever flips via the OTP-gated enable/disable flow
   // (validateVerifyEnable2FABody / validateDisable2FABody below), so this
   // validator intentionally has nothing to say about it either way.
-  const result = validateSecuritySettingsBody({ twoFactorEnabled: "not-a-boolean" });
+  const result = validateSecuritySettingsBody({
+    twoFactorEnabled: "not-a-boolean",
+  });
 
   assert.deepEqual(result.errors, []);
 });
@@ -130,7 +179,10 @@ test("validateVerifyEnable2FABody accepts the otpCode alias", () => {
 test("validateVerifyEnable2FABody rejects a missing code", () => {
   const result = validateVerifyEnable2FABody({});
 
-  assert.equal(result.errors.some((m) => m.includes("otp is required")), true);
+  assert.equal(
+    result.errors.some((m) => m.includes("otp is required")),
+    true,
+  );
 });
 
 test("validateDisable2FABody accepts a payload with currentPassword", () => {
@@ -142,7 +194,10 @@ test("validateDisable2FABody accepts a payload with currentPassword", () => {
 test("validateDisable2FABody rejects a missing currentPassword", () => {
   const result = validateDisable2FABody({});
 
-  assert.equal(result.errors.some((m) => m.includes("currentPassword is required")), true);
+  assert.equal(
+    result.errors.some((m) => m.includes("currentPassword is required")),
+    true,
+  );
 });
 
 // ==========================================
@@ -164,13 +219,23 @@ test("validateRequestEmailChangeBody rejects an invalid email", () => {
     currentPassword: "MyPassword123",
   });
 
-  assert.equal(result.errors.some((m) => m.includes("newEmail must be a valid email address")), true);
+  assert.equal(
+    result.errors.some((m) =>
+      m.includes("newEmail must be a valid email address"),
+    ),
+    true,
+  );
 });
 
 test("validateRequestEmailChangeBody rejects a missing currentPassword", () => {
-  const result = validateRequestEmailChangeBody({ newEmail: "jane@example.com" });
+  const result = validateRequestEmailChangeBody({
+    newEmail: "jane@example.com",
+  });
 
-  assert.equal(result.errors.some((m) => m.includes("currentPassword is required")), true);
+  assert.equal(
+    result.errors.some((m) => m.includes("currentPassword is required")),
+    true,
+  );
 });
 
 // ==========================================
@@ -191,7 +256,10 @@ test("validateVerifyEmailChangeBody accepts the otpCode alias", () => {
 test("validateVerifyEmailChangeBody rejects a missing code", () => {
   const result = validateVerifyEmailChangeBody({});
 
-  assert.equal(result.errors.some((m) => m.includes("otp is required")), true);
+  assert.equal(
+    result.errors.some((m) => m.includes("otp is required")),
+    true,
+  );
 });
 
 // ==========================================
@@ -210,9 +278,18 @@ test("validateChangePasswordBody accepts a valid password change", () => {
 test("validateChangePasswordBody rejects missing fields", () => {
   const result = validateChangePasswordBody({});
 
-  assert.equal(result.errors.some((m) => m.includes("currentPassword is required")), true);
-  assert.equal(result.errors.some((m) => m.includes("newPassword is required")), true);
-  assert.equal(result.errors.some((m) => m.includes("confirmPassword is required")), true);
+  assert.equal(
+    result.errors.some((m) => m.includes("currentPassword is required")),
+    true,
+  );
+  assert.equal(
+    result.errors.some((m) => m.includes("newPassword is required")),
+    true,
+  );
+  assert.equal(
+    result.errors.some((m) => m.includes("confirmPassword is required")),
+    true,
+  );
 });
 
 test("validateChangePasswordBody rejects a newPassword that is too short or too weak", () => {
@@ -221,7 +298,12 @@ test("validateChangePasswordBody rejects a newPassword that is too short or too 
     newPassword: "short1",
     confirmPassword: "short1",
   });
-  assert.equal(tooShort.errors.some((m) => m.includes("newPassword must be at least 8 characters")), true);
+  assert.equal(
+    tooShort.errors.some((m) =>
+      m.includes("newPassword must be at least 8 characters"),
+    ),
+    true,
+  );
 
   const noDigits = validateChangePasswordBody({
     currentPassword: "OldPass123",
@@ -229,8 +311,10 @@ test("validateChangePasswordBody rejects a newPassword that is too short or too 
     confirmPassword: "onlyletters",
   });
   assert.equal(
-    noDigits.errors.some((m) => m.includes("newPassword must contain at least one letter and one number")),
-    true
+    noDigits.errors.some((m) =>
+      m.includes("newPassword must contain at least one letter and one number"),
+    ),
+    true,
   );
 });
 
@@ -241,7 +325,12 @@ test("validateChangePasswordBody rejects mismatched confirmPassword", () => {
     confirmPassword: "Different789",
   });
 
-  assert.equal(result.errors.some((m) => m.includes("confirmPassword must match newPassword")), true);
+  assert.equal(
+    result.errors.some((m) =>
+      m.includes("confirmPassword must match newPassword"),
+    ),
+    true,
+  );
 });
 
 test("validateChangePasswordBody rejects newPassword equal to currentPassword", () => {
@@ -251,7 +340,12 @@ test("validateChangePasswordBody rejects newPassword equal to currentPassword", 
     confirmPassword: "SamePass123",
   });
 
-  assert.equal(result.errors.some((m) => m.includes("newPassword must be different from currentPassword")), true);
+  assert.equal(
+    result.errors.some((m) =>
+      m.includes("newPassword must be different from currentPassword"),
+    ),
+    true,
+  );
 });
 
 // ==========================================
@@ -270,16 +364,28 @@ test("validatePrivacySettingsBody accepts a valid payload", () => {
 });
 
 test("validatePrivacySettingsBody rejects non-boolean toggles", () => {
-  const result = validatePrivacySettingsBody({ isPrivate: "true", hideReadReceipts: "no" });
+  const result = validatePrivacySettingsBody({
+    isPrivate: "true",
+    hideReadReceipts: "no",
+  });
 
-  assert.equal(result.errors.some((m) => m.includes("isPrivate must be a boolean")), true);
-  assert.equal(result.errors.some((m) => m.includes("hideReadReceipts must be a boolean")), true);
+  assert.equal(
+    result.errors.some((m) => m.includes("isPrivate must be a boolean")),
+    true,
+  );
+  assert.equal(
+    result.errors.some((m) => m.includes("hideReadReceipts must be a boolean")),
+    true,
+  );
 });
 
 test("validatePrivacySettingsBody rejects an invalid commentPermission", () => {
   const result = validatePrivacySettingsBody({ commentPermission: "nobody" });
 
-  assert.equal(result.errors.some((m) => m.includes("commentPermission must be one of")), true);
+  assert.equal(
+    result.errors.some((m) => m.includes("commentPermission must be one of")),
+    true,
+  );
 });
 
 // ==========================================
@@ -298,26 +404,49 @@ test("validateNotificationSettingsBody accepts valid boolean toggles", () => {
 });
 
 test("validateNotificationSettingsBody rejects non-boolean fields", () => {
-  const result = validateNotificationSettingsBody({ notifyOnLikes: "yes", emailNotifications: 0 });
+  const result = validateNotificationSettingsBody({
+    notifyOnLikes: "yes",
+    emailNotifications: 0,
+  });
 
-  assert.equal(result.errors.some((m) => m.includes("notifyOnLikes must be a boolean")), true);
-  assert.equal(result.errors.some((m) => m.includes("emailNotifications must be a boolean")), true);
+  assert.equal(
+    result.errors.some((m) => m.includes("notifyOnLikes must be a boolean")),
+    true,
+  );
+  assert.equal(
+    result.errors.some((m) =>
+      m.includes("emailNotifications must be a boolean"),
+    ),
+    true,
+  );
 });
 
 // ==========================================
 // APPEARANCE SETTINGS
 // ==========================================
 test("validateAppearanceSettingsBody accepts valid theme and font size", () => {
-  const result = validateAppearanceSettingsBody({ appTheme: "dark", fontSize: "large" });
+  const result = validateAppearanceSettingsBody({
+    appTheme: "dark",
+    fontSize: "large",
+  });
 
   assert.deepEqual(result.errors, []);
 });
 
 test("validateAppearanceSettingsBody rejects invalid theme and font size", () => {
-  const result = validateAppearanceSettingsBody({ appTheme: "neon", fontSize: "huge" });
+  const result = validateAppearanceSettingsBody({
+    appTheme: "neon",
+    fontSize: "huge",
+  });
 
-  assert.equal(result.errors.some((m) => m.includes("appTheme must be one of")), true);
-  assert.equal(result.errors.some((m) => m.includes("fontSize must be one of")), true);
+  assert.equal(
+    result.errors.some((m) => m.includes("appTheme must be one of")),
+    true,
+  );
+  assert.equal(
+    result.errors.some((m) => m.includes("fontSize must be one of")),
+    true,
+  );
 });
 
 // ==========================================
@@ -332,13 +461,19 @@ test("validateLanguageSettingsBody accepts a supported language", () => {
 test("validateLanguageSettingsBody rejects a missing appLanguage", () => {
   const result = validateLanguageSettingsBody({});
 
-  assert.equal(result.errors.some((m) => m.includes("appLanguage is required")), true);
+  assert.equal(
+    result.errors.some((m) => m.includes("appLanguage is required")),
+    true,
+  );
 });
 
 test("validateLanguageSettingsBody rejects an unsupported appLanguage", () => {
   const result = validateLanguageSettingsBody({ appLanguage: "xx" });
 
-  assert.equal(result.errors.some((m) => m.includes("appLanguage must be one of")), true);
+  assert.equal(
+    result.errors.some((m) => m.includes("appLanguage must be one of")),
+    true,
+  );
 });
 
 // ==========================================
@@ -353,5 +488,8 @@ test("validateDeleteAccountBody accepts a payload with a password", () => {
 test("validateDeleteAccountBody rejects a missing password", () => {
   const result = validateDeleteAccountBody({});
 
-  assert.equal(result.errors.some((m) => m.includes("password is required")), true);
+  assert.equal(
+    result.errors.some((m) => m.includes("password is required")),
+    true,
+  );
 });

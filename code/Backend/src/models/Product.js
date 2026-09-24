@@ -49,7 +49,7 @@ const productSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
-    
+
     image: {
       data: Buffer,
       contentType: String,
@@ -77,5 +77,3 @@ const productSchema = new mongoose.Schema(
 const Product = mongoose.model("Product", productSchema);
 
 export default Product;
-
-

@@ -44,7 +44,7 @@ router.put(
   "/profile",
   upload.single("avatar"),
   validateRequest({ body: validateProfileSettingsBody }),
-  updateProfileSettings
+  updateProfileSettings,
 );
 
 // Email re-verification endpoints (OTP)
@@ -52,78 +52,70 @@ router.post(
   "/email/request-change",
   authRateLimiter,
   validateRequest({ body: validateRequestEmailChangeBody }),
-  requestEmailChange
+  requestEmailChange,
 );
-router.post(
-  "/email/resend-otp",
-  authRateLimiter,
-  resendEmailChangeOtp
-);
+router.post("/email/resend-otp", authRateLimiter, resendEmailChangeOtp);
 router.post(
   "/email/verify",
   authRateLimiter,
   validateRequest({ body: validateVerifyEmailChangeBody }),
-  verifyEmailChange
+  verifyEmailChange,
 );
 
 // Security endpoints
 router.put(
   "/security",
   validateRequest({ body: validateSecuritySettingsBody }),
-  updateSecuritySettings
+  updateSecuritySettings,
 );
 router.post(
   "/change-password",
   authRateLimiter,
   validateRequest({ body: validateChangePasswordBody }),
-  changePassword
+  changePassword,
 );
 
 // Two-factor authentication (OTP-gated enable, password-gated disable)
-router.post(
-  "/security/2fa/request-enable",
-  authRateLimiter,
-  requestEnable2FA
-);
+router.post("/security/2fa/request-enable", authRateLimiter, requestEnable2FA);
 router.post(
   "/security/2fa/verify-enable",
   authRateLimiter,
   validateRequest({ body: validateVerifyEnable2FABody }),
-  verifyEnable2FA
+  verifyEnable2FA,
 );
 router.post(
   "/security/2fa/disable",
   authRateLimiter,
   validateRequest({ body: validateDisable2FABody }),
-  disable2FA
+  disable2FA,
 );
 
 // Privacy endpoints
 router.put(
   "/privacy",
   validateRequest({ body: validatePrivacySettingsBody }),
-  updatePrivacySettings
+  updatePrivacySettings,
 );
 
 // Notification endpoints
 router.put(
   "/notifications",
   validateRequest({ body: validateNotificationSettingsBody }),
-  updateNotificationSettings
+  updateNotificationSettings,
 );
 
 // Appearance endpoints
 router.put(
   "/appearance",
   validateRequest({ body: validateAppearanceSettingsBody }),
-  updateAppearanceSettings
+  updateAppearanceSettings,
 );
 
 // Language endpoints
 router.put(
   "/language",
   validateRequest({ body: validateLanguageSettingsBody }),
-  updateLanguageSettings
+  updateLanguageSettings,
 );
 
 // Account deletion
@@ -131,7 +123,7 @@ router.delete(
   "/account",
   authRateLimiter,
   validateRequest({ body: validateDeleteAccountBody }),
-  deleteAccount
+  deleteAccount,
 );
 
 export default router;

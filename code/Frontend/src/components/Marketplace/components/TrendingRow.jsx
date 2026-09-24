@@ -1,7 +1,9 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { ProductCard } from "./ProductCard";
 
 export function TrendingRow({ products, onBuy, checkingOut, coinsFor }) {
+  const navigate = useNavigate();
   if (products.length === 0) return null;
   return (
     <div className="mk-section">
@@ -15,8 +17,9 @@ export function TrendingRow({ products, onBuy, checkingOut, coinsFor }) {
         {products.map((product, i) => (
           <div
             key={product._id}
-            className="mk-trending-card"
+            className="mk-trending-card cursor-pointer"
             style={{ animationDelay: `${i * 60}ms` }}
+            onClick={() => product._id && navigate(`/marketplace/product/${product._id}`)}
           >
             <div className="mk-trending-img">
               {product.imageUrl ? (
@@ -31,12 +34,18 @@ export function TrendingRow({ products, onBuy, checkingOut, coinsFor }) {
               )}
             </div>
             <div className="mk-trending-body">
-              <h4 className="mk-product-name">{product.name}</h4>
+              <h4 className="mk-product-name hover:text-purple-600 transition-colors">
+                {product.name}
+              </h4>
               <div className="mk-trending-footer">
                 <span className="mk-price">${product.price?.toLocaleString()}</span>
                 <button
+                  type="button"
                   className={`mk-trending-buy ${checkingOut === product._id ? "mk-buy-loading" : ""}`}
-                  onClick={() => onBuy(product)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onBuy(product);
+                  }}
                   disabled={product.stock === 0 || checkingOut === product._id}
                 >
                   {checkingOut === product._id ? (

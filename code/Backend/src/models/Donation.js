@@ -47,4 +47,3 @@ donationSchema.index({ charityProjectId: 1, status: 1, createdAt: -1 });
 const Donation = mongoose.model("Donation", donationSchema);
 
 export default Donation;
-

@@ -8,6 +8,9 @@ import { ProductSection } from "./components/ProductSection";
 import { ProductCard } from "./components/ProductCard";
 import { LoadingState } from "./components/LoadingState";
 import { EmptyState } from "./components/EmptyState";
+import { AuctionCard } from "../Auctions/AuctionCard";
+import { AuctionBiddingModal } from "../Auctions/AuctionBiddingModal";
+import { listAuctions } from "../../services/auctionApi";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -15,13 +18,15 @@ function coinsFor(price) {
   return Math.floor(price / 10);
 }
 
-const FILTERS = ["All", "In Stock", "Limited", "Trending"];
+const FILTERS = ["All", "Auctions", "In Stock", "Limited", "Trending"];
 
 import apiClient from "../../api/apiClient";
 import { useAuth } from "../../context/Context";
 
 export default function Marketplace() {
   const [products, setProducts] = useState([]);
+  const [auctions, setAuctions] = useState([]);
+  const [selectedAuction, setSelectedAuction] = useState(null);
   const [loading, setLoading] = useState(true);
   const [checkingOut, setCheckingOut] = useState(null);
   const [toast, setToast] = useState(null);
@@ -29,9 +34,21 @@ export default function Marketplace() {
   const { accessToken: token } = useAuth();
 
   useEffect(() => {
-    apiClient.get("/api/v1/marketplace/products")
-      .then((res) => setProducts(res.data?.data?.products ?? []))
-      .catch(() => showToast("error", "Could not load products."))
+    Promise.allSettled([
+      apiClient.get("/api/v1/marketplace/products"),
+      listAuctions({ status: "all" }),
+    ])
+      .then(([productsRes, auctionsRes]) => {
+        if (productsRes.status === "fulfilled") {
+          setProducts(productsRes.value.data?.data?.products ?? []);
+        } else {
+          showToast("error", "Could not load products.");
+        }
+
+        if (auctionsRes.status === "fulfilled" && auctionsRes.value?.success) {
+          setAuctions(auctionsRes.value.auctions ?? []);
+        }
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -74,6 +91,13 @@ export default function Marketplace() {
     return products;
   };
 
+  const handleBidSuccess = (updatedAuction) => {
+    setAuctions((prev) =>
+      prev.map((auc) => (auc._id === updatedAuction._id ? updatedAuction : auc))
+    );
+    showToast("success", `🎉 High bid placed at $${updatedAuction.currentPrice}!`);
+  };
+
   const filtered = getFiltered();
   const showSections = filter === "All";
 
@@ -107,25 +131,84 @@ export default function Marketplace() {
       {loading && <LoadingState />}
 
       {/* Empty */}
-      {!loading && filtered.length === 0 && <EmptyState filter={filter} />}
+      {!loading && filter !== "Auctions" && filtered.length === 0 && <EmptyState filter={filter} />}
 
       {/* Sectioned view */}
       {!loading && showSections && (
         <>
+          {auctions.length > 0 && (
+            <div className="mk-section mb-6">
+              <div className="mk-section-head flex items-center justify-between">
+                <h2 className="mk-section-title">⚡ Live Charity Auctions</h2>
+                <button
+                  type="button"
+                  onClick={() => setFilter("Auctions")}
+                  className="text-xs font-bold text-purple-600 hover:text-purple-700 cursor-pointer"
+                >
+                  View All ({auctions.length}) →
+                </button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-4">
+                {auctions.slice(0, 4).map((auc) => (
+                  <AuctionCard
+                    key={auc._id}
+                    auction={auc}
+                    onOpenBidModal={(a) => setSelectedAuction(a)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
           <TrendingRow products={trending} onBuy={handleBuy} checkingOut={checkingOut} coinsFor={coinsFor} />
           <ProductSection title="Featured Drops" icon="⭐" products={featured} onBuy={handleBuy} checkingOut={checkingOut} startIndex={0} coinsFor={coinsFor} />
           <ProductSection title="Curated Marketplace" icon="🛍️" products={regular} onBuy={handleBuy} checkingOut={checkingOut} startIndex={featured.length} coinsFor={coinsFor} />
         </>
       )}
 
+      {/* Auctions filter view */}
+      {!loading && filter === "Auctions" && (
+        <div className="mk-section">
+          <div className="mk-section-head flex items-center justify-between mb-4">
+            <h2 className="mk-section-title">⚡ Live Charity Auctions & Drops</h2>
+            <span className="text-xs font-semibold text-purple-600 bg-purple-50 dark:bg-purple-900/40 px-2.5 py-1 rounded-full">
+              {auctions.length} Drops
+            </span>
+          </div>
+
+          {auctions.length === 0 ? (
+            <div className="text-center py-16 text-gray-500">
+              No live auctions right now. Check back soon for the next exclusive drop!
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {auctions.map((auc) => (
+                <AuctionCard
+                  key={auc._id}
+                  auction={auc}
+                  onOpenBidModal={(a) => setSelectedAuction(a)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Filtered flat view */}
-      {!loading && !showSections && filtered.length > 0 && (
+      {!loading && !showSections && filter !== "Auctions" && filtered.length > 0 && (
         <div className="mk-grid">
           {filtered.map((product, i) => (
             <ProductCard key={product._id} product={product} index={i} onBuy={handleBuy} isBuying={checkingOut === product._id} coinsFor={coinsFor} />
           ))}
         </div>
       )}
+
+      {/* Bidding Modal */}
+      <AuctionBiddingModal
+        auction={selectedAuction}
+        isOpen={Boolean(selectedAuction)}
+        onClose={() => setSelectedAuction(null)}
+        onBidSuccess={handleBidSuccess}
+      />
 
     </div>
   );

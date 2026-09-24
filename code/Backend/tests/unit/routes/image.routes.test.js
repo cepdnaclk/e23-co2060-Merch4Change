@@ -32,24 +32,60 @@ for (const scenario of [
   { name: "invalid token", invalidToken: true, status: 401 },
   { name: "unrelated user", userId: otherId, status: 403 },
   { name: "unrelated admin", userId: otherId, role: "admin", status: 403 },
-  { name: "unrelated brand owner", userId: otherId, brandOwnerId: ownerId, status: 403 },
-  { name: "suspended product owner", userId: ownerId, inactive: true, status: 403 },
+  {
+    name: "unrelated brand owner",
+    userId: otherId,
+    brandOwnerId: ownerId,
+    status: 403,
+  },
+  {
+    name: "suspended product owner",
+    userId: ownerId,
+    inactive: true,
+    status: 403,
+  },
   { name: "product owner", userId: ownerId, status: 200 },
-  { name: "product brand owner", userId: otherId, brandOwnerId: otherId, status: 200 },
+  {
+    name: "product brand owner",
+    userId: otherId,
+    brandOwnerId: otherId,
+    status: 200,
+  },
   { name: "invalid product ID", userId: ownerId, invalidId: true, status: 400 },
-  { name: "missing product", userId: ownerId, missingProduct: true, status: 404 },
+  {
+    name: "missing product",
+    userId: ownerId,
+    missingProduct: true,
+    status: 404,
+  },
 ]) {
   test(`product image upload access for ${scenario.name}`, async (t) => {
     t.mock.method(User, "findById", () => ({
-      select: async () => ({ _id: scenario.userId, role: scenario.role || "user", isActive: !scenario.inactive }),
+      select: async () => ({
+        _id: scenario.userId,
+        role: scenario.role || "user",
+        isActive: !scenario.inactive,
+      }),
     }));
-    const previousImage = { data: Buffer.from("original"), contentType: "image/png" };
+    const previousImage = {
+      data: Buffer.from("original"),
+      contentType: "image/png",
+    };
     const save = t.mock.fn(async () => {});
-    const product = { _id: productId, ownerUserId: ownerId, image: previousImage, save,
+    const product = {
+      _id: productId,
+      ownerUserId: ownerId,
+      image: previousImage,
+      save,
       ...(scenario.brandOwnerId ? { brandId } : {}),
     };
-    const lookup = t.mock.method(Product, "findById", async () => scenario.missingProduct ? null : product);
-    t.mock.method(Brand, "findById", async () => ({ _id: brandId, ownerUserId: scenario.brandOwnerId }));
+    const lookup = t.mock.method(Product, "findById", async () =>
+      scenario.missingProduct ? null : product,
+    );
+    t.mock.method(Brand, "findById", async () => ({
+      _id: brandId,
+      ownerUserId: scenario.brandOwnerId,
+    }));
     const url = await startServer(t);
     const headers = {};
     if (scenario.invalidToken) {
@@ -58,10 +94,19 @@ for (const scenario of [
       headers.Authorization = `Bearer ${jwt.sign({ userId: String(scenario.userId) }, env.jwtSecret, { expiresIn: "5m" })}`;
     }
     const form = new FormData();
-    form.append("image", new Blob(["replacement"], { type: "image/png" }), "product.png");
-    const response = await fetch(`${url}/${scenario.invalidId ? "invalid" : productId}`, {
-      method: "POST", headers, body: form,
-    });
+    form.append(
+      "image",
+      new Blob(["replacement"], { type: "image/png" }),
+      "product.png",
+    );
+    const response = await fetch(
+      `${url}/${scenario.invalidId ? "invalid" : productId}`,
+      {
+        method: "POST",
+        headers,
+        body: form,
+      },
+    );
     await response.json();
     assert.equal(response.status, scenario.status);
     if (scenario.status === 200) {
@@ -70,7 +115,11 @@ for (const scenario of [
       assert.equal(product.image.contentType, "image/png");
     } else {
       assert.equal(save.mock.callCount(), 0);
-      assert.equal(product.image, previousImage, "Rejected requests must preserve the original image");
+      assert.equal(
+        product.image,
+        previousImage,
+        "Rejected requests must preserve the original image",
+      );
     }
     if (scenario.anonymous || scenario.invalidToken || scenario.inactive) {
       assert.equal(lookup.mock.callCount(), 0);

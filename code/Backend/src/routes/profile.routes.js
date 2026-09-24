@@ -1,6 +1,15 @@
 import { Router } from "express";
 
-import { me, getMyCoins, updateMe, getProfileByUsername, followUser, unfollowUser, getSuggestedUsers, getTopCustomers } from "../controllers/profile.controller.js";
+import {
+  me,
+  getMyCoins,
+  updateMe,
+  getProfileByUsername,
+  followUser,
+  unfollowUser,
+  getSuggestedUsers,
+  getTopCustomers,
+} from "../controllers/profile.controller.js";
 import protect from "../middlewares/auth.js";
 
 const router = Router();
@@ -13,7 +22,5 @@ router.get("/:username/top-customers", getTopCustomers);
 router.get("/:username", protect, getProfileByUsername);
 router.post("/:username/follow", protect, followUser);
 router.post("/:username/unfollow", protect, unfollowUser);
-
-
 
 export default router;

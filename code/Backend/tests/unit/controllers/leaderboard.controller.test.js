@@ -1,6 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { getLeaderboardStats, getCharityLeaderboard, getDonorLeaderboard, getCompanyLeaderboard, getTimeframeFilter, parseLimit, parsePage } from "../../../src/controllers/leaderboard.controller.js";
+import {
+  getLeaderboardStats,
+  getCharityLeaderboard,
+  getDonorLeaderboard,
+  getCompanyLeaderboard,
+  getTimeframeFilter,
+  parseLimit,
+  parsePage,
+} from "../../../src/controllers/leaderboard.controller.js";
 import Charity from "../../../src/models/Charity.js";
 import Donation from "../../../src/models/Donation.js";
 import User from "../../../src/models/User.js";
@@ -30,15 +38,23 @@ test("getLeaderboardStats returns aggregated stats with distinct donors and veri
   const originalBrandCount = Brand.countDocuments;
 
   Donation.aggregate = async (pipeline) => {
-    const isDistinctPipeline = pipeline.some((stage) => stage.$group && stage.$group._id === "$donorUserId");
+    const isDistinctPipeline = pipeline.some(
+      (stage) => stage.$group && stage.$group._id === "$donorUserId",
+    );
     if (isDistinctPipeline) {
-      assert.deepEqual(pipeline[0].$match, { status: "completed", donorUserId: { $ne: null } });
+      assert.deepEqual(pipeline[0].$match, {
+        status: "completed",
+        donorUserId: { $ne: null },
+      });
       assert.deepEqual(pipeline[1].$group, { _id: "$donorUserId" });
       assert.deepEqual(pipeline[2].$count, "count");
       return [{ count: 3 }];
     }
     assert.deepEqual(pipeline[0].$match, { status: "completed" });
-    assert.deepEqual(pipeline[1].$group, { _id: null, total: { $sum: "$coinAmount" } });
+    assert.deepEqual(pipeline[1].$group, {
+      _id: null,
+      total: { $sum: "$coinAmount" },
+    });
     return [{ _id: null, total: 3850 }];
   };
   Charity.countDocuments = async (query) => {
@@ -106,14 +122,22 @@ test("getCharityLeaderboard returns ranked charities with categories and coins",
           publicName: "Clean Oceans Initiative",
           category: "environment",
           description: "Protecting marine life",
-          ownerUserId: { userName: "cleanoceans", profileImageUrl: "ocean.jpg", isVerified: true },
+          ownerUserId: {
+            userName: "cleanoceans",
+            profileImageUrl: "ocean.jpg",
+            isVerified: true,
+          },
         },
         {
           _id: "charityB",
           publicName: "Education For All",
           category: "education",
           description: "Empowering children",
-          ownerUserId: { userName: "edforall", profileImageUrl: "edu.jpg", isVerified: true },
+          ownerUserId: {
+            userName: "edforall",
+            profileImageUrl: "edu.jpg",
+            isVerified: true,
+          },
         },
       ],
     }),
@@ -168,9 +192,24 @@ test("getDonorLeaderboard assigns contiguous ranks starting from 1 even when top
 
   // Donation aggregate returns 3 donors: userDeleted (highest), userActive1, userActive2
   Donation.aggregate = async () => [
-    { _id: "userDeleted", totalCoins: 8000, donationCount: 15, lastDonatedAt: new Date() },
-    { _id: "userActive1", totalCoins: 5000, donationCount: 10, lastDonatedAt: new Date() },
-    { _id: "userActive2", totalCoins: 2000, donationCount: 5, lastDonatedAt: new Date() },
+    {
+      _id: "userDeleted",
+      totalCoins: 8000,
+      donationCount: 15,
+      lastDonatedAt: new Date(),
+    },
+    {
+      _id: "userActive1",
+      totalCoins: 5000,
+      donationCount: 10,
+      lastDonatedAt: new Date(),
+    },
+    {
+      _id: "userActive2",
+      totalCoins: 2000,
+      donationCount: 5,
+      lastDonatedAt: new Date(),
+    },
   ];
 
   // User.find returns only the existing active users (userDeleted is missing/deleted from User collection)
@@ -243,7 +282,11 @@ test("getCompanyLeaderboard includes paid, shipped, and completed orders in bran
           _id: "b1",
           brandName: "Eco Threads",
           slug: "eco-threads",
-          ownerUserId: { userName: "ecothreads", isVerified: true, salesCount: 0 },
+          ownerUserId: {
+            userName: "ecothreads",
+            isVerified: true,
+            salesCount: 0,
+          },
         },
       ],
     }),
@@ -275,8 +318,13 @@ test("getCompanyLeaderboard includes paid, shipped, and completed orders in bran
     assert.equal(res.statusCode, 200);
     assert.equal(res.payload.success, true);
     assert.ok(capturedPipeline, "Order.aggregate should have been called");
-    assert.deepEqual(capturedPipeline[0].$match.status, { $in: ["paid", "shipped", "completed"] });
-    assert.ok(capturedPipeline[0].$match["items.productId"], "Must filter items.productId in pipeline");
+    assert.deepEqual(capturedPipeline[0].$match.status, {
+      $in: ["paid", "shipped", "completed"],
+    });
+    assert.ok(
+      capturedPipeline[0].$match["items.productId"],
+      "Must filter items.productId in pipeline",
+    );
 
     const leaderboard = res.payload.data.leaderboard;
     assert.equal(leaderboard.length, 1);
@@ -309,14 +357,22 @@ test("getCharityLeaderboard deterministically breaks ties using donorCount, dona
           publicName: "Beta Charity",
           category: "education",
           description: "Education",
-          ownerUserId: { userName: "beta", profileImageUrl: "b.jpg", isVerified: true },
+          ownerUserId: {
+            userName: "beta",
+            profileImageUrl: "b.jpg",
+            isVerified: true,
+          },
         },
         {
           _id: "charityA",
           publicName: "Alpha Charity",
           category: "environment",
           description: "Environment",
-          ownerUserId: { userName: "alpha", profileImageUrl: "a.jpg", isVerified: true },
+          ownerUserId: {
+            userName: "alpha",
+            profileImageUrl: "a.jpg",
+            isVerified: true,
+          },
         },
       ],
     }),
@@ -369,25 +425,31 @@ test("Donation and Order schemas define compound indexes for leaderboard perform
   const donationIndexes = Donation.schema.indexes().map(([spec]) => spec);
   assert.ok(
     donationIndexes.some((f) => f.status === 1 && f.createdAt === -1),
-    "Donation should index { status: 1, createdAt: -1 }"
+    "Donation should index { status: 1, createdAt: -1 }",
   );
   assert.ok(
-    donationIndexes.some((f) => f.status === 1 && f.donorUserId === 1 && f.coinAmount === 1),
-    "Donation should index { status: 1, donorUserId: 1, coinAmount: 1 }"
+    donationIndexes.some(
+      (f) => f.status === 1 && f.donorUserId === 1 && f.coinAmount === 1,
+    ),
+    "Donation should index { status: 1, donorUserId: 1, coinAmount: 1 }",
   );
   assert.ok(
-    donationIndexes.some((f) => f.status === 1 && f.charityId === 1 && f.coinAmount === 1),
-    "Donation should index { status: 1, charityId: 1, coinAmount: 1 }"
+    donationIndexes.some(
+      (f) => f.status === 1 && f.charityId === 1 && f.coinAmount === 1,
+    ),
+    "Donation should index { status: 1, charityId: 1, coinAmount: 1 }",
   );
 
   const orderIndexes = Order.schema.indexes().map(([spec]) => spec);
   assert.ok(
     orderIndexes.some((f) => f.status === 1 && f.createdAt === -1),
-    "Order should index { status: 1, createdAt: -1 }"
+    "Order should index { status: 1, createdAt: -1 }",
   );
   assert.ok(
-    orderIndexes.some((f) => f["items.productId"] === 1 && f.status === 1 && f.createdAt === -1),
-    "Order should index { 'items.productId': 1, status: 1, createdAt: -1 }"
+    orderIndexes.some(
+      (f) => f["items.productId"] === 1 && f.status === 1 && f.createdAt === -1,
+    ),
+    "Order should index { 'items.productId': 1, status: 1, createdAt: -1 }",
   );
 });
 
@@ -397,15 +459,21 @@ test("getTimeframeFilter calculates calendar week and month aligned to UTC midni
 
   const weekFilter = getTimeframeFilter("week", testRef);
   // Monday of that week: Sept 7, 2026 at 00:00:00.000 UTC
-  assert.deepEqual(weekFilter, { createdAt: { $gte: new Date("2026-09-07T00:00:00.000Z") } });
+  assert.deepEqual(weekFilter, {
+    createdAt: { $gte: new Date("2026-09-07T00:00:00.000Z") },
+  });
 
   const monthFilter = getTimeframeFilter("month", testRef);
   // 1st of that month: Sept 1, 2026 at 00:00:00.000 UTC
-  assert.deepEqual(monthFilter, { createdAt: { $gte: new Date("2026-09-01T00:00:00.000Z") } });
+  assert.deepEqual(monthFilter, {
+    createdAt: { $gte: new Date("2026-09-01T00:00:00.000Z") },
+  });
 
   const dayFilter = getTimeframeFilter("today", testRef);
   // Start of day: Sept 9, 2026 at 00:00:00.000 UTC
-  assert.deepEqual(dayFilter, { createdAt: { $gte: new Date("2026-09-09T00:00:00.000Z") } });
+  assert.deepEqual(dayFilter, {
+    createdAt: { $gte: new Date("2026-09-09T00:00:00.000Z") },
+  });
 
   const allTimeFilter = getTimeframeFilter("all_time", testRef);
   assert.deepEqual(allTimeFilter, {});
@@ -444,7 +512,12 @@ test("getDonorLeaderboard applies page offset and assigns correct offset ranks",
   Donation.aggregate = async (pipeline) => {
     capturedPipeline = pipeline;
     return [
-      { _id: "user6", totalCoins: 1200, donationCount: 4, lastDonatedAt: new Date() },
+      {
+        _id: "user6",
+        totalCoins: 1200,
+        donationCount: 4,
+        lastDonatedAt: new Date(),
+      },
     ];
   };
 

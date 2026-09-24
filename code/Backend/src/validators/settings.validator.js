@@ -3,7 +3,8 @@ const usernamePattern = /^[a-zA-Z0-9._]+$/;
 const passwordStrongPattern = /^(?=.*[A-Za-z])(?=.*\d).+$/;
 const urlPattern = /^https?:\/\/.+/i;
 
-const trimIfString = (value) => (typeof value === "string" ? value.trim() : value);
+const trimIfString = (value) =>
+  typeof value === "string" ? value.trim() : value;
 
 // ==========================================
 // PROFILE SETTINGS
@@ -23,31 +24,50 @@ export const validateProfileSettingsBody = (payload = {}) => {
   const errors = [];
 
   if (normalized.firstName !== undefined) {
-    if (typeof normalized.firstName !== "string" || normalized.firstName.length < 2 || normalized.firstName.length > 120) {
+    if (
+      typeof normalized.firstName !== "string" ||
+      normalized.firstName.length < 2 ||
+      normalized.firstName.length > 120
+    ) {
       errors.push("firstName must be a string between 2 and 120 characters.");
     }
   }
 
   if (normalized.lastName !== undefined) {
-    if (typeof normalized.lastName !== "string" || normalized.lastName.length < 2 || normalized.lastName.length > 120) {
+    if (
+      typeof normalized.lastName !== "string" ||
+      normalized.lastName.length < 2 ||
+      normalized.lastName.length > 120
+    ) {
       errors.push("lastName must be a string between 2 and 120 characters.");
     }
   }
 
   if (normalized.userName !== undefined) {
-    if (typeof normalized.userName !== "string" || normalized.userName.length < 2 || normalized.userName.length > 30) {
+    if (
+      typeof normalized.userName !== "string" ||
+      normalized.userName.length < 2 ||
+      normalized.userName.length > 30
+    ) {
       errors.push("userName must be a string between 2 and 30 characters.");
     } else if (!usernamePattern.test(normalized.userName)) {
-      errors.push("userName can only contain letters, numbers, periods, and underscores.");
+      errors.push(
+        "userName can only contain letters, numbers, periods, and underscores.",
+      );
     }
   }
 
-  if (normalized.profileBio !== undefined && normalized.profileBio.length > 500) {
+  if (
+    normalized.profileBio !== undefined &&
+    normalized.profileBio.length > 500
+  ) {
     errors.push("profileBio must not exceed 500 characters.");
   }
 
   if (normalized.userLink && !urlPattern.test(normalized.userLink)) {
-    errors.push("userLink must be a valid URL starting with http:// or https://.");
+    errors.push(
+      "userLink must be a valid URL starting with http:// or https://.",
+    );
   }
 
   return { value: normalized, errors };
@@ -62,7 +82,10 @@ export const validateSecuritySettingsBody = (payload = {}) => {
   // NOTE: twoFactorEnabled is intentionally not settable through this
   // endpoint — see validateVerifyEnable2FABody / validateDisable2FABody,
   // which back the OTP-gated enable/disable flow.
-  if (payload.loginActivityAlerts !== undefined && typeof payload.loginActivityAlerts !== "boolean") {
+  if (
+    payload.loginActivityAlerts !== undefined &&
+    typeof payload.loginActivityAlerts !== "boolean"
+  ) {
     errors.push("loginActivityAlerts must be a boolean.");
   }
 
@@ -98,17 +121,27 @@ export const validateDisable2FABody = (payload = {}) => {
 // ==========================================
 export const validateRequestEmailChangeBody = (payload = {}) => {
   const normalized = {
-    newEmail: typeof payload.newEmail === "string" ? payload.newEmail.toLowerCase().trim() : payload.newEmail,
+    newEmail:
+      typeof payload.newEmail === "string"
+        ? payload.newEmail.toLowerCase().trim()
+        : payload.newEmail,
     currentPassword: payload.currentPassword,
   };
 
   const errors = [];
 
-  if (!normalized.newEmail || typeof normalized.newEmail !== "string" || !emailPattern.test(normalized.newEmail)) {
+  if (
+    !normalized.newEmail ||
+    typeof normalized.newEmail !== "string" ||
+    !emailPattern.test(normalized.newEmail)
+  ) {
     errors.push("newEmail must be a valid email address.");
   }
 
-  if (!normalized.currentPassword || typeof normalized.currentPassword !== "string") {
+  if (
+    !normalized.currentPassword ||
+    typeof normalized.currentPassword !== "string"
+  ) {
     errors.push("currentPassword is required.");
   }
 
@@ -121,7 +154,10 @@ export const validateRequestEmailChangeBody = (payload = {}) => {
 export const validateVerifyEmailChangeBody = (payload = {}) => {
   const normalized = {
     otp: typeof payload.otp === "string" ? payload.otp.trim() : payload.otp,
-    otpCode: typeof payload.otpCode === "string" ? payload.otpCode.trim() : payload.otpCode,
+    otpCode:
+      typeof payload.otpCode === "string"
+        ? payload.otpCode.trim()
+        : payload.otpCode,
   };
 
   const errors = [];
@@ -145,7 +181,10 @@ export const validateChangePasswordBody = (payload = {}) => {
 
   const errors = [];
 
-  if (!normalized.currentPassword || typeof normalized.currentPassword !== "string") {
+  if (
+    !normalized.currentPassword ||
+    typeof normalized.currentPassword !== "string"
+  ) {
     errors.push("currentPassword is required and must be a string.");
   }
 
@@ -159,9 +198,15 @@ export const validateChangePasswordBody = (payload = {}) => {
     errors.push("newPassword must contain at least one letter and one number.");
   }
 
-  if (!normalized.confirmPassword || typeof normalized.confirmPassword !== "string") {
+  if (
+    !normalized.confirmPassword ||
+    typeof normalized.confirmPassword !== "string"
+  ) {
     errors.push("confirmPassword is required and must be a string.");
-  } else if (normalized.newPassword && normalized.confirmPassword !== normalized.newPassword) {
+  } else if (
+    normalized.newPassword &&
+    normalized.confirmPassword !== normalized.newPassword
+  ) {
     errors.push("confirmPassword must match newPassword.");
   }
 
@@ -184,23 +229,37 @@ const COMMENT_PERMISSIONS = ["everyone", "followers", "following", "none"];
 export const validatePrivacySettingsBody = (payload = {}) => {
   const errors = [];
 
-  if (payload.isPrivate !== undefined && typeof payload.isPrivate !== "boolean") {
+  if (
+    payload.isPrivate !== undefined &&
+    typeof payload.isPrivate !== "boolean"
+  ) {
     errors.push("isPrivate must be a boolean.");
   }
-  if (payload.showActivityStatus !== undefined && typeof payload.showActivityStatus !== "boolean") {
+  if (
+    payload.showActivityStatus !== undefined &&
+    typeof payload.showActivityStatus !== "boolean"
+  ) {
     errors.push("showActivityStatus must be a boolean.");
   }
-  if (payload.allowMessageRequests !== undefined && typeof payload.allowMessageRequests !== "boolean") {
+  if (
+    payload.allowMessageRequests !== undefined &&
+    typeof payload.allowMessageRequests !== "boolean"
+  ) {
     errors.push("allowMessageRequests must be a boolean.");
   }
-  if (payload.hideReadReceipts !== undefined && typeof payload.hideReadReceipts !== "boolean") {
+  if (
+    payload.hideReadReceipts !== undefined &&
+    typeof payload.hideReadReceipts !== "boolean"
+  ) {
     errors.push("hideReadReceipts must be a boolean.");
   }
   if (
     payload.commentPermission !== undefined &&
     !COMMENT_PERMISSIONS.includes(payload.commentPermission)
   ) {
-    errors.push(`commentPermission must be one of: ${COMMENT_PERMISSIONS.join(", ")}.`);
+    errors.push(
+      `commentPermission must be one of: ${COMMENT_PERMISSIONS.join(", ")}.`,
+    );
   }
 
   return { value: payload, errors };
@@ -237,10 +296,16 @@ const FONT_SIZES = ["small", "medium", "large"];
 export const validateAppearanceSettingsBody = (payload = {}) => {
   const errors = [];
 
-  if (payload.appTheme !== undefined && !APP_THEMES.includes(payload.appTheme)) {
+  if (
+    payload.appTheme !== undefined &&
+    !APP_THEMES.includes(payload.appTheme)
+  ) {
     errors.push(`appTheme must be one of: ${APP_THEMES.join(", ")}.`);
   }
-  if (payload.fontSize !== undefined && !FONT_SIZES.includes(payload.fontSize)) {
+  if (
+    payload.fontSize !== undefined &&
+    !FONT_SIZES.includes(payload.fontSize)
+  ) {
     errors.push(`fontSize must be one of: ${FONT_SIZES.join(", ")}.`);
   }
 

@@ -50,7 +50,6 @@ test("env module throws in production when required vars are missing", () => {
       JWT_REFRESH_SECRET: "present",
     });
   }, /Missing required environment variable: JWT_SECRET/);
-
   assert.throws(() => {
     runScript("import './src/config/env.js';", {
       NODE_ENV: "production",

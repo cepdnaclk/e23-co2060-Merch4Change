@@ -20,8 +20,7 @@ const postSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
-    images: [{ type: String }
-    ],
+    images: [{ type: String }],
     comments: [
       {
         author: {
@@ -57,4 +56,4 @@ postSchema.post("findOneAndDelete", async function (doc) {
 const Post = mongoose.model("Post", postSchema);
 export default Post;
 
-// updated for post creation 
+// updated for post creation

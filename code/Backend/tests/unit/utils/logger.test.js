@@ -12,7 +12,9 @@ import {
 } from "../../../src/utils/logger.js";
 
 const createTempFile = (fileName, content) => {
-  const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "merch4change-logger-"));
+  const tempDirectory = fs.mkdtempSync(
+    path.join(os.tmpdir(), "merch4change-logger-"),
+  );
   const filePath = path.join(tempDirectory, fileName);
 
   fs.writeFileSync(filePath, content, "utf8");
@@ -26,7 +28,10 @@ test.afterEach(() => {
       continue;
     }
 
-    fs.rmSync(path.join(os.tmpdir(), directoryEntry), { recursive: true, force: true });
+    fs.rmSync(path.join(os.tmpdir(), directoryEntry), {
+      recursive: true,
+      force: true,
+    });
   }
 });
 

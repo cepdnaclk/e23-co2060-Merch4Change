@@ -1,15 +1,23 @@
-const isNonEmptyString = (value) => typeof value === "string" && value.trim().length > 0;
+const isNonEmptyString = (value) =>
+  typeof value === "string" && value.trim().length > 0;
 
-const isValidNumber = (value) => typeof value === "number" && Number.isFinite(value);
+const isValidNumber = (value) =>
+  typeof value === "number" && Number.isFinite(value);
 
-const normalizeString = (value) => (typeof value === "string" ? value.trim() : value);
+const normalizeString = (value) =>
+  typeof value === "string" ? value.trim() : value;
 
 const normalizeProduct = (payload = {}) => ({
   name: normalizeString(payload.name),
   description: normalizeString(payload.description),
-  price: typeof payload.price === "string" ? Number(payload.price) : payload.price,
+  price:
+    typeof payload.price === "string" ? Number(payload.price) : payload.price,
   stock:
-    payload.stock === undefined ? 0 : typeof payload.stock === "string" ? Number(payload.stock) : payload.stock,
+    payload.stock === undefined
+      ? 0
+      : typeof payload.stock === "string"
+        ? Number(payload.stock)
+        : payload.stock,
   isLimitedEdition: Boolean(payload.isLimitedEdition),
 });
 
@@ -58,15 +66,24 @@ export const validateProductUpdateBody = (payload = {}) => {
     errors.push("name must be a non-empty string.");
   }
 
-  if (payload.description !== undefined && !isNonEmptyString(normalized.description)) {
+  if (
+    payload.description !== undefined &&
+    !isNonEmptyString(normalized.description)
+  ) {
     errors.push("description must be a non-empty string.");
   }
 
-  if (payload.price !== undefined && (!isValidNumber(normalized.price) || normalized.price < 0)) {
+  if (
+    payload.price !== undefined &&
+    (!isValidNumber(normalized.price) || normalized.price < 0)
+  ) {
     errors.push("price must be a non-negative number.");
   }
 
-  if (payload.stock !== undefined && (!isValidNumber(normalized.stock) || normalized.stock < 0)) {
+  if (
+    payload.stock !== undefined &&
+    (!isValidNumber(normalized.stock) || normalized.stock < 0)
+  ) {
     errors.push("stock must be a non-negative number.");
   }
 
@@ -80,7 +97,10 @@ export const validateCheckoutBody = (payload = {}) => {
   const normalizedItems = Array.isArray(payload.items)
     ? payload.items.map((item) => ({
         productId: normalizeString(item?.productId),
-        quantity: typeof item?.quantity === "string" ? Number(item.quantity) : item?.quantity,
+        quantity:
+          typeof item?.quantity === "string"
+            ? Number(item.quantity)
+            : item?.quantity,
       }))
     : [];
 
@@ -92,11 +112,15 @@ export const validateCheckoutBody = (payload = {}) => {
 
   normalizedItems.forEach((item, index) => {
     if (!isNonEmptyString(item.productId)) {
-      errors.push(`items[${index}].productId is required and must be a string.`);
+      errors.push(
+        `items[${index}].productId is required and must be a string.`,
+      );
     }
 
     if (!Number.isInteger(item.quantity) || item.quantity < 1) {
-      errors.push(`items[${index}].quantity must be an integer greater than 0.`);
+      errors.push(
+        `items[${index}].quantity must be an integer greater than 0.`,
+      );
     }
   });
 

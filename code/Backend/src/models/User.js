@@ -248,7 +248,7 @@ const userSchema = new mongoose.Schema(
   {
     timestamps: true,
     versionKey: false,
-  }
+  },
 );
 
 userSchema.pre("save", function assignDefaultRole(next) {

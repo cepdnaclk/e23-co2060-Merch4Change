@@ -17,9 +17,12 @@ export const createDonation = asyncHandler(async (req, res) => {
   const parsedAmount = Number.parseInt(rawAmount ?? amount, 10);
 
   if (!Number.isInteger(parsedAmount) || parsedAmount < 1) {
-    throw new AppError("Donation amount must be at least 1 coin.", 400, "VALIDATION_ERROR", [
-      { section: "body", message: "coinAmount must be at least 1" },
-    ]);
+    throw new AppError(
+      "Donation amount must be at least 1 coin.",
+      400,
+      "VALIDATION_ERROR",
+      [{ section: "body", message: "coinAmount must be at least 1" }],
+    );
   }
 
   let resolvedProjectId = null;
@@ -47,9 +50,17 @@ export const createDonation = asyncHandler(async (req, res) => {
   }
 
   if (!charityId) {
-    throw new AppError("charityId or charityProjectId is required.", 400, "VALIDATION_ERROR", [
-      { section: "body", message: "charityId or charityProjectId is required" },
-    ]);
+    throw new AppError(
+      "charityId or charityProjectId is required.",
+      400,
+      "VALIDATION_ERROR",
+      [
+        {
+          section: "body",
+          message: "charityId or charityProjectId is required",
+        },
+      ],
+    );
   }
 
   const charityIdStr = charityId ? String(charityId).trim() : "";
@@ -76,7 +87,10 @@ export const createDonation = asyncHandler(async (req, res) => {
   if (
     project &&
     String(project.charityId) !== String(charity._id) &&
-    !(charity.ownerUserId && String(project.charityId) === String(charity.ownerUserId))
+    !(
+      charity.ownerUserId &&
+      String(project.charityId) === String(charity.ownerUserId)
+    )
   ) {
     throw new AppError(
       "The selected project does not belong to this charity.",
@@ -85,7 +99,11 @@ export const createDonation = asyncHandler(async (req, res) => {
     );
   }
   if (charity.verificationStatus !== "verified") {
-    throw new AppError("Donations are only accepted for verified charities.", 403, "CHARITY_NOT_VERIFIED");
+    throw new AppError(
+      "Donations are only accepted for verified charities.",
+      403,
+      "CHARITY_NOT_VERIFIED",
+    );
   }
 
   // Atomically check and decrement coin balance
@@ -100,13 +118,16 @@ export const createDonation = asyncHandler(async (req, res) => {
     {
       new: true,
       runValidators: true,
-    }
+    },
   ).select("coinBalance");
 
   if (!updatedUser) {
-    throw new AppError("Insufficient coin balance.", 400, "INSUFFICIENT_COINS", [
-      { section: "body", message: "not enough coins" },
-    ]);
+    throw new AppError(
+      "Insufficient coin balance.",
+      400,
+      "INSUFFICIENT_COINS",
+      [{ section: "body", message: "not enough coins" }],
+    );
   }
 
   const donation = await Donation.create({
@@ -144,13 +165,19 @@ export const createDonation = asyncHandler(async (req, res) => {
  */
 export const getMyDonations = asyncHandler(async (req, res) => {
   const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
-  const limit = Math.min(100, Math.max(1, Number.parseInt(req.query.limit, 10) || 10));
+  const limit = Math.min(
+    100,
+    Math.max(1, Number.parseInt(req.query.limit, 10) || 10),
+  );
   const skip = (page - 1) * limit;
 
   const total = await Donation.countDocuments({ donorUserId: req.user._id });
   const records = await Donation.find({ donorUserId: req.user._id })
     .populate("charityId", "publicName logoUrl category")
-    .populate("charityProjectId", "title description goalAmount collectedAmount status")
+    .populate(
+      "charityProjectId",
+      "title description goalAmount collectedAmount status",
+    )
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit);
@@ -187,17 +214,29 @@ export const getMyDonations = asyncHandler(async (req, res) => {
 export const getDonationStats = asyncHandler(async (req, res) => {
   const donations = await Donation.find({ donorUserId: req.user._id })
     .populate("charityId", "publicName logoUrl")
-    .populate("charityProjectId", "title description goalAmount collectedAmount status");
+    .populate(
+      "charityProjectId",
+      "title description goalAmount collectedAmount status",
+    );
 
-  const totalDonated = donations.reduce((sum, d) => sum + (d.coinAmount || 0), 0);
+  const totalDonated = donations.reduce(
+    (sum, d) => sum + (d.coinAmount || 0),
+    0,
+  );
   const causesSupported = new Set(
-    donations.map((d) => d.charityId?._id?.toString() || d.charityId?.toString()).filter(Boolean)
+    donations
+      .map((d) => d.charityId?._id?.toString() || d.charityId?.toString())
+      .filter(Boolean),
   ).size;
   const donationCount = donations.length;
 
   const impactScore = Math.min(
     100,
-    Math.round((totalDonated / 1000) * 0.4 + causesSupported * 10 * 0.4 + donationCount * 2 * 0.2)
+    Math.round(
+      (totalDonated / 1000) * 0.4 +
+        causesSupported * 10 * 0.4 +
+        donationCount * 2 * 0.2,
+    ),
   );
 
   // Group user contributions by project
@@ -205,13 +244,18 @@ export const getDonationStats = asyncHandler(async (req, res) => {
   for (const d of donations) {
     const proj = d.charityProjectId;
     const charity = d.charityId;
-    const projectId = proj?._id?.toString() || (charity ? `charity-${charity._id}` : "general");
+    const projectId =
+      proj?._id?.toString() || (charity ? `charity-${charity._id}` : "general");
 
     if (!projectsMap.has(projectId)) {
       projectsMap.set(projectId, {
         _id: proj?._id || projectId,
-        title: proj?.title || (charity?.publicName ? `${charity.publicName} Fund` : "General Fund"),
-        description: proj?.description || `Supporting ${charity?.publicName || "Community Causes"}`,
+        title:
+          proj?.title ||
+          (charity?.publicName ? `${charity.publicName} Fund` : "General Fund"),
+        description:
+          proj?.description ||
+          `Supporting ${charity?.publicName || "Community Causes"}`,
         goalAmount: proj?.goalAmount || 100000,
         collectedAmount: proj?.collectedAmount || d.coinAmount,
         status: proj?.status || "active",
@@ -249,11 +293,23 @@ export const listCharities = asyncHandler(async (req, res) => {
   const [donationTotals, projectTotals] = await Promise.all([
     Donation.aggregate([
       { $match: { charityId: { $in: charityIds }, status: "completed" } },
-      { $group: { _id: "$charityId", totalRaised: { $sum: "$coinAmount" }, count: { $sum: 1 } } },
+      {
+        $group: {
+          _id: "$charityId",
+          totalRaised: { $sum: "$coinAmount" },
+          count: { $sum: 1 },
+        },
+      },
     ]),
     Project.aggregate([
       { $match: { charityId: { $in: charityIds }, status: "active" } },
-      { $group: { _id: "$charityId", totalGoal: { $sum: "$goalAmount" }, totalCollected: { $sum: "$collectedAmount" } } },
+      {
+        $group: {
+          _id: "$charityId",
+          totalGoal: { $sum: "$goalAmount" },
+          totalCollected: { $sum: "$collectedAmount" },
+        },
+      },
     ]),
   ]);
 
@@ -265,7 +321,10 @@ export const listCharities = asyncHandler(async (req, res) => {
     const pInfo = projectMap.get(c._id.toString());
     const totalRaised = dInfo?.totalRaised || pInfo?.totalCollected || 0;
     const totalGoal = pInfo?.totalGoal || 10000;
-    const percent = totalGoal > 0 ? Math.min(100, Math.round((totalRaised / totalGoal) * 100)) : 0;
+    const percent =
+      totalGoal > 0
+        ? Math.min(100, Math.round((totalRaised / totalGoal) * 100))
+        : 0;
 
     return {
       ...c,
@@ -276,7 +335,9 @@ export const listCharities = asyncHandler(async (req, res) => {
     };
   });
 
-  return successResponse(res, 200, "Charities fetched successfully.", { charities: enriched });
+  return successResponse(res, 200, "Charities fetched successfully.", {
+    charities: enriched,
+  });
 });
 
 /**
@@ -284,7 +345,9 @@ export const listCharities = asyncHandler(async (req, res) => {
  * List active donation projects under verified charities
  */
 export const listDonationProjects = asyncHandler(async (req, res) => {
-  const verifiedCharityIds = await Charity.find({ verificationStatus: "verified" }).distinct("_id");
+  const verifiedCharityIds = await Charity.find({
+    verificationStatus: "verified",
+  }).distinct("_id");
 
   const projects = await Project.find({
     charityId: { $in: verifiedCharityIds },

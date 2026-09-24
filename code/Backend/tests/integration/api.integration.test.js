@@ -59,7 +59,9 @@ const restoreMocks = () => {
 };
 
 before(async () => {
-  await mongoose.connect(env.mongodbUri || "mongodb://127.0.0.1:27017/merch4change");
+  await mongoose.connect(
+    env.mongodbUri || "mongodb://127.0.0.1:27017/merch4change",
+  );
   server = await new Promise((resolve) => {
     const started = app.listen(0, () => resolve(started));
   });
@@ -196,7 +198,9 @@ test("GET /api/v1/profile/me rejects requests without a bearer token", async () 
 test("GET /api/v1/profile/me returns current user for a valid token", async () => {
   restoreMocks();
 
-  const token = jwt.sign({ userId: "user-3" }, env.jwtSecret, { expiresIn: "1h" });
+  const token = jwt.sign({ userId: "user-3" }, env.jwtSecret, {
+    expiresIn: "1h",
+  });
   User.findById = () => ({
     select: async () => ({
       _id: "user-3",
@@ -246,7 +250,9 @@ test("GET /api/v1/marketplace/products returns products", async () => {
 test("POST /api/v1/marketplace/products creates a product for individual accounts", async () => {
   restoreMocks();
 
-  const token = jwt.sign({ userId: "user-product-2" }, env.jwtSecret, { expiresIn: "1h" });
+  const token = jwt.sign({ userId: "user-product-2" }, env.jwtSecret, {
+    expiresIn: "1h",
+  });
 
   User.findById = () => ({
     select: async () => ({
@@ -294,7 +300,9 @@ test("POST /api/v1/marketplace/products creates a product for individual account
 test("POST /api/v1/marketplace/checkout creates a paid order and order items", async () => {
   restoreMocks();
 
-  const token = jwt.sign({ userId: "user-checkout-1" }, env.jwtSecret, { expiresIn: "1h" });
+  const token = jwt.sign({ userId: "user-checkout-1" }, env.jwtSecret, {
+    expiresIn: "1h",
+  });
 
   User.findById = () => ({
     select: async () => ({

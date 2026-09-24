@@ -16,7 +16,7 @@ export const uploadStory = asyncHandler(async (req, res) => {
   // Upload image to cloudinary
   const uploadResult = await uploadBufferToCloudinary(
     req.file.buffer,
-    "merch4change/stories"
+    "merch4change/stories",
   );
 
   const newStory = await Story.create({

@@ -4,11 +4,11 @@ import nodemailer from "nodemailer";
 const user = process.env.EMAIL_USER;
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: user,
-        pass: process.env.EMAIL_PASS,
-    },
+  service: "gmail",
+  auth: {
+    user: user,
+    pass: process.env.EMAIL_PASS,
+  },
 });
 
 /**
@@ -17,16 +17,16 @@ const transporter = nodemailer.createTransport({
  * @param {{ device?: string, ip?: string, time?: Date }} details
  */
 const sendLoginAlertEmail = async (toEmail, { device, ip, time } = {}) => {
-    const formattedTime = (time || new Date()).toLocaleString("en-US", {
-        dateStyle: "medium",
-        timeStyle: "short",
-    });
+  const formattedTime = (time || new Date()).toLocaleString("en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
 
-    await transporter.sendMail({
-        from: `"Merch4Change" <${user}>`,
-        to: toEmail,
-        subject: "New login to your Merch4Change account",
-        html: `
+  await transporter.sendMail({
+    from: `"Merch4Change" <${user}>`,
+    to: toEmail,
+    subject: "New login to your Merch4Change account",
+    html: `
       <h2>New Login Detected</h2>
       <p>We noticed a new login to your account.</p>
       <ul>
@@ -37,7 +37,7 @@ const sendLoginAlertEmail = async (toEmail, { device, ip, time } = {}) => {
       <p>If this was you, you can safely ignore this email.</p>
       <p>If you don't recognize this activity, please change your password immediately and review your account security settings.</p>
     `,
-    });
+  });
 };
 
 export default sendLoginAlertEmail;

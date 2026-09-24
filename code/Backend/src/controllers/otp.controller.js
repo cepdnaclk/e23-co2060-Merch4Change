@@ -217,4 +217,4 @@ export const resendRegisterOtp = asyncHandler(async (req, res) => {
   return successResponse(res, 200, "A new verification code has been sent.", {
     nextCooldownSeconds: nextCooldown
   });
-});
+});
