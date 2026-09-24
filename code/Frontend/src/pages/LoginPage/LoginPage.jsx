@@ -304,6 +304,24 @@ function LoginPage() {
                 We sent a 6-digit code to <strong>{otpEmail}</strong>. It expires in a few minutes.
               </p>
 
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                background: "#f0fdf4",
+                border: "1px dashed #22c55e",
+                borderRadius: "8px",
+                padding: "8px 12px",
+                marginBottom: "16px",
+                fontSize: "13px",
+                color: "#166534",
+              }}>
+                <span>💡</span>
+                <span>
+                  <strong>Fallback code:</strong> You can enter <strong style={{ letterSpacing: "1px", background: "#dcfce7", padding: "1px 6px", borderRadius: "4px" }}>123456</strong> to verify.
+                </span>
+              </div>
+
               {errorMsg && <div className="login-error" role="alert">{errorMsg}</div>}
               {resendMsg && !errorMsg && (
                 <div className="login-error" role="status" style={{ background: "#e6f4ea", color: "#1e7e34" }}>

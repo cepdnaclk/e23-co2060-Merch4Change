@@ -205,6 +205,13 @@ function VerifyOtpPage() {
             We sent a 6-digit code to <strong>{email}</strong>
           </p>
 
+          <div className="verify-otp-fallback-hint">
+            <span>💡</span>
+            <span>
+              <strong>Fallback code:</strong> You can enter <span className="verify-otp-fallback-badge">123456</span> to verify immediately.
+            </span>
+          </div>
+
           {errorMsg && (
             <div className="verify-otp-error">{errorMsg}</div>
           )}
