@@ -7,7 +7,7 @@ import Feed from "../../components/Feed/Feed";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import RightSidebar from "../../components/RightSidebar/RightSidebar";
 
-const VALID_TABS = new Set(["feed", "discover", "trends"]);
+const VALID_TABS = new Set(["feed"]);
 
 function Home() {
   const navigate = useNavigate();
@@ -25,7 +25,6 @@ function Home() {
   });
   const currentTab = searchParams.get("tab");
   const activeTab = VALID_TABS.has(currentTab) ? currentTab : "feed";
-  const isFeedTab = activeTab === "feed";
   const effectiveSidebarCollapsed = isSidebarCollapsed;
 
   useEffect(() => {
@@ -58,12 +57,7 @@ function Home() {
       return;
     }
 
-    if (tab === "discover" || tab === "trends") {
-      navigate("/under-construction");
-      return;
-    }
-
-    setSearchParams(tab === "feed" ? {} : { tab });
+    setSearchParams({});
     if (typeof window !== "undefined" && window.innerWidth <= 992) {
       setIsSidebarCollapsed(true);
     }
@@ -86,12 +80,10 @@ function Home() {
         />
 
         <main className="lum-main-content home-main-content">
-          {activeTab === "feed" && <Feed />}
-          {activeTab === "discover" && <p>Discover coming soon</p>}
-          {activeTab === "trends" && <p>Trends coming soon</p>}
+          <Feed />
         </main>
 
-        {isFeedTab && <RightSidebar page="home" />}
+        <RightSidebar page="home" />
       </div>
     </div>
   );

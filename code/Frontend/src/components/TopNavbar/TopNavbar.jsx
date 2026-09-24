@@ -75,8 +75,8 @@ function TopNavbar({
       return;
     }
 
-    if (tab === "discover" || tab === "trends") {
-      navigate("/under-construction");
+    if (tab === "marketplace") {
+      navigate("/marketplace");
       if (typeof onTabChange === "function") onTabChange(tab);
       return;
     }
@@ -149,22 +149,10 @@ function TopNavbar({
           Feed
         </span>
         <span
-          className={activeTab === "discover" ? "lum-nav-link active" : "lum-nav-link"}
-          onClick={() => handleTabClick("discover")}
-        >
-          Discover
-        </span>
-        <span
           className={activeTab === "marketplace" ? "lum-nav-link active" : "lum-nav-link"}
           onClick={() => handleTabClick("marketplace")}
         >
           Marketplace
-        </span>
-        <span
-          className={activeTab === "trends" ? "lum-nav-link active" : "lum-nav-link"}
-          onClick={() => handleTabClick("trends")}
-        >
-          Trends
         </span>
 
         {/* Dedicated relative container for notification button + dropdown */}

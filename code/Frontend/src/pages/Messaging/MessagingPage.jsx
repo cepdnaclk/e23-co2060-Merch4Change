@@ -199,11 +199,6 @@ function MessagingPage() {
         return;
       }
 
-      if (tab === "discover" || tab === "trends") {
-        navigate("/home?tab=discover");
-        return;
-      }
-
       if (tab === "feed") {
         navigate("/home?tab=feed");
       }
@@ -211,8 +206,8 @@ function MessagingPage() {
     [navigate],
   );
 
-  const handleDiscoverClick = useCallback(() => {
-    navigate("/home?tab=discover");
+  const handleSearchClick = useCallback(() => {
+    navigate("/search");
   }, [navigate]);
 
   const handleSelectConversation = useCallback((id) => {
@@ -298,11 +293,11 @@ function MessagingPage() {
                 <div className="messaging-empty-kicker">Messages</div>
                 <h2>Find people to start messaging</h2>
                 <p>
-                  Once you have a conversation, it will appear here. Use Discover to find people and brands to
+                  Once you have a conversation, it will appear here. Use Search to find people and brands to
                   connect with.
                 </p>
-                <button type="button" className="messaging-empty-button" onClick={handleDiscoverClick}>
-                  Go to Discover
+                <button type="button" className="messaging-empty-button" onClick={handleSearchClick}>
+                  Go to Search
                 </button>
               </div>
             </div>
