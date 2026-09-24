@@ -273,7 +273,7 @@ export const getBids = async (req, res) => {
 
     const bids = await Bid.find({ auctionId: id })
       .sort({ createdAt: -1 })
-      .populate("userId", { userName: 1, firstName: 1, lastName: 1 });
+      .populate("userId", { userName: 1, firstName: 1, lastName: 1, profileImageUrl: 1, avatarUrl: 1 });
 
     return res.status(200).json({ success: true, bids });
   } catch (err) {

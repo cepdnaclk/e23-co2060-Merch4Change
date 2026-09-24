@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate, useInRouterContext } from "react-router-dom";
 import { Clock, Flame, Trophy, ShieldCheck } from "lucide-react";
 
 export function formatTimeLeft(endTime) {
@@ -16,7 +17,7 @@ export function formatTimeLeft(endTime) {
   return { label: `${hours}h ${minutes}m ${seconds}s`, ended: false };
 }
 
-export function AuctionCard({ auction, onOpenBidModal }) {
+function AuctionCardBase({ auction, onOpenBidModal, navigate }) {
   const [timeLeft, setTimeLeft] = useState(() => formatTimeLeft(auction.endTime));
   const product = auction.productId || {};
 
@@ -30,8 +31,17 @@ export function AuctionCard({ auction, onOpenBidModal }) {
   const isLive = auction.status === "active" && !timeLeft.ended;
   const isUpcoming = auction.status === "scheduled" && !timeLeft.ended;
 
+  const handleCardClick = () => {
+    if (auction?._id && navigate) {
+      navigate(`/marketplace/auction/${auction._id}`);
+    }
+  };
+
   return (
-    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col group">
+    <div
+      onClick={handleCardClick}
+      className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col group cursor-pointer"
+    >
       {/* Image container */}
       <div className="relative aspect-square w-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
         {product.images && product.images[0] ? (
@@ -117,7 +127,14 @@ export function AuctionCard({ auction, onOpenBidModal }) {
           <button
             type="button"
             disabled={!isLive}
-            onClick={() => onOpenBidModal(auction)}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onOpenBidModal) {
+                onOpenBidModal(auction);
+              } else if (auction?._id) {
+                navigate(`/marketplace/auction/${auction._id}`);
+              }
+            }}
             className={`w-full py-2.5 px-4 rounded-xl text-sm font-semibold transition-all shadow-sm flex items-center justify-center gap-2 ${
               isLive
                 ? "bg-purple-600 hover:bg-purple-700 text-white cursor-pointer active:scale-[0.98]"
@@ -137,6 +154,26 @@ export function AuctionCard({ auction, onOpenBidModal }) {
         </div>
       </div>
     </div>
+  );
+}
+
+function AuctionCardWithRouter(props) {
+  const navigate = useNavigate();
+  return <AuctionCardBase {...props} navigate={navigate} />;
+}
+
+export function AuctionCard(props) {
+  const inRouter = useInRouterContext();
+  if (inRouter) {
+    return <AuctionCardWithRouter {...props} />;
+  }
+  return (
+    <AuctionCardBase
+      {...props}
+      navigate={(path) => {
+        if (typeof window !== "undefined") window.location.href = path;
+      }}
+    />
   );
 }
 
