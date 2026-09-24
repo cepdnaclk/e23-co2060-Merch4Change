@@ -228,3 +228,29 @@
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 600px) {
+  .mk-root {
+    padding: 0 8px 30px;
+    gap: 16px;
+  }
+
+  .mk-filters {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .mk-filters::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mk-filter-pill {
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-size: 12px;
+    padding: 6px 14px;
+  }
+}
