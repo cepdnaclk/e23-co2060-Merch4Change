@@ -193,3 +193,24 @@
     padding: 30px 20px;
   }
 }
+
+@media (max-width: 480px) {
+  .about-hero {
+    padding: 60px 20px;
+  }
+  .about-hero h1 {
+    font-size: 28px;
+  }
+  .about-hero p {
+    font-size: 16px;
+  }
+  .content-block {
+    padding: 24px 16px;
+  }
+  .content-block h2 {
+    font-size: 24px;
+  }
+  .mission-card {
+    padding: 24px 20px;
+  }
+}
