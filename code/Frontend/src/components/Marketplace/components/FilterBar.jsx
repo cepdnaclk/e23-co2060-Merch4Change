@@ -9,7 +9,7 @@ export function FilterBar({ filter, onFilterChange, filters }) {
           className={`mk-filter-pill ${filter === f ? "mk-filter-active" : ""}`}
           onClick={() => onFilterChange(f)}
         >
-          {f === "Trending" ? "🔥 Trending" : f === "Limited" ? "⭐ Limited" : f}
+          {f === "Trending" ? "🔥 Trending" : f === "Limited" ? "⭐ Limited" : f === "Auctions" ? "⚡ Live Auctions" : f}
         </button>
       ))}
     </div>
