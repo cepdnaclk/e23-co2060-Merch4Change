@@ -31,6 +31,7 @@ import notificationRoutes from "./routes/notification.routes.js";
 import auctionRoutes from "./routes/auction.routes.js";
 import leaderboardRoutes from "./routes/leaderboard.routes.js";
 import settingsRoutes from "./routes/settings.routes.js";
+import paymentRoutes from "./routes/payment.routes.js";
 
 const app = express();
 
@@ -57,8 +58,15 @@ app.use(
   }),
 );
 
-// decode the raw bytes from the req.body to json type
-app.use(express.json({ limit: "1mb" }));
+// decode the raw bytes from the req.body to json type and preserve rawBody for webhook signatures
+app.use(
+  express.json({
+    limit: "1mb",
+    verify: (req, res, buf) => {
+      req.rawBody = buf;
+    },
+  }),
+);
 
 app.use(cookieParser());
 
@@ -100,6 +108,7 @@ app.use("/api/v1/notifications", notificationRoutes);
 app.use("/api/v1/auctions", auctionRoutes);
 app.use("/api/v1/leaderboards", leaderboardRoutes);
 app.use("/api/v1/settings", settingsRoutes);
+app.use("/api/v1/payments", paymentRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

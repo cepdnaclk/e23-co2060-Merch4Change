@@ -5,6 +5,9 @@ import Product from "../models/Product.js";
 import User from "../models/User.js";
 import Notification from "../models/Notification.js";
 import mongoose from "mongoose";
+import env from "../config/env.js";
+import { createCheckoutSession } from "../services/stripe.service.js";
+import { fulfillPaidOrder } from "../services/orderFulfillment.service.js";
 import AppError from "../utils/appError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { successResponse } from "../utils/apiResponse.js";
@@ -190,74 +193,51 @@ export const checkout = asyncHandler(async (req, res) => {
   }
 
   const coinsEarned = Math.floor(totalAmount / 10);
+  const isStripeConfigured = Boolean(env.stripeSecretKey);
 
   const order = await Order.create({
     userId: req.user._id,
     items: orderItems,
     currency: "USD",
     totalAmount,
-    status: "paid",
+    status: isStripeConfigured ? "pending" : "paid",
+    paymentStatus: isStripeConfigured ? "pending" : "paid",
+    paymentGateway: isStripeConfigured ? "stripe" : "none",
     coinsEarned,
   });
 
-  // Update buyer coinBalance
-  await User.findByIdAndUpdate(req.user._id, {
-    $inc: {
-      coinBalance: coinsEarned,
-    },
-  });
+  let checkoutUrl = null;
+  let sessionId = null;
 
-  if (coinsEarned > 0) {
-    await CoinTransaction.create({
-      userId: req.user._id,
-      type: "earn",
-      amount: coinsEarned,
-      refType: "order",
-      refId: order._id,
-    });
-  }
-
-  // Create Notifications
-  if (mongoose.Types.ObjectId.isValid(req.user._id)) {
-    await Notification.create({
-      userId: req.user._id,
-      type: "order",
-      message: `Your order for $${totalAmount.toFixed(2)} has been successfully placed! Order ID: #${order._id.toString().substring(18)}`,
-      isRead: false,
-    });
-  }
-
-  const buyerName =
-    req.user.firstName && req.user.lastName
-      ? `${req.user.firstName} ${req.user.lastName}`.trim()
-      : req.user.firstName || req.user.userName || "A customer";
-
-  for (const requestedItem of requestedItems) {
-    const product = await Product.findById(requestedItem.productId);
-    if (product) {
-      let sellerUserId = product.ownerUserId;
-      if (!sellerUserId && product.brandId) {
-        const brand = await Brand.findById(product.brandId);
-        sellerUserId = brand?.ownerUserId;
+  if (isStripeConfigured) {
+    try {
+      const session = await createCheckoutSession({
+        orderId: order._id,
+        items: orderItems,
+        customerEmail: req.user.email,
+      });
+      order.stripeSessionId = session.id;
+      await order.save();
+      checkoutUrl = session.url;
+      sessionId = session.id;
+    } catch (sessionError) {
+      // Roll back order and restore stock if session creation fails
+      for (const item of decrementedProducts) {
+        await Product.findByIdAndUpdate(item.productId, { $inc: { stock: item.quantity } });
       }
-      if (sellerUserId && mongoose.Types.ObjectId.isValid(sellerUserId)) {
-        await User.findByIdAndUpdate(sellerUserId, {
-          $inc: { salesCount: Number(requestedItem.quantity) || 1 },
-        });
-
-        await Notification.create({
-          userId: sellerUserId,
-          type: "order",
-          message: `You have received a new order for "${product.name}" (Qty: ${requestedItem.quantity}) from ${buyerName}!`,
-          isRead: false,
-        });
-      }
+      await Order.findByIdAndDelete(order._id);
+      throw sessionError;
     }
+  } else {
+    // Development fallback without Stripe key: immediately fulfill order
+    await fulfillPaidOrder(order._id, { paymentGateway: "none" });
   }
 
-  return successResponse(res, 201, "Checkout completed successfully.", {
+  return successResponse(res, 201, "Checkout initialized successfully.", {
     order,
     items: order.items,
+    checkoutUrl,
+    sessionId,
   });
 });
 

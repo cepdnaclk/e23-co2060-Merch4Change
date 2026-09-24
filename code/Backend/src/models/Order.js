@@ -71,6 +71,29 @@ const orderSchema = new mongoose.Schema(
       min: 0,
       default: 0,
     },
+    paymentGateway: {
+      type: String,
+      trim: true,
+      enum: ["stripe", "none"],
+      default: "stripe",
+    },
+    paymentStatus: {
+      type: String,
+      trim: true,
+      enum: ["pending", "paid", "failed"],
+      default: "pending",
+    },
+    stripeSessionId: {
+      type: String,
+      trim: true,
+      default: null,
+      index: true,
+    },
+    stripePaymentIntentId: {
+      type: String,
+      trim: true,
+      default: null,
+    },
   },
   {
     timestamps: true,
