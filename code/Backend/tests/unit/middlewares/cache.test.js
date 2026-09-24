@@ -72,14 +72,22 @@ test("cacheResponse ignores non-GET requests and non-2xx responses", async () =>
     const address = server.address();
 
     // POST requests are not cached
-    await fetch(`http://127.0.0.1:${address.port}/post-endpoint`, { method: "POST" });
-    await fetch(`http://127.0.0.1:${address.port}/post-endpoint`, { method: "POST" });
+    await fetch(`http://127.0.0.1:${address.port}/post-endpoint`, {
+      method: "POST",
+    });
+    await fetch(`http://127.0.0.1:${address.port}/post-endpoint`, {
+      method: "POST",
+    });
     assert.equal(postInvocations, 2);
 
     // Error responses are not cached
-    const errRes1 = await fetch(`http://127.0.0.1:${address.port}/error-endpoint`);
+    const errRes1 = await fetch(
+      `http://127.0.0.1:${address.port}/error-endpoint`,
+    );
     assert.equal(errRes1.headers.get("x-cache"), "MISS");
-    const errRes2 = await fetch(`http://127.0.0.1:${address.port}/error-endpoint`);
+    const errRes2 = await fetch(
+      `http://127.0.0.1:${address.port}/error-endpoint`,
+    );
     assert.equal(errRes2.headers.get("x-cache"), "MISS");
     assert.equal(errorInvocations, 2);
   } finally {

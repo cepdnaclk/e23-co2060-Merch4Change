@@ -1,7 +1,16 @@
 import express from "express";
 import protect from "../middlewares/auth.js";
 import { upload } from "../middlewares/upload.js";
-import { createPost, deletePost, getFeedPosts, getRecommendedPosts, getMyPosts, getUserPosts, likePost, commentOnPost } from "../controllers/post.controller.js";
+import {
+  createPost,
+  deletePost,
+  getFeedPosts,
+  getRecommendedPosts,
+  getMyPosts,
+  getUserPosts,
+  likePost,
+  commentOnPost,
+} from "../controllers/post.controller.js";
 
 const router = express.Router();
 

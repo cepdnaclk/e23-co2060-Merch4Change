@@ -21,7 +21,7 @@ const storySchema = new mongoose.Schema(
   {
     timestamps: false,
     versionKey: false,
-  }
+  },
 );
 
 const Story = mongoose.model("Story", storySchema);

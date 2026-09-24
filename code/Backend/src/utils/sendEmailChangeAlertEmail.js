@@ -5,11 +5,11 @@ import nodemailer from "nodemailer";
 const user = process.env.EMAIL_USER;
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: user,
-        pass: process.env.EMAIL_PASS,
-    },
+  service: "gmail",
+  auth: {
+    user: user,
+    pass: process.env.EMAIL_PASS,
+  },
 });
 
 /**
@@ -17,17 +17,17 @@ const transporter = nodemailer.createTransport({
  * @param {string} newEmail - the email address the change was requested to
  */
 const sendEmailChangeAlertEmail = async (toEmail, newEmail) => {
-    await transporter.sendMail({
-        from: `"Merch4Change" <${user}>`,
-        to: toEmail,
-        subject: "Email change requested on your Merch4Change account",
-        html: `
+  await transporter.sendMail({
+    from: `"Merch4Change" <${user}>`,
+    to: toEmail,
+    subject: "Email change requested on your Merch4Change account",
+    html: `
       <h2>Email Change Requested</h2>
       <p>Someone requested to change the email on your account to <strong>${newEmail}</strong>.</p>
       <p>The change will only take effect once a verification code sent to that new address is confirmed.</p>
       <p>If this wasn't you, please change your password immediately and review your account security settings.</p>
     `,
-    });
+  });
 };
 
 export default sendEmailChangeAlertEmail;

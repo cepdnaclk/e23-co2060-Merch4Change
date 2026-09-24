@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 function stockLabel(stock) {
   if (stock === 0) return { text: "Sold out", cls: "mk-stock-out" };
@@ -8,12 +9,23 @@ function stockLabel(stock) {
 }
 
 export function ProductCard({ product, index, onBuy, isBuying, coinsFor }) {
+  const navigate = useNavigate();
   const stock = stockLabel(product.stock);
   const coins = coinsFor(product.price);
   const soldOut = product.stock === 0;
 
+  const handleCardClick = () => {
+    if (product?._id) {
+      navigate(`/marketplace/product/${product._id}`);
+    }
+  };
+
   return (
-    <div className="mk-card" style={{ animationDelay: `${index * 60}ms` }}>
+    <div
+      className="mk-card cursor-pointer"
+      style={{ animationDelay: `${index * 60}ms` }}
+      onClick={handleCardClick}
+    >
       <div className="mk-card-img">
         {product.imageUrl ? (
           <img src={product.imageUrl} alt={product.name} />
@@ -32,7 +44,9 @@ export function ProductCard({ product, index, onBuy, isBuying, coinsFor }) {
 
       <div className="mk-card-body">
         <div className="mk-card-top">
-          <h4 className="mk-product-name">{product.name}</h4>
+          <h4 className="mk-product-name hover:text-purple-600 transition-colors">
+            {product.name}
+          </h4>
           {product.description && (
             <p className="mk-product-desc">{product.description}</p>
           )}
@@ -44,8 +58,12 @@ export function ProductCard({ product, index, onBuy, isBuying, coinsFor }) {
             <span className={`mk-stock ${stock.cls}`}>{stock.text}</span>
           </div>
           <button
+            type="button"
             className={`mk-buy-btn ${soldOut ? "mk-buy-soldout" : ""} ${isBuying ? "mk-buy-loading" : ""}`}
-            onClick={() => onBuy(product)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onBuy(product);
+            }}
             disabled={soldOut || isBuying}
           >
             {isBuying ? (

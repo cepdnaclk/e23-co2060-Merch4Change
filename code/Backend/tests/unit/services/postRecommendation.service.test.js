@@ -14,7 +14,11 @@ import {
 } from "../../../src/services/postRecommendation.service.js";
 
 test("parseRecommendationPagination clamps page and limit", () => {
-  assert.deepEqual(parseRecommendationPagination({}), { page: 1, limit: 20, skip: 0 });
+  assert.deepEqual(parseRecommendationPagination({}), {
+    page: 1,
+    limit: 20,
+    skip: 0,
+  });
   assert.deepEqual(parseRecommendationPagination({ page: "2", limit: "10" }), {
     page: 2,
     limit: 10,
@@ -73,8 +77,14 @@ test("buildRecommendationPipeline scores a capped recent candidate window then p
 
   assert.deepEqual(pipeline[0], { $sort: { createdAt: -1 } });
   assert.deepEqual(pipeline[1], { $limit: RECOMMENDATION_CANDIDATE_LIMIT });
-  assert.equal(pipeline.some((stage) => stage.$skip === 0), true);
-  assert.equal(pipeline.some((stage) => stage.$limit === 21), true);
+  assert.equal(
+    pipeline.some((stage) => stage.$skip === 0),
+    true,
+  );
+  assert.equal(
+    pipeline.some((stage) => stage.$limit === 21),
+    true,
+  );
   assert.equal(
     pipeline.some((stage) => stage.$sort?.recommendationScore === -1),
     true,
@@ -102,7 +112,12 @@ test("getRecommendedPostsForUser ranks via aggregation and supports empty intera
         likes: [],
         comments: [],
         createdAt: new Date("2026-09-23T00:00:00.000Z"),
-        userId: { _id: authorId, firstName: "Ada", lastName: "Ng", userName: "ada" },
+        userId: {
+          _id: authorId,
+          firstName: "Ada",
+          lastName: "Ng",
+          userName: "ada",
+        },
         likesCount: 0,
         commentsCount: 0,
         recommendationScore: 18.5,
@@ -116,7 +131,10 @@ test("getRecommendedPostsForUser ranks via aggregation and supports empty intera
   };
 
   try {
-    const result = await getRecommendedPostsForUser(userId, { page: 1, limit: 1 });
+    const result = await getRecommendedPostsForUser(userId, {
+      page: 1,
+      limit: 1,
+    });
     assert.equal(result.posts.length, 1);
     assert.equal(result.pagination.hasMore, true);
     assert.equal(result.posts[0].content, "Hello");

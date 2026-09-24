@@ -30,7 +30,10 @@ export function parseRecommendationPagination(query = {}) {
   const page = Math.max(1, Number.parseInt(query.page, 10) || 1);
   const limit = Math.min(
     RECOMMENDATION_MAX_LIMIT,
-    Math.max(1, Number.parseInt(query.limit, 10) || RECOMMENDATION_DEFAULT_LIMIT),
+    Math.max(
+      1,
+      Number.parseInt(query.limit, 10) || RECOMMENDATION_DEFAULT_LIMIT,
+    ),
   );
 
   return {
@@ -61,7 +64,8 @@ export function calculateRecommendationScores(
 
   const engagementScore = Math.min(
     weights.engagementCap,
-    likesCount * weights.engagementLike + commentsCount * weights.engagementComment,
+    likesCount * weights.engagementLike +
+      commentsCount * weights.engagementComment,
   );
 
   const safeAgeHours = Math.max(0, ageHours);
@@ -177,16 +181,25 @@ export function buildRecommendationPipeline({
           $multiply: [
             weights.recencyMax,
             {
-              $pow: [0.5, { $divide: ["$ageHours", weights.recencyHalfLifeHours] }],
+              $pow: [
+                0.5,
+                { $divide: ["$ageHours", weights.recencyHalfLifeHours] },
+              ],
             },
           ],
         },
         interactionScore: {
           $add: [
             { $cond: ["$isInteractedAuthor", weights.interactionAuthor, 0] },
-            { $cond: ["$userLikedThisPost", weights.interactionThisPostLike, 0] },
             {
-              $cond: ["$userCommentedThisPost", weights.interactionThisPostComment, 0],
+              $cond: ["$userLikedThisPost", weights.interactionThisPostLike, 0],
+            },
+            {
+              $cond: [
+                "$userCommentedThisPost",
+                weights.interactionThisPostComment,
+                0,
+              ],
             },
           ],
         },
@@ -264,7 +277,9 @@ export function buildRecommendationPipeline({
                           $filter: {
                             input: "$commentAuthors",
                             as: "commentAuthor",
-                            cond: { $eq: ["$$commentAuthor._id", "$$comment.author"] },
+                            cond: {
+                              $eq: ["$$commentAuthor._id", "$$comment.author"],
+                            },
                           },
                         },
                         0,
@@ -320,7 +335,9 @@ export async function getRecommendedPostsForUser(userId, query = {}) {
 
   const rows = await Post.aggregate(pipeline);
   const hasMore = rows.length > limit;
-  const posts = (hasMore ? rows.slice(0, limit) : rows).map(shapeRecommendedPost);
+  const posts = (hasMore ? rows.slice(0, limit) : rows).map(
+    shapeRecommendedPost,
+  );
 
   return {
     posts,

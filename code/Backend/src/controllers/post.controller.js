@@ -42,7 +42,7 @@ export const getFeedPosts = async (req, res) => {
     const skip = (page - 1) * limit;
 
     let query = Post.find()
-      .populate("userId", "firstName lastName profileImageUrl userName")
+      .populate("userId", "firstName lastName profileImage profileImageUrl userName")
       .populate("comments.author", "firstName lastName userName profileImageUrl")
       .sort({ createdAt: -1 });
 
@@ -63,7 +63,10 @@ export const getFeedPosts = async (req, res) => {
 
 export const getRecommendedPosts = async (req, res) => {
   try {
-    const { posts, pagination } = await getRecommendedPostsForUser(req.user._id, req.query);
+    const { posts, pagination } = await getRecommendedPostsForUser(
+      req.user._id,
+      req.query,
+    );
     res.status(200).json({ success: true, posts, pagination });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -73,8 +76,14 @@ export const getRecommendedPosts = async (req, res) => {
 export const getMyPosts = async (req, res) => {
   try {
     const posts = await Post.find({ userId: req.user._id })
-      .populate("userId", "firstName lastName userName profileImage profileImageUrl")
-      .populate("comments.author", "firstName lastName userName profileImageUrl")
+      .populate(
+        "userId",
+        "firstName lastName userName profileImage profileImageUrl",
+      )
+      .populate(
+        "comments.author",
+        "firstName lastName userName profileImageUrl",
+      )
       .sort({ createdAt: -1 });
 
     const normalizedPosts = posts.map((post) => ({
@@ -114,7 +123,9 @@ export const deletePost = async (req, res) => {
     const post = await Post.findById(req.params.postId);
 
     if (!post) {
-      return res.status(404).json({ success: false, message: "Post not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Post not found" });
     }
 
     const isOwner = String(post.userId) === String(req.user._id);
@@ -125,7 +136,9 @@ export const deletePost = async (req, res) => {
 
     await Post.findByIdAndDelete(req.params.postId);
 
-    return res.status(200).json({ success: true, message: "Post deleted successfully" });
+    return res
+      .status(200)
+      .json({ success: true, message: "Post deleted successfully" });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
@@ -136,11 +149,19 @@ export const getUserPosts = async (req, res) => {
     const { username } = req.params;
     const user = await User.findOne({ userName: username });
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
     const posts = await Post.find({ userId: user._id })
-      .populate("userId", "firstName lastName userName profileImage profileImageUrl")
-      .populate("comments.author", "firstName lastName userName profileImageUrl")
+      .populate(
+        "userId",
+        "firstName lastName userName profileImage profileImageUrl",
+      )
+      .populate(
+        "comments.author",
+        "firstName lastName userName profileImageUrl",
+      )
       .sort({ createdAt: -1 });
 
     const normalizedPosts = posts.map((post) => ({
@@ -178,7 +199,9 @@ export const likePost = async (req, res) => {
 
     const post = await Post.findById(req.params.postId);
     if (!post) {
-      return res.status(404).json({ success: false, message: "Post not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Post not found" });
     }
 
     const userId = req.user._id;
@@ -215,7 +238,9 @@ export const commentOnPost = async (req, res) => {
 
     const post = await Post.findById(req.params.postId);
     if (!post) {
-      return res.status(404).json({ success: false, message: "Post not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Post not found" });
     }
 
     const newComment = {
@@ -227,7 +252,10 @@ export const commentOnPost = async (req, res) => {
     await post.save();
 
     // Populate the author so frontend has name/image immediately
-    await post.populate("comments.author", "firstName lastName userName profileImageUrl");
+    await post.populate(
+      "comments.author",
+      "firstName lastName userName profileImageUrl",
+    );
 
     res.status(201).json({ success: true, comments: post.comments });
   } catch (error) {

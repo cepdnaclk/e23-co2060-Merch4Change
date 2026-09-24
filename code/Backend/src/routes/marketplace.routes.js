@@ -23,7 +23,12 @@ const router = Router();
 
 router.get("/products", listProducts);
 router.get("/products/:productId", getProduct);
-router.post("/products", protect, validateRequest({ body: validateProductCreateBody }), createProduct);
+router.post(
+  "/products",
+  protect,
+  validateRequest({ body: validateProductCreateBody }),
+  createProduct,
+);
 router.patch(
   "/products/:productId",
   protect,
@@ -31,7 +36,12 @@ router.patch(
   updateProduct,
 );
 router.delete("/products/:productId", protect, deleteProduct);
-router.post("/checkout", protect, validateRequest({ body: validateCheckoutBody }), checkout);
+router.post(
+  "/checkout",
+  protect,
+  validateRequest({ body: validateCheckoutBody }),
+  checkout,
+);
 router.get("/orders", protect, listMyOrders);
 router.get("/orders/:orderId", protect, getMyOrder);
 router.patch("/orders/:orderId/status", protect, updateOrderStatus);

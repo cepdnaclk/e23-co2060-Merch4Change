@@ -11,7 +11,6 @@ export const createBrand = asyncHandler(async (req, res) => {
   if (!brandName || brandName.length < 2 || brandName.length > 150) {
     throw new AppError("Brand name must be between 2 and 150 characters.", 400, "VALIDATION_ERROR");
   }
-
   if (description.length > 5000) {
     throw new AppError("Description cannot exceed 5000 characters.", 400, "VALIDATION_ERROR");
   }

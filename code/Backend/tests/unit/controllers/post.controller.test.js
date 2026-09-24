@@ -4,7 +4,12 @@ import test from "node:test";
 import { createMockResponse } from "../helpers/http.js";
 import Follow from "../../../src/models/Follow.js";
 import Post from "../../../src/models/Post.js";
-import { getFeedPosts, getRecommendedPosts, likePost, commentOnPost } from "../../../src/controllers/post.controller.js";
+import {
+  getFeedPosts,
+  getRecommendedPosts,
+  likePost,
+  commentOnPost,
+} from "../../../src/controllers/post.controller.js";
 
 const createFindChain = (posts) => ({
   populate() {
@@ -70,7 +75,11 @@ test("getRecommendedPosts returns scored posts for the authenticated user", asyn
     assert.equal(res.payload.success, true);
     assert.equal(res.payload.posts[0].content, "Ranked");
     assert.equal(res.payload.posts[0].recommendationScore, 42.22);
-    assert.deepEqual(res.payload.pagination, { page: 1, limit: 20, hasMore: false });
+    assert.deepEqual(res.payload.pagination, {
+      page: 1,
+      limit: 20,
+      hasMore: false,
+    });
   } finally {
     Follow.distinct = originalFollowDistinct;
     Post.distinct = originalPostDistinct;

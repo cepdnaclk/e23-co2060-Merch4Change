@@ -78,7 +78,7 @@ test("register rejects duplicate email", async () => {
         assert.equal(err.name, "AppError");
         assert.equal(err.code, "EMAIL_ALREADY_IN_USE");
         return true;
-      }
+      },
     );
   } finally {
     User.findOne = originalFindOne;
@@ -106,7 +106,7 @@ test("login returns INVALID_CREDENTIALS when user does not exist", async () => {
         assert.equal(err.name, "AppError");
         assert.equal(err.code, "INVALID_CREDENTIALS");
         return true;
-      }
+      },
     );
   } finally {
     User.findOne = originalFindOne;
@@ -142,7 +142,7 @@ test("login returns INVALID_CREDENTIALS when password mismatch", async () => {
         assert.equal(err.name, "AppError");
         assert.equal(err.code, "INVALID_CREDENTIALS");
         return true;
-      }
+      },
     );
   } finally {
     User.findOne = originalFindOne;
@@ -179,7 +179,7 @@ test("login rejects unsupported account type", async () => {
         assert.equal(err.name, "AppError");
         assert.equal(err.code, "INVALID_ACCOUNT_TYPE");
         return true;
-      }
+      },
     );
   } finally {
     User.findOne = originalFindOne;

@@ -16,7 +16,9 @@ test("app serves the health check endpoint", async () => {
 
   try {
     const address = server.address();
-    const response = await fetch(`http://127.0.0.1:${address.port}/api/v1/health`);
+    const response = await fetch(
+      `http://127.0.0.1:${address.port}/api/v1/health`,
+    );
     const payload = await response.json();
 
     assert.equal(response.status, 200);
@@ -35,12 +37,17 @@ test("app returns a not found response for unknown routes", async () => {
 
   try {
     const address = server.address();
-    const response = await fetch(`http://127.0.0.1:${address.port}/api/v1/does-not-exist`);
+    const response = await fetch(
+      `http://127.0.0.1:${address.port}/api/v1/does-not-exist`,
+    );
     const payload = await response.json();
 
     assert.equal(response.status, 404);
     assert.equal(payload.success, false);
-    assert.equal(payload.message, "Route not found: GET /api/v1/does-not-exist");
+    assert.equal(
+      payload.message,
+      "Route not found: GET /api/v1/does-not-exist",
+    );
     assert.equal(payload.error.code, "ROUTE_NOT_FOUND");
   } finally {
     await new Promise((resolve) => server.close(resolve));

@@ -33,36 +33,44 @@ const isValidId = (id) => mongoose.Types.ObjectId.isValid(id);
    ============================================================ */
 
 // Upload product image  (POST /api/v1/images/product/:id)
-router.post("/product/:id", protect, upload.single("image"), async (req, res) => {
-  try {
-    if (!isValidId(req.params.id)) {
-      return res.status(400).json({ message: "Invalid product id" });
-    }
-    if (!req.file) {
-      return res.status(400).json({ message: "No image file uploaded" });
-    }
-
-    const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ message: "Product not found" });
-
-    if (String(product.ownerUserId) !== String(req.user._id)) {
-      const brand = product.brandId ? await Brand.findById(product.brandId) : null;
-      if (!brand || String(brand.ownerUserId) !== String(req.user._id)) {
-        return res.status(403).json({ message: "Forbidden" });
+router.post(
+  "/product/:id",
+  protect,
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      if (!isValidId(req.params.id)) {
+        return res.status(400).json({ message: "Invalid product id" });
       }
+      if (!req.file) {
+        return res.status(400).json({ message: "No image file uploaded" });
+      }
+
+      const product = await Product.findById(req.params.id);
+      if (!product)
+        return res.status(404).json({ message: "Product not found" });
+
+      if (String(product.ownerUserId) !== String(req.user._id)) {
+        const brand = product.brandId
+          ? await Brand.findById(product.brandId)
+          : null;
+        if (!brand || String(brand.ownerUserId) !== String(req.user._id)) {
+          return res.status(403).json({ message: "Forbidden" });
+        }
+      }
+
+      product.image = {
+        data: req.file.buffer,
+        contentType: req.file.mimetype,
+      };
+      await product.save();
+
+      res.status(200).json({ message: "Product image uploaded successfully" });
+    } catch (err) {
+      res.status(500).json({ message: err.message });
     }
-
-    product.image = {
-      data: req.file.buffer,
-      contentType: req.file.mimetype,
-    };
-    await product.save();
-
-    res.status(200).json({ message: "Product image uploaded successfully" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
+  },
+);
 
 // View product image  (GET /api/v1/images/product/:id)
 router.get("/product/:id", async (req, res) => {
@@ -108,7 +116,10 @@ router.post("/user/:id", protect, upload.single("image"), async (req, res) => {
 
     // Upload to Cloudinary and save the secure URL
     try {
-      const result = await uploadBufferToCloudinary(req.file.buffer, "merch4change/profiles");
+      const result = await uploadBufferToCloudinary(
+        req.file.buffer,
+        "merch4change/profiles",
+      );
       if (result && result.secure_url) {
         user.profileImageUrl = result.secure_url;
       }
@@ -124,7 +135,12 @@ router.post("/user/:id", protect, upload.single("image"), async (req, res) => {
     };
     await user.save();
 
-    res.status(200).json({ message: "Profile image uploaded successfully", profileImageUrl: user.profileImageUrl });
+    res
+      .status(200)
+      .json({
+        message: "Profile image uploaded successfully",
+        profileImageUrl: user.profileImageUrl,
+      });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -152,36 +168,44 @@ router.get("/user/:id", async (req, res) => {
 });
 
 // Upload user cover image  (POST /api/v1/images/user/:id/cover)
-router.post("/user/:id/cover", protect, upload.single("image"), async (req, res) => {
-  try {
-    if (!isValidId(req.params.id)) {
-      return res.status(400).json({ message: "Invalid user id" });
+router.post(
+  "/user/:id/cover",
+  protect,
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      if (!isValidId(req.params.id)) {
+        return res.status(400).json({ message: "Invalid user id" });
+      }
+      if (!req.file) {
+        return res.status(400).json({ message: "No image file uploaded" });
+      }
+
+      if (req.user._id.toString() !== req.params.id.toString()) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const user = await User.findById(req.params.id);
+      if (!user) return res.status(404).json({ message: "User not found" });
+
+      const result = await uploadBufferToCloudinary(
+        req.file.buffer,
+        "merch4change/covers",
+      );
+      if (result?.secure_url) {
+        user.coverImageUrl = result.secure_url;
+      }
+
+      await user.save();
+
+      res.status(200).json({
+        message: "Cover image uploaded successfully",
+        coverImageUrl: user.coverImageUrl,
+      });
+    } catch (err) {
+      res.status(500).json({ message: err.message });
     }
-    if (!req.file) {
-      return res.status(400).json({ message: "No image file uploaded" });
-    }
-
-    if (req.user._id.toString() !== req.params.id.toString()) {
-      return res.status(403).json({ message: "Forbidden" });
-    }
-
-    const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    const result = await uploadBufferToCloudinary(req.file.buffer, "merch4change/covers");
-    if (result?.secure_url) {
-      user.coverImageUrl = result.secure_url;
-    }
-
-    await user.save();
-
-    res.status(200).json({
-      message: "Cover image uploaded successfully",
-      coverImageUrl: user.coverImageUrl,
-    });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
+  },
+);
 
 export default router;

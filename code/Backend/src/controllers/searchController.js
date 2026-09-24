@@ -16,7 +16,12 @@ export const searchAll = asyncHandler(async (req, res) => {
   const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 8));
   const skip = (page - 1) * limit;
 
-  if (q.length < 2) throw new AppError("Query must be at least 2 characters.", 400, "VALIDATION_ERROR");
+  if (q.length < 2)
+    throw new AppError(
+      "Query must be at least 2 characters.",
+      400,
+      "VALIDATION_ERROR",
+    );
 
   const cleanedQuery = q.startsWith("@") ? q.substring(1) : q;
 
@@ -27,7 +32,11 @@ export const searchAll = asyncHandler(async (req, res) => {
     for (let i = 0; i < len; i++) {
       const dropped = str.substring(0, i) + str.substring(i + 1);
       if (dropped.length >= 2) parts.push(escapeRegex(dropped));
-      parts.push(escapeRegex(str.substring(0, i)) + "." + escapeRegex(str.substring(i + 1)));
+      parts.push(
+        escapeRegex(str.substring(0, i)) +
+          "." +
+          escapeRegex(str.substring(i + 1)),
+      );
     }
     return new RegExp(parts.join("|"), "i");
   };
@@ -108,7 +117,9 @@ export const searchAll = asyncHandler(async (req, res) => {
       { $match: { charityId: { $in: charityIds } } },
       { $group: { _id: "$charityId", total: { $sum: "$coinAmount" } } },
     ]);
-    agg.forEach((a) => { charityTotals[String(a._id)] = a.total; });
+    agg.forEach((a) => {
+      charityTotals[String(a._id)] = a.total;
+    });
   }
 
   // populate charity and owner usernames for profile routing
@@ -121,7 +132,9 @@ export const searchAll = asyncHandler(async (req, res) => {
   });
 
   if (charityOwnerUserIds.length) {
-    const ownerUsers = await User.find({ _id: { $in: charityOwnerUserIds } }).select("userName");
+    const ownerUsers = await User.find({
+      _id: { $in: charityOwnerUserIds },
+    }).select("userName");
     const ownerById = {};
     ownerUsers.forEach((u) => {
       ownerById[String(u._id)] = u.userName;
@@ -133,19 +146,32 @@ export const searchAll = asyncHandler(async (req, res) => {
 
   // populate project charity name
   if (projects && projects.length) {
-    const charityIdsForProjects = projects.map((p) => p.charityId).filter(Boolean);
-    const charityDocs = await Charity.find({ _id: { $in: charityIdsForProjects } }).select("publicName ownerUserId");
-    charityDocs.forEach((c) => { charityMap[String(c._id)] = c.publicName; });
+    const charityIdsForProjects = projects
+      .map((p) => p.charityId)
+      .filter(Boolean);
+    const charityDocs = await Charity.find({
+      _id: { $in: charityIdsForProjects },
+    }).select("publicName ownerUserId");
+    charityDocs.forEach((c) => {
+      charityMap[String(c._id)] = c.publicName;
+    });
 
-    const missingOwnerUserIds = charityDocs.map((c) => c.ownerUserId).filter(Boolean);
+    const missingOwnerUserIds = charityDocs
+      .map((c) => c.ownerUserId)
+      .filter(Boolean);
     if (missingOwnerUserIds.length) {
-      const ownerUsers = await User.find({ _id: { $in: missingOwnerUserIds } }).select("userName");
+      const ownerUsers = await User.find({
+        _id: { $in: missingOwnerUserIds },
+      }).select("userName");
       const ownerById = {};
       ownerUsers.forEach((u) => {
         ownerById[String(u._id)] = u.userName;
       });
       charityDocs.forEach((c) => {
-        charityOwnerMap[String(c._id)] = ownerById[String(c.ownerUserId)] || charityOwnerMap[String(c._id)] || "";
+        charityOwnerMap[String(c._id)] =
+          ownerById[String(c.ownerUserId)] ||
+          charityOwnerMap[String(c._id)] ||
+          "";
       });
     }
   }
@@ -154,8 +180,12 @@ export const searchAll = asyncHandler(async (req, res) => {
   const brandIds = (products || []).map((p) => p.brandId).filter(Boolean);
   const brandMap = {};
   if (brandIds.length) {
-    const brands = await Brand.find({ _id: { $in: brandIds } }).select("brandName");
-    brands.forEach((b) => { brandMap[String(b._id)] = b.brandName; });
+    const brands = await Brand.find({ _id: { $in: brandIds } }).select(
+      "brandName",
+    );
+    brands.forEach((b) => {
+      brandMap[String(b._id)] = b.brandName;
+    });
   }
 
   // shape results
@@ -182,7 +212,9 @@ export const searchAll = asyncHandler(async (req, res) => {
     name: p.title,
     charityName: charityMap[String(p.charityId)] || "",
     charityUserName: charityOwnerMap[String(p.charityId)] || "",
-    progress: p.goalAmount ? Math.round((p.collectedAmount / p.goalAmount) * 100) : 0,
+    progress: p.goalAmount
+      ? Math.round((p.collectedAmount / p.goalAmount) * 100)
+      : 0,
   }));
 
   const shapedProducts = (products || []).map((p) => ({
@@ -197,10 +229,18 @@ export const searchAll = asyncHandler(async (req, res) => {
     charities: shapedCharities,
     projects: shapedProjects,
     products: shapedProducts,
-    totalCount: (shapedUsers.length + shapedCharities.length + shapedProjects.length + shapedProducts.length),
+    totalCount:
+      shapedUsers.length +
+      shapedCharities.length +
+      shapedProjects.length +
+      shapedProducts.length,
   };
 
-  return successResponse(res, 200, "Search results fetched.", { query: q, hasMore, results });
+  return successResponse(res, 200, "Search results fetched.", {
+    query: q,
+    hasMore,
+    results,
+  });
 });
 
 export default { searchAll };

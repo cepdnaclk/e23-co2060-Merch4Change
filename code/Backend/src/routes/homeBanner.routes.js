@@ -12,7 +12,13 @@ import {
 const router = express.Router();
 
 router.get("/", getBanners);
-router.post("/", protect, requireRole("admin"), upload.single("image"), uploadBanner);
+router.post(
+  "/",
+  protect,
+  requireRole("admin"),
+  upload.single("image"),
+  uploadBanner,
+);
 router.delete("/:id", protect, requireRole("admin"), deleteBanner);
 
 export default router;

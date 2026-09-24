@@ -19,7 +19,6 @@ const startServer = async () => {
   }
 };
 
-
 process.on("unhandledRejection", (reason) => {
   logError("Unhandled promise rejection.", reason);
 });
