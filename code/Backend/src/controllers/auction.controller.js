@@ -159,13 +159,70 @@ export const placeBid = async (req, res) => {
   }
 };
 
+// Helper to settle auctions whose deadline passed or start time arrived
+const settleAuctionIfEnded = async (auction) => {
+  const now = new Date();
+  if (auction.status === "scheduled" && new Date(auction.startTime) <= now) {
+    auction.status = "active";
+    await auction.save();
+  } else if (auction.status === "active" && new Date(auction.endTime) <= now) {
+    auction.status = "ended";
+    await auction.save();
+
+    if (auction.currentBidder) {
+      await Bid.findOneAndUpdate(
+        { auctionId: auction._id, userId: auction.currentBidder, status: "active" },
+        { $set: { status: "won" } }
+      );
+
+      const productName = auction.productId?.name || "the item";
+
+      await Notification.create({
+        userId: auction.currentBidder,
+        type: "bet",
+        message: `Congratulations! You won the auction for ${productName} with a bid of $${auction.currentPrice}!`,
+        isRead: false,
+      });
+
+      if (auction.createdBy && auction.createdBy.toString() !== auction.currentBidder.toString()) {
+        await Notification.create({
+          userId: auction.createdBy,
+          type: "bet",
+          message: `Your auction for ${productName} has ended with a winning bid of $${auction.currentPrice}!`,
+          isRead: false,
+        });
+      }
+    }
+  }
+  return auction;
+};
+
 // GET api/auctions
 export const listAuctions = async (req, res) => {
   try {
     const { status = "active" } = req.query;
+    const now = new Date();
 
-    const auctions = await Auction.find({ status: status })
+    // Auto-transition scheduled auctions that have reached start time
+    await Auction.updateMany(
+      { status: "scheduled", startTime: { $lte: now }, endTime: { $gt: now } },
+      { $set: { status: "active" } }
+    );
+
+    // Auto-settle active auctions that have expired
+    const expiredAuctions = await Auction.find({
+      status: "active",
+      endTime: { $lte: now },
+    }).populate("productId");
+
+    for (const exp of expiredAuctions) {
+      await settleAuctionIfEnded(exp);
+    }
+
+    const filter = status === "all" ? {} : { status };
+    const auctions = await Auction.find(filter)
       .populate("productId")
+      .populate("currentBidder", "userName firstName lastName avatar")
       .sort({ endTime: 1 });
 
     return res.status(200).json({
@@ -186,13 +243,18 @@ export const getAuction = async (req, res) => {
       return res.status(404).json({ success: false, message: "Invalid id" });
     }
 
-    const auction = await Auction.findById(id).populate("productId");
+    const auction = await Auction.findById(id)
+      .populate("productId")
+      .populate("currentBidder", "userName firstName lastName avatar")
+      .populate("createdBy", "userName firstName lastName");
 
     if (!auction) {
       return res
         .status(404)
-        .json({ success: false, message: "No acution found" });
+        .json({ success: false, message: "No auction found" });
     }
+
+    await settleAuctionIfEnded(auction);
 
     return res.status(200).json({ success: true, auction });
   } catch (err) {
