@@ -288,7 +288,6 @@ async function runTests() {
       const {
         totalDonated,
         causesSupported,
-        donationCount,
         impactScore,
         ongoingProjects,
       } = json.data;

@@ -21,9 +21,10 @@ import {
   ClipboardList,
   Trophy,
   Users,
+  X,
 } from "lucide-react";
 
-function Sidebar({ profileData, setIsSidebarCollapsed, onPostCreated }) {
+function Sidebar({ profileData, setIsSidebarCollapsed, isSidebarCollapsed, onPostCreated }) {
   const [selectedOption, setSelectedOption] = useState(0);
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
   const navigate = useNavigate();
@@ -34,8 +35,13 @@ function Sidebar({ profileData, setIsSidebarCollapsed, onPostCreated }) {
   const isAdmin = userRole === "admin";
   const showAddProjectLink = userAccountType === "organization";
 
+  const closeMobileSidebar = () => {
+    setIsSidebarCollapsed?.(true);
+  };
+
   const handleSelectOption = (value) => {
     setSelectedOption(value);
+    closeMobileSidebar();
   };
 
   const [notifications, setNotifications] = useState([]);
@@ -64,18 +70,32 @@ function Sidebar({ profileData, setIsSidebarCollapsed, onPostCreated }) {
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   return (
-    <aside className="lum-sidebar-left">
-      <div className="lum-logo">
-        <BrandLogo size={34} className="lp-navbar-icon" />
-        <h2 className="lp-navbar-text">Merch4Change</h2>
-      </div>
+    <>
+      <div
+        className="lum-sidebar-backdrop"
+        onClick={closeMobileSidebar}
+        aria-hidden="true"
+      />
+      <aside className="lum-sidebar-left">
+        <div className="lum-logo">
+          <BrandLogo size={34} className="lp-navbar-icon" />
+          <h2 className="lp-navbar-text">Merch4Change</h2>
+          <button
+            type="button"
+            className="lum-sidebar-close-btn"
+            onClick={closeMobileSidebar}
+            aria-label="Close sidebar"
+          >
+            <X size={20} />
+          </button>
+        </div>
 
-      <div className="lum-sidebar-nav">
-        <NavLink
-          to="/home"
-          className={({ isActive }) => (isActive ? "lum-nav-item active" : "lum-nav-item")}
-          onClick={() => handleSelectOption(1)}
-        >
+        <div className="lum-sidebar-nav">
+          <NavLink
+            to="/home"
+            className={({ isActive }) => (isActive ? "lum-nav-item active" : "lum-nav-item")}
+            onClick={() => handleSelectOption(1)}
+          >
           <div className="lum-nav-icon"><Home size={20} /></div> <span className="lum-nav-text">{t("nav.home")}</span>
         </NavLink>
         <NavLink
@@ -181,7 +201,7 @@ function Sidebar({ profileData, setIsSidebarCollapsed, onPostCreated }) {
       </div>
 
       <div className="lum-sidebar-footer">
-        <NavLink to="/profile/me" className="lum-sidebar-profile-link">
+        <NavLink to="/profile/me" className="lum-sidebar-profile-link" onClick={closeMobileSidebar}>
           <div className="lum-nav-icon">
             <img 
               src={profileData?.profileImageUrl || storedUser?.profileImageUrl || "/src/assets/user.svg"} 
@@ -202,9 +222,8 @@ function Sidebar({ profileData, setIsSidebarCollapsed, onPostCreated }) {
           }
         }}
       />
-
-      
     </aside>
+    </>
   );
 }
 

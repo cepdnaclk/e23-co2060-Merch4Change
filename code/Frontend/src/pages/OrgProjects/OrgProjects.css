@@ -364,3 +364,33 @@
 .org-projects-verify-btn:hover {
   background: #c05621;
 }
+
+@media (max-width: 768px) {
+  .org-projects-container {
+    padding: 20px 16px;
+  }
+  .org-projects-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .org-projects-header-text h2 {
+    font-size: 24px;
+  }
+  .org-projects-add-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .org-projects-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .org-projects-verification-notice {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .org-projects-verify-btn {
+    width: 100%;
+    text-align: center;
+  }
+}

@@ -674,3 +674,76 @@ body.dark .signup-page,
   animation: spin 0.7s linear infinite;
   flex-shrink: 0;
 }
+
+@media (max-width: 900px) {
+  .signup-page {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .signup-left {
+    width: 100%;
+    padding: 32px 24px;
+    min-height: auto;
+  }
+
+  .signup-hero {
+    padding: 20px 0 16px;
+  }
+
+  .signup-tagline {
+    font-size: 30px;
+    margin-bottom: 12px;
+  }
+
+  .signup-desc {
+    max-width: none;
+  }
+
+  .signup-dots {
+    display: none;
+  }
+
+  .signup-right {
+    width: 100%;
+    padding: 36px 20px 60px;
+    justify-content: flex-start;
+  }
+
+  .signup-form-wrap {
+    max-width: 100%;
+  }
+
+  .progress-wrap {
+    margin-bottom: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .signup-left {
+    padding: 24px 16px;
+  }
+
+  .signup-right {
+    padding: 28px 16px 48px;
+  }
+
+  .signup-tagline {
+    font-size: 26px;
+  }
+
+  .form-title {
+    font-size: 24px;
+  }
+
+  .step-node span {
+    font-size: 11px;
+  }
+
+  .step-label {
+    display: none;
+  }
+}

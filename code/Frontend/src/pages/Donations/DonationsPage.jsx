@@ -282,17 +282,17 @@ export default function DonationsPage() {
               </p>
 
               {/* Stats row */}
-              <div style={{ display: "flex", justifyContent: "center", gap: "0", marginBottom: "48px" }}>
+              <div className="donations-stats-row">
                 {[{ v: `${stats.charityCount}`, l: "Verified charities" }, { v: `${projects.length}`, l: "Active projects" }, { v: "0 fee", l: "Platform fees" }].map((s, i) => (
-                  <div key={s.l} style={{ textAlign: "center", padding: "0 32px", borderRight: i < 2 ? "1px solid rgba(255,255,255,0.15)" : "none" }}>
-                    <div style={{ fontFamily: "'DM Serif Display',serif", fontSize: "28px", color: "#FDE68A", fontWeight: 400 }}>{s.v}</div>
-                    <div style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "12px", color: "rgba(255,255,255,0.6)", marginTop: "4px", textTransform: "uppercase", letterSpacing: "0.5px" }}>{s.l}</div>
+                  <div key={s.l} className="donations-stat-item" style={{ borderRight: i < 2 ? "1px solid rgba(255,255,255,0.15)" : "none" }}>
+                    <div className="donations-stat-val">{s.v}</div>
+                    <div className="donations-stat-label">{s.l}</div>
                   </div>
                 ))}
               </div>
 
               {/* Search */}
-              <div style={{ background: "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)", borderRadius: "16px", padding: "6px 6px 6px 20px", display: "flex", alignItems: "center", gap: "12px", boxShadow: "0 24px 64px rgba(0,0,0,0.2)", marginBottom: "0" }}>
+              <div className="donations-search-wrap">
                 <Search size={18} color="#6B6560" style={{ flexShrink: 0 }} />
                 <input
                   value={query}
@@ -310,7 +310,7 @@ export default function DonationsPage() {
                   </button>
                 )}
                 <button onClick={() => handleDonateNavigation()}
-                  style={{ background: "#D4820A", color: "#fff", fontFamily: "'DM Sans',sans-serif", fontSize: "14px", fontWeight: 500, padding: "12px 24px", borderRadius: "12px", border: "none", cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0 }}
+                  className="donations-search-btn"
                   onMouseEnter={e => e.target.style.background = "#be7509"} onMouseLeave={e => e.target.style.background = "#D4820A"}>
                   Donate Now
                 </button>
@@ -330,11 +330,11 @@ export default function DonationsPage() {
             </div>
           )}
 
-          <div style={{ padding: "32px 40px 80px" }}>
+          <div className="donations-body-container">
 
             {/* ── SECTION SWITCHER TABS ─────────────────────────────────── */}
             <div style={{ display: "flex", justifyContent: "center", marginBottom: "32px" }}>
-              <div style={{ display: "inline-flex", background: "#EAE5DC", padding: "5px", borderRadius: "16px", gap: "6px" }}>
+              <div className="donations-tabs-wrap">
                 <button
                   onClick={() => handleTabChange("causes")}
                   style={{

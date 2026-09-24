@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useInRouterContext } from "react-router-dom";
-import { Clock, Flame, Trophy, ShieldCheck } from "lucide-react";
+import { Clock, Flame, Trophy } from "lucide-react";
 
 export function formatTimeLeft(endTime) {
   const total = new Date(endTime).getTime() - new Date().getTime();

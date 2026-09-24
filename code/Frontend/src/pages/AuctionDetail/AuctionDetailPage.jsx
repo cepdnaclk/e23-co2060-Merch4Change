@@ -9,12 +9,9 @@ import {
   Trophy,
   ShieldCheck,
   Package,
-  Sparkles,
   Coins,
   History,
   AlertCircle,
-  ExternalLink,
-  ChevronRight,
   TrendingUp,
 } from "lucide-react";
 import TopNavbar from "../../components/TopNavbar/TopNavbar";

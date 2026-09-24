@@ -279,20 +279,45 @@
     flex-direction: column;
     height: auto;
     min-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
   .verify-otp-left {
     width: 100%;
-    padding: 32px 24px;
+    padding: 32px 24px 20px;
   }
   .verify-otp-tagline {
-    font-size: 32px;
+    font-size: 30px;
+  }
+  .verify-otp-dots {
+    display: none;
   }
   .verify-otp-right {
     width: 100%;
-    padding: 40px 24px;
+    padding: 32px 24px 48px;
   }
   .otp-input {
     max-width: 45px;
     font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .verify-otp-left {
+    padding: 24px 16px 16px;
+  }
+  .verify-otp-tagline {
+    font-size: 26px;
+  }
+  .verify-otp-right {
+    padding: 24px 16px 40px;
+  }
+  .otp-inputs-container {
+    gap: 6px;
+  }
+  .otp-input {
+    max-width: 38px;
+    font-size: 16px;
+    border-radius: 8px;
   }
 }
