@@ -23,7 +23,8 @@ export const searchAll = asyncHandler(async (req, res) => {
       "VALIDATION_ERROR",
     );
 
-  const cleanedQuery = q.startsWith("@") ? q.substring(1) : q;
+  const normalizedQuery = q.replace(/^[#@]+/, "").trim();
+  const cleanedQuery = normalizedQuery || q;
 
   const createFuzzyRegex = (str) => {
     if (str.length < 3) return new RegExp(escapeRegex(str), "i");
@@ -42,7 +43,7 @@ export const searchAll = asyncHandler(async (req, res) => {
   };
 
   const cleanedRegex = createFuzzyRegex(cleanedQuery);
-  const regex = createFuzzyRegex(q);
+  const regex = createFuzzyRegex(cleanedQuery);
   const isAdmin = !!(req.user && req.user.role === "admin");
 
   // run queries in parallel

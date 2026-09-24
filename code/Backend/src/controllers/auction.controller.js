@@ -197,6 +197,58 @@ const settleAuctionIfEnded = async (auction) => {
   return auction;
 };
 
+// GET api/auctions/activity
+export const getLiveAuctionFeed = async (req, res) => {
+  try {
+    const now = new Date();
+
+    // Auto-transition scheduled auctions that have reached start time
+    await Auction.updateMany(
+      { status: "scheduled", startTime: { $lte: now }, endTime: { $gt: now } },
+      { $set: { status: "active" } }
+    );
+
+    // Auto-settle active auctions that have expired
+    const expiredAuctions = await Auction.find({
+      status: "active",
+      endTime: { $lte: now },
+    }).populate("productId");
+
+    for (const exp of expiredAuctions) {
+      await settleAuctionIfEnded(exp);
+    }
+
+    const auctions = await Auction.find({ status: "active", endTime: { $gt: now } })
+      .populate("productId")
+      .populate("currentBidder", "userName firstName lastName avatar avatarUrl profileImageUrl")
+      .sort({ endTime: 1 })
+      .limit(6);
+
+    const recentBids = await Bid.find()
+      .sort({ createdAt: -1 })
+      .limit(8)
+      .populate({
+        path: "auctionId",
+        populate: { path: "productId", select: "name images price" },
+      })
+      .populate("userId", "userName firstName lastName avatar avatarUrl profileImageUrl");
+
+    const totalActive = await Auction.countDocuments({ status: "active", endTime: { $gt: now } });
+
+    return res.status(200).json({
+      success: true,
+      auctions,
+      recentBids: recentBids.filter((b) => b && b.auctionId),
+      stats: {
+        totalActive,
+        totalBids: recentBids.length,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 // GET api/auctions
 export const listAuctions = async (req, res) => {
   try {
@@ -222,7 +274,7 @@ export const listAuctions = async (req, res) => {
     const filter = status === "all" ? {} : { status };
     const auctions = await Auction.find(filter)
       .populate("productId")
-      .populate("currentBidder", "userName firstName lastName avatar")
+      .populate("currentBidder", "userName firstName lastName avatar avatarUrl profileImageUrl")
       .sort({ endTime: 1 });
 
     return res.status(200).json({

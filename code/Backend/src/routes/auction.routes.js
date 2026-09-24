@@ -6,6 +6,7 @@ import {
   getBids,
   listAuctions,
   placeBid,
+  getLiveAuctionFeed,
 } from "../controllers/auction.controller.js";
 
 const router = express.Router();
@@ -13,6 +14,7 @@ const router = express.Router();
 router.post("/", protect, createAuction);
 router.post("/:id/bid", protect, placeBid);
 router.get("/", listAuctions);
+router.get("/activity", getLiveAuctionFeed);
 router.get("/:id", getAuction);
 router.get("/:id/bids", getBids);
 

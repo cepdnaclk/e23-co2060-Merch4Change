@@ -75,8 +75,8 @@ function TopNavbar({
       return;
     }
 
-    if (tab === "discover" || tab === "trends") {
-      navigate("/under-construction");
+    if (tab === "marketplace") {
+      navigate("/marketplace");
       if (typeof onTabChange === "function") onTabChange(tab);
       return;
     }
@@ -142,30 +142,28 @@ function TopNavbar({
         </div>
       </div>
       <div className="lum-nav-links">
-        <span
-          className={activeTab === "feed" ? "lum-nav-link active" : "lum-nav-link"}
-          onClick={() => handleTabClick("feed")}
-        >
-          Feed
-        </span>
-        <span
-          className={activeTab === "discover" ? "lum-nav-link active" : "lum-nav-link"}
-          onClick={() => handleTabClick("discover")}
-        >
-          Discover
-        </span>
-        <span
-          className={activeTab === "marketplace" ? "lum-nav-link active" : "lum-nav-link"}
-          onClick={() => handleTabClick("marketplace")}
-        >
-          Marketplace
-        </span>
-        <span
-          className={activeTab === "trends" ? "lum-nav-link active" : "lum-nav-link"}
-          onClick={() => handleTabClick("trends")}
-        >
-          Trends
-        </span>
+        <div className="lum-nav-tabs" role="tablist">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "feed"}
+            className={activeTab === "feed" ? "lum-nav-link active" : "lum-nav-link"}
+            onClick={() => handleTabClick("feed")}
+          >
+            {activeTab === "feed" && <span className="lum-nav-link-dot" />}
+            Feed
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "marketplace"}
+            className={activeTab === "marketplace" ? "lum-nav-link active" : "lum-nav-link"}
+            onClick={() => handleTabClick("marketplace")}
+          >
+            {activeTab === "marketplace" && <span className="lum-nav-link-dot" />}
+            Marketplace
+          </button>
+        </div>
 
         {/* Dedicated relative container for notification button + dropdown */}
         <div className="lum-notification-wrapper" ref={notificationRef}>

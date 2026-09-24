@@ -24,3 +24,8 @@ export const createAuction = async (payload) => {
   const response = await apiClient.post("/api/v1/auctions", payload);
   return response.data;
 };
+
+export const getLiveAuctionFeed = async () => {
+  const response = await apiClient.get("/api/v1/auctions/activity");
+  return response.data;
+};

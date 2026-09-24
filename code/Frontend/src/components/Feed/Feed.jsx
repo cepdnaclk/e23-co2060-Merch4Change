@@ -2,7 +2,6 @@ import "./Feed.css";
 import Stories from "./Stories";
 import PromoBanner from "./PromoBanner";
 import PostsGrid from "./PostsGrid";
-import TrendingNow from "./TrendingNow";
 
 function Feed() {
   return (
@@ -10,7 +9,6 @@ function Feed() {
       <Stories />
       <PromoBanner />
       <PostsGrid />
-      <TrendingNow />
     </div>
   );
 }
