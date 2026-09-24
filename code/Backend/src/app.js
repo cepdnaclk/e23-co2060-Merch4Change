@@ -48,15 +48,43 @@ const httpLogFormat = (tokens, req, res) => {
   return `${method} ${url} ${status} ${responseTime} ms - ${contentLength}`;
 };
 
-app.use(helmet());
+const configuredOrigins = new Set([
+  ...env.allowedOrigins,
+  env.frontendUrl,
+  "https://merch4change.vercel.app",
+  "http://localhost:5173",
+  "http://localhost:3000",
+]);
+
+const isOriginAllowed = (origin) => {
+  if (!origin) return true;
+  const cleanOrigin = origin.replace(/\/+$/, "");
+  if (configuredOrigins.has(cleanOrigin)) return true;
+  try {
+    const { hostname } = new URL(cleanOrigin);
+    if (hostname.endsWith(".vercel.app") || hostname === "localhost" || hostname === "127.0.0.1") {
+      return true;
+    }
+  } catch {
+    return false;
+  }
+  return false;
+};
 
 // include CORS: Cross Over Resource Sharing
 app.use(
   cors({
-    origin: env.frontendUrl,
+    origin: (origin, callback) => {
+      if (isOriginAllowed(origin)) {
+        return callback(null, true);
+      }
+      return callback(null, false);
+    },
     credentials: true, // Allow cookies to flow cross-origin
   }),
 );
+
+app.use(helmet());
 
 // decode the raw bytes from the req.body to json type and preserve rawBody for webhook signatures
 app.use(
