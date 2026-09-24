@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar/Sidebar";
+import TopNavbar from "../../components/TopNavbar/TopNavbar";
 import ConversationList from "./components/ConversationList";
 import ChatWindow from "./components/ChatWindow";
 import apiClient from "../../api/apiClient";
@@ -22,6 +23,7 @@ function MessagingPage() {
   const [activeContactId, setActiveContactId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isConvListCollapsed, setIsConvListCollapsed] = useState(false);
+  const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
   const [profileData, setProfileData] = useState({
     firstName: "Guest",
     lastName: "User",
@@ -215,6 +217,7 @@ function MessagingPage() {
 
   const handleSelectConversation = useCallback((id) => {
     setActiveContactId(id);
+    setIsMobileChatOpen(true);
   }, []);
 
   const handleSendMessage = useCallback(
@@ -268,8 +271,17 @@ function MessagingPage() {
 
   return (
     <div className={`luminous-app ${isSidebarCollapsed ? "sidebar-collapsed" : ""}`}>
+      <TopNavbar
+        profileData={profileData}
+        isSidebarCollapsed={isSidebarCollapsed}
+        setIsSidebarCollapsed={setIsSidebarCollapsed}
+      />
       <div className="lum-layout messaging-layout">
-        <Sidebar profileData={profileData} setIsSidebarCollapsed={setIsSidebarCollapsed} />
+        <Sidebar
+          profileData={profileData}
+          setIsSidebarCollapsed={setIsSidebarCollapsed}
+          isSidebarCollapsed={isSidebarCollapsed}
+        />
 
         <main className="lum-main-content messaging-main-content">
           {isLoading ? (
@@ -295,7 +307,7 @@ function MessagingPage() {
               </div>
             </div>
           ) : (
-            <div className="messaging-page-container">
+            <div className={`messaging-page-container ${isMobileChatOpen && activeContact ? "mobile-chat-open" : ""}`}>
               <ConversationList
                 conversations={contacts}
                 activeId={activeContactId}
@@ -318,6 +330,7 @@ function MessagingPage() {
                     onSendMessage={handleSendMessage}
                     isConvListCollapsed={isConvListCollapsed}
                     onToggleConvList={() => setIsConvListCollapsed(!isConvListCollapsed)}
+                    onBack={() => setIsMobileChatOpen(false)}
                   />
                 )}
               </div>

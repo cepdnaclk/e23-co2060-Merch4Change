@@ -172,3 +172,18 @@ body.dark .privacy-footer-links span,
 .privacy-page[data-theme="dark"] .privacy-footer-links span {
   color: #4b5563;
 }
+@media (max-width: 640px) {
+  .privacy-hero {
+    padding: 40px 16px 32px 16px;
+  }
+  .privacy-content {
+    padding: 0 16px;
+    margin-top: 24px;
+  }
+  .privacy-hero h1 {
+    font-size: 28px;
+  }
+  .privacy-section {
+    padding: 20px 16px;
+  }
+}
