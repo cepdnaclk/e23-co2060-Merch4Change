@@ -17,7 +17,12 @@ function Home() {
     lastName: "User", 
     userName: "guest",
   });
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth <= 992;
+    }
+    return false;
+  });
   const currentTab = searchParams.get("tab");
   const activeTab = VALID_TABS.has(currentTab) ? currentTab : "feed";
   const isFeedTab = activeTab === "feed";
@@ -33,6 +38,20 @@ function Home() {
       .catch(() => {});
   }, []);
 
+  useEffect(() => {
+    let wasMobile = typeof window !== "undefined" ? window.innerWidth <= 992 : false;
+    const handleResize = () => {
+      const isMobile = window.innerWidth <= 992;
+      if (isMobile !== wasMobile) {
+        wasMobile = isMobile;
+        setIsSidebarCollapsed(isMobile);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const handleTabChange = useCallback((tab) => {
     if (tab === "marketplace") {
       navigate("/marketplace");
@@ -45,7 +64,9 @@ function Home() {
     }
 
     setSearchParams(tab === "feed" ? {} : { tab });
-    setIsSidebarCollapsed(tab !== "feed");
+    if (typeof window !== "undefined" && window.innerWidth <= 992) {
+      setIsSidebarCollapsed(true);
+    }
   }, [navigate, setSearchParams]);
 
   return (
