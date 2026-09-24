@@ -1,3 +1,5 @@
+import API_BASE from "./apiUrl";
+
 const USER_KEY = "user";
 
 export function saveAuth({ token, user, rememberMe = true }) {
@@ -43,7 +45,7 @@ export async function refreshStoredUser() {
     return null;
   }
 
-  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const apiUrl = API_BASE;
 
   try {
     const response = await fetch(`${apiUrl}/api/v1/profile/me`, {

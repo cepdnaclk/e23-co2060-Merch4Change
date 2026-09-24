@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import { setAccessToken as syncTokenToApiClient, setLogoutCallback } from "../api/apiClient";
+import API_BASE from "../utils/apiUrl";
 
 interface User {
     id: string;
@@ -20,7 +21,6 @@ interface AuthContextValue {
     logout: () => void;
 }
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {

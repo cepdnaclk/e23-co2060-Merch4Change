@@ -3,6 +3,7 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../../context/Context";
 import "./VerifyOtpPage.css";
 import BrandLogo from "../../components/BrandLogo/BrandLogo";
+import API_BASE from "../../utils/apiUrl";
 
 function VerifyOtpPage() {
   const navigate = useNavigate();
@@ -81,7 +82,7 @@ function VerifyOtpPage() {
 
     try {
       setIsSubmitting(true);
-      const apiBaseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+      const apiBaseUrl = API_BASE;
 
       const response = await fetch(`${apiBaseUrl}/api/v1/auth/verify-otp`, {
         method: "POST",
@@ -124,7 +125,7 @@ function VerifyOtpPage() {
     setIsResending(true);
     
     try {
-      const apiBaseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+      const apiBaseUrl = API_BASE;
       const response = await fetch(`${apiBaseUrl}/api/v1/auth/resend-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

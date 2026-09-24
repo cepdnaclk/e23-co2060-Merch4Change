@@ -1,6 +1,5 @@
 import axios from "axios";
-
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+import API_BASE from "../utils/apiUrl";
 
 // ── Module-level token store ─────────────────────────────────────────
 // AuthContext syncs the current access token here via setAccessToken().

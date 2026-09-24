@@ -5,6 +5,7 @@ import { useAuth } from "../../context/Context";
 import { getMyCharity } from "../../services/charityApi";
 import "./LoginPage.css";
 import BrandLogo from "../../components/BrandLogo/BrandLogo";
+import API_BASE from "../../utils/apiUrl";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -26,8 +27,7 @@ function LoginPage() {
   const [resendMsg, setResendMsg] = useState("");
 
   const { login } = useAuth();
-
-  const apiBase = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const apiBase = API_BASE;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
