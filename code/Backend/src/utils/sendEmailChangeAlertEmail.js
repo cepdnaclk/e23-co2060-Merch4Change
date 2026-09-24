@@ -3,12 +3,25 @@ import nodemailer from "nodemailer";
 // heads-up mail sent to the CURRENT email address when someone requests
 // to change it, so the account owner has a chance to react if it wasn't them.
 const user = process.env.EMAIL_USER;
+const host = process.env.SMTP_HOST || "smtp.gmail.com";
+const port = parseInt(process.env.SMTP_PORT || "465", 10);
+const secure = process.env.SMTP_SECURE !== undefined
+  ? process.env.SMTP_SECURE === "true"
+  : port === 465;
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host,
+  port,
+  secure,
   auth: {
     user: user,
     pass: process.env.EMAIL_PASS,
+  },
+  connectionTimeout: 10000,
+  greetingTimeout: 5000,
+  socketTimeout: 15000,
+  tls: {
+    rejectUnauthorized: false,
   },
 });
 
