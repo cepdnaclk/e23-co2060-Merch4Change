@@ -9,6 +9,8 @@ import Project from "../models/Project.js";
 import Donation from "../models/Donation.js";
 import Order from "../models/Order.js";
 import CoinTransaction from "../models/CoinTransaction.js";
+import Auction from "../models/Auction.js";
+import Bid from "../models/Bid.js";
 
 const MONGO_URI = "mongodb://127.0.0.1:27017/merch4change";
 
@@ -110,6 +112,8 @@ async function seed() {
     await Donation.deleteMany({});
     await Order.deleteMany({});
     await CoinTransaction.deleteMany({});
+    await Auction.deleteMany({});
+    await Bid.deleteMany({});
     console.log("Existing data cleared.");
 
     // 2. Hash standard password
@@ -429,6 +433,60 @@ async function seed() {
       });
     }
     console.log(`✅ Seeded brand orders and impact metrics.`);
+
+    // 10. Seed Sample Auctions and Bids
+    console.log("Seeding sample charity auctions...");
+    const now = new Date();
+    const liveAuction1 = await Auction.create({
+      productId: createdProducts[0]._id,
+      startPrice: 500,
+      currentPrice: 750,
+      currentBidder: individuals[0]._id,
+      startTime: new Date(now.getTime() - 2 * 60 * 60 * 1000), // started 2h ago
+      endTime: new Date(now.getTime() + 48 * 60 * 60 * 1000), // ends in 2 days
+      createdBy: individuals[1]._id,
+      status: "active",
+      bidIncrement: 25,
+    });
+
+    await Bid.create({
+      auctionId: liveAuction1._id,
+      userId: individuals[0]._id,
+      amount: 750,
+      status: "active",
+    });
+
+    const liveAuction2 = await Auction.create({
+      productId: createdProducts[1]._id,
+      startPrice: 1000,
+      currentPrice: 1200,
+      currentBidder: individuals[1]._id,
+      startTime: new Date(now.getTime() - 1 * 60 * 60 * 1000),
+      endTime: new Date(now.getTime() + 24 * 60 * 60 * 1000),
+      createdBy: individuals[0]._id,
+      status: "active",
+      bidIncrement: 50,
+    });
+
+    await Bid.create({
+      auctionId: liveAuction2._id,
+      userId: individuals[1]._id,
+      amount: 1200,
+      status: "active",
+    });
+
+    await Auction.create({
+      productId: createdProducts[2]._id,
+      startPrice: 800,
+      currentPrice: 800,
+      currentBidder: null,
+      startTime: new Date(now.getTime() + 12 * 60 * 60 * 1000), // starts in 12h
+      endTime: new Date(now.getTime() + 72 * 60 * 60 * 1000),
+      createdBy: individuals[0]._id,
+      status: "scheduled",
+      bidIncrement: 50,
+    });
+    console.log("✅ Seeded live and upcoming charity auctions.");
 
     await mongoose.disconnect();
     console.log("🎉 Seeding complete with live Leaderboards!");
