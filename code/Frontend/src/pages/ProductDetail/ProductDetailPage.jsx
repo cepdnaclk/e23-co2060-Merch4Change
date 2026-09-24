@@ -126,6 +126,11 @@ export default function ProductDetailPage() {
       });
       const data = res.data;
       if (data.success) {
+        if (data.data?.checkoutUrl) {
+          window.location.href = data.data.checkoutUrl;
+          return;
+        }
+
         const earned =
           data.data?.order?.coinsEarned ??
           data.data?.coinsEarned ??

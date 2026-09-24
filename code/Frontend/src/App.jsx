@@ -42,6 +42,8 @@ import NotificationPage from "./pages/Notification/Notification";
 import SearchPage from "./pages/Search/SearchPage";
 import AllDonorsPage from "./pages/AllDonors/AllDonorsPage";
 import LeaderboardPage from "./pages/Leaderboard/LeaderboardPage";
+import OrderSuccessPage from "./pages/Order/OrderSuccessPage";
+import OrderCancelPage from "./pages/Order/OrderCancelPage";
 
 function App() {
   return (
@@ -81,6 +83,8 @@ function App() {
               <Route path="/product/:id" element={<ProductDetailPage />} />
               <Route path="/marketplace/auction/:id" element={<AuctionDetailPage />} />
               <Route path="/auctions/:id" element={<AuctionDetailPage />} />
+              <Route path="/orders/success" element={<ProtectedRoute><OrderSuccessPage /></ProtectedRoute>} />
+              <Route path="/orders/cancel" element={<ProtectedRoute><OrderCancelPage /></ProtectedRoute>} />
               <Route path="/donations" element={<ProtectedRoute><DonationsPage /></ProtectedRoute>} />
               <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
               <Route path="/donate" element={<ProtectedRoute><DonatePage /></ProtectedRoute>} />

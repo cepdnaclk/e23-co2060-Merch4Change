@@ -7,7 +7,7 @@ import Feed from "../../components/Feed/Feed";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import RightSidebar from "../../components/RightSidebar/RightSidebar";
 
-const VALID_TABS = new Set(["feed", "discover", "trends"]);
+const VALID_TABS = new Set(["feed"]);
 
 function Home() {
   const navigate = useNavigate();
@@ -17,10 +17,14 @@ function Home() {
     lastName: "User", 
     userName: "guest",
   });
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth <= 992;
+    }
+    return false;
+  });
   const currentTab = searchParams.get("tab");
   const activeTab = VALID_TABS.has(currentTab) ? currentTab : "feed";
-  const isFeedTab = activeTab === "feed";
   const effectiveSidebarCollapsed = isSidebarCollapsed;
 
   useEffect(() => {
@@ -33,19 +37,30 @@ function Home() {
       .catch(() => {});
   }, []);
 
+  useEffect(() => {
+    let wasMobile = typeof window !== "undefined" ? window.innerWidth <= 992 : false;
+    const handleResize = () => {
+      const isMobile = window.innerWidth <= 992;
+      if (isMobile !== wasMobile) {
+        wasMobile = isMobile;
+        setIsSidebarCollapsed(isMobile);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const handleTabChange = useCallback((tab) => {
     if (tab === "marketplace") {
       navigate("/marketplace");
       return;
     }
 
-    if (tab === "discover" || tab === "trends") {
-      navigate("/under-construction");
-      return;
+    setSearchParams({});
+    if (typeof window !== "undefined" && window.innerWidth <= 992) {
+      setIsSidebarCollapsed(true);
     }
-
-    setSearchParams(tab === "feed" ? {} : { tab });
-    setIsSidebarCollapsed(tab !== "feed");
   }, [navigate, setSearchParams]);
 
   return (
@@ -65,12 +80,10 @@ function Home() {
         />
 
         <main className="lum-main-content home-main-content">
-          {activeTab === "feed" && <Feed />}
-          {activeTab === "discover" && <p>Discover coming soon</p>}
-          {activeTab === "trends" && <p>Trends coming soon</p>}
+          <Feed />
         </main>
 
-        {isFeedTab && <RightSidebar page="home" />}
+        <RightSidebar page="home" />
       </div>
     </div>
   );

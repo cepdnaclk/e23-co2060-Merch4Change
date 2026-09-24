@@ -33,6 +33,8 @@ const env = {
   authRateLimitWindowMs:
     Number(process.env.AUTH_RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
   authRateLimitMax: Number(process.env.AUTH_RATE_LIMIT_MAX) || 20,
+  stripeSecretKey: process.env.STRIPE_SECRET_KEY || "",
+  stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || "",
 };
 
 export default env;
