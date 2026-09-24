@@ -7,7 +7,7 @@
   height: 100vh;
   background: var(--m4c-bg-surface, #ffffff);
   border-right: 1px solid var(--m4c-border, #f0f0f0);
-  padding: 20px 15px;
+  padding: 20px 12px;
   display: flex;
   flex-direction: column;
   box-shadow: 2px 0 20px rgba(0, 0, 0, 0.02);
@@ -83,25 +83,31 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 12px;
+  padding: 9px 7px;
   border-radius: 10px;
   color: var(--m4c-text-secondary, #666666);
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
+  flex-shrink: 0;
 }
 
 .lum-nav-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 20px;
+  width: 28px;
+  min-width: 28px;
+  max-width: 28px;
+  height: 28px;
+  min-height: 28px;
+  max-height: 28px;
+  flex-shrink: 0;
   color: inherit;
 }
 
 .lum-nav-text {
-  margin-left: 12px;
   white-space: nowrap;
   display: none;
   color: inherit;
@@ -141,7 +147,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 12px;
+  padding: 9px 7px;
   border-radius: 10px;
   color: var(--m4c-text-secondary, #666666);
   font-weight: 600;
@@ -149,6 +155,7 @@
   cursor: pointer;
   text-decoration: none;
   transition: background 0.15s ease, color 0.15s ease;
+  flex-shrink: 0;
 }
 
 .lum-sidebar-profile-link:hover {
@@ -164,10 +171,16 @@
 .lum-sidebar-profile-img {
   width: 28px;
   height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  max-width: 28px;
+  max-height: 28px;
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
   border: 1px solid var(--m4c-border, #e0e0e0);
   object-fit: cover;
   flex-shrink: 0;
+  display: block;
   background-color: var(--m4c-bg-surface-alt, #f8f9fb);
 }
 
