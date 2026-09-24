@@ -10,6 +10,7 @@ import MessagingPage from "./pages/Messaging/MessagingPage";
 import Home from "./pages/Home/Home";
 import UserProfile from "./pages/UserProfile/UserProfile";
 import MarketplacePage from "./pages/Marketplace/Marketplace";
+import ProductDetailPage from "./pages/ProductDetail/ProductDetailPage";
 import SignUpPage from "./pages/SignUp/SignUpPage";
 import UserSignupPage from "./pages/SignUp/UserSignupPage";
 import VerifyOtpPage from "./pages/VerifyOtp/VerifyOtpPage";
@@ -75,6 +76,8 @@ function App() {
               <Route path="/profile/me" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
               <Route path="/profile/:username" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
               <Route path="/marketplace" element={<MarketplacePage />} />
+              <Route path="/marketplace/product/:id" element={<ProductDetailPage />} />
+              <Route path="/product/:id" element={<ProductDetailPage />} />
               <Route path="/donations" element={<ProtectedRoute><DonationsPage /></ProtectedRoute>} />
               <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
               <Route path="/donate" element={<ProtectedRoute><DonatePage /></ProtectedRoute>} />

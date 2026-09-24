@@ -54,10 +54,9 @@ export const listProducts = asyncHandler(async (req, res) => {
 });
 
 export const getProduct = asyncHandler(async (req, res) => {
-  const product = await Product.findById(req.params.productId).populate(
-    "brandId",
-    "brandName logoUrl slug",
-  );
+  const product = await Product.findById(req.params.productId)
+    .populate("brandId", "brandName logoUrl slug")
+    .populate("ownerUserId", "firstName lastName userName profileImageUrl avatarUrl role isVerified");
 
   if (!product) {
     throw new AppError("Product not found.", 404, "PRODUCT_NOT_FOUND");
