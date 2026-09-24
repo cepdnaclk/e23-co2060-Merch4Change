@@ -16,6 +16,19 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: opacity 0.2s ease;
+}
+
+.post-user-info:hover .post-meta h4 {
+  color: #4a24e1;
+  text-decoration: underline;
+}
+
+.post-user-info:hover .post-avatar {
+  transform: scale(1.05);
+  transition: transform 0.2s ease;
 }
 
 .post-avatar {
@@ -24,6 +37,7 @@
   border-radius: 50%;
   object-fit: cover;
   background: #f0f2f5;
+  transition: transform 0.2s ease;
 }
 
 .post-meta h4 {
@@ -31,6 +45,7 @@
   font-size: 15px;
   font-weight: 700;
   color: #1a1a1a;
+  transition: color 0.15s ease;
 }
 
 .post-meta span {

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Post.css";
 
 import defaultUserPic from "../../assets/user.svg";
@@ -37,6 +38,13 @@ function idsMatch(left, right) {
 }
 
 function Post({ post, onOpen }) {
+  let navigate = null;
+  try {
+    navigate = useNavigate();
+  } catch {
+    navigate = null;
+  }
+
   const { user: currentUser } = useAuth();
   const isLive = Boolean(post);
   const currentUserId = currentUser?._id || currentUser?.id;
@@ -45,7 +53,7 @@ function Post({ post, onOpen }) {
   const [localLikes, setLocalLikes] = useState(post?.likes || []);
   const [isLiking, setIsLiking] = useState(false);
 
-  const author = post?.userId;
+  const author = post?.userId || post?.author;
   const images = post?.images || [];
   const likes = isLive ? localLikes : [];
   const isLiked = isLive
@@ -53,6 +61,23 @@ function Post({ post, onOpen }) {
     : like;
   const likesCount = isLive ? likes.length : "1.2k";
   const commentsCount = isLive ? post.comments?.length || 0 : 84;
+
+  const handleProfileClick = (event) => {
+    event.stopPropagation();
+    if (!isLive || !author) return;
+    const targetUsername = author.userName;
+    const path = targetUsername
+      ? (currentUser?.userName && targetUsername === currentUser.userName
+          ? "/profile/me"
+          : `/profile/${targetUsername}`)
+      : (author._id || author.id ? `/profile/${author._id || author.id}` : null);
+    if (!path) return;
+    if (navigate) {
+      navigate(path);
+    } else if (typeof window !== "undefined" && window.location) {
+      window.location.assign(path);
+    }
+  };
 
   const handleLike = async (event) => {
     event.stopPropagation();
@@ -81,7 +106,13 @@ function Post({ post, onOpen }) {
       style={isLive && onOpen ? { cursor: "pointer" } : undefined}
     >
       <div className="post-header">
-        <div className="post-user-info">
+        <div
+          className="post-user-info"
+          onClick={handleProfileClick}
+          role={isLive && author ? "button" : undefined}
+          tabIndex={isLive && author ? 0 : undefined}
+          style={isLive && author ? { cursor: "pointer" } : undefined}
+        >
           <img
             src={author?.profileImageUrl || author?.avatarUrl || defaultUserPic}
             alt="user"

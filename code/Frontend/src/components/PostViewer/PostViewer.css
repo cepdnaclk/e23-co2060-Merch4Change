@@ -139,6 +139,19 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: opacity 0.2s ease;
+}
+
+.pv-author:hover .pv-author-name {
+  color: #4a24e1;
+  text-decoration: underline;
+}
+
+.pv-author:hover .pv-author-img {
+  transform: scale(1.05);
+  transition: transform 0.2s ease;
 }
 
 .pv-author-img {
@@ -146,6 +159,7 @@
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
+  transition: transform 0.2s ease;
 }
 
 .pv-author-info {
@@ -157,6 +171,7 @@
   font-weight: 600;
   font-size: 15px;
   color: #111;
+  transition: color 0.15s ease;
 }
 
 .pv-author-username {
@@ -212,6 +227,11 @@
   height: 28px;
   border-radius: 50%;
   object-fit: cover;
+  transition: transform 0.2s ease;
+}
+
+.pv-comment-avatar:hover {
+  transform: scale(1.08);
 }
 
 .pv-comment-body {
@@ -228,6 +248,12 @@
   font-size: 13px;
   color: #111;
   margin-bottom: 2px;
+  transition: color 0.15s ease;
+}
+
+.pv-comment-author:hover {
+  color: #4a24e1;
+  text-decoration: underline;
 }
 
 .pv-comment-text {

@@ -1,10 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './PostViewer.css';
 import { X, ChevronLeft, ChevronRight, Heart, Share2, MessageCircle, Send } from 'lucide-react';
 import { useAuth } from '../../context/Context';
 import { likePost, commentOnPost } from '../../api/postsService';
 
 function PostViewer({ post, onClose }) {
+  let navigate = null;
+  try {
+    navigate = useNavigate();
+  } catch {
+    navigate = null;
+  }
+
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { user: currentUser } = useAuth();
   
@@ -14,6 +22,24 @@ function PostViewer({ post, onClose }) {
   
   const [localComments, setLocalComments] = useState([]);
   const [localLikes, setLocalLikes] = useState([]);
+
+  const author = post?.author || (typeof post?.userId === 'object' ? post?.userId : null);
+
+  const handleProfileClick = (targetUser, e) => {
+    if (e && e.stopPropagation) e.stopPropagation();
+    if (!targetUser) return;
+    const targetUsername = targetUser.userName;
+    const path = targetUsername
+      ? (currentUser?.userName && targetUsername === currentUser.userName ? '/profile/me' : `/profile/${targetUsername}`)
+      : (targetUser._id || targetUser.id ? `/profile/${targetUser._id || targetUser.id}` : null);
+    if (!path) return;
+    if (onClose) onClose();
+    if (navigate) {
+      navigate(path);
+    } else if (typeof window !== 'undefined' && window.location) {
+      window.location.assign(path);
+    }
+  };
 
   useEffect(() => {
     if (post) {
@@ -115,19 +141,31 @@ function PostViewer({ post, onClose }) {
 
         <div className="pv-right-pane">
           <div className="pv-header">
-            {post.author && (
-              <div className="pv-author">
-                <img src={post.author.profileImageUrl || '/src/assets/user.svg'} alt="Author" className="pv-author-img" />
+            {author && (
+              <div
+                className="pv-author"
+                onClick={(e) => handleProfileClick(author, e)}
+                style={{ cursor: "pointer" }}
+                role="button"
+                tabIndex={0}
+              >
+                <img
+                  src={author.profileImageUrl || author.avatarUrl || '/src/assets/user.svg'}
+                  alt="Author"
+                  className="pv-author-img"
+                />
                 <div className="pv-author-info">
-                  <span className="pv-author-name">{post.author.firstName} {post.author.lastName}</span>
-                  <span className="pv-author-username">@{post.author.userName}</span>
+                  <span className="pv-author-name">
+                    {author.firstName || ''} {author.lastName || ''}
+                  </span>
+                  <span className="pv-author-username">@{author.userName}</span>
                 </div>
               </div>
             )}
           </div>
 
           <div className="pv-content">
-            <p className="pv-description">{post.description}</p>
+            <p className="pv-description">{post.description || post.content}</p>
           </div>
 
           <div className="pv-comments-section">
@@ -136,12 +174,24 @@ function PostViewer({ post, onClose }) {
               {localComments.length > 0 ? (
                 localComments.map((comment, index) => {
                   const authorName = comment.author?.userName || comment.author?.firstName || 'User';
-                  const authorImg = comment.author?.profileImageUrl || '/src/assets/user.svg';
+                  const authorImg = comment.author?.profileImageUrl || comment.author?.avatarUrl || '/src/assets/user.svg';
                   return (
                     <div key={index} className="pv-comment">
-                      <img src={authorImg} alt="author" className="pv-comment-avatar" />
+                      <img
+                        src={authorImg}
+                        alt="author"
+                        className="pv-comment-avatar"
+                        onClick={(e) => handleProfileClick(comment.author, e)}
+                        style={{ cursor: comment.author?.userName ? "pointer" : "default" }}
+                      />
                       <div className="pv-comment-body">
-                        <span className="pv-comment-author">@{authorName}</span>
+                        <span
+                          className="pv-comment-author"
+                          onClick={(e) => handleProfileClick(comment.author, e)}
+                          style={{ cursor: comment.author?.userName ? "pointer" : "default" }}
+                        >
+                          @{authorName}
+                        </span>
                         <span className="pv-comment-text">{comment.text}</span>
                       </div>
                     </div>
