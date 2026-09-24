@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import apiClient from "../../api/apiClient";
 import "./Home.css";
+import TopNavbar from "../../components/TopNavbar/TopNavbar";
 import Feed from "../../components/Feed/Feed";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import RightSidebar from "../../components/RightSidebar/RightSidebar";
@@ -16,7 +17,7 @@ function Home() {
     lastName: "User", 
     userName: "guest",
   });
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const currentTab = searchParams.get("tab");
   const activeTab = VALID_TABS.has(currentTab) ? currentTab : "feed";
   const isFeedTab = activeTab === "feed";
@@ -49,10 +50,18 @@ function Home() {
 
   return (
     <div className={`luminous-app ${effectiveSidebarCollapsed ? "sidebar-collapsed" : ""}`}>
+      <TopNavbar
+        isSidebarCollapsed={effectiveSidebarCollapsed}
+        setIsSidebarCollapsed={setIsSidebarCollapsed}
+        profileData={profileData}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+      />
       <div className="lum-layout">
         <Sidebar
           profileData={profileData}
           setIsSidebarCollapsed={setIsSidebarCollapsed}
+          isSidebarCollapsed={effectiveSidebarCollapsed}
         />
 
         <main className="lum-main-content home-main-content">

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../../components/Sidebar/Sidebar";
+import TopNavbar from "../../components/TopNavbar/TopNavbar";
 import NotificationDropDown from "../../components/Notifications/NotificationDropDown";
 import { fetchNotifications, markNotificationRead } from "../../services/notificationService";
 
 export default function NotificationPage() {
   const [notifications, setNotifications] = useState([]);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 
   useEffect(() => {
     fetchNotifications()
@@ -31,17 +33,22 @@ export default function NotificationPage() {
   };
 
   return (
-    <div className={`luminous-app`}>
+    <div className={`luminous-app ${isSidebarCollapsed ? "sidebar-collapsed" : ""}`}>
+      <TopNavbar
+        isSidebarCollapsed={isSidebarCollapsed}
+        setIsSidebarCollapsed={setIsSidebarCollapsed}
+      />
       <div className="lum-layout">
         <Sidebar 
-          setIsSidebarCollapsed={() => {}} 
+          setIsSidebarCollapsed={setIsSidebarCollapsed}
+          isSidebarCollapsed={isSidebarCollapsed}
         />
         <main className="lum-main-content">
-          <div className="p-6 flex justify-center w-full min-h-screen">
+          <div className="p-3 sm:p-6 flex justify-center w-full min-h-screen">
             <NotificationDropDown 
               notifications={notifications} 
               onMarkAsRead={handleMarkAsRead}
-              containerClassName="bg-white rounded-xl shadow-sm border border-gray-100 w-full max-w-3xl p-6 h-fit mt-4"
+              containerClassName="bg-white dark:bg-[#1b1b1f] rounded-xl shadow-sm border border-gray-100 dark:border-[#2c2c33] w-full max-w-3xl p-4 sm:p-6 h-fit mt-2 sm:mt-4"
             />
           </div>
         </main>

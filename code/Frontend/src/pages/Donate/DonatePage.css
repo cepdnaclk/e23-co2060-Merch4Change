@@ -534,3 +534,52 @@
   gap: 16px;
   flex-wrap: wrap;
 }
+
+@media (max-width: 768px) {
+  .donate-page-main {
+    padding: 20px 14px 60px;
+  }
+
+  .donate-summary-card,
+  .donate-config-card,
+  .donate-receipt-card {
+    padding: 20px 16px;
+    border-radius: 16px;
+  }
+
+  .donate-tabs-wrapper {
+    flex-direction: column;
+    padding: 4px;
+    gap: 4px;
+  }
+
+  .donate-tab-btn {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+
+  .donate-project-header-row {
+    flex-direction: column;
+  }
+
+  .donate-balance-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .donate-presets-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .donate-receipt-title {
+    font-size: 24px;
+  }
+
+  .donate-receipt-details {
+    padding: 16px;
+    font-size: 13px;
+  }
+}
+

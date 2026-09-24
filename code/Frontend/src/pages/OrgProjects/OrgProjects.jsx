@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { useAuth } from "../../context/Context";
 import { Heart, Plus, X, ArrowLeft } from "lucide-react";
 import Sidebar from "../../components/Sidebar/Sidebar";
+import TopNavbar from "../../components/TopNavbar/TopNavbar";
 import "./OrgProjects.css";
 
 const OrgProjects = () => {
@@ -14,6 +15,7 @@ const OrgProjects = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState({ title: "", description: "", goalAmount: "" });
@@ -81,9 +83,17 @@ const OrgProjects = () => {
   if (error) return <div className="org-projects-error">{error}</div>;
 
   return (
-    <div className="luminous-app">
+    <div className={`luminous-app ${isSidebarCollapsed ? "sidebar-collapsed" : ""}`}>
+      <TopNavbar
+        profileData={profile}
+        isSidebarCollapsed={isSidebarCollapsed}
+        setIsSidebarCollapsed={setIsSidebarCollapsed}
+      />
       <div className="lum-layout">
-        <Sidebar setIsSidebarCollapsed={() => {}} />
+        <Sidebar
+          setIsSidebarCollapsed={setIsSidebarCollapsed}
+          isSidebarCollapsed={isSidebarCollapsed}
+        />
         <main className="lum-main-content">
           <div className="org-projects-container">
       <div className="org-projects-header">

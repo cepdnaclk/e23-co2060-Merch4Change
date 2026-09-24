@@ -96,44 +96,67 @@ function Navbar({ scrolled = false }) {
         </div>
 
         {/* Mobile Menu Toggle */}
-        {isLandingPage && (
-          <button
-            className="lp-navbar-mobile-toggle"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label="Toggle menu"
-            aria-expanded={isMobileMenuOpen}
-            aria-controls="landing-mobile-menu"
-          >
-            {isMobileMenuOpen ? (
-              <X size={24} />
-            ) : (
-              <Menu size={24} />
-            )}
-          </button>
-        )}
+        <button
+          className="lp-navbar-mobile-toggle"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          aria-label="Toggle menu"
+          aria-expanded={isMobileMenuOpen}
+          aria-controls="public-mobile-menu"
+        >
+          {isMobileMenuOpen ? (
+            <X size={24} />
+          ) : (
+            <Menu size={24} />
+          )}
+        </button>
       </div>
 
       {/* Mobile Menu */}
-      {isLandingPage && isMobileMenuOpen && (
-        <div className="lp-navbar-mobile-menu" id="landing-mobile-menu">
+      {isMobileMenuOpen && (
+        <div className="lp-navbar-mobile-menu" id="public-mobile-menu">
           <button
             className="lp-navbar-mobile-link"
             onClick={() => handleNavigation("/marketplace")}
           >
             {t("publicNav.marketplace")}
           </button>
-          <button
-            className="lp-navbar-mobile-link"
-            onClick={() => scrollTo("for-organisations")}
-          >
-            {t("publicNav.forOrganisations")}
-          </button>
-          <button
-            className="lp-navbar-mobile-link"
-            onClick={() => scrollTo("impact-stats")}
-          >
-            {t("publicNav.impact")}
-          </button>
+          {isLandingPage ? (
+            <>
+              <button
+                className="lp-navbar-mobile-link"
+                onClick={() => scrollTo("for-organisations")}
+              >
+                {t("publicNav.forOrganisations")}
+              </button>
+              <button
+                className="lp-navbar-mobile-link"
+                onClick={() => scrollTo("impact-stats")}
+              >
+                {t("publicNav.impact")}
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                className="lp-navbar-mobile-link"
+                onClick={() => handleNavigation("/faq")}
+              >
+                FAQ
+              </button>
+              <button
+                className="lp-navbar-mobile-link"
+                onClick={() => handleNavigation("/help")}
+              >
+                Help & Support
+              </button>
+              <button
+                className="lp-navbar-mobile-link"
+                onClick={() => handleNavigation("/about/story")}
+              >
+                About Us
+              </button>
+            </>
+          )}
 
           <div className="lp-navbar-mobile-divider"></div>
 

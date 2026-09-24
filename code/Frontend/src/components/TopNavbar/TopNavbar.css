@@ -421,18 +421,71 @@
 @media (max-width: 992px) {
   .lum-topbar {
     margin-left: 0;
-    padding: 0 20px;
+    padding: 0 16px;
+    height: 60px;
   }
 
   .lum-menu-btn { display: flex; align-items: center; }
-  .lum-brand { display: block; }
+  .lum-brand { display: block; font-size: 18px; }
 
   .lum-nav-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Hide textual tabs from topbar on mobile */
+  .lum-nav-link {
     display: none;
   }
 
   .lum-search { 
-    max-width: 280px;
-    min-width: 240px;
+    max-width: 220px;
+    min-width: 140px;
+    padding: 7px 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .lum-topbar {
+    padding: 0 12px;
+    height: 56px;
+  }
+
+  .lum-topbar-left {
+    gap: 8px;
+  }
+
+  .lum-brand {
+    font-size: 16px;
+  }
+
+  .lum-profile-btn span {
+    display: none;
+  }
+
+  .lum-profile-btn {
+    padding: 3px;
+  }
+
+  .lum-coin-balance {
+    padding: 5px 10px;
+    font-size: 12px;
+    gap: 4px;
+  }
+
+  .lum-notification-dropdown {
+    position: fixed;
+    top: 60px;
+    right: 12px;
+    left: 12px;
+    max-height: 75vh;
+    width: auto;
+  }
+}
+
+@media (max-width: 520px) {
+  .lum-search {
+    display: none;
   }
 }

@@ -171,13 +171,59 @@
   background-color: var(--m4c-bg-surface-alt, #f8f9fb);
 }
 
+.lum-sidebar-backdrop {
+  display: none;
+}
+
+.lum-sidebar-close-btn {
+  display: none;
+  background: none;
+  border: none;
+  margin-left: auto;
+  color: var(--m4c-text-secondary, #666666);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.lum-sidebar-close-btn:hover {
+  color: var(--m4c-accent, #4a24e1);
+  background: var(--m4c-bg-surface-alt, #f8f9fb);
+}
+
 /* Responsive */
 @media (max-width: 992px) {
   .lum-sidebar-left {
     transform: translateX(-100%);
+    width: 260px !important;
+    max-width: 80vw;
+    z-index: 1200;
+    box-shadow: 4px 0 25px rgba(0, 0, 0, 0.2);
   }
 
-  .sidebar-collapsed .lum-sidebar-left {
+  /* When open on mobile (not sidebar-collapsed) */
+  .luminous-app:not(.sidebar-collapsed) .lum-sidebar-left {
     transform: translateX(0);
+  }
+
+  .luminous-app:not(.sidebar-collapsed) .lum-sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(2px);
+    z-index: 1150;
+  }
+
+  .luminous-app:not(.sidebar-collapsed) .lum-nav-text,
+  .luminous-app:not(.sidebar-collapsed) .lum-logo h2 {
+    display: block !important;
+  }
+
+  .luminous-app:not(.sidebar-collapsed) .lum-sidebar-close-btn {
+    display: flex !important;
   }
 }

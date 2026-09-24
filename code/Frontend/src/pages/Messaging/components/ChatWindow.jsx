@@ -1,8 +1,8 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Search, MoreVertical, Paperclip, Image as ImageIcon, Mic, Smile, Send, Menu } from 'lucide-react';
+import { Search, MoreVertical, Paperclip, Image as ImageIcon, Mic, Smile, Send, Menu, ArrowLeft } from 'lucide-react';
 import MessageBubble from './MessageBubble';
 
-function ChatWindow({ activeContact, messages, onSendMessage, isConvListCollapsed, onToggleConvList }) {
+function ChatWindow({ activeContact, messages, onSendMessage, isConvListCollapsed, onToggleConvList, onBack }) {
   const scrollRef = useRef();
   const [inputText, setInputText] = useState('');
 
@@ -38,8 +38,18 @@ function ChatWindow({ activeContact, messages, onSendMessage, isConvListCollapse
     <div className="mc">
       <div className="mc-header">
         <div className="mc-hinfo">
+          {onBack && (
+            <button
+              type="button"
+              className="mc-hbtn mc-back-btn"
+              onClick={onBack}
+              aria-label="Back to conversations"
+            >
+              <ArrowLeft size={18} />
+            </button>
+          )}
           {isConvListCollapsed && (
-            <button className="mc-hbtn" style={{ marginRight: '12px', border: 'none', background: 'transparent' }} onClick={onToggleConvList} title="Expand sidebar">
+            <button className="mc-hbtn mc-expand-btn" style={{ marginRight: '12px', border: 'none', background: 'transparent' }} onClick={onToggleConvList} title="Expand sidebar">
               <Menu size={18} />
             </button>
           )}

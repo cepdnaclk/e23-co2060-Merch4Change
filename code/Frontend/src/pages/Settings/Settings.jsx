@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar/Sidebar";
+import TopNavbar from "../../components/TopNavbar/TopNavbar";
 import SettingsSidebar from "./components/SettingsSidebar";
 import {
   ProfileSection,
@@ -31,6 +32,7 @@ function Settings() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [profileData, setProfileData] = useState({
     firstName: "Guest",
     lastName: "User",
@@ -83,16 +85,28 @@ function Settings() {
   const ActiveSection = SECTIONS[activeSection] || ProfileSection;
 
   return (
-    <div className="settings-page">
-      <Sidebar profileData={profileData} />
-      <div className="settings-body">
-        <SettingsSidebar
-          activeSection={activeSection}
-          onSelect={handleSelect}
-          showOrganization={profileData.accountType === "organization"}
+    <div className={`luminous-app ${isSidebarCollapsed ? "sidebar-collapsed" : ""}`}>
+      <TopNavbar
+        isSidebarCollapsed={isSidebarCollapsed}
+        setIsSidebarCollapsed={setIsSidebarCollapsed}
+      />
+      <div className="lum-layout settings-layout">
+        <Sidebar
+          profileData={profileData}
+          isSidebarCollapsed={isSidebarCollapsed}
+          setIsSidebarCollapsed={setIsSidebarCollapsed}
         />
-        <main className="settings-content">
-          <ActiveSection profileData={profileData} onUpdate={setProfileData} />
+        <main className="lum-main-content settings-main-content">
+          <div className="settings-body">
+            <SettingsSidebar
+              activeSection={activeSection}
+              onSelect={handleSelect}
+              showOrganization={profileData.accountType === "organization"}
+            />
+            <div className="settings-content">
+              <ActiveSection profileData={profileData} onUpdate={setProfileData} />
+            </div>
+          </div>
         </main>
       </div>
     </div>

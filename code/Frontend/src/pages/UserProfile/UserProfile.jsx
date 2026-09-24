@@ -4,6 +4,7 @@ import apiClient from "../../api/apiClient";
 import { useAuth } from "../../context/Context";
 import "./UserProfile.css";
 import "../Home/Home.css";
+import TopNavbar from "../../components/TopNavbar/TopNavbar";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import ProfileHeader from "./ProfileHeader/ProfileHeader";
 import ProfileHighlights from "./ProfileHighlights/ProfileHighlights";
@@ -44,7 +45,7 @@ function UserProfile() {
   
   const [profileData, setProfileData] = useState(null);
   const [isFollowing, setIsFollowing] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [activeTab, setActiveTab] = useState("POSTS");
   const [isEditing, setIsEditing] = useState(false);
@@ -382,10 +383,16 @@ function UserProfile() {
 
   return (
     <div className={`luminous-app ${isSidebarCollapsed ? "sidebar-collapsed" : ""}`}>
+      <TopNavbar
+        profileData={currentUser || profileData}
+        isSidebarCollapsed={isSidebarCollapsed}
+        setIsSidebarCollapsed={setIsSidebarCollapsed}
+      />
       <div className="lum-layout">
         <Sidebar
           profileData={currentUser || profileData}
           setIsSidebarCollapsed={setIsSidebarCollapsed}
+          isSidebarCollapsed={isSidebarCollapsed}
           onPostCreated={loadPosts}
         />
 

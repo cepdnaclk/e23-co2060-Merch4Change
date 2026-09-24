@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar/Sidebar";
+import TopNavbar from "../../components/TopNavbar/TopNavbar";
 import { useSearch } from "../../hooks/useSearch";
 import { Search, Loader2 } from "lucide-react";
 import SearchResultItem from "../../components/TopNavbar/search/SearchResultItem";
@@ -36,6 +37,7 @@ export default function SearchPage() {
   const [filter, setFilter] = useState("all");
   const [prediction, setPrediction] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 
   useEffect(() => {
     if (!query || query.length < 2 || !results) {
@@ -155,9 +157,16 @@ export default function SearchPage() {
   const anyVisibleResults = showUsers || showCharities || showProjects || showProducts;
 
   return (
-    <div className={`luminous-app`}>
+    <div className={`luminous-app ${isSidebarCollapsed ? "sidebar-collapsed" : ""}`}>
+      <TopNavbar
+        isSidebarCollapsed={isSidebarCollapsed}
+        setIsSidebarCollapsed={setIsSidebarCollapsed}
+      />
       <div className="lum-layout">
-        <Sidebar setIsSidebarCollapsed={() => {}} />
+        <Sidebar
+          setIsSidebarCollapsed={setIsSidebarCollapsed}
+          isSidebarCollapsed={isSidebarCollapsed}
+        />
         <main className="lum-main-content">
           <div className="search-page-container">
             <div className="search-page-header">

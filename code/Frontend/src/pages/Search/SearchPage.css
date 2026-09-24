@@ -74,7 +74,7 @@
 
 .search-page-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 16px;
 }
 
@@ -117,4 +117,15 @@
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .search-page-container {
+    padding: 20px 16px;
+  }
+
+  .search-page-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
 }

@@ -140,3 +140,23 @@
 
 .charity-form-message.success { color: #047857; }
 .charity-form-message.error { color: #b91c1c; }
+
+@media (max-width: 600px) {
+  .charity-verify-page {
+    padding: 12px 10px 40px;
+  }
+
+  .charity-doc-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed #ddd6f3;
+    margin-bottom: 8px;
+  }
+
+  .charity-doc-row button {
+    align-self: flex-start;
+    padding: 6px 0;
+  }
+}
+

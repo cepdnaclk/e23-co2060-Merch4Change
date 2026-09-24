@@ -368,3 +368,27 @@
   outline: none;
   border-color: var(--m4c-accent);
 }
+
+@media (max-width: 600px) {
+  .s-section {
+    padding: 20px 16px;
+    max-width: 100%;
+  }
+
+  .s-input {
+    max-width: 100%;
+  }
+
+  .s-avatar-row {
+    max-width: 100%;
+  }
+
+  .otp-inputs-container {
+    gap: 6px;
+  }
+
+  .otp-input {
+    width: 36px;
+    height: 42px;
+  }
+}
