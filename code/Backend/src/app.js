@@ -74,8 +74,8 @@ app.use(
   }),
 );
 
-// Rate limiter applied to all /api/v1 routes
-app.use("/api/v1", apiRateLimiter);
+// Rate limiter applied to API routes
+app.use(["/api/v1", "/api/search"], apiRateLimiter);
 
 // Routes
 app.use("/api/v1", healthRoutes);
@@ -83,6 +83,7 @@ app.use("/api/v1/auth", authRateLimiter, authRoutes);
 app.use("/api/v1/marketplace", marketplaceRoutes);
 app.use("/api/v1/profile", profileRoutes);
 app.use("/api/search", searchRoutes);
+app.use("/api/v1/search", searchRoutes);
 app.use("/api/v1/images", imageRoutes);
 app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/posts", postRoutes);

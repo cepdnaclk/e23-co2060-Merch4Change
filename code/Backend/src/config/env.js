@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const requiredInProduction = ["MONGODB_URI", "JWT_SECRET"];
+const requiredInProduction = ["MONGODB_URI", "JWT_SECRET", "JWT_REFRESH_SECRET"];
 
 for (const key of requiredInProduction) {
   if (process.env.NODE_ENV === "production" && !process.env[key]) {

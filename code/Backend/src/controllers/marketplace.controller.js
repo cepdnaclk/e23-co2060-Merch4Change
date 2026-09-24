@@ -67,10 +67,33 @@ export const getProduct = asyncHandler(async (req, res) => {
   });
 });
 
+const ALLOWED_PRODUCT_FIELDS = [
+  "name",
+  "description",
+  "price",
+  "stock",
+  "currency",
+  "images",
+  "imageUrl",
+  "isPublished",
+  "isLimitedEdition",
+];
+
+const pickProductFields = (source = {}) => {
+  const clean = {};
+  for (const field of ALLOWED_PRODUCT_FIELDS) {
+    if (Object.prototype.hasOwnProperty.call(source, field)) {
+      clean[field] = source[field];
+    }
+  }
+  return clean;
+};
+
 export const createProduct = asyncHandler(async (req, res) => {
   const brand = await resolveBrandForUser(req.user);
+  const cleanData = pickProductFields(req.body);
   const product = await Product.create({
-    ...req.body,
+    ...cleanData,
     brandId: brand._id,
     ownerUserId: req.user._id,
   });
@@ -89,7 +112,8 @@ export const updateProduct = asyncHandler(async (req, res) => {
 
   await ensureProductOwnership(product, req.user);
 
-  Object.assign(product, req.body);
+  const cleanData = pickProductFields(req.body);
+  Object.assign(product, cleanData);
   const updatedProduct = await product.save();
 
   return successResponse(res, 200, "Product updated successfully.", {
@@ -115,39 +139,54 @@ export const deleteProduct = asyncHandler(async (req, res) => {
 
 export const checkout = asyncHandler(async (req, res) => {
   const requestedItems = req.body.items;
+  if (!Array.isArray(requestedItems) || requestedItems.length === 0) {
+    throw new AppError("Items are required for checkout.", 400, "VALIDATION_ERROR");
+  }
+
   const orderItems = [];
   let totalAmount = 0;
+  const decrementedProducts = [];
 
-  for (const requestedItem of requestedItems) {
-    const product = await Product.findById(requestedItem.productId);
+  try {
+    for (const requestedItem of requestedItems) {
+      const quantity = Number.parseInt(requestedItem.quantity, 10);
+      if (!Number.isInteger(quantity) || quantity <= 0) {
+        throw new AppError("Item quantity must be a positive integer.", 400, "VALIDATION_ERROR");
+      }
 
-    if (!product) {
-      throw new AppError(
-        `Product not found for id ${requestedItem.productId}.`,
-        404,
-        "PRODUCT_NOT_FOUND",
+      // Atomically decrement stock only if product has enough stock
+      const product = await Product.findOneAndUpdate(
+        { _id: requestedItem.productId, stock: { $gte: quantity } },
+        { $inc: { stock: -quantity } },
+        { new: true },
       );
+
+      if (!product) {
+        const existingProduct = await Product.findById(requestedItem.productId);
+        if (!existingProduct) {
+          throw new AppError(`Product not found for id ${requestedItem.productId}.`, 404, "PRODUCT_NOT_FOUND");
+        }
+        throw new AppError(`Insufficient stock for ${existingProduct.name}.`, 409, "INSUFFICIENT_STOCK");
+      }
+
+      decrementedProducts.push({ productId: product._id, quantity });
+
+      const lineTotal = product.price * quantity;
+      totalAmount += lineTotal;
+
+      orderItems.push({
+        productId: product._id,
+        titleSnapshot: product.name,
+        quantity,
+        unitPrice: product.price,
+      });
     }
-
-    if (product.stock < requestedItem.quantity) {
-      throw new AppError(
-        `Insufficient stock for ${product.name}.`,
-        409,
-        "INSUFFICIENT_STOCK",
-      );
+  } catch (error) {
+    // Roll back decremented stock if an error occurred during the loop
+    for (const item of decrementedProducts) {
+      await Product.findByIdAndUpdate(item.productId, { $inc: { stock: item.quantity } });
     }
-
-    const lineTotal = product.price * requestedItem.quantity;
-    totalAmount += lineTotal;
-    product.stock -= requestedItem.quantity;
-    await product.save();
-
-    orderItems.push({
-      productId: product._id,
-      titleSnapshot: product.name,
-      quantity: requestedItem.quantity,
-      unitPrice: product.price,
-    });
+    throw error;
   }
 
   const coinsEarned = Math.floor(totalAmount / 10);
@@ -297,15 +336,25 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     }
   }
 
-  const isBuyer =
-    String(order.userId._id || order.userId) === String(req.user._id);
+  const isBuyer = String(order.userId._id || order.userId) === String(req.user._id);
+  const isAdmin = req.user.role === "admin";
 
-  if (!isBuyer && !isSeller) {
-    throw new AppError(
-      "You do not have permission to update this order.",
-      403,
-      "FORBIDDEN",
-    );
+  if (!isBuyer && !isSeller && !isAdmin) {
+    throw new AppError("You do not have permission to update this order.", 403, "FORBIDDEN");
+  }
+
+  // Restrict buyer capabilities: buyers may only cancel an order that is still pending or paid
+  if (isBuyer && !isSeller && !isAdmin) {
+    if (status !== "cancelled") {
+      throw new AppError("Buyers are only permitted to cancel their orders.", 403, "FORBIDDEN");
+    }
+    if (!["pending", "paid"].includes(order.status)) {
+      throw new AppError(
+        "Orders that are already shipped, completed, or cancelled cannot be modified.",
+        400,
+        "INVALID_ORDER_STATE",
+      );
+    }
   }
 
   const oldStatus = order.status;

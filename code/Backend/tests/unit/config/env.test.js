@@ -38,6 +38,7 @@ test("env module throws in production when required vars are missing", () => {
       NODE_ENV: "production",
       MONGODB_URI: "",
       JWT_SECRET: "present",
+      JWT_REFRESH_SECRET: "present",
     });
   }, /Missing required environment variable: MONGODB_URI/);
 
@@ -46,6 +47,15 @@ test("env module throws in production when required vars are missing", () => {
       NODE_ENV: "production",
       MONGODB_URI: "mongodb://localhost:27017/test",
       JWT_SECRET: "",
+      JWT_REFRESH_SECRET: "present",
     });
   }, /Missing required environment variable: JWT_SECRET/);
+  assert.throws(() => {
+    runScript("import './src/config/env.js';", {
+      NODE_ENV: "production",
+      MONGODB_URI: "mongodb://localhost:27017/test",
+      JWT_SECRET: "present",
+      JWT_REFRESH_SECRET: "",
+    });
+  }, /Missing required environment variable: JWT_REFRESH_SECRET/);
 });

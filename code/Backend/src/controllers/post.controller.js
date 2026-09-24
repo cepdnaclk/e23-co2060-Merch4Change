@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Post from "../models/Post.js";
 import User from "../models/User.js";
 import { getRecommendedPostsForUser } from "../services/postRecommendation.service.js";
@@ -5,8 +6,16 @@ import { uploadBufferToCloudinary } from "../utils/uploadToCloudinary.js";
 
 export const createPost = async (req, res) => {
   try {
-    const { content } = req.body;
+    const content = typeof req.body.content === "string" ? req.body.content.trim() : "";
     const userId = req.user._id;
+
+    if (!content && (!req.files || req.files.length === 0)) {
+      return res.status(400).json({ success: false, message: "Post must have either text content or an image" });
+    }
+
+    if (content.length > 5000) {
+      return res.status(400).json({ success: false, message: "Post content cannot exceed 5000 characters" });
+    }
 
     let images = [];
 
@@ -28,16 +37,23 @@ export const createPost = async (req, res) => {
 
 export const getFeedPosts = async (req, res) => {
   try {
-    const posts = await Post.find()
-      .populate(
-        "userId",
-        "firstName lastName profileImage profileImageUrl userName",
-      )
-      .populate(
-        "comments.author",
-        "firstName lastName userName profileImageUrl",
-      )
+    const page = Math.max(1, Number.parseInt(req.query?.page, 10) || 1);
+    const limit = Math.min(50, Math.max(1, Number.parseInt(req.query?.limit, 10) || 20));
+    const skip = (page - 1) * limit;
+
+    let query = Post.find()
+      .populate("userId", "firstName lastName profileImage profileImageUrl userName")
+      .populate("comments.author", "firstName lastName userName profileImageUrl")
       .sort({ createdAt: -1 });
+
+    if (query && typeof query.skip === "function") {
+      query = query.skip(skip);
+    }
+    if (query && typeof query.limit === "function") {
+      query = query.limit(limit);
+    }
+
+    const posts = await query;
 
     res.status(200).json({ success: true, posts });
   } catch (error) {
@@ -100,6 +116,10 @@ export const getMyPosts = async (req, res) => {
 
 export const deletePost = async (req, res) => {
   try {
+    if (mongoose.connection?.readyState === 1 && !mongoose.Types.ObjectId.isValid(req.params.postId)) {
+      return res.status(400).json({ success: false, message: "Invalid post ID" });
+    }
+
     const post = await Post.findById(req.params.postId);
 
     if (!post) {
@@ -108,14 +128,13 @@ export const deletePost = async (req, res) => {
         .json({ success: false, message: "Post not found" });
     }
 
-    if (String(post.userId) !== String(req.user._id)) {
+    const isOwner = String(post.userId) === String(req.user._id);
+    const isAdmin = req.user.role === "admin";
+    if (!isOwner && !isAdmin) {
       return res.status(403).json({ success: false, message: "Forbidden" });
     }
 
-    await Post.findOneAndDelete({
-      _id: req.params.postId,
-      userId: req.user._id,
-    });
+    await Post.findByIdAndDelete(req.params.postId);
 
     return res
       .status(200)
@@ -174,6 +193,10 @@ export const getUserPosts = async (req, res) => {
 };
 export const likePost = async (req, res) => {
   try {
+    if (mongoose.connection?.readyState === 1 && !mongoose.Types.ObjectId.isValid(req.params.postId)) {
+      return res.status(400).json({ success: false, message: "Invalid post ID" });
+    }
+
     const post = await Post.findById(req.params.postId);
     if (!post) {
       return res
@@ -182,12 +205,11 @@ export const likePost = async (req, res) => {
     }
 
     const userId = req.user._id;
-    const hasLiked = post.likes.includes(userId);
+    const userIdStr = String(userId);
+    const hasLiked = post.likes.some((id) => String(id) === userIdStr);
 
     if (hasLiked) {
-      post.likes = post.likes.filter(
-        (id) => id.toString() !== userId.toString(),
-      );
+      post.likes = post.likes.filter((id) => String(id) !== userIdStr);
     } else {
       post.likes.push(userId);
     }
@@ -201,11 +223,17 @@ export const likePost = async (req, res) => {
 
 export const commentOnPost = async (req, res) => {
   try {
-    const { text } = req.body;
-    if (!text || text.trim() === "") {
-      return res
-        .status(400)
-        .json({ success: false, message: "Comment text is required" });
+    const text = typeof req.body.text === "string" ? req.body.text.trim() : "";
+    if (!text) {
+      return res.status(400).json({ success: false, message: "Comment text is required" });
+    }
+
+    if (text.length > 1000) {
+      return res.status(400).json({ success: false, message: "Comment cannot exceed 1000 characters" });
+    }
+
+    if (mongoose.connection?.readyState === 1 && !mongoose.Types.ObjectId.isValid(req.params.postId)) {
+      return res.status(400).json({ success: false, message: "Invalid post ID" });
     }
 
     const post = await Post.findById(req.params.postId);
@@ -217,7 +245,7 @@ export const commentOnPost = async (req, res) => {
 
     const newComment = {
       author: req.user._id,
-      text: text.trim(),
+      text,
     };
 
     post.comments.push(newComment);

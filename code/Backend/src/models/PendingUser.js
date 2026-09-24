@@ -12,6 +12,7 @@ const pendingUserSchema = new mongoose.Schema({
   userName: { type: String, required: true },
   accountType: { type: String, required: true },
   otpCode: { type: String, required: true },
+  otpAttempts: { type: Number, default: 0 },
   profileData: { type: mongoose.Schema.Types.Mixed, required: true },
   createdAt: { type: Date, default: Date.now, expires: 900 }, // Auto-deletes after 15 minutes
 });

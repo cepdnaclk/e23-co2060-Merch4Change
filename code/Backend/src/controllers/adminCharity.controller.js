@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Charity from "../models/Charity.js";
 import Notification from "../models/Notification.js";
 import User from "../models/User.js";
@@ -6,26 +7,32 @@ import asyncHandler from "../utils/asyncHandler.js";
 import { successResponse } from "../utils/apiResponse.js";
 
 export const listCharitiesForReview = asyncHandler(async (req, res) => {
-  const { status = "pending", page = 1, limit = 20 } = req.query;
-  const skip = (Number(page) - 1) * Number(limit);
+  const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
+  const limit = Math.min(50, Math.max(1, Number.parseInt(req.query.limit, 10) || 20));
+  const validStatuses = ["pending", "verified", "rejected"];
+  const status = validStatuses.includes(req.query.status) ? req.query.status : "pending";
+  const skip = (page - 1) * limit;
 
   const [items, total] = await Promise.all([
     Charity.find({ verificationStatus: status })
       .populate("ownerUserId", "userName email firstName lastName")
       .sort({ submittedAt: 1 })
       .skip(skip)
-      .limit(Number(limit)),
+      .limit(limit),
     Charity.countDocuments({ verificationStatus: status }),
   ]);
 
   return successResponse(res, 200, "Charities fetched for review.", {
     items,
     total,
-    page: Number(page),
+    page,
   });
 });
 
 export const getCharityForReview = asyncHandler(async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    throw new AppError("Invalid charity ID.", 400, "VALIDATION_ERROR");
+  }
   const charity = await Charity.findById(req.params.id).populate(
     "ownerUserId",
     "userName email firstName lastName",
@@ -38,6 +45,9 @@ export const getCharityForReview = asyncHandler(async (req, res) => {
 });
 
 export const approveCharity = asyncHandler(async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    throw new AppError("Invalid charity ID.", 400, "VALIDATION_ERROR");
+  }
   const charity = await Charity.findById(req.params.id);
   if (!charity)
     throw new AppError("Charity not found.", 404, "CHARITY_NOT_FOUND");
@@ -68,7 +78,10 @@ export const approveCharity = asyncHandler(async (req, res) => {
 });
 
 export const rejectCharity = asyncHandler(async (req, res) => {
-  const { reason } = req.body;
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    throw new AppError("Invalid charity ID.", 400, "VALIDATION_ERROR");
+  }
+  const reason = typeof req.body.reason === "string" ? req.body.reason.trim().slice(0, 1000) : "No reason provided.";
 
   const charity = await Charity.findById(req.params.id);
   if (!charity)

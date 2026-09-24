@@ -6,6 +6,7 @@ import User from "../models/User.js";
 import Charity from "../models/Charity.js";
 import Project from "../models/Project.js";
 import Donation from "../models/Donation.js";
+import escapeRegex from "../utils/escapeRegex.js";
 
 /**
  * Get organization profile by username
@@ -14,16 +15,17 @@ export const getOrgProfileByUsername = asyncHandler(async (req, res) => {
   const { username } = req.params;
 
   const cleanParam = decodeURIComponent(username || "").trim();
+  const escapedParam = escapeRegex(cleanParam);
   const alphanumericOnly = cleanParam.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const fuzzyPattern = cleanParam.replace(/[-_]/g, "[\\s\\-_]*");
+  const fuzzyPattern = escapedParam.replace(/[-_]/g, "[\\s\\-_]*");
   const fuzzyRegex = new RegExp(`^${fuzzyPattern}$`, "i");
 
   let user = await User.findOne({
     $or: [
-      { userName: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
-      { userName: { $regex: new RegExp(`^${alphanumericOnly}$`, "i") } },
+      { userName: { $regex: new RegExp(`^${escapedParam}$`, "i") } },
+      { userName: { $regex: new RegExp(`^${escapeRegex(alphanumericOnly)}$`, "i") } },
       { userName: { $regex: fuzzyRegex } },
-      { firstName: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
+      { firstName: { $regex: new RegExp(`^${escapedParam}$`, "i") } },
       { firstName: { $regex: fuzzyRegex } },
       ...(mongoose.isValidObjectId(cleanParam) ? [{ _id: cleanParam }] : []),
     ],
@@ -40,7 +42,7 @@ export const getOrgProfileByUsername = asyncHandler(async (req, res) => {
   } else {
     charity = await Charity.findOne({
       $or: [
-        { publicName: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
+        { publicName: { $regex: new RegExp(`^${escapedParam}$`, "i") } },
         { publicName: { $regex: fuzzyRegex } },
         ...(mongoose.isValidObjectId(cleanParam)
           ? [{ _id: cleanParam }, { ownerUserId: cleanParam }]
