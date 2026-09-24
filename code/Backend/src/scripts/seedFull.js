@@ -12,6 +12,8 @@ import Order from "../models/Order.js";
 import CoinTransaction from "../models/CoinTransaction.js";
 import Auction from "../models/Auction.js";
 import Bid from "../models/Bid.js";
+import Follow from "../models/Follow.js";
+import Post from "../models/Post.js";
 
 dotenv.config();
 
@@ -1347,6 +1349,8 @@ async function seedFull() {
         CoinTransaction.deleteMany({}),
         Auction.deleteMany({}),
         Bid.deleteMany({}),
+        Follow.deleteMany({}),
+        Post.deleteMany({}),
       ]);
     }
 
@@ -1779,6 +1783,309 @@ async function seedFull() {
 
     console.log("✅ Seeded 5 live, scheduled, and concluded charity auctions with multi-bid leaderboards.");
 
+    // ── STEP 11: SEED FOLLOW RELATIONSHIPS ───────────────────────
+    console.log("🔗 Seeding follow relationships for recommendation engine...");
+    const followPairs = [];
+
+    // Donors follow charities (each donor follows 3-5 charities)
+    for (let i = 0; i < createdDonors.length; i++) {
+      const numFollows = 3 + (i % 3); // 3, 4, or 5
+      for (let j = 0; j < numFollows && j < createdCharityUsers.length; j++) {
+        const charityIdx = (i + j) % createdCharityUsers.length;
+        followPairs.push({ followerId: createdDonors[i]._id, followingId: createdCharityUsers[charityIdx]._id });
+      }
+    }
+
+    // Donors follow brands (each donor follows 2-3 brands)
+    for (let i = 0; i < createdDonors.length; i++) {
+      const numFollows = 2 + (i % 2); // 2 or 3
+      for (let j = 0; j < numFollows && j < createdBrandUsers.length; j++) {
+        const brandIdx = (i * 2 + j) % createdBrandUsers.length;
+        followPairs.push({ followerId: createdDonors[i]._id, followingId: createdBrandUsers[brandIdx]._id });
+      }
+    }
+
+    // Community leaders follow each other and some donors
+    for (let i = 0; i < createdCommunity.length; i++) {
+      // Follow 2 other community members
+      for (let j = 1; j <= 2; j++) {
+        const otherIdx = (i + j) % createdCommunity.length;
+        followPairs.push({ followerId: createdCommunity[i]._id, followingId: createdCommunity[otherIdx]._id });
+      }
+      // Follow 1-2 donors
+      const donorIdx = i % createdDonors.length;
+      followPairs.push({ followerId: createdCommunity[i]._id, followingId: createdDonors[donorIdx]._id });
+    }
+
+    // Shoppers follow a few brands
+    for (let i = 0; i < createdShoppers.length; i++) {
+      const brandIdx = i % createdBrandUsers.length;
+      followPairs.push({ followerId: createdShoppers[i]._id, followingId: createdBrandUsers[brandIdx]._id });
+      // Every other shopper follows a second brand
+      if (i % 2 === 0) {
+        const brandIdx2 = (i + 5) % createdBrandUsers.length;
+        followPairs.push({ followerId: createdShoppers[i]._id, followingId: createdBrandUsers[brandIdx2]._id });
+      }
+    }
+
+    // Deduplicate and remove self-follows
+    const followSet = new Set();
+    const uniqueFollows = [];
+    for (const pair of followPairs) {
+      const key = `${pair.followerId}-${pair.followingId}`;
+      if (!followSet.has(key) && String(pair.followerId) !== String(pair.followingId)) {
+        followSet.add(key);
+        uniqueFollows.push(pair);
+      }
+    }
+
+    // Batch insert follows (bypass hooks for speed, update counts manually)
+    await Follow.insertMany(uniqueFollows);
+
+    // Update follower/following counts
+    const followerCounts = {};
+    const followingCounts = {};
+    for (const f of uniqueFollows) {
+      const ferId = String(f.followerId);
+      const fingId = String(f.followingId);
+      followingCounts[ferId] = (followingCounts[ferId] || 0) + 1;
+      followerCounts[fingId] = (followerCounts[fingId] || 0) + 1;
+    }
+
+    for (const [userId, count] of Object.entries(followingCounts)) {
+      await User.findByIdAndUpdate(userId, { $inc: { followingCount: count } });
+    }
+    for (const [userId, count] of Object.entries(followerCounts)) {
+      await User.findByIdAndUpdate(userId, { $inc: { followersCount: count } });
+    }
+
+    console.log(`✅ Seeded ${uniqueFollows.length} follow relationships.`);
+
+    // ── STEP 12: SEED POSTS FOR RECOMMENDATION ENGINE ─────────────
+    console.log("📝 Seeding posts with varied engagement for recommendation engine...");
+    const createdPosts = [];
+
+    // Helper: create a date N hours ago
+    const hoursAgo = (h) => new Date(now.getTime() - h * 60 * 60 * 1000);
+
+    // --- Charity campaign update posts (high engagement, recent) ---
+    const charityPostData = [
+      { idx: 0, content: "🌿 Incredible news! Our Amazon Rainforest Canopy Protection program has saved 12,000 acres this quarter. Every donation directly funds indigenous ranger teams. Together we're making a real difference! #SaveTheAmazon #Conservation", age: 2, images: ["https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=800", "https://images.unsplash.com/photo-1448375240586-882707db888b?w=600"] },
+      { idx: 1, content: "🐋 Our Great Barrier Reef Plastic Skimmer Fleet just completed its 500th ocean cleanup run! Over 15 tons of plastic removed from coral nurseries. Thank you to every supporter who made this possible. 🌊 #OceanClean #PlasticFree", age: 5, images: ["https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800", "https://images.unsplash.com/photo-1546026423-cc4642628d2b?w=600", "https://images.unsplash.com/photo-1520633465133-7e618991fa9b?w=600"] },
+      { idx: 2, content: "📚 STEM Laboratories for Girls Academy update: 200 young women graduated from our first coding bootcamp in Nairobi! Their projects included apps for water quality monitoring and crop disease detection. Future tech leaders! 💪 #GirlsInSTEM", age: 8, images: ["https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800", "https://images.unsplash.com/photo-1577896851231-70ef18881754?w=600"] },
+      { idx: 3, content: "💧 Clean Water Springs has drilled its 8th borehole in Oromia! 12,000 residents now have access to disease-free drinking water. Your coins literally save lives. #CleanWater #Ethiopia", age: 18, images: ["https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=800", "https://images.unsplash.com/photo-1574482620826-40685ca5ebd2?w=600"] },
+      { idx: 4, content: "🏥 Mobile Surgical Containers deployed to 3 new flood zones this week. Our team of 12 surgeons performed 84 emergency procedures. Thank you for keeping our mission alive. #DoctorsForHumanity", age: 36, images: ["https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?w=800", "https://images.unsplash.com/photo-1516549655169-df83a0774514?w=600"] },
+      { idx: 5, content: "🏠 Winter Emergency Housing: 35 families moved into warm transitional studio units this month. Each resident gets a dedicated social worker. Shelter is a human right. ❄️ #ShelterSafe", age: 48, images: ["https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=800"] },
+      { idx: 6, content: "🐕 Our Winterized Medical Sanctuary just welcomed 15 senior rescue dogs! Each one receives orthopedic care and a heated rehabilitation kennel. They deserve a comfortable life. 🐾 #CanineRescue", age: 72, images: ["https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800", "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=600"] },
+      { idx: 7, content: "🌳 ONE MILLION SAPLINGS milestone reached! Green Earth Reforest has planted native trees across 5,000 hectares of fragmented wildlife corridors in Parana, Brazil. 🎉 #Reforestation", age: 96, images: ["https://images.unsplash.com/photo-1511497584788-87676104235f?w=800", "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600"] },
+      { idx: 8, content: "🤖 Township Youth Robotics Hub: 50 students just built their first autonomous line-following robots! Watching these teens code in Python for the first time was magical. #BrightFuture #Soweto", age: 120, images: ["https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800", "https://images.unsplash.com/photo-1529390079861-591de354faf5?w=600"] },
+      { idx: 9, content: "👁️ Sight for Everyone completed 1,000 sight-restoring cataract surgeries! Our mobile eye theater visited 28 remote villages. Vision is freedom. #SightForEveryone #India", age: 144, images: ["https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=800"] },
+    ];
+
+    for (const cp of charityPostData) {
+      const authorUser = createdCharityUsers[cp.idx % createdCharityUsers.length];
+      // Determine likers: recent charity posts get more likes
+      const likeCount = cp.age <= 8 ? 14 : cp.age <= 48 ? 8 : 4;
+      const likers = [];
+      for (let k = 0; k < likeCount && k < createdDonors.length; k++) {
+        likers.push(createdDonors[(cp.idx + k) % createdDonors.length]._id);
+      }
+      // Add some community likers
+      for (let k = 0; k < Math.min(3, createdCommunity.length); k++) {
+        likers.push(createdCommunity[(cp.idx + k) % createdCommunity.length]._id);
+      }
+
+      // Comments from donors
+      const commentCount = cp.age <= 8 ? 4 : cp.age <= 48 ? 2 : 1;
+      const commentTexts = [
+        "This is amazing work! So proud to support this cause. 🙌",
+        "Incredible impact! Every coin matters.",
+        "Just donated more to keep this going! 💪",
+        "The world needs more initiatives like this.",
+        "Shared this with my community. Let's spread the word!",
+        "Truly inspiring progress. Thank you for the transparency.",
+      ];
+      const postComments = [];
+      for (let c = 0; c < commentCount; c++) {
+        postComments.push({
+          author: createdDonors[(cp.idx * 3 + c) % createdDonors.length]._id,
+          text: commentTexts[c % commentTexts.length],
+          createdAt: hoursAgo(cp.age - 1),
+        });
+      }
+
+      const post = await Post.create({
+        userId: authorUser._id,
+        content: cp.content,
+        images: cp.images || [],
+        likes: likers,
+        comments: postComments,
+        createdAt: hoursAgo(cp.age),
+      });
+      createdPosts.push(post);
+    }
+
+    // --- Brand product launch / showcase posts (medium-high engagement) ---
+    const brandPostData = [
+      { idx: 0, content: "♻️ Introducing our new Recycled Ocean Fleece Pullover — woven entirely from reclaimed ocean bottles! Soft, warm, and saving our seas one thread at a time. Now available in the marketplace. 🌊 #EcoWear #SustainableFashion", age: 3, images: ["https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=800", "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=600"] },
+      { idx: 1, content: "🏔️ The Alpine Expedition Storm Shell is here. 3-layer breathable, waterproof, and Fair Trade Certified. Built for the harshest conditions, made with the best intentions. #PatagoniaImpact", age: 12, images: ["https://images.unsplash.com/photo-1548883354-7622d03aca27?w=800"] },
+      { idx: 2, content: "✨ Hand-turned Tuscan leather meets solid brass closures. Our new briefcase collection is a love letter to Florentine craftsmanship. Limited edition — only 12 pieces available. #AuraArtisan", age: 24, images: ["https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800", "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=600"] },
+      { idx: 3, content: "🍃 Zero waste, zero compromise. The Mycelium Vegan Travel Pouch is made from mushroom leather with a biodegradable lining. The future of accessories is growing. 🍄 #TerraLiving", age: 42, images: ["https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=800"] },
+      { idx: 4, content: "☀️ Power your adventures with the sun! Our Modular Solar Commuter Backpack generates 15W fast charge while you explore. Laptop pocket, solar cells, and pure freedom. #SolsticeGear", age: 60, images: ["https://images.unsplash.com/photo-1622560480605-d83c853bc5c3?w=800"] },
+      { idx: 5, content: "🎋 The art of simplicity. Hand-carved Kyoto bamboo tea sets, cured in organic walnut oil by master craftspeople. A ceremony in every sip. 🍵 #NirvanaBamboo", age: 84, images: ["https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800", "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=600"] },
+      { idx: 6, content: "⌚ Introducing the Vanguard Terra Automatic Diver — 300m depth rating, recycled aerospace titanium, sapphire crystal. Luxury that respects the planet. Only 6 pieces remain. #VanguardWatches", age: 110, images: ["https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=800", "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=600"] },
+      { idx: 7, content: "🧶 From regenerative Merino farms in New Zealand to your wardrobe. The Cloud Merino Crewneck — traceable, sustainable, impossibly soft. 17.5 micron perfection. #NomadWoolen", age: 130, images: ["https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=800"] },
+    ];
+
+    for (const bp of brandPostData) {
+      const authorUser = createdBrandUsers[bp.idx % createdBrandUsers.length];
+      const likeCount = bp.age <= 24 ? 10 : bp.age <= 84 ? 6 : 3;
+      const likers = [];
+      for (let k = 0; k < likeCount && k < createdShoppers.length; k++) {
+        likers.push(createdShoppers[(bp.idx + k) % createdShoppers.length]._id);
+      }
+      // Add some donor likers
+      for (let k = 0; k < 2 && k < createdDonors.length; k++) {
+        likers.push(createdDonors[(bp.idx * 2 + k) % createdDonors.length]._id);
+      }
+
+      const commentCount = bp.age <= 24 ? 3 : bp.age <= 84 ? 1 : 0;
+      const shopperComments = [
+        "Just ordered one! Can't wait to get it. 🛍️",
+        "The quality looks incredible. Adding to cart!",
+        "Love that it's sustainable AND stylish.",
+        "This is exactly what I've been looking for!",
+      ];
+      const postComments = [];
+      for (let c = 0; c < commentCount; c++) {
+        postComments.push({
+          author: createdShoppers[(bp.idx * 2 + c) % createdShoppers.length]._id,
+          text: shopperComments[c % shopperComments.length],
+          createdAt: hoursAgo(bp.age - 2),
+        });
+      }
+
+      const post = await Post.create({
+        userId: authorUser._id,
+        content: bp.content,
+        images: bp.images || [],
+        likes: likers,
+        comments: postComments,
+        createdAt: hoursAgo(bp.age),
+      });
+      createdPosts.push(post);
+    }
+
+    // --- Donor / community personal posts (varied engagement) ---
+    const personalPostData = [
+      { userArr: "donors", idx: 0, content: "Just donated 5,400 coins to the Amazon Rainforest Protection project! 🌿 Feeling incredibly grateful to be part of this community. If we all chip in, we can save our planet. #Merch4Change #GivingBack", age: 1, images: ["https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=800"] },
+      { userArr: "donors", idx: 5, content: "Hit my 10th donation milestone today! 🎉 Started small with 100 coins, and now I've donated over 3,200 total. Every coin counts, and watching the impact grow is so rewarding. #DonorJourney", age: 4, images: ["https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=800"] },
+      { userArr: "donors", idx: 2, content: "Visited the coral reef restoration site in the Philippines last week. Seeing the super-coral nurseries in person was breathtaking. This is what our donations look like in real life! 🐠🌊 #CoralReef", age: 14, images: ["https://images.unsplash.com/photo-1546026423-cc4642628d2b?w=800", "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600"] },
+      { userArr: "donors", idx: 7, content: "Proud to support Doctors for Humanity's mobile surgical containers. In a world of crisis, these doctors bring hope. 🏥 Donating again this week. Who's with me?", age: 28, images: ["https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?w=800"] },
+      { userArr: "donors", idx: 10, content: "Shopping sustainably on Merch4Change is honestly addictive! Just got the recycled ocean fleece pullover and it's the softest thing I own. Doing good feels great. 💙 #SustainableFashion", age: 50, images: ["https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=800"] },
+      { userArr: "community", idx: 0, content: "Organized a neighborhood cleanup drive this weekend! 45 volunteers, 200 bags of trash collected, and 3 new follow-up events planned. Community action is unstoppable. 🌍♻️ #CleanUpCrew", age: 6, images: ["https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800", "https://images.unsplash.com/photo-1618477461853-cf6ed80faba5?w=600"] },
+      { userArr: "community", idx: 3, content: "Just finished mentoring 12 students in our after-school coding program. These kids built their first web apps in 6 weeks! The future is so bright. 💻 #YouthEmpowerment", age: 20, images: ["https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800"] },
+      { userArr: "community", idx: 6, content: "Attended the Climate Action Rally downtown today. Thousands of voices, one message: the time for change is NOW. Let's keep pushing for a sustainable world. 🌱 #ClimateAction", age: 40, images: ["https://images.unsplash.com/photo-1571260899304-425eee4c7efc?w=800"] },
+      { userArr: "community", idx: 9, content: "Grateful for this platform connecting changemakers worldwide. In 3 months I've met incredible activists, donated to 5 projects, and bought ethically. This is the future of commerce. 🤝 #Merch4Change", age: 65, images: ["https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800", "https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=600"] },
+      { userArr: "community", idx: 12, content: "Volunteered at the local shelter this morning. Served 120 meals and helped 8 families with housing applications. Small acts, big ripples. ❤️ #ShelterVolunteer", age: 100, images: ["https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=800"] },
+      { userArr: "donors", idx: 13, content: "Weekend haul from Merch4Change marketplace! 📦 Got the bamboo tea set and the titanium camp stove. Both are gorgeous and sustainably made. Supporting brands that care.", age: 30, images: ["https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800", "https://images.unsplash.com/photo-1510312305653-8ed496efae75?w=600"] },
+      { userArr: "donors", idx: 16, content: "My coin balance just crossed 3,000! Saving up for a big donation to the Solar Power Schools project. Education + clean energy = unstoppable combo. ☀️📚 #SolarSchools", age: 55, images: ["https://images.unsplash.com/photo-1509391365360-2e959784a276?w=800"] },
+      { userArr: "shoppers", idx: 0, content: "Won the charity auction last week! 🏆 The Aventador Carbon Chronograph is even more stunning in person. Best part? The proceeds go directly to wildlife conservation. #LuxuryForGood", age: 10, images: ["https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=800"] },
+      { userArr: "shoppers", idx: 5, content: "Bidding on the new limited edition silk scarf! The craftsmanship is unreal and it supports Prancing Horse heritage artisans. Ethical luxury is the new standard. 🐎✨ #CharityAuction", age: 22, images: ["https://images.unsplash.com/photo-1601924994987-69e26d50dc26?w=800"] },
+      { userArr: "shoppers", idx: 10, content: "Just placed my 5th order on Merch4Change! Every purchase earns coins that I donate right back to charity projects. It's a beautiful cycle. 🔄 #ShopForChange", age: 75, images: ["https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=800"] },
+    ];
+
+    for (const pp of personalPostData) {
+      let authorUser;
+      if (pp.userArr === "donors") authorUser = createdDonors[pp.idx % createdDonors.length];
+      else if (pp.userArr === "community") authorUser = createdCommunity[pp.idx % createdCommunity.length];
+      else authorUser = createdShoppers[pp.idx % createdShoppers.length];
+
+      const likeCount = pp.age <= 10 ? 8 : pp.age <= 40 ? 5 : 2;
+      const likers = [];
+      // Mix likers from different user groups
+      for (let k = 0; k < Math.ceil(likeCount / 2) && k < createdDonors.length; k++) {
+        likers.push(createdDonors[(pp.idx + k + 5) % createdDonors.length]._id);
+      }
+      for (let k = 0; k < Math.floor(likeCount / 2) && k < createdCommunity.length; k++) {
+        likers.push(createdCommunity[(pp.idx + k + 3) % createdCommunity.length]._id);
+      }
+
+      const commentCount = pp.age <= 10 ? 2 : pp.age <= 40 ? 1 : 0;
+      const genericComments = [
+        "So inspiring! Love this community. 🙌",
+        "This is what it's all about!",
+        "Amazing work, keep it going! 💪",
+      ];
+      const postComments = [];
+      for (let c = 0; c < commentCount; c++) {
+        const commenter = pp.userArr === "donors"
+          ? createdCommunity[(pp.idx + c) % createdCommunity.length]
+          : createdDonors[(pp.idx + c) % createdDonors.length];
+        postComments.push({
+          author: commenter._id,
+          text: genericComments[c % genericComments.length],
+          createdAt: hoursAgo(pp.age - 1),
+        });
+      }
+
+      const post = await Post.create({
+        userId: authorUser._id,
+        content: pp.content,
+        images: pp.images || [],
+        likes: likers,
+        comments: postComments,
+        createdAt: hoursAgo(pp.age),
+      });
+      createdPosts.push(post);
+    }
+
+    // --- Very fresh posts (last 2 hours) for recency signal testing ---
+    const freshPostData = [
+      { userArr: "charities", idx: 10, content: "🦧 BREAKING: Borneo Orangutan Habitat Buffer Zones expanded by 500 hectares this week! Conservation easements now protect critical fire-prone areas near national parks. #RainforestGuardians", age: 0.5, images: ["https://images.unsplash.com/photo-1516426122078-c23e76319801?w=800"] },
+      { userArr: "charities", idx: 11, content: "🥬 Our Electric Refrigerated Produce Rescue Vans just delivered their millionth pound of fresh vegetables to food deserts! Zero emissions, zero hunger. Thank you! 🚐💚 #ZeroHunger", age: 1, images: ["https://images.unsplash.com/photo-1593113598332-cd288d649433?w=800"] },
+      { userArr: "brands", idx: 8, content: "🌹 NEW DROP: Regenerative Rosehip Night Elixir — hand-harvested Patagonian rosehip seed oil with blue tansy and Bakuchiol. Your skin deserves the purest ingredients. #OasisBotanicals", age: 0.3, images: ["https://images.unsplash.com/photo-1608248597359-0092d6e36d4f?w=800"] },
+      { userArr: "brands", idx: 10, content: "🕶️ Summer vibes! Our Iberian Polarized Wayfarers are now back in stock. Made from recycled Mediterranean fishnets. Look good, do good. #BlueOceanEyewear", age: 1.5, images: ["https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=800"] },
+      { userArr: "donors", idx: 1, content: "Just woke up to the best notification — my donation helped reach 90% of the Clean Water Springs goal! Only 1,100 coins to go! Who's helping us cross the finish line? 🏁💧", age: 0.8, images: ["https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=800"] },
+      { userArr: "community", idx: 1, content: "Live from the Youth Robotics competition! 🤖 Our township team just won first place with their obstacle-avoidance robot! Tears of joy everywhere. #BrightFuture #Robotics", age: 0.2, images: ["https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800"] },
+    ];
+
+    for (const fp of freshPostData) {
+      let authorUser;
+      if (fp.userArr === "charities") authorUser = createdCharityUsers[fp.idx % createdCharityUsers.length];
+      else if (fp.userArr === "brands") authorUser = createdBrandUsers[fp.idx % createdBrandUsers.length];
+      else if (fp.userArr === "donors") authorUser = createdDonors[fp.idx % createdDonors.length];
+      else authorUser = createdCommunity[fp.idx % createdCommunity.length];
+
+      // Fresh posts get fewer likes (just posted)
+      const likers = [];
+      for (let k = 0; k < 3 && k < createdDonors.length; k++) {
+        likers.push(createdDonors[(fp.idx + k) % createdDonors.length]._id);
+      }
+
+      const post = await Post.create({
+        userId: authorUser._id,
+        content: fp.content,
+        images: fp.images || [],
+        likes: likers,
+        comments: [],
+        createdAt: hoursAgo(fp.age),
+      });
+      createdPosts.push(post);
+    }
+
+    // Update postsCount for all post authors
+    const postCountMap = {};
+    for (const p of createdPosts) {
+      const uid = String(p.userId);
+      postCountMap[uid] = (postCountMap[uid] || 0) + 1;
+    }
+    for (const [userId, count] of Object.entries(postCountMap)) {
+      await User.findByIdAndUpdate(userId, { postsCount: count });
+    }
+
+    console.log(`✅ Seeded ${createdPosts.length} posts with varied engagement levels for recommendation engine.`);
+
     await mongoose.disconnect();
     console.log("\n========================================================");
     console.log("🚀 FULL SEEDING COMPLETED SUCCESSFULLY!");
@@ -1787,6 +2094,8 @@ async function seedFull() {
     console.log(`✨ Total Brands: ${createdBrandUsers.length}`);
     console.log(`✨ Total Impact Projects: ${createdProjects.length}`);
     console.log(`✨ Total Merchandise Products: ${createdProducts.length}`);
+    console.log(`✨ Total Follow Relationships: ${uniqueFollows.length}`);
+    console.log(`✨ Total Posts: ${createdPosts.length}`);
     console.log("========================================================\n");
   } catch (err) {
     console.error("Seeding error in seedFull:", err);

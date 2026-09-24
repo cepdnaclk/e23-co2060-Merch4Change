@@ -16,6 +16,19 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: opacity 0.2s ease;
+}
+
+.post-user-info:hover .post-meta h4 {
+  color: #4a24e1;
+  text-decoration: underline;
+}
+
+.post-user-info:hover .post-avatar {
+  transform: scale(1.05);
+  transition: transform 0.2s ease;
 }
 
 .post-avatar {
@@ -24,6 +37,7 @@
   border-radius: 50%;
   object-fit: cover;
   background: #f0f2f5;
+  transition: transform 0.2s ease;
 }
 
 .post-meta h4 {
@@ -31,6 +45,7 @@
   font-size: 15px;
   font-weight: 700;
   color: #1a1a1a;
+  transition: color 0.15s ease;
 }
 
 .post-meta span {
@@ -66,6 +81,17 @@
   overflow: hidden;
   height: 400px;
   margin-bottom: 15px;
+}
+
+.post-image-grid.single-image .main-image.full-width {
+  flex: 1 1 100%;
+  width: 100%;
+  height: 100%;
+}
+
+.post-image-grid.two-images .main-image {
+  flex: 1;
+  height: 100%;
 }
 
 .main-image {
@@ -168,5 +194,100 @@
 
   .post-image-grid {
     height: 280px;
+  }
+}
+
+@media (max-width: 480px) {
+  .post-card {
+    padding: 14px;
+    border-radius: 12px;
+  }
+
+  .post-header {
+    margin-bottom: 10px;
+  }
+
+  .post-user-info {
+    gap: 8px;
+  }
+
+  .post-avatar {
+    width: 34px;
+    height: 34px;
+  }
+
+  .post-meta h4 {
+    font-size: 13px;
+  }
+
+  .post-meta span {
+    font-size: 10px;
+  }
+
+  .post-description {
+    margin-bottom: 10px;
+  }
+
+  .post-description p {
+    font-size: 13px;
+  }
+
+  .post-image-grid {
+    height: 220px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+  }
+
+  .image-overlay {
+    font-size: 14px;
+  }
+
+  .post-footer {
+    padding-top: 10px;
+  }
+
+  .post-actions {
+    gap: 14px;
+  }
+
+  .action-btn {
+    font-size: 12px;
+    gap: 5px;
+  }
+
+  .action-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .shop-look-btn {
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 360px) {
+  .post-card {
+    padding: 10px;
+    border-radius: 10px;
+  }
+
+  .post-image-grid {
+    height: 180px;
+    border-radius: 10px;
+  }
+
+  .post-actions {
+    gap: 10px;
+  }
+
+  .action-btn {
+    font-size: 11px;
+    gap: 4px;
+  }
+
+  .action-icon {
+    width: 16px;
+    height: 16px;
   }
 }

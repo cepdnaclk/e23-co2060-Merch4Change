@@ -356,13 +356,28 @@
   gap: 20px;
 }
 
-/* When sidebar is collapsed — 4 columns */
-.sidebar-collapsed .mk-grid {
-  grid-template-columns: repeat(4, 1fr);
+/* When sidebar is collapsed on desktop — 4 columns */
+@media (min-width: 1200px) {
+  .sidebar-collapsed .mk-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
-@media (max-width: 1100px) { .mk-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 600px) { .mk-grid { grid-template-columns: 1fr; } }
+@media (max-width: 1199px) {
+  .mk-grid,
+  .sidebar-collapsed .mk-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .mk-grid,
+  .sidebar-collapsed .mk-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
 
 /* ── Product card ────────────────────────────── */
 .mk-card {
@@ -571,3 +586,205 @@
 .mk-empty-icon { font-size: 48px; }
 .mk-empty h3 { margin: 0; font-size: 18px; font-weight: 700; color: #1a1a1a; }
 .mk-empty p { margin: 0; font-size: 14px; color: #888; }
+
+/* ── Mobile Responsive Enhancements ─────────── */
+@media (max-width: 768px) {
+  .mk-root {
+    padding: 16px 12px 50px;
+    gap: 24px;
+  }
+
+  .mk-hero {
+    height: 320px;
+    border-radius: 18px;
+  }
+
+  .mk-hero-content {
+    padding: 24px;
+  }
+
+  .mk-hero-title {
+    font-size: 24px;
+  }
+
+  .mk-trending-card {
+    width: 175px;
+  }
+
+  .mk-trending-img {
+    height: 125px;
+  }
+}
+
+@media (max-width: 600px) {
+  .mk-filter-bar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .mk-filter-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mk-filter-pill {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 7px 14px;
+    font-size: 12px;
+  }
+
+  .mk-flash-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+
+  .mk-flash-end {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .mk-root {
+    padding: 12px 6px 40px;
+    gap: 20px;
+  }
+
+  .mk-hero {
+    height: auto;
+    min-height: 290px;
+    border-radius: 14px;
+  }
+
+  .mk-hero-content {
+    padding: 16px;
+  }
+
+  .mk-hero-tag {
+    font-size: 10px;
+    padding: 4px 10px;
+    margin-bottom: 8px;
+  }
+
+  .mk-hero-title {
+    font-size: 19px;
+    margin-bottom: 6px;
+  }
+
+  .mk-hero-sub {
+    font-size: 12px;
+    line-height: 1.5;
+    margin-bottom: 14px;
+    -webkit-line-clamp: 2;
+  }
+
+  .mk-hero-actions {
+    gap: 10px;
+  }
+
+  .mk-hero-buy {
+    padding: 10px 20px;
+    font-size: 13px;
+    width: 100%;
+    order: 1;
+  }
+
+  .mk-hero-actions .mk-filter-pill {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .mk-hero-price {
+    font-size: 18px;
+  }
+
+  .mk-hero-coins {
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+
+  .mk-section-title {
+    font-size: 16px;
+  }
+
+  .mk-section-header {
+    padding-bottom: 10px;
+  }
+
+  .mk-card {
+    border-radius: 14px;
+  }
+
+  .mk-card-img {
+    height: 190px;
+  }
+
+  .mk-card-body {
+    padding: 14px;
+    gap: 10px;
+  }
+
+  .mk-product-name {
+    font-size: 13.5px;
+  }
+
+  .mk-product-desc {
+    font-size: 11.5px;
+  }
+
+  .mk-price {
+    font-size: 16px;
+  }
+
+  .mk-buy-btn {
+    padding: 10px 0;
+    font-size: 13px;
+  }
+
+  .mk-trending-card {
+    width: 155px;
+    border-radius: 12px;
+  }
+
+  .mk-trending-img {
+    height: 110px;
+  }
+
+  .mk-trending-body {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .mk-trending-body .mk-product-name {
+    font-size: 12px;
+  }
+
+  .mk-trending-footer .mk-price {
+    font-size: 14px;
+  }
+
+  .mk-trending-buy {
+    padding: 5px 10px;
+    font-size: 11px;
+    min-width: 40px;
+  }
+}
+
+@media (max-width: 360px) {
+  .mk-card-img {
+    height: 160px;
+  }
+
+  .mk-hero-title {
+    font-size: 17px;
+  }
+
+  .mk-trending-card {
+    width: 140px;
+  }
+}

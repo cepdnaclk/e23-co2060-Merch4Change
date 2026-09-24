@@ -12,6 +12,8 @@ import Order from "../models/Order.js";
 import CoinTransaction from "../models/CoinTransaction.js";
 import Auction from "../models/Auction.js";
 import Bid from "../models/Bid.js";
+import Follow from "../models/Follow.js";
+import Post from "../models/Post.js";
 
 dotenv.config();
 
@@ -123,6 +125,8 @@ async function seed() {
       await CoinTransaction.deleteMany({});
       await Auction.deleteMany({});
       await Bid.deleteMany({});
+      await Follow.deleteMany({});
+      await Post.deleteMany({});
     }
 
     // 2. Hash standard password
@@ -283,6 +287,8 @@ async function seed() {
 
     const createdBrands = [];
     const createdCharities = [];
+    const createdBrandUsers = [];
+    const createdCharityUsers = [];
 
     for (const org of orgDataList) {
       const orgUser = await User.create({
@@ -316,6 +322,7 @@ async function seed() {
           logoUrl: org.logoUrl,
         });
         createdCharities.push(charity);
+        createdCharityUsers.push(orgUser);
       } else {
         const brand = await Brand.create({
           ownerUserId: orgUser._id,
@@ -325,6 +332,7 @@ async function seed() {
           slug: org.orgName.toLowerCase().replace(/[^a-z0-9]/g, "-"),
         });
         createdBrands.push(brand);
+        createdBrandUsers.push(orgUser);
       }
     }
     console.log(
@@ -497,8 +505,101 @@ async function seed() {
     });
     console.log("✅ Seeded live and upcoming charity auctions.");
 
+    // 11. Seed Follow Relationships for Recommendation Engine
+    console.log("Seeding follow relationships...");
+    const followList = [];
+    for (let i = 0; i < individuals.length; i++) {
+      const charUser = createdCharityUsers[i % createdCharityUsers.length];
+      const brandUser = createdBrandUsers[i % createdBrandUsers.length];
+      followList.push({ followerId: individuals[i]._id, followingId: charUser._id });
+      followList.push({ followerId: individuals[i]._id, followingId: brandUser._id });
+    }
+    await Follow.insertMany(followList);
+    for (const f of followList) {
+      await User.findByIdAndUpdate(f.followerId, { $inc: { followingCount: 1 } });
+      await User.findByIdAndUpdate(f.followingId, { $inc: { followersCount: 1 } });
+    }
+    console.log(`✅ Seeded ${followList.length} follow relationships.`);
+
+    // 12. Seed Feed Posts with Images & Engagement
+    console.log("Seeding recommended feed posts...");
+    const samplePosts = [
+      {
+        user: createdCharityUsers[0],
+        content: "🌿 Incredible news! Our Amazon Rainforest Protection program has successfully protected over 12,000 canopy acres this month. Thank you to everyone supporting our mission! 💚 #Conservation",
+        images: ["https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=800", "https://images.unsplash.com/photo-1448375240586-882707db888b?w=600"],
+        likes: [individuals[0]._id, individuals[1]._id, individuals[2]._id],
+        comments: [
+          { author: individuals[0]._id, text: "Proud to support this cause! Keep up the great work 🙌" },
+          { author: individuals[1]._id, text: "Incredible milestone! 🌳" },
+        ],
+        hoursAgo: 2,
+      },
+      {
+        user: createdBrandUsers[0],
+        content: "♻️ Dropping our new Recycled Ocean Fleece Pullover today! 100% reclaimed ocean plastics woven into ultra-soft outdoor gear. Every purchase earns coins for charity! 🌊 #EcoWear #Sustainable",
+        images: ["https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=800", "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=600"],
+        likes: [individuals[0]._id, individuals[3]._id],
+        comments: [
+          { author: individuals[0]._id, text: "Just ordered mine! Love the sustainability focus 💙" },
+        ],
+        hoursAgo: 6,
+      },
+      {
+        user: createdCharityUsers[1],
+        content: "🌊 Ocean Clean Initiative just recovered 5 tons of plastic debris from fragile coral reefs today. Small actions lead to massive change! 🐠 #OceanClean",
+        images: ["https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800"],
+        likes: [individuals[1]._id, individuals[2]._id, individuals[4]._id],
+        comments: [
+          { author: individuals[2]._id, text: "Pure inspiration! Let's clean our oceans 🐬" },
+        ],
+        hoursAgo: 14,
+      },
+      {
+        user: individuals[0],
+        content: "Just made my milestone donation on Merch4Change! 💎 5,400 coins donated to fund clean water projects. Together we can change the world! #GivingBack",
+        images: ["https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=800"],
+        likes: [individuals[1]._id, individuals[3]._id],
+        comments: [
+          { author: individuals[1]._id, text: "Legendary Sarah! 👏" },
+        ],
+        hoursAgo: 24,
+      },
+      {
+        user: createdBrandUsers[1],
+        content: "🏔️ Built for extreme cold and severe summit conditions. Our Alpine Expedition Storm Shell is Fair Trade Certified. #PatagoniaImpact",
+        images: ["https://images.unsplash.com/photo-1548883354-7622d03aca27?w=800"],
+        likes: [individuals[2]._id, individuals[4]._id],
+        comments: [],
+        hoursAgo: 48,
+      },
+      {
+        user: createdCharityUsers[2],
+        content: "📚 Empowering the next generation through education! 500 digital tablets supplied to rural schools today. Knowledge is power! ✨ #HopeForEducation",
+        images: ["https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800", "https://images.unsplash.com/photo-1577896851231-70ef18881754?w=600"],
+        likes: [individuals[0]._id, individuals[1]._id, individuals[3]._id, individuals[4]._id],
+        comments: [
+          { author: individuals[3]._id, text: "Education opens every door. Wonderful! 🎓" },
+        ],
+        hoursAgo: 1,
+      },
+    ];
+
+    for (const sp of samplePosts) {
+      await Post.create({
+        userId: sp.user._id,
+        content: sp.content,
+        images: sp.images,
+        likes: sp.likes,
+        comments: sp.comments,
+        createdAt: new Date(now.getTime() - sp.hoursAgo * 60 * 60 * 1000),
+      });
+      await User.findByIdAndUpdate(sp.user._id, { $inc: { postsCount: 1 } });
+    }
+    console.log(`✅ Seeded ${samplePosts.length} ranked posts for recommendation engine.`);
+
     await mongoose.disconnect();
-    console.log("🎉 Seeding complete with live Leaderboards!");
+    console.log("🎉 Seeding complete with live Leaderboards and Recommended Posts!");
   } catch (error) {
     console.error("Seeding error:", error);
     process.exit(1);
