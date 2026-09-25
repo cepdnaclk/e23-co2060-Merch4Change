@@ -6,12 +6,7 @@ import { useAuth } from '../../context/Context';
 import { likePost, commentOnPost } from '../../api/postsService';
 
 function PostViewer({ post, onClose }) {
-  let navigate = null;
-  try {
-    navigate = useNavigate();
-  } catch {
-    navigate = null;
-  }
+  const navigate = useNavigate();
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { user: currentUser } = useAuth();
@@ -34,11 +29,7 @@ function PostViewer({ post, onClose }) {
       : (targetUser._id || targetUser.id ? `/profile/${targetUser._id || targetUser.id}` : null);
     if (!path) return;
     if (onClose) onClose();
-    if (navigate) {
-      navigate(path);
-    } else if (typeof window !== 'undefined' && window.location) {
-      window.location.assign(path);
-    }
+    navigate(path);
   };
 
   useEffect(() => {

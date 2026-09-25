@@ -38,12 +38,7 @@ function idsMatch(left, right) {
 }
 
 function Post({ post, onOpen }) {
-  let navigate = null;
-  try {
-    navigate = useNavigate();
-  } catch {
-    navigate = null;
-  }
+  const navigate = useNavigate();
 
   const { user: currentUser } = useAuth();
   const isLive = Boolean(post);
@@ -72,11 +67,7 @@ function Post({ post, onOpen }) {
           : `/profile/${targetUsername}`)
       : (author._id || author.id ? `/profile/${author._id || author.id}` : null);
     if (!path) return;
-    if (navigate) {
-      navigate(path);
-    } else if (typeof window !== "undefined" && window.location) {
-      window.location.assign(path);
-    }
+    navigate(path);
   };
 
   const handleLike = async (event) => {
