@@ -5,6 +5,7 @@
 <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License" />
 <img src="https://img.shields.io/badge/Node.js-%3E%3D%2018.0.0-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js" />
 <img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" />
+<img src="https://img.shields.io/badge/Stripe-Enabled-635BFF?style=for-the-badge&logo=stripe&logoColor=white" alt="Stripe" />
 
 # 🛍️ Merch4Change
 
@@ -33,7 +34,7 @@ A modern full-stack web platform bridging **conscious shoppers**, **merchants & 
   - [Step-by-Step Installation](#step-by-step-installation)
   - [Database Seeding](#database-seeding)
   - [Running the Application](#running-the-application)
-  - [Running Tests](#running-tests)
+  - [Running Tests & CI Checks](#running-tests--ci-checks)
 - [Environment Variables](#-environment-variables)
 - [Folder Structure](#-folder-structure)
 - [API Overview](#-api-overview)
@@ -64,18 +65,25 @@ A modern full-stack web platform bridging **conscious shoppers**, **merchants & 
 
 | Role | Key Capabilities |
 |---|---|
-| **Normal Shoppers** | Browse products, purchase merchandise, earn Merch Coins, donate coins to verified charities and projects, follow brands/charities, interact with community posts & stories, message peers, earn donor rank badges. |
+| **Normal Shoppers** | Browse products, place live bids on limited auctions, purchase merchandise via Stripe, earn Merch Coins, donate coins to verified charities and projects, follow brands/charities, interact with community posts & stories, message peers, earn donor rank badges. |
 | **Brands & Merchants** | Dedicated brand storefronts, product catalog management, Cloudinary-powered media uploads, track orders and sales impact, showcase corporate philanthropy. |
 | **Charities & NGOs** | Document submission for admin verification, verified badge status, create targeted fundraising campaigns/projects, accept direct and coin-based donations, showcase HQ on interactive maps. |
 | **Admins & Moderators** | Charity verification portal (inspect registration proofs, approve/reject applications), content moderation, platform audits, user status controls. |
 
 ### 🚀 Core Platform Capabilities
 
-- **🔐 Robust Dual-Token Authentication & Security**:
+- **🔐 Robust Dual-Token Authentication & Email Delivery**:
   - JWT access tokens accompanied by secure `HttpOnly`, `SameSite` refresh token cookies.
-  - Email OTP verification powered by `nodemailer`.
-  - Account state enforcement (inactive/suspended user isolation).
+  - Dual transactional email dispatch: **Resend HTTPS API** for cloud reliability and **Nodemailer SMTP** for custom mail servers.
+  - Secure email OTP verification with dev fallback (`123456`) and account state isolation.
   - Rate limiting on API and authentication routes (`express-rate-limit`), security headers (`helmet`), and CORS protection.
+- **💳 Real-Currency Checkout & Stripe Integration**:
+  - Integrated **Stripe Checkout Sessions** for secure credit/debit card merchandise payments.
+  - Automated post-payment verification, order generation, and instant Merch Coin disbursement.
+  - Order success receipts with breakdown of items and earned coin rewards.
+- **⚡ Live Auctions & Timed Bidding Engine**:
+  - Dedicated auction marketplace for exclusive charity items and limited creator merchandise drops.
+  - Dynamic countdown timers, current high-bidder tracking, minimum bid increments, and bid activity feeds.
 - **🪙 Coin Donation & Social Impact Engine**:
   - Atomic coin transactions preventing race conditions and double-spending.
   - Direct donations to verified charities or specific charitable fundraising projects.
@@ -84,8 +92,9 @@ A modern full-stack web platform bridging **conscious shoppers**, **merchants & 
   - Support for multi-vendor brand storefronts and individual user-uploaded merchandise.
   - Category filtering, price sorting, and dynamic product showcases.
   - Responsive modals for instant product creation.
-- **📱 Social Feed, Community Posts & Ephemeral Stories**:
-  - Social feed with optimistic like animations, counts, and threaded commenting.
+- **🧠 Intelligent Community Feed & Personalized Recommendations**:
+  - Algorithmic recommendation feed combining author-follower affinity, engagement signals (likes and comments), recency scoring, and user history.
+  - Optimistic like animations, threaded commenting, and direct user profile routing.
   - 24-hour auto-expiring media stories and permanent highlight collections.
   - Polymorphic profile pages (`/profile/:username`) for both individual users and organizations with donor lists, project catalogs, and community tabs.
 - **💬 Direct Messaging & Notifications**:
@@ -112,14 +121,15 @@ A modern full-stack web platform bridging **conscious shoppers**, **merchants & 
 | **Styling & Icons** | [Tailwind CSS](https://tailwindcss.com/) · [Lucide React](https://lucide.dev/) |
 | **State & Routing** | React Context API · [React Router v7](https://reactrouter.com/) |
 | **Maps & Geolocation** | [React-Leaflet](https://react-leaflet.js.org/) · [Leaflet](https://leafletjs.com/) · OpenStreetMap |
+| **Payments & Billing** | [Stripe](https://stripe.com/) (Checkout Sessions, Webhooks, Customer Portal) |
 | **HTTP Client & Toast** | [Axios](https://axios-http.com/) · [React Hot Toast](https://react-hot-toast.com/) |
 | **Backend Runtime** | [Node.js](https://nodejs.org/) (>= 18.0.0, ES Modules) + [Express.js](https://expressjs.com/) |
 | **Database & ODM** | [MongoDB](https://www.mongodb.com/) + [Mongoose ODM](https://mongoosejs.com/) |
-| **Authentication** | JWT (Dual-Token: Access + Refresh) · [Bcrypt.js](https://github.com/dcodeIO/bcrypt.js) · [Nodemailer](https://nodemailer.com/) (OTP) |
+| **Authentication & Email** | JWT (Dual-Token: Access + Refresh) · [Bcrypt.js](https://github.com/dcodeIO/bcrypt.js) · [Resend API](https://resend.com/) · [Nodemailer](https://nodemailer.com/) |
 | **Security & Middleware** | [Helmet](https://helmetjs.github.io/) · [CORS](https://github.com/expressjs/cors) · [Cookie-Parser](https://github.com/expressjs/cookie-parser) · [Express Rate Limit](https://express-rate-limit.mintlify.app/) |
 | **Media Uploads** | [Multer](https://github.com/expressjs/multer) · [Cloudinary SDK](https://cloudinary.com/) · [Streamifier](https://github.com/valeriangalliat/node-streamifier) |
 | **Testing** | [Vitest](https://vitest.dev/) & React Testing Library (Frontend) · Node.js Native Test Runner (Backend) |
-| **Deployment & Analytics** | [Vercel](https://vercel.com/) (Frontend & Analytics) · Cloud / Container ready (Backend) |
+| **CI/CD & Deployment** | [GitHub Actions](https://github.com/features/actions) · [Vercel](https://vercel.com/) (Frontend & Analytics) · Cloud / Container ready (Backend) |
 
 ---
 
@@ -192,7 +202,7 @@ npm install
 ### 🔐 Environment Variables
 
 #### Backend (`code/Backend/.env`)
-Create a `.env` file inside `code/Backend/`:
+Create a `.env` file inside `code/Backend/` (or copy from `.env.example`):
 
 ```env
 # Server
@@ -214,10 +224,21 @@ CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
 CLOUDINARY_API_KEY=your_cloudinary_api_key
 CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 
-# Email OTP Service (Nodemailer)
+# Email Service Option A: Resend API (Recommended for cloud/production)
+RESEND_API_KEY=re_your_resend_api_key
+EMAIL_FROM=Merch4Change <onboarding@resend.dev>
+
+# Email Service Option B: Nodemailer SMTP
 EMAIL_USER=your_email@gmail.com
 EMAIL_PASS=your_gmail_app_password
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_SECURE=true
 OTP_EXPIRE_MIN=5
+
+# Stripe Payments & Checkout
+STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
+STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
 
 # Rate Limiting (Optional overrides)
 API_RATE_LIMIT_WINDOW_MS=900000
@@ -241,7 +262,12 @@ Populate the database with pre-configured mock data (admin accounts, standard us
 
 ```bash
 cd code/Backend
+
+# Standard seeding (admins, merchants, charities, products, projects)
 node src/scripts/seed.js
+
+# Full enriched seeding (includes 100% post images, followers, recommendation graphs, and auctions)
+node src/scripts/seedFull.js
 ```
 
 ---
@@ -264,11 +290,16 @@ npm run dev
 
 ---
 
-### 🧪 Running Tests
+### 🧪 Running Tests & CI Checks
 
-#### Backend Tests (Node.js Native Test Runner)
+Both backend and frontend are automated through our GitHub Actions CI pipeline (`.github/workflows/ci.yml`).
+
+#### Backend Lint & Tests (Node.js Native Test Runner)
 ```bash
 cd code/Backend
+
+# Run linter
+npm run lint
 
 # Run all unit tests
 npm test
@@ -280,15 +311,21 @@ npm run test:watch
 npm run test:all
 ```
 
-#### Frontend Tests (Vitest + React Testing Library)
+#### Frontend Lint, Tests & Build (Vitest + React Testing Library + Vite)
 ```bash
 cd code/Frontend
+
+# Run linter
+npm run lint
+
+# Run tests in single-run mode (used by CI)
+npm run test:run
 
 # Run tests in interactive watch mode
 npm test
 
-# Run single test run
-npm run test:run
+# Verify production build bundle
+npm run build
 ```
 
 ---
@@ -381,7 +418,15 @@ All API endpoints are prefixed with `/api/v1` (with the exception of `/api/searc
 | | `GET` | `/api/v1/donations/history` | Retrieve user coin donation history | ✅ |
 | **Admin** | `GET` | `/api/v1/admin/charities/pending` | Fetch unverified charity review queue | ✅ (Admin) |
 | | `POST` | `/api/v1/admin/charities/:id/status` | Approve or reject charity verification | ✅ (Admin) |
+| **Auctions** | `GET` | `/api/v1/auctions` | List active, scheduled, and past auctions | ❌ |
+| | `GET` | `/api/v1/auctions/:id` | Fetch auction details, current high bid & history | ❌ |
+| | `POST` | `/api/v1/auctions/:id/bids` | Place live bid on an auction item | ✅ |
+| **Payments & Checkout** | `POST` | `/api/v1/payments/create-checkout-session` | Create Stripe Hosted Checkout Session for order | ✅ |
+| | `GET` | `/api/v1/payments/verify-session/:sessionId` | Verify payment session & fulfill coin allocation | ✅ |
+| | `POST` | `/api/v1/payments/webhook` | Handle asynchronous Stripe webhook events | ❌ |
+| | `GET` | `/api/v1/marketplace/orders/:orderId` | Retrieve order confirmation and coin receipt | ✅ |
 | **Social & Feed** | `GET` | `/api/v1/posts` | Fetch public feed posts | ✅ |
+| | `GET` | `/api/v1/posts/recommended` | Algorithmic personalized feed with pagination | ✅ |
 | | `POST` | `/api/v1/posts` | Create a community post | ✅ |
 | | `POST` | `/api/v1/posts/:id/like` | Like or unlike a post | ✅ |
 | | `POST` | `/api/v1/posts/:id/comment` | Add comment to a post | ✅ |
@@ -412,7 +457,7 @@ All API endpoints are prefixed with `/api/v1` (with the exception of `/api/searc
 - [x] Unified profile architecture (`/profile/:username`)
 - [x] Comprehensive database seeding script (`seed.js`)
 
-### Semester 4 (Current & Planned)
+### Semester 4 (Completed Milestones)
 - [x] Coin earning engine upon merchandise checkout
 - [x] Atomic coin donation engine & charity impact metrics
 - [x] Charity verification workflow & Admin moderation portal
@@ -424,10 +469,10 @@ All API endpoints are prefixed with `/api/v1` (with the exception of `/api/searc
 - [x] Donor leaderboards & gamified badges (Diamond to Bronze tiers)
 - [x] Global cross-entity search engine
 - [x] Redesigned public experience (Landing animations, Story, Mission, Team, FAQ, Help)
-- [ ] Auction system with real-time bidding for limited drops
-- [ ] Stripe payment gateway integration for real-currency checkout
-- [ ] Socket.io real-time streaming for live chat & auction updates
-- [ ] Mobile-optimized Progressive Web App (PWA) enhancements
+- [x] Auction system with real-time bidding and countdown timers
+- [x] Stripe payment gateway integration with verified checkout sessions
+- [x] Algorithmic feed recommendation engine with multi-factor scoring
+- [x] Dual-delivery transactional email architecture (Resend API + Nodemailer)
 
 ---
 
