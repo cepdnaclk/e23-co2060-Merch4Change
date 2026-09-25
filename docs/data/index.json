@@ -1,5 +1,4 @@
 {
-    "title": "Merch4Change",
     "team": [
         {
             "name": "G.C. Damsiluni",
@@ -20,6 +19,16 @@
             "name": "S.D.M.P. Sandanayake",
             "email": "e23347@eng.pdn.ac.lk",
             "eNumber": "E/23/347"
+        }
+    ],
+    "supervisors": [
+        {
+            "name": "Dr. Supervisor 1",
+            "email": "email@eng.pdn.ac.lk"
+        },
+        {
+            "name": "Supervisor 2",
+            "email": "email@eng.pdn.ac.lk"
         }
     ],
     "tags": ["Web", "Software Systems", "CO2060"],

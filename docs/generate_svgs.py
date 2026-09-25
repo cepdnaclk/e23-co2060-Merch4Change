@@ -398,88 +398,97 @@ content_7 = '''
 with open('docs/images/flowchart_architecture.svg', 'w') as f:
     f.write(create_svg(1000, 490, content_7))
 
-# 8. ER Model
+# 8. NoSQL Document Model
 content_8 = '''
-  <text x="500" y="38" text-anchor="middle" fill="#111827" font-size="16" font-weight="700">Figure 8: Database Entity Relational Overview</text>
+  <text x="500" y="38" text-anchor="middle" fill="#111827" font-size="16" font-weight="700">Figure 8: NoSQL Document Model &amp; Collection Architecture (MongoDB Atlas)</text>
   <line x1="40" y1="52" x2="960" y2="52" stroke="#e5e7eb" stroke-width="1"/>
 
-  <!-- User Model -->
-  <g transform="translate(60, 75)">
-    <rect width="200" height="140" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
-    <rect width="200" height="28" rx="4" fill="#f3f4f6" stroke="#111827" stroke-width="1.5"/>
-    <text x="100" y="19" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">USER</text>
-    <text x="15" y="48" fill="#111827" font-size="11">_id: ObjectId (PK)</text>
-    <text x="15" y="68" fill="#4b5563" font-size="11">username: String</text>
-    <text x="15" y="88" fill="#4b5563" font-size="11">email: String</text>
-    <text x="15" y="108" fill="#4b5563" font-size="11">role: Enum</text>
-    <text x="15" y="128" fill="#111827" font-size="11" font-weight="600">merchCoins: Number</text>
+  <!-- User Document -->
+  <g transform="translate(50, 75)">
+    <rect width="215" height="150" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+    <rect width="215" height="28" rx="4" fill="#f3f4f6" stroke="#111827" stroke-width="1.5"/>
+    <text x="107" y="19" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">users Collection</text>
+    <text x="14" y="48" fill="#111827" font-size="11">_id: ObjectId</text>
+    <text x="14" y="68" fill="#4b5563" font-size="11">userName, email: String (unique)</text>
+    <text x="14" y="88" fill="#4b5563" font-size="11">role: 'user'|'brand'|'charity'|'admin'</text>
+    <text x="14" y="108" fill="#111827" font-size="11" font-weight="600">coinBalance: Number (atomic)</text>
+    <text x="14" y="128" fill="#4b5563" font-size="11">accountType: 'individual'|'org'</text>
+    <text x="14" y="143" fill="#6b7280" font-size="9" font-style="italic">Compound index: { role: 1, email: 1 }</text>
   </g>
 
-  <!-- Order Model -->
-  <g transform="translate(400, 75)">
-    <rect width="200" height="140" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
-    <rect width="200" height="28" rx="4" fill="#f3f4f6" stroke="#111827" stroke-width="1.5"/>
-    <text x="100" y="19" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">ORDER</text>
-    <text x="15" y="48" fill="#111827" font-size="11">_id: ObjectId (PK)</text>
-    <text x="15" y="68" fill="#4b5563" font-size="11">userId: ObjectId (FK)</text>
-    <text x="15" y="88" fill="#4b5563" font-size="11">totalAmount: Number</text>
-    <text x="15" y="108" fill="#111827" font-size="11" font-weight="600">coinsEarned: Number</text>
-    <text x="15" y="128" fill="#4b5563" font-size="11">paymentStatus: String</text>
+  <!-- Order Document -->
+  <g transform="translate(390, 75)">
+    <rect width="225" height="150" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+    <rect width="225" height="28" rx="4" fill="#f3f4f6" stroke="#111827" stroke-width="1.5"/>
+    <text x="112" y="19" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">orders Collection</text>
+    <text x="14" y="48" fill="#111827" font-size="11">_id: ObjectId</text>
+    <text x="14" y="68" fill="#4b5563" font-size="11">userId: ObjectId (ref: 'User')</text>
+    <text x="14" y="88" fill="#111827" font-size="11" font-weight="600">items: [OrderItem] (Embedded)</text>
+    <text x="14" y="108" fill="#4b5563" font-size="11">totalAmount, coinsEarned: Number</text>
+    <text x="14" y="128" fill="#4b5563" font-size="11">status: 'pending'|'paid'|'delivered'</text>
+    <text x="14" y="143" fill="#6b7280" font-size="9" font-style="italic">Index: { userId: 1, status: 1 }</text>
   </g>
 
-  <!-- Donation Model -->
-  <g transform="translate(740, 75)">
-    <rect width="200" height="140" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
-    <rect width="200" height="28" rx="4" fill="#f3f4f6" stroke="#111827" stroke-width="1.5"/>
-    <text x="100" y="19" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">DONATION</text>
-    <text x="15" y="48" fill="#111827" font-size="11">_id: ObjectId (PK)</text>
-    <text x="15" y="68" fill="#4b5563" font-size="11">donorId: ObjectId (FK)</text>
-    <text x="15" y="88" fill="#4b5563" font-size="11">charityId: ObjectId (FK)</text>
-    <text x="15" y="108" fill="#4b5563" font-size="11">projectId: ObjectId (FK)</text>
-    <text x="15" y="128" fill="#111827" font-size="11" font-weight="600">amount: Number</text>
+  <!-- Donation Document -->
+  <g transform="translate(735, 75)">
+    <rect width="220" height="150" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+    <rect width="220" height="28" rx="4" fill="#f3f4f6" stroke="#111827" stroke-width="1.5"/>
+    <text x="110" y="19" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">donations Collection</text>
+    <text x="14" y="48" fill="#111827" font-size="11">_id: ObjectId</text>
+    <text x="14" y="68" fill="#4b5563" font-size="11">donorUserId: ObjectId (ref: 'User')</text>
+    <text x="14" y="88" fill="#4b5563" font-size="11">charityId: ObjectId (ref: 'Charity')</text>
+    <text x="14" y="108" fill="#4b5563" font-size="11">charityProjectId: ObjectId (ref)</text>
+    <text x="14" y="128" fill="#111827" font-size="11" font-weight="600">coinAmount: Number, status: String</text>
+    <text x="14" y="143" fill="#6b7280" font-size="9" font-style="italic">Index: { status: 1, donorUserId: 1 }</text>
   </g>
 
-  <!-- Charity Model -->
-  <g transform="translate(60, 255)">
-    <rect width="200" height="130" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
-    <rect width="200" height="28" rx="4" fill="#f3f4f6" stroke="#111827" stroke-width="1.5"/>
-    <text x="100" y="19" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">CHARITY</text>
-    <text x="15" y="48" fill="#111827" font-size="11">_id: ObjectId (PK)</text>
-    <text x="15" y="68" fill="#4b5563" font-size="11">name: String</text>
-    <text x="15" y="88" fill="#111827" font-size="11" font-weight="600">status: 'verified'</text>
-    <text x="15" y="108" fill="#4b5563" font-size="11">coordinates: [lat, lng]</text>
+  <!-- Charity Document -->
+  <g transform="translate(50, 260)">
+    <rect width="215" height="140" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+    <rect width="215" height="28" rx="4" fill="#f3f4f6" stroke="#111827" stroke-width="1.5"/>
+    <text x="107" y="19" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">charities Collection</text>
+    <text x="14" y="48" fill="#111827" font-size="11">_id: ObjectId</text>
+    <text x="14" y="68" fill="#4b5563" font-size="11">ownerUserId: ObjectId (ref: 'User')</text>
+    <text x="14" y="88" fill="#111827" font-size="11" font-weight="600">verificationStatus: 'verified'</text>
+    <text x="14" y="108" fill="#4b5563" font-size="11">proofDocuments: [Doc] (Embedded)</text>
+    <text x="14" y="128" fill="#4b5563" font-size="11">country, city: String (geocoded)</text>
   </g>
 
-  <!-- Project Model -->
-  <g transform="translate(400, 255)">
-    <rect width="200" height="130" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
-    <rect width="200" height="28" rx="4" fill="#f3f4f6" stroke="#111827" stroke-width="1.5"/>
-    <text x="100" y="19" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">PROJECT</text>
-    <text x="15" y="48" fill="#111827" font-size="11">_id: ObjectId (PK)</text>
-    <text x="15" y="68" fill="#4b5563" font-size="11">charityId: ObjectId (FK)</text>
-    <text x="15" y="88" fill="#4b5563" font-size="11">targetAmount: Number</text>
-    <text x="15" y="108" fill="#111827" font-size="11" font-weight="600">collectedAmount: Number</text>
+  <!-- Project Document -->
+  <g transform="translate(390, 260)">
+    <rect width="225" height="140" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+    <rect width="225" height="28" rx="4" fill="#f3f4f6" stroke="#111827" stroke-width="1.5"/>
+    <text x="112" y="19" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">projects Collection</text>
+    <text x="14" y="48" fill="#111827" font-size="11">_id: ObjectId</text>
+    <text x="14" y="68" fill="#4b5563" font-size="11">charityId: ObjectId (ref: 'Charity')</text>
+    <text x="14" y="88" fill="#4b5563" font-size="11">title, description: String</text>
+    <text x="14" y="108" fill="#111827" font-size="11" font-weight="600">targetAmount, collectedAmount: Num</text>
+    <text x="14" y="128" fill="#4b5563" font-size="11">status: 'active'|'completed'</text>
   </g>
 
-  <!-- Auction Model -->
-  <g transform="translate(740, 255)">
-    <rect width="200" height="130" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
-    <rect width="200" height="28" rx="4" fill="#f3f4f6" stroke="#111827" stroke-width="1.5"/>
-    <text x="100" y="19" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">AUCTION</text>
-    <text x="15" y="48" fill="#111827" font-size="11">_id: ObjectId (PK)</text>
-    <text x="15" y="68" fill="#111827" font-size="11" font-weight="600">currentHighBid: Number</text>
-    <text x="15" y="88" fill="#4b5563" font-size="11">highBidderId: ObjectId</text>
-    <text x="15" y="108" fill="#4b5563" font-size="11">endTime: Date</text>
+  <!-- Product Document -->
+  <g transform="translate(735, 260)">
+    <rect width="220" height="140" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+    <rect width="220" height="28" rx="4" fill="#f3f4f6" stroke="#111827" stroke-width="1.5"/>
+    <text x="110" y="19" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">products Collection</text>
+    <text x="14" y="48" fill="#111827" font-size="11">_id: ObjectId</text>
+    <text x="14" y="68" fill="#4b5563" font-size="11">ownerUserId: ObjectId (ref: 'User')</text>
+    <text x="14" y="88" fill="#4b5563" font-size="11">name, description: String</text>
+    <text x="14" y="108" fill="#111827" font-size="11" font-weight="600">price, stock: Number (inventory)</text>
+    <text x="14" y="128" fill="#4b5563" font-size="11">images: [String] (Cloudinary)</text>
   </g>
 
-  <!-- Connectors -->
-  <path d="M 260 145 L 400 145" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <path d="M 600 145 L 740 145" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <path d="M 260 320 L 400 320" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <path d="M 500 255 L 500 215" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <!-- Reference Connectors (ObjectId References) -->
+  <path d="M 265 145 L 390 145" fill="none" stroke="#111827" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+  <path d="M 615 145 L 735 145" fill="none" stroke="#111827" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+  <path d="M 265 330 L 390 330" fill="none" stroke="#111827" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+  <path d="M 502 260 L 502 225" fill="none" stroke="#111827" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+
+  <!-- Legend -->
+  <text x="500" y="425" text-anchor="middle" fill="#4b5563" font-size="11" font-style="italic">Dashed lines represent normalized MongoDB ObjectId references (ref). Subdocuments are embedded directly.</text>
 '''
 with open('docs/images/flowchart_er_model.svg', 'w') as f:
-    f.write(create_svg(1000, 420, content_8))
+    f.write(create_svg(1000, 440, content_8))
 
 # 9. Testing Strategy
 content_9 = '''

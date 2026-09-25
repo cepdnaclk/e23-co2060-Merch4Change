@@ -43,7 +43,7 @@
 6. [System Architecture & Engineering Design](#6-system-architecture--engineering-design)
    - [6.1 High-Level Architecture](#61-high-level-architecture)
    - [6.2 Technology Matrix](#62-technology-matrix)
-   - [6.3 Relational & Document Schema Design](#63-relational--document-schema-design)
+   - [6.3 NoSQL Document Model & Collection Architecture](#63-nosql-document-model--collection-architecture)
 7. [Security Architecture & Concurrency Safeguards](#7-security-architecture--concurrency-safeguards)
 8. [Quality Assurance & Verification Methodology](#8-quality-assurance--verification-methodology)
 9. [Project Milestones & Strategic Roadmap](#9-project-milestones--strategic-roadmap)
@@ -185,12 +185,20 @@ Rigorous multi-stage vetting process safeguarding donor contributions against un
 
 ---
 
-### 6.3 Relational & Document Schema Design
+### 6.3 NoSQL Document Model & Collection Architecture
 
-The document schema establishes relationships between users, merchandise products, purchase orders, verified non-profits, campaigns, and donations:
+The data tier is engineered natively on **MongoDB Atlas** utilizing **Mongoose 8 ODM**, leveraging a document-oriented NoSQL paradigm optimized for high-throughput reads, polymorphic user roles, and atomic ledger mutations:
 
-![Figure 8: Database Entity Relational Overview](./images/flowchart_er_model.svg)
-*Figure 8: Entity relationships illustrating document schemas and foreign-key references.*
+* **Denormalization vs. Referencing Strategy:** High-frequency read paths employ embedded subdocuments (e.g., `OrderItem` snapshots embedded directly inside the `orders` collection) to guarantee immutable purchase records and eliminate costly runtime `$lookup` joins. Shared entities (`users`, `charities`, `projects`) are linked via normalized MongoDB `ObjectId` references (`ref`).
+* **Polymorphic Account Modeling:** The `users` collection models diverse actor types (`user`, `brand`, `charity`, `admin`) alongside embedded authentication metadata, complemented by specialized profile documents (`Charity`, `Brand`, `OrganizationProfile`) linked through indexed `ownerUserId` references.
+* **Compound Performance Indexing:** Performance-critical query paths are hardened with targeted compound indexes:
+  * `{ status: 1, createdAt: -1 }` on `donations` for high-speed monthly and weekly leaderboard aggregations.
+  * `{ role: 1, email: 1 }` on `users` for rapid role-scoped authentication queries.
+  * `{ userId: 1, status: 1 }` on `orders` for zero-latency customer purchase history lookups.
+* **Atomic Concurrency Controls:** All coin balance modifications and campaign crowdfunding totals utilize conditional MongoDB atomic operators (`$inc`, `$set`) executed with balance preconditions (e.g., `{ coinBalance: { $gte: donationAmount } }`), delivering ACID-compliant ledger updates without the multi-table locking penalties of traditional relational databases.
+
+![Figure 8: NoSQL Document Model & Collection Architecture](./images/flowchart_er_model.svg)
+*Figure 8: MongoDB NoSQL collection schemas, embedded document arrays, and normalized ObjectId references.*
 
 ---
 
