@@ -91,7 +91,7 @@ export const OrgHqMap = ({ country, organizationName, city }) => {
           <Popup>
             <div className="map-popup-card">
               <h4>{organizationName}</h4>
-              <p>📍 {city ? `${city}, ` : ""}{country}</p>
+              <p>{city ? `${city}, ` : ""}{country}</p>
             </div>
           </Popup>
         </Marker>

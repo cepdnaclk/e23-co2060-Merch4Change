@@ -1,22 +1,22 @@
-# ⚙️ Merch4Change — Backend REST API
+# Merch4Change — Backend REST API
 
 The high-performance RESTful API powering **Merch4Change**, built using **Node.js (>= 18.0.0, ES Modules)**, **Express.js**, and **MongoDB Atlas (Mongoose ODM)**.
 
 ---
 
-## 🌟 Overview & Key Capabilities
+## Overview & Key Capabilities
 
-- **🔐 Dual-Token Authentication**: Short-lived JWT access tokens in memory coupled with secure, `HttpOnly`, `SameSite=Lax` refresh token cookies.
-- **✉️ Transactional Email Verification**: Automatic OTP verification on signup with dual dispatch via Resend HTTPS API and Nodemailer SMTP fallback.
-- **💳 Real-Currency Stripe Checkout**: Stripe Checkout Sessions with post-payment order completion and atomic Merch Coin credit ($\lfloor \text{USD} / 10 \rfloor$).
-- **🪙 Concurrency-Safe Coin Donations**: Atomic transactions ensuring user coin balances cannot fall below zero under concurrent donation attempts.
-- **⚡ Live Auctions Engine**: Time-validated bidding with automated minimum increment checks and high-bidder tracking.
-- **☁️ Memory-Buffered Cloud Media Pipeline**: Multer memory storage (2MB limit) streaming directly to Cloudinary CDN, leaving zero residual files on the server host.
-- **🛡️ Defensive API Hardening**: `helmet` security headers, `express-rate-limit` brute-force defense, CORS origin whitelisting, and strict request validation.
+- **Dual-Token Authentication**: Short-lived JWT access tokens in memory coupled with secure, `HttpOnly`, `SameSite=Lax` refresh token cookies.
+- **Transactional Email Verification**: Automatic OTP verification on signup with dual dispatch via Resend HTTPS API and Nodemailer SMTP fallback.
+- **Real-Currency Stripe Checkout**: Stripe Checkout Sessions with post-payment order completion and atomic Merch Coin credit ($\lfloor \text{USD} / 10 \rfloor$).
+- **Concurrency-Safe Coin Donations**: Atomic transactions ensuring user coin balances cannot fall below zero under concurrent donation attempts.
+- **Live Auctions Engine**: Time-validated bidding with automated minimum increment checks and high-bidder tracking.
+- **Memory-Buffered Cloud Media Pipeline**: Multer memory storage (2MB limit) streaming directly to Cloudinary CDN, leaving zero residual files on the server host.
+- **Defensive API Hardening**: `helmet` security headers, `express-rate-limit` brute-force defense, CORS origin whitelisting, and strict request validation.
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 | Category | Technology |
 |---|---|
@@ -31,7 +31,7 @@ The high-performance RESTful API powering **Merch4Change**, built using **Node.j
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### 1. Prerequisites
 - **Node.js**: `>= 18.0.0`
@@ -99,7 +99,7 @@ The API server will listen on `http://localhost:5000`.
 
 ---
 
-## 🧪 Testing & Linting
+## Testing & Linting
 
 The backend utilizes Node's high-speed native test runner:
 
@@ -127,7 +127,7 @@ For more in-depth testing scenarios, refer to [`TESTING.md`](./TESTING.md).
 
 ---
 
-## 📁 Source Code Organization
+## Source Code Organization
 
 ```
 src/

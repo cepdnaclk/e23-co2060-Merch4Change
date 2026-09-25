@@ -1,4 +1,4 @@
-# 🛍️ Merch4Change — Developer Guide & System Handbook
+# Merch4Change — Developer Guide & System Handbook
 
 <div align="center">
 
@@ -25,7 +25,7 @@
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 
 1. [Executive Summary & System Vision](#1-executive-summary--system-vision)
    - [1.1 The Problem Space](#11-the-problem-space)
@@ -793,11 +793,11 @@ export const requireRole = (...allowedRoles) => {
 ### Feature 14: Leaderboards, Donor Tiers & Gamified Badges
 - **Purpose**: Gamified community recognition ranking donors by lifetime and monthly contributions.
 - **Tier Boundaries**:
-  - 💎 **Diamond**: $5,000+$ Coins Donated
-  - 🥇 **Platinum**: $2,000 - 4,999$ Coins
-  - 🥈 **Gold**: $500 - 1,999$ Coins
-  - 🥉 **Silver**: $100 - 499$ Coins
-  - 🎗️ **Bronze**: $1 - 99$ Coins
+  - **Diamond**: $5,000+$ Coins Donated
+  - **Platinum**: $2,000 - 4,999$ Coins
+  - **Gold**: $500 - 1,999$ Coins
+  - **Silver**: $100 - 499$ Coins
+  - **Bronze**: $1 - 99$ Coins
 
 ### Feature 15: Global Multi-Entity Search Engine
 - **Purpose**: High-performance unified discovery endpoint (`/api/search?q=query`).
@@ -1174,14 +1174,19 @@ git commit -m "docs(api): document endpoint payloads for charity verification"
 
 ### Team Antigravity (Group 13)
 
-| Team Member | Project Role | Academic Email |
-|---|---|---|
-| **R.A.J.C. Adhikari** | Tech Lead & Architecture | [e23004@eng.pdn.ac.lk](mailto:e23004@eng.pdn.ac.lk) |
-| **M.N.A. Fikry** | Scrum Master & Full-Stack Engineer | [e23114@eng.pdn.ac.lk](mailto:e23114@eng.pdn.ac.lk) |
-| **S.D.M.P. Sandanayake** | Team Leader & Full-Stack Engineer | [e23347@eng.pdn.ac.lk](mailto:e23347@eng.pdn.ac.lk) |
-| **S.B.N.S. Samarawickrama** | Backend & Security Engineer | [e23343@eng.pdn.ac.lk](mailto:e23343@eng.pdn.ac.lk) |
-| **M.A.S. Dulshara** | Database Manager & API Engineer | [e23089@eng.pdn.ac.lk](mailto:e23089@eng.pdn.ac.lk) |
-| **G.C. Damsiluni** | Frontend Engineer & UI/UX Specialist | [e23050@eng.pdn.ac.lk](mailto:e23050@eng.pdn.ac.lk) |
+#### Project Leadership
+| Role | Name |
+|---|---|
+| **Tech Lead** | **R.A.J.C. Adhikari** |
+| **Scrum Master** | **M.N.A. Fikry** |
+
+#### Development Team
+| Registration No | Student Name | Project Role | Academic Email |
+|:---:|:---|:---|:---|
+| **E/23/050** | **G.C. Damsiluni** | Frontend Developer & UI/UX Specialist | [e23050@eng.pdn.ac.lk](mailto:e23050@eng.pdn.ac.lk) |
+| **E/23/089** | **M.A.S. Dulshara** | Database Systems & Infrastructure Engineer | [e23089@eng.pdn.ac.lk](mailto:e23089@eng.pdn.ac.lk) |
+| **E/23/343** | **S.B.N.S. Samarawickrama** | Backend Systems & API Architect | [e23343@eng.pdn.ac.lk](mailto:e23343@eng.pdn.ac.lk) |
+| **E/23/347** | **S.D.M.P. Sandanayake** | Team Leader & Full-Stack Systems Engineer | [e23347@eng.pdn.ac.lk](mailto:e23347@eng.pdn.ac.lk) |
 
 ### Acknowledgements & Citations
 We express our deepest gratitude to the faculty and academic staff of the **Department of Computer Engineering, University of Peradeniya** for their invaluable guidance throughout the ideation, architecture, and execution of the **Merch4Change** project.

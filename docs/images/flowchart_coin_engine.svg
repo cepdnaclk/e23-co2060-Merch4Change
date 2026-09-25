@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 420" width="100%" height="100%" style="background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#111827" />
+    </marker>
+  </defs>
+
+  <!-- Canvas Outer Border -->
+  <rect x="1" y="1" width="898" height="418" rx="6" fill="#ffffff" stroke="#e5e7eb" stroke-width="1.5" />
+
+  
+  <text x="450" y="38" text-anchor="middle" fill="#111827" font-size="16" font-weight="700">Figure 4: Coin Generation &amp; Atomic Donation Architecture</text>
+  <line x1="40" y1="52" x2="860" y2="52" stroke="#e5e7eb" stroke-width="1"/>
+
+  <!-- Left: Earning -->
+  <g transform="translate(40, 70)">
+    <rect width="370" height="320" rx="4" fill="#fafafa" stroke="#9ca3af" stroke-dasharray="4,4" stroke-width="1"/>
+    <text x="185" y="28" text-anchor="middle" fill="#111827" font-size="13" font-weight="700">Stage A: Reward Generation Pipeline</text>
+
+    <rect x="45" y="55" width="280" height="45" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+    <text x="185" y="82" text-anchor="middle" fill="#111827" font-size="12">Order Paid: $Total (Stripe Webhook)</text>
+
+    <path d="M 185 100 L 185 135" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <rect x="45" y="135" width="280" height="50" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+    <text x="185" y="157" text-anchor="middle" fill="#111827" font-size="12" font-weight="600">Deterministic Reward Calculation</text>
+    <text x="185" y="174" text-anchor="middle" fill="#4b5563" font-size="11">Coins = floor(Total USD Amount / 10)</text>
+
+    <path d="M 185 185 L 185 220" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <rect x="45" y="220" width="280" height="45" rx="4" fill="#f3f4f6" stroke="#111827" stroke-width="1.5"/>
+    <text x="185" y="247" text-anchor="middle" fill="#111827" font-size="12" font-weight="600">Credit User Balance: $inc(merchCoins)</text>
+  </g>
+
+  <!-- Right: Donating -->
+  <g transform="translate(450, 70)">
+    <rect width="410" height="320" rx="4" fill="#fafafa" stroke="#9ca3af" stroke-dasharray="4,4" stroke-width="1"/>
+    <text x="205" y="28" text-anchor="middle" fill="#111827" font-size="13" font-weight="700">Stage B: Atomic Donation Engine</text>
+
+    <rect x="45" y="55" width="320" height="40" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+    <text x="205" y="80" text-anchor="middle" fill="#111827" font-size="12">Select Cause / Project &amp; Coin Amount (A)</text>
+
+    <path d="M 205 95 L 205 125" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <!-- Validation Diamond -->
+    <polygon points="205,125 325,160 205,195 85,160" fill="#f9fafb" stroke="#111827" stroke-width="1.5"/>
+    <text x="205" y="156" text-anchor="middle" fill="#111827" font-size="11" font-weight="600">Balance &gt;= A &amp;</text>
+    <text x="205" y="171" text-anchor="middle" fill="#111827" font-size="11" font-weight="600">Charity Verified?</text>
+
+    <!-- Reject Branch -->
+    <path d="M 85 160 L 25 160 L 25 235" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <rect x="5" y="235" width="80" height="35" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+    <text x="45" y="257" text-anchor="middle" fill="#111827" font-size="11">Reject (400)</text>
+
+    <!-- Accept Branch -->
+    <path d="M 205 195 L 205 225" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <!-- Atomic Block -->
+    <rect x="45" y="225" width="320" height="55" rx="4" fill="#f3f4f6" stroke="#111827" stroke-width="1.5"/>
+    <text x="205" y="247" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">Atomic MongoDB Transaction</text>
+    <text x="205" y="265" text-anchor="middle" fill="#4b5563" font-size="11">Deduct User Coins · Increment Project · Append Audit</text>
+  </g>
+
+</svg>

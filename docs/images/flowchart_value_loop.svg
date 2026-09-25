@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 260" width="100%" height="100%" style="background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#111827" />
+    </marker>
+  </defs>
+
+  <!-- Canvas Outer Border -->
+  <rect x="1" y="1" width="998" height="258" rx="6" fill="#ffffff" stroke="#e5e7eb" stroke-width="1.5" />
+
+  
+  <text x="500" y="38" text-anchor="middle" fill="#111827" font-size="16" font-weight="700">Figure 2: The Merch-to-Impact Closed-Loop Value Cycle</text>
+  <line x1="40" y1="52" x2="960" y2="52" stroke="#e5e7eb" stroke-width="1"/>
+
+  <!-- Step 1 -->
+  <g transform="translate(30, 80)">
+    <rect width="165" height="90" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+    <text x="82" y="30" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">1. Browse &amp; Buy</text>
+    <text x="82" y="50" text-anchor="middle" fill="#4b5563" font-size="11">Curated merchandise</text>
+    <text x="82" y="66" text-anchor="middle" fill="#4b5563" font-size="11">via Stripe checkout</text>
+  </g>
+
+  <path d="M 195 125 L 225 125" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Step 2 -->
+  <g transform="translate(230, 80)">
+    <rect width="165" height="90" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+    <text x="82" y="30" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">2. Accrue Coins</text>
+    <text x="82" y="50" text-anchor="middle" fill="#4b5563" font-size="11">Deterministic reward</text>
+    <text x="82" y="66" text-anchor="middle" fill="#4b5563" font-size="11">1 Coin per $10 spent</text>
+  </g>
+
+  <path d="M 395 125 L 425 125" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Step 3 -->
+  <g transform="translate(430, 80)">
+    <rect width="165" height="90" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+    <text x="82" y="30" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">3. Allocate Donation</text>
+    <text x="82" y="50" text-anchor="middle" fill="#4b5563" font-size="11">Atomic micro-giving</text>
+    <text x="82" y="66" text-anchor="middle" fill="#4b5563" font-size="11">to verified non-profits</text>
+  </g>
+
+  <path d="M 595 125 L 625 125" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Step 4 -->
+  <g transform="translate(630, 80)">
+    <rect width="165" height="90" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+    <text x="82" y="30" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">4. Elevate Tier</text>
+    <text x="82" y="50" text-anchor="middle" fill="#4b5563" font-size="11">Bronze to Diamond</text>
+    <text x="82" y="66" text-anchor="middle" fill="#4b5563" font-size="11">Public donor ranking</text>
+  </g>
+
+  <path d="M 795 125 L 825 125" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Step 5 -->
+  <g transform="translate(830, 80)">
+    <rect width="140" height="90" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+    <text x="70" y="30" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">5. Community</text>
+    <text x="70" y="50" text-anchor="middle" fill="#4b5563" font-size="11">Social proof, feed</text>
+    <text x="70" y="66" text-anchor="middle" fill="#4b5563" font-size="11">stories &amp; milestones</text>
+  </g>
+
+  <!-- Return Loop Path -->
+  <path d="M 900 170 L 900 215 L 112 215 L 112 170" fill="none" stroke="#111827" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+  <text x="500" y="235" text-anchor="middle" fill="#4b5563" font-size="12" font-style="italic">Continuous Self-Sustaining Commercial Philanthropy Loop</text>
+
+</svg>

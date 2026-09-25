@@ -6,11 +6,11 @@ The **Leaderboards, Donor Tiers & Gamified Badges** module provides positive rei
 ### Key Capabilities
 - **Timeframe Leaderboards**: View rankings filtered by `week`, `month`, or `all_time`.
 - **Automated Donor Tiers**:
-  - 💎 **Diamond**: $\ge 5,000$ coins donated
-  - 👑 **Platinum**: $\ge 2,000$ coins donated
-  - 🥇 **Gold**: $\ge 500$ coins donated
-  - 🥈 **Silver**: $\ge 100$ coins donated
-  - 🥉 **Bronze**: $< 100$ coins donated
+  - **Diamond**: $\ge 5,000$ coins donated
+  - **Platinum**: $\ge 2,000$ coins donated
+  - **Gold**: $\ge 500$ coins donated
+  - **Silver**: $\ge 100$ coins donated
+  - **Bronze**: $< 100$ coins donated
 - **High-Performance Aggregation**: Computes rankings on-the-fly using MongoDB Aggregation Pipelines with indexed status and date matches.
 - **Earned Digital Badges**: Users collect milestone badges showcased on their profile.
 
@@ -45,11 +45,11 @@ sequenceDiagram
 
 ```javascript
 export const getDonorTier = (totalCoins) => {
-  if (totalCoins >= 5000) return { tier: "Diamond", color: "#60A5FA", bg: "#EFF6FF", icon: "💎" };
-  if (totalCoins >= 2000) return { tier: "Platinum", color: "#A855F7", bg: "#FAF5FF", icon: "👑" };
-  if (totalCoins >= 500) return { tier: "Gold", color: "#D97706", bg: "#FFFBEB", icon: "🥇" };
-  if (totalCoins >= 100) return { tier: "Silver", color: "#4B5563", bg: "#F3F4F6", icon: "🥈" };
-  return { tier: "Bronze", color: "#92400E", bg: "#FEF3C7", icon: "🥉" };
+  if (totalCoins >= 5000) return { tier: "Diamond", color: "#60A5FA", bg: "#EFF6FF", label: "Diamond" };
+  if (totalCoins >= 2000) return { tier: "Platinum", color: "#A855F7", bg: "#FAF5FF", label: "Platinum" };
+  if (totalCoins >= 500) return { tier: "Gold", color: "#D97706", bg: "#FFFBEB", label: "Gold" };
+  if (totalCoins >= 100) return { tier: "Silver", color: "#4B5563", bg: "#F3F4F6", label: "Silver" };
+  return { tier: "Bronze", color: "#92400E", bg: "#FEF3C7", label: "Bronze" };
 };
 ```
 
@@ -82,7 +82,7 @@ Base URL: `/api/v1/leaderboards`
           "donationCount": 18,
           "tier": {
             "tier": "Diamond",
-            "icon": "💎",
+            "label": "Diamond",
             "color": "#60A5FA"
           }
         }

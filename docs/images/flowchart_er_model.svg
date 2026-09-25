@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 420" width="100%" height="100%" style="background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#111827" />
+    </marker>
+  </defs>
+
+  <!-- Canvas Outer Border -->
+  <rect x="1" y="1" width="998" height="418" rx="6" fill="#ffffff" stroke="#e5e7eb" stroke-width="1.5" />
+
+  
+  <text x="500" y="38" text-anchor="middle" fill="#111827" font-size="16" font-weight="700">Figure 8: Database Entity Relational Overview</text>
+  <line x1="40" y1="52" x2="960" y2="52" stroke="#e5e7eb" stroke-width="1"/>
+
+  <!-- User Model -->
+  <g transform="translate(60, 75)">
+    <rect width="200" height="140" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+    <rect width="200" height="28" rx="4" fill="#f3f4f6" stroke="#111827" stroke-width="1.5"/>
+    <text x="100" y="19" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">USER</text>
+    <text x="15" y="48" fill="#111827" font-size="11">_id: ObjectId (PK)</text>
+    <text x="15" y="68" fill="#4b5563" font-size="11">username: String</text>
+    <text x="15" y="88" fill="#4b5563" font-size="11">email: String</text>
+    <text x="15" y="108" fill="#4b5563" font-size="11">role: Enum</text>
+    <text x="15" y="128" fill="#111827" font-size="11" font-weight="600">merchCoins: Number</text>
+  </g>
+
+  <!-- Order Model -->
+  <g transform="translate(400, 75)">
+    <rect width="200" height="140" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+    <rect width="200" height="28" rx="4" fill="#f3f4f6" stroke="#111827" stroke-width="1.5"/>
+    <text x="100" y="19" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">ORDER</text>
+    <text x="15" y="48" fill="#111827" font-size="11">_id: ObjectId (PK)</text>
+    <text x="15" y="68" fill="#4b5563" font-size="11">userId: ObjectId (FK)</text>
+    <text x="15" y="88" fill="#4b5563" font-size="11">totalAmount: Number</text>
+    <text x="15" y="108" fill="#111827" font-size="11" font-weight="600">coinsEarned: Number</text>
+    <text x="15" y="128" fill="#4b5563" font-size="11">paymentStatus: String</text>
+  </g>
+
+  <!-- Donation Model -->
+  <g transform="translate(740, 75)">
+    <rect width="200" height="140" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+    <rect width="200" height="28" rx="4" fill="#f3f4f6" stroke="#111827" stroke-width="1.5"/>
+    <text x="100" y="19" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">DONATION</text>
+    <text x="15" y="48" fill="#111827" font-size="11">_id: ObjectId (PK)</text>
+    <text x="15" y="68" fill="#4b5563" font-size="11">donorId: ObjectId (FK)</text>
+    <text x="15" y="88" fill="#4b5563" font-size="11">charityId: ObjectId (FK)</text>
+    <text x="15" y="108" fill="#4b5563" font-size="11">projectId: ObjectId (FK)</text>
+    <text x="15" y="128" fill="#111827" font-size="11" font-weight="600">amount: Number</text>
+  </g>
+
+  <!-- Charity Model -->
+  <g transform="translate(60, 255)">
+    <rect width="200" height="130" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+    <rect width="200" height="28" rx="4" fill="#f3f4f6" stroke="#111827" stroke-width="1.5"/>
+    <text x="100" y="19" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">CHARITY</text>
+    <text x="15" y="48" fill="#111827" font-size="11">_id: ObjectId (PK)</text>
+    <text x="15" y="68" fill="#4b5563" font-size="11">name: String</text>
+    <text x="15" y="88" fill="#111827" font-size="11" font-weight="600">status: 'verified'</text>
+    <text x="15" y="108" fill="#4b5563" font-size="11">coordinates: [lat, lng]</text>
+  </g>
+
+  <!-- Project Model -->
+  <g transform="translate(400, 255)">
+    <rect width="200" height="130" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+    <rect width="200" height="28" rx="4" fill="#f3f4f6" stroke="#111827" stroke-width="1.5"/>
+    <text x="100" y="19" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">PROJECT</text>
+    <text x="15" y="48" fill="#111827" font-size="11">_id: ObjectId (PK)</text>
+    <text x="15" y="68" fill="#4b5563" font-size="11">charityId: ObjectId (FK)</text>
+    <text x="15" y="88" fill="#4b5563" font-size="11">targetAmount: Number</text>
+    <text x="15" y="108" fill="#111827" font-size="11" font-weight="600">collectedAmount: Number</text>
+  </g>
+
+  <!-- Auction Model -->
+  <g transform="translate(740, 255)">
+    <rect width="200" height="130" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+    <rect width="200" height="28" rx="4" fill="#f3f4f6" stroke="#111827" stroke-width="1.5"/>
+    <text x="100" y="19" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">AUCTION</text>
+    <text x="15" y="48" fill="#111827" font-size="11">_id: ObjectId (PK)</text>
+    <text x="15" y="68" fill="#111827" font-size="11" font-weight="600">currentHighBid: Number</text>
+    <text x="15" y="88" fill="#4b5563" font-size="11">highBidderId: ObjectId</text>
+    <text x="15" y="108" fill="#4b5563" font-size="11">endTime: Date</text>
+  </g>
+
+  <!-- Connectors -->
+  <path d="M 260 145 L 400 145" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M 600 145 L 740 145" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M 260 320 L 400 320" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M 500 255 L 500 215" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+</svg>

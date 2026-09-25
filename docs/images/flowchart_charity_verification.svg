@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 440" width="100%" height="100%" style="background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#111827" />
+    </marker>
+  </defs>
+
+  <!-- Canvas Outer Border -->
+  <rect x="1" y="1" width="898" height="438" rx="6" fill="#ffffff" stroke="#e5e7eb" stroke-width="1.5" />
+
+  
+  <text x="450" y="38" text-anchor="middle" fill="#111827" font-size="16" font-weight="700">Figure 6: Non-Profit Compliance &amp; Verification Pipeline</text>
+  <line x1="40" y1="52" x2="860" y2="52" stroke="#e5e7eb" stroke-width="1"/>
+
+  <rect x="315" y="70" width="270" height="42" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+  <text x="450" y="96" text-anchor="middle" fill="#111827" font-size="12">Charity Organization Onboarding Registration</text>
+
+  <path d="M 450 112 L 450 140" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="300" y="140" width="300" height="42" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+  <text x="450" y="166" text-anchor="middle" fill="#111827" font-size="12">Upload Registration Proof &amp; Tax Exemption PDF</text>
+
+  <path d="M 450 182 L 450 210" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="300" y="210" width="300" height="42" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+  <text x="450" y="236" text-anchor="middle" fill="#111827" font-size="12">Application Enqueued: status = 'pending'</text>
+
+  <path d="M 450 252 L 450 280" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Decision -->
+  <polygon points="450,280 570,315 450,350 330,315" fill="#f9fafb" stroke="#111827" stroke-width="1.5"/>
+  <text x="450" y="319" text-anchor="middle" fill="#111827" font-size="12" font-weight="600">Admin Audit Valid?</text>
+
+  <!-- Rejected -->
+  <path d="M 330 315 L 180 315 L 180 370" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="235" y="305" fill="#4b5563" font-size="11">Rejected</text>
+  <rect x="70" y="370" width="220" height="46" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+  <text x="180" y="391" text-anchor="middle" fill="#111827" font-size="12">Status: 'rejected'</text>
+  <text x="180" y="407" text-anchor="middle" fill="#4b5563" font-size="10">Email Reason Notes &amp; Resubmission Link</text>
+
+  <!-- Approved -->
+  <path d="M 570 315 L 720 315 L 720 370" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="645" y="305" fill="#4b5563" font-size="11">Approved</text>
+  <rect x="610" y="370" width="220" height="46" rx="4" fill="#f3f4f6" stroke="#111827" stroke-width="1.5"/>
+  <text x="720" y="391" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">Status: 'approved'</text>
+  <text x="720" y="407" text-anchor="middle" fill="#4b5563" font-size="10">Assign Verification Badge &amp; Unlock Projects</text>
+
+</svg>

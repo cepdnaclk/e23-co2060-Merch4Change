@@ -1,20 +1,20 @@
-# 💻 Merch4Change — Frontend Client Application
+# Merch4Change — Frontend Client Application
 
 The modern single-page application (SPA) client for **Merch4Change**, built using **React 19**, **Vite 7**, and **Tailwind CSS**.
 
 ---
 
-## 🌟 Overview & Key Features
+## Overview & Key Features
 
-- **⚡ Lightning-Fast Build & HMR**: Powered by Vite 7 for instantaneous Hot Module Replacement.
-- **🎨 Modern Responsive UI**: Styled with Tailwind CSS, supporting dark/light UI modes and responsive layouts for mobile, tablet, and desktop devices.
-- **🗺️ Interactive Geolocation Mapping**: Integrated Leaflet & OpenStreetMap (`react-leaflet`) for global charity and NGO headquarters discovery.
-- **🔐 Robust Token Handling**: Axios client configured with automatic dual-token refresh interceptors, seamlessly renewing expired access tokens via HttpOnly cookies without interrupting user flow.
-- **🪙 Reactive Impact Display**: Real-time coin balances, animated badge updates, live auction countdown timers, and optimistic UI updates for post likes and comments.
+- **Lightning-Fast Build & HMR**: Powered by Vite 7 for instantaneous Hot Module Replacement.
+- **Modern Responsive UI**: Styled with Tailwind CSS, supporting dark/light UI modes and responsive layouts for mobile, tablet, and desktop devices.
+- **Interactive Geolocation Mapping**: Integrated Leaflet & OpenStreetMap (`react-leaflet`) for global charity and NGO headquarters discovery.
+- **Robust Token Handling**: Axios client configured with automatic dual-token refresh interceptors, seamlessly renewing expired access tokens via HttpOnly cookies without interrupting user flow.
+- **Reactive Impact Display**: Real-time coin balances, animated badge updates, live auction countdown timers, and optimistic UI updates for post likes and comments.
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 | Category | Technology |
 |---|---|
@@ -28,7 +28,7 @@ The modern single-page application (SPA) client for **Merch4Change**, built usin
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### 1. Prerequisites
 - **Node.js**: `>= 18.0.0`
@@ -69,7 +69,7 @@ npm run preview
 
 ---
 
-## 📁 Source Code Organization
+## Source Code Organization
 
 ```
 src/
@@ -97,7 +97,7 @@ src/
 
 ---
 
-## 🧪 Linting & Code Quality
+## Linting & Code Quality
 
 ```bash
 # Check code with ESLint

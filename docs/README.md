@@ -1,456 +1,246 @@
----
-layout: home
-permalink: index.html
+# Merch4Change: An Integrated Social Commerce & Philanthropic Giving Platform
 
-repository-name: e23-co2060-Merch4Change
-title: Merch4Change
----
-
-<div align="center">
-
-# 🛍️ Merch4Change
-
-### *Shop with purpose. Give with every purchase.*
-
-A multi-sided social commerce ecosystem bridging **conscious consumers**, **ethical brands & creators**, and **verified charities** — turning everyday merchandise purchases into measurable social impact.
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18.0.0-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
-[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
-[![Stripe](https://img.shields.io/badge/Stripe-Enabled-635BFF?logo=stripe&logoColor=white)](https://stripe.com/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/atlas)
-
-[🌐 Live Demo](https://merch4change.vercel.app/){:target="_blank" .btn}
-[📁 GitHub Repository](https://github.com/cepdnaclk/e23-co2060-Merch4Change){:target="_blank" .btn}
-[📘 Technical Documentation](https://github.com/cepdnaclk/e23-co2060-Merch4Change/tree/main/Documentation){:target="_blank" .btn}
-
-</div>
+**CO2060 — Software Systems Design Project (2YP)**  
+*Department of Computer Engineering · Faculty of Engineering · University of Peradeniya, Sri Lanka*
 
 ---
 
-## 👥 Team & Supervisors
+![Project Overview](./images/cover_page.jpg)
 
-**Department of Computer Engineering**, Faculty of Engineering, **University of Peradeniya**  
-*CO2060 — Software Systems Design Project (2YP) · Batch E23*
+---
 
-### Project Team
+## Academic Information & Team
 
-| eNumber | Name | Role | Email |
-|---|---|---|---|
-| **E/23/347** | S.D.M.P. Sandanayake | Team Leader & Full-Stack Developer | [e23347@eng.pdn.ac.lk](mailto:e23347@eng.pdn.ac.lk) |
-| **E/23/343** | S.B.N.S. Samarawickrama | Backend Developer & API Architect | [e23343@eng.pdn.ac.lk](mailto:e23343@eng.pdn.ac.lk) |
-| **E/23/089** | M.A.S. Dulshara | Database Manager & Systems Engineer | [e23089@eng.pdn.ac.lk](mailto:e23089@eng.pdn.ac.lk) |
+* **Course Code:** CO2060 — Software Systems Design Project
+* **Academic Institution:** Department of Computer Engineering, University of Peradeniya
+* **Academic Batch:** E23 (2025/2026)
+* **Team:** Group 13 — Team Antigravity
+* **Live Deployment:** [merch4change.vercel.app](https://merch4change.vercel.app/)
+* **Project Repository:** [github.com/cepdnaclk/e23-co2060-Merch4Change](https://github.com/cepdnaclk/e23-co2060-Merch4Change)
+
+### Engineering Team
+
+| Registration No | Student Name | Assigned Role | University Email |
+|:---:|:---|:---|:---|
 | **E/23/050** | G.C. Damsiluni | Frontend Developer & UI/UX Designer | [e23050@eng.pdn.ac.lk](mailto:e23050@eng.pdn.ac.lk) |
-
-### Mentors & Supervisors
-
-| Name | Role | Contact |
-|---|---|---|
-| **R.A.J.C. Adhikari** | Technical Lead | [email@eng.pdn.ac.lk](mailto:email@eng.pdn.ac.lk) |
-| **M.N.A. Fikry** | Scrum Master | [email@eng.pdn.ac.lk](mailto:email@eng.pdn.ac.lk) |
+| **E/23/089** | M.A.S. Dulshara | Database Systems & Infrastructure Engineer | [e23089@eng.pdn.ac.lk](mailto:e23089@eng.pdn.ac.lk) |
+| **E/23/343** | S.B.N.S. Samarawickrama | Backend Systems & API Architect | [e23343@eng.pdn.ac.lk](mailto:e23343@eng.pdn.ac.lk) |
+| **E/23/347** | S.D.M.P. Sandanayake | Team Leader & Full-Stack Systems Engineer | [e23347@eng.pdn.ac.lk](mailto:e23347@eng.pdn.ac.lk) |
 
 ---
 
-## 📌 Table of Contents
+## Table of Contents
 
-1. [Executive Summary & Problem Statement](#executive-summary--problem-statement)
-2. [Proposed Solution & Core Value Loop](#proposed-solution--core-value-loop)
-3. [Multi-Sided Stakeholder Roles](#multi-sided-stakeholder-roles)
-4. [Key Product Capabilities](#key-product-capabilities)
-5. [Process Workflows & System Flowcharts](#process-workflows--system-flowcharts)
+1. [Executive Summary & Problem Statement](#1-executive-summary--problem-statement)
+2. [The Merch-to-Impact Closed-Loop Architecture](#2-the-merch-to-impact-closed-loop-architecture)
+3. [Multi-Sided Stakeholder Roles](#3-multi-sided-stakeholder-roles)
+4. [Functional Capabilities & Subsystems](#4-functional-capabilities--subsystems)
+5. [System Process Workflows & Flowcharts](#5-system-process-workflows--flowcharts)
    - [5.1 End-to-End User Impact Journey](#51-end-to-end-user-impact-journey)
-   - [5.2 Coin Reward & Donation Engine](#52-coin-reward--donation-engine)
-   - [5.3 Live Auction & Real-Time Bidding](#53-live-auction--real-time-bidding)
-   - [5.4 Charity Verification & Compliance Pipeline](#54-charity-verification--compliance-pipeline)
-6. [System Architecture & Technology Stack](#system-architecture--technology-stack)
+   - [5.2 Coin Accrual & Atomic Donation Engine](#52-coin-accrual--atomic-donation-engine)
+   - [5.3 Live Auction & Real-Time Bidding Mechanics](#53-live-auction--real-time-bidding-mechanics)
+   - [5.4 Non-Profit Credentialing & Regulatory Audit Pipeline](#54-non-profit-credentialing--regulatory-audit-pipeline)
+6. [System Architecture & Engineering Design](#6-system-architecture--engineering-design)
    - [6.1 High-Level Architecture](#61-high-level-architecture)
    - [6.2 Technology Matrix](#62-technology-matrix)
-   - [6.3 Data Model Entity Relationships](#63-data-model-entity-relationships)
-7. [Security & Engineering Highlights](#security--engineering-highlights)
-8. [Testing & Quality Assurance](#testing--quality-assurance)
-9. [Conclusion & Future Roadmap](#conclusion--future-roadmap)
-10. [Links & Resources](#links--resources)
+   - [6.3 Relational & Document Schema Design](#63-relational--document-schema-design)
+7. [Security Architecture & Concurrency Safeguards](#7-security-architecture--concurrency-safeguards)
+8. [Quality Assurance & Verification Methodology](#8-quality-assurance--verification-methodology)
+9. [Project Milestones & Strategic Roadmap](#9-project-milestones--strategic-roadmap)
+10. [References & Technical Resources](#10-references--technical-resources)
 
 ---
 
 ## 1. Executive Summary & Problem Statement
 
-### 1.1 The Problem
-In contemporary e-commerce and social advocacy, three critical challenges persist:
+### 1.1 Problem Domain
+Contemporary digital retail and philanthropic fundraising operate in distinct silos, leading to three systemic inefficiencies:
 
-1. **Disconnected Consumer Giving:** Conscious consumers wish to support charitable initiatives, but separate donation channels create friction and lack instant gratification.
-2. **Charity Trust & Visibility Deficit:** Grassroots charities and non-profit initiatives struggle with public discoverability and face high donor skepticism regarding fund transparency and verification.
-3. **Lack of Tangible CSR for Creators & Brands:** Brands and merchandise creators often want to express corporate social responsibility, yet lack unified platforms to show exactly how their product lines drive measurable social good.
+1. **Philanthropic Friction:** While digital consumers exhibit strong demand for socially responsible consumption, conventional donation funnels are disconnected from day-to-day purchasing activities, producing high friction and drop-off rates.
+2. **Asymmetric Information and Verification Deficits:** Grassroots charitable institutions face profound credibility challenges. Lacking standardized verification channels, legitimate causes struggle to gain public trust and funding.
+3. **Unrealized Corporate Social Responsibility:** Independent brands and creators lack turn-key software infrastructure to demonstrate direct social impact within their existing sales funnels.
 
-```mermaid
-flowchart LR
-    A["🛒 Shoppers\nLack unified social\ncommerce platform"] --- Problem{{"Frictional Philanthropy\n& Trust Deficit"}}
-    B["🏢 Brands / Creators\nHigh barrier to prove\nauthentic CSR impact"] --- Problem
-    C["🏛️ Charities & NGOs\nHigh donor skepticism\n& discovery barrier"] --- Problem
-```
+![Figure 1: Architectural Problem Domain](./images/flowchart_problem.svg)
+*Figure 1: Systemic market deficits and structural friction separating consumer commerce from philanthropic funding.*
 
-### 1.2 The Opportunity
-By unifying **brand merchandise sales**, **instant micro-donation incentives**, and **rigorous non-profit verification**, **Merch4Change** creates a sustainable, self-reinforcing flywheel where commerce fuels philanthropy.
+### 1.2 Proposed Resolution
+**Merch4Change** resolves this structural disconnect through a unified, multi-sided digital platform that connects ethical merchandise purchases directly with transparent philanthropic allocations via an in-app reward coin economy.
 
 ---
 
-## 2. Proposed Solution & Core Value Loop
+## 2. The Merch-to-Impact Closed-Loop Architecture
 
-**Merch4Change** introduces a proprietary **Merch-to-Impact Model**:
-- When consumers buy merchandise through integrated Stripe checkout, they instantly earn **Merch Coins** ($\lfloor \text{USD} / 10 \rfloor$).
-- These coins can be directly donated to **admin-verified charities** and specific community development projects.
-- Donors earn tiered status badges (Bronze, Silver, Gold, Platinum, Diamond) and public recognition across leaderboards, community feeds, and profile showcases.
+The platform operates on a closed-loop micro-philanthropic economy:
 
-```mermaid
-flowchart LR
-    A["🛍️ 1. Browse & Buy Merch\n(Stripe Checkout)"] --> B["🪙 2. Earn Merch Coins\n(1 Coin per $10 spent)"]
-    B --> C["❤️ 3. Donate to Causes\n(Verified Charities/Projects)"]
-    C --> D["🏆 4. Gain Badges & Rank\n(Leaderboards & Profiles)"]
-    D --> E["🌱 5. Inspire Community\n(Social Posts & Stories)"]
-    E --> A
-```
+* **Deterministic Coin Generation:** For every verified merchandise purchase executed via Stripe, buyers automatically accrue Merch Coins calculated deterministically as $\lfloor \text{USD} / 10 \rfloor$ (1 coin per $10 spent).
+* **Targeted Cause Allocation:** Consumers direct accrued coins toward specific verified charitable projects.
+* **Social Proof & Reputation Incentives:** Total donations dynamically adjust the donor's status across five tiers (Bronze $\rightarrow$ Silver $\rightarrow$ Gold $\rightarrow$ Platinum $\rightarrow$ Diamond), granting verified badges and public leaderboard standing.
+
+![Figure 2: The Merch-to-Impact Value Loop](./images/flowchart_value_loop.svg)
+*Figure 2: The closed-loop Merch-to-Impact value cycle converting retail transactions into verifiable social impact.*
 
 ---
 
 ## 3. Multi-Sided Stakeholder Roles
 
-The platform provides dedicated, tailored experiences for four distinct personas:
+The system is structured around four primary user personas with distinct operational scopes:
 
-| Stakeholder | Role & Capabilities |
-|---|---|
-| **Conscious Shoppers** | Browse products, place live bids in limited charity drops, complete secure card payments, earn Merch Coins, donate to verified projects, view donor tier rankings, interact with community feeds and 24h stories. |
-| **Brands & Creators** | Manage digital storefronts, upload curated merchandise catalogs, schedule limited-edition drops, and demonstrate transparent CSR impact to their followers. |
-| **Charities & NGOs** | Submit formal registration documents for admin verification, earn a verified green checkmark, publish targeted fundraising campaigns, accept coin donations, and showcase headquarters on interactive maps. |
-| **Platform Admins** | Inspect charity proof documents, approve/reject non-profit verification applications, monitor platform transactions, and maintain community safety. |
-
----
-
-## 4. Key Product Capabilities
-
-### 🛍️ Curated Multi-Vendor Marketplace
-- **Dynamic Catalog:** Multi-brand merchandise catalog supporting filtering by category, price ranges, and vendor types.
-- **Fast Cart & Order Handling:** Seamless basket calculations, stock checks, and instant receipt generation.
-- **Stripe Integration:** Production-grade checkout sessions supporting secure global payments.
-
-### ⚡ Timed Auctions & Real-Time Bidding
-- **Limited Drops:** Exclusive charity auctions and rare creator items.
-- **Dynamic Bidding Engine:** Countdown timers, automated minimum increment validation, and instant high-bidder updates.
-
-### 🪙 Impact Coin Economy & Project Funding
-- **Atomic Micro-Donations:** Concurrency-safe coin donation processing directly to charities or targeted project campaigns.
-- **Progress Tracking:** Real-time goal meters showcasing community funding status.
-
-### 🛡️ Verified Non-Profit Governance & Mapping
-- **Documented Verification:** Charities must upload official tax and registration credentials for admin audit before raising funds.
-- **HQ Geolocation:** Interactive map powered by Leaflet and OpenStreetMap showing charity headquarters worldwide.
-
-### 💬 Social Community, Stories & Messaging
-- **Interactive Feed:** Rich multimedia posts with optimistic likes, threaded comments, and follower affinity ranking.
-- **24-Hour Stories:** Auto-expiring ephemeral updates and permanent profile highlights.
-- **Direct 1-on-1 Messaging:** Real-time messaging with unread badges and conversation management.
+| Persona | Operational Scope & Permissions |
+|:---|:---|
+| **Conscious Consumers** | Discover and purchase curated merchandise, place real-time bids on limited charity auctions, earn Merch Coins, execute atomic cause donations, monitor project funding progress, and engage via community feeds and 24-hour stories. |
+| **Brands & Creators** | Manage branded merchandise storefronts, publish product collections, upload cloud media assets, host timed charity drop auctions, and track verified impact metrics. |
+| **Charities & NGOs** | Submit statutory registration documentation for administrative compliance audits, receive verified status badges, publish milestone-driven campaigns, receive atomic coin donations, and showcase physical headquarters on interactive geospatial maps. |
+| **Platform Administrators** | Review pending non-profit compliance applications, inspect PDF documentation, grant or revoke verification status, audit system financial ledgers, and supervise content moderation. |
 
 ---
 
-## 5. Process Workflows & System Flowcharts
+## 4. Functional Capabilities & Subsystems
+
+### Multi-Vendor Merchandise Marketplace
+* **Catalog Management:** Unified discovery across independent vendors, creator apparel, and official organization merchandise.
+* **Multi-Attribute Search:** Parametric query filters spanning categories, price intervals, seller verification tiers, and inventory states.
+* **PCI-Compliant Checkout:** Integrated Stripe Checkout Sessions executing card authorization, tax computations, and automated order confirmation webhooks.
+
+### Timed Auction & Bidding Engine
+* **Dynamic Bidding Windows:** Real-time countdown timers, automated minimum increment validation, and optimistic concurrency state updates.
+* **Participant Notifications:** Automated event dispatch notifying outbid users and updating the active bidding ledger.
+
+### Closed-Loop Coin Economy & Crowdfunding
+* **Atomic Deductions:** Transactional coin disbursements updating campaign balances under ACID guarantees.
+* **Milestone Visualization:** Real-time progress indicators displaying accumulated funding relative to statutory project targets.
+
+### Non-Profit Governance & Geospatial Discovery
+* **Statutory Compliance Queue:** Multi-step credential verification ensuring only vetted organizations can publish campaigns or accept funds.
+* **Geospatial Mapping:** Interactive global map rendered using Leaflet and OpenStreetMap displaying verified charity head offices worldwide.
+
+### Social Community & Direct Messaging
+* **Algorithmic Activity Stream:** Feed ranking posts according to follower affinity, interaction metrics, and time-decay functions.
+* **Ephemeral Stories:** 24-hour expiring media stories and permanent profile highlight reels.
+* **Direct Messaging:** One-to-one encrypted messaging threads with deterministic addressing and unread badge counters.
+
+---
+
+## 5. System Process Workflows & Flowcharts
 
 ### 5.1 End-to-End User Impact Journey
 
-The complete lifecycle from user onboarding to societal impact:
+The complete operational flow from initial registration to verified philanthropic delivery:
 
-```mermaid
-flowchart TD
-    Start(["Shopper Visits Platform"]) --> Register["Register & Verify Email via OTP"]
-    Register --> Browse["Explore Marketplace & Live Auctions"]
-    Browse --> BuyDecision{"Purchase Type?"}
-    
-    BuyDecision -- Fixed Price --> StripePay["Stripe Checkout Session"]
-    BuyDecision -- Timed Auction --> BidAction["Place Competitive Bid"]
-    BidAction --> WonAuction{"Won Auction?"}
-    WonAuction -- Yes --> StripePay
-    WonAuction -- No --> Browse
-    
-    StripePay --> PaymentSuccess{"Payment Confirmed?"}
-    PaymentSuccess -- No --> ErrorReceipt["Display Failure & Retry"]
-    PaymentSuccess -- Yes --> OrderCreated["Create Order & Issue Merch Coins"]
-    
-    OrderCreated --> ExploreCauses["Explore Verified Charities & Campaigns"]
-    ExploreCauses --> DonateCoins["Donate Merch Coins Atomically"]
-    DonateCoins --> UpdateProgress["Update Campaign Goal Meter"]
-    UpdateProgress --> BadgeAward["Calculate Donor Tier & Award Badges"]
-    BadgeAward --> ShareSocial["Share Milestone to Community Feed"]
-    ShareSocial --> End(["Impact Realized & Displayed"])
-```
+![Figure 3: End-to-End User Impact Journey](./images/flowchart_user_journey.svg)
+*Figure 3: Sequence of operations from consumer onboarding to charitable impact execution.*
 
 ---
 
-### 5.2 Coin Reward & Donation Engine
+### 5.2 Coin Accrual & Atomic Donation Engine
 
-Coins are disbursed upon verified purchases and donated with atomic database guarantees:
+The reward and donation subsystem is built to ensure strict ledger integrity, preventing double-spending and race conditions:
 
-```mermaid
-flowchart TD
-    subgraph Earning["Coin Generation"]
-        P1["Order Paid: $Total"] --> Calc["Calculate Coins: floor(Total / 10)"]
-        Calc --> CreditUser["Credit User Coin Balance"]
-    end
-
-    subgraph Donating["Coin Donation Execution"]
-        D1["User Selects Charity / Project & Coins"] --> CheckBal{"User Balance >= Donation Amount?"}
-        CheckBal -- No --> Insufficient["Return 400 Insufficient Coins"]
-        CheckBal -- Yes --> CheckCharity{"Charity Status == 'approved'?"}
-        CheckCharity -- No --> Unverified["Reject: Charity Not Verified"]
-        CheckCharity -- Yes --> AtomicBlock["Execute Atomic DB Transaction"]
-        
-        AtomicBlock --> Step1["Deduct Coins from User"]
-        AtomicBlock --> Step2["Increment Charity/Project Funds"]
-        AtomicBlock --> Step3["Insert Donation Ledger Record"]
-        
-        Step3 --> TierEval["Evaluate Cumulative Donor Tier"]
-        TierEval --> NotifyCharity["Dispatch Notification to Charity Admin"]
-    end
-
-    CreditUser -.-> D1
-```
+![Figure 4: Coin Generation and Atomic Donation Architecture](./images/flowchart_coin_engine.svg)
+*Figure 4: Algorithmic coin accrual calculations and atomic multi-document transaction pipeline.*
 
 ---
 
-### 5.3 Live Auction & Real-Time Bidding
+### 5.3 Live Auction & Real-Time Bidding Mechanics
 
-The auction system guarantees fair increments, active window enforcement, and high-bidder tracking:
+Ensures valid bid increments, active-window verification, and atomic high-bidder reassignment:
 
-```mermaid
-flowchart TD
-    A1["Creator/Charity Lists Limited Auction"] --> A2["Set Starting Price, End Time & Min Increment"]
-    A2 --> A3["Auction Becomes Active"]
-    
-    A3 --> B1["User Places Bid ($X)"]
-    B1 --> C1{"Auction Expired?"}
-    C1 -- Yes --> R1["Reject: Auction Has Concluded"]
-    C1 -- No --> C2{"$X >= Current Bid + Min Increment?"}
-    C2 -- No --> R2["Reject: Below Minimum Increment"]
-    C2 -- Yes --> SuccessBid["Record Bid & Set Current High Bidder"]
-    
-    SuccessBid --> OutbidNotice["Notify Previous High Bidder"]
-    OutbidNotice --> A3
-    
-    C1 -- Reached Deadline --> CloseAuction["Close Bidding Window"]
-    CloseAuction --> WinnerNotif["Notify Winner for Payment & Fulfillment"]
-```
+![Figure 5: Live Auction Engine](./images/flowchart_auction_engine.svg)
+*Figure 5: Auction scheduling, bid increment validation, and winner determination flow.*
 
 ---
 
-### 5.4 Charity Verification & Compliance Pipeline
+### 5.4 Non-Profit Credentialing & Regulatory Audit Pipeline
 
-To ensure absolute donor confidence, non-profits undergo strict administrative auditing:
+Rigorous multi-stage vetting process safeguarding donor contributions against unverified entities:
 
-```mermaid
-flowchart TD
-    N1["Charity Creates Account"] --> N2["Upload Official Registration & Tax PDF Proofs"]
-    N2 --> N3["Account Tagged: status = 'pending'"]
-    N3 --> N4["Application Enters Admin Moderation Queue"]
-    
-    N4 --> AdminReview{"Admin Compliance Review"}
-    
-    AdminReview -- Missing/Invalid Documents --> RejectApp["Mark 'rejected' with Reason Notes"]
-    RejectApp --> NotifyOrg["Email Organization with Resubmission Link"]
-    
-    AdminReview -- Valid Non-Profit Entity --> ApproveApp["Mark 'approved' & Assign Green Badge"]
-    ApproveApp --> UnlockRights["Enable Project Campaigns & Coin Acceptance"]
-    UnlockRights --> PublicShowcase["Publish to Verified Directory & Map"]
-```
+![Figure 6: Charity Verification Pipeline](./images/flowchart_charity_verification.svg)
+*Figure 6: Administrative audit pipeline from certificate upload to verified directory indexing.*
 
 ---
 
-## 6. System Architecture & Technology Stack
+## 6. System Architecture & Engineering Design
 
 ### 6.1 High-Level Architecture
 
-**Merch4Change** is built on a clean three-tier full-stack architecture with modular services and strict middleware boundaries:
+**Merch4Change** employs a modular three-tier client-server architecture:
 
-```mermaid
-flowchart TD
-    subgraph Presentation["🖥️ Client Presentation Tier"]
-        ClientApp["React 19 Single Page App\n(Vite + Tailwind CSS)"]
-        UI_Components["Lucide Icons + Leaflet Maps"]
-        AuthContext["Auth Context & Token Interceptors"]
-    end
-
-    subgraph Gateway["🛡️ Gateway & Middleware Tier"]
-        Express["Express.js Server Engine"]
-        CorsHelmet["CORS & Helmet Security Headers"]
-        RateLimiter["express-rate-limit Defense"]
-        JWT_Guard["JWT Auth Guard (Dual-Token)"]
-        MulterMemory["Multer Memory Buffer"]
-    end
-
-    subgraph Domain["⚙️ Core Domain Services"]
-        S_Auth["Authentication & OTP Service"]
-        S_Market["Marketplace & Orders Service"]
-        S_Auction["Live Auction Bidding Service"]
-        S_Donate["Atomic Coin Donation Engine"]
-        S_Social["Community Posts & 24h Stories"]
-        S_Chat["Direct Messaging & Notifications"]
-        S_Admin["Charity Verification Queue"]
-    end
-
-    subgraph Data["💾 Persistence & External APIs"]
-        MongoDB[("MongoDB Atlas\n(Mongoose ODM)")]
-        Cloudinary["Cloudinary Media CDN"]
-        StripeAPI["Stripe Payment Gateway"]
-        MailAPI["Resend & Nodemailer SMTP"]
-        OSMTiles["OpenStreetMap Map Tiles"]
-    end
-
-    ClientApp --> Express
-    Express --> CorsHelmet --> RateLimiter --> JWT_Guard
-    JWT_Guard --> Domain
-    MulterMemory --> Cloudinary
-    Domain --> MongoDB
-    S_Market --> StripeAPI
-    S_Auth --> MailAPI
-    UI_Components -.-> OSMTiles
-```
+![Figure 7: Multi-Tier System Architecture](./images/flowchart_architecture.svg)
+*Figure 7: Multi-tier architectural boundaries spanning client SPA, API gateway, core domain services, and persistence.*
 
 ---
 
 ### 6.2 Technology Matrix
 
-| Layer | Technologies | Justification |
-|---|---|---|
-| **Frontend UI** | React 19, Tailwind CSS, Vite, Lucide Icons | Ultra-fast build times, modern component primitives, and highly responsive styling. |
-| **Mapping & Visuals** | React-Leaflet, OpenStreetMap | Interactive, zero-cost, open-source geospatial visualization for global charity HQs. |
-| **Backend API** | Node.js, Express.js | Event-driven, asynchronous I/O ideal for real-time commerce, social feeds, and micro-donations. |
-| **Database** | MongoDB Atlas, Mongoose ODM | Flexible JSON document model suited for polymorphic user profiles, media posts, and order history. |
-| **Authentication** | Dual JWT (Access Token + HttpOnly Cookie) | Enterprise-grade stateless authorization with protection against XSS and CSRF token interception. |
-| **Payment Gateway** | Stripe Checkout API | Industry standard, PCI-DSS compliant payment processing for credit and debit cards. |
-| **Media Pipeline** | Cloudinary REST API, Multer (Memory Storage) | Ephemeral in-memory file buffers piped directly to cloud CDN without storing disk artifacts on servers. |
-| **Email Delivery** | Resend API & Nodemailer (SMTP) | Dual transactional mail system ensuring prompt OTP code deliveries with automatic fallback. |
+| Subsystem | Selected Technologies | Technical Rationale |
+|:---|:---|:---|
+| **Presentation Tier** | React 19, Vite 7, Tailwind CSS 3.4 | Modern React compiler optimizations, sub-second module reloads, and utility-first responsive layout structures. |
+| **Geospatial & Visuals** | Leaflet, React-Leaflet, OpenStreetMap | High-performance raster map rendering for global NGO headquarters without proprietary API licensing constraints. |
+| **Backend Runtime** | Node.js (>=18.0.0, ES Modules) | High-throughput asynchronous event loop well suited for concurrent e-commerce and real-time social workloads. |
+| **API Gateway Tier** | Express.js 4 | Robust middleware composition, modular resource routers, and defensive HTTP security headers. |
+| **Database & ODM** | MongoDB Atlas, Mongoose 8 | Flexible JSON document schemas accommodating polymorphic profile types, dynamic product attributes, and audit logs. |
+| **Session Security** | Dual-Token JWT (Memory + HttpOnly Cookie) | In-memory ephemeral access tokens paired with rotated `HttpOnly`, `SameSite=Lax` refresh cookies. |
+| **Payment Ingress** | Stripe Checkout API | Fully hosted, PCI-DSS compliant checkout sessions providing secure card processing and webhook notifications. |
+| **Media Pipeline** | Cloudinary REST API, Multer (Memory) | In-memory buffering (strict 2MB ceiling) with streaming uploads to Cloudinary CDN, bypassing local disk storage. |
+| **Transactional Email** | Resend API & Nodemailer (SMTP) | Multi-provider fallback delivery ensuring reliable OTP transmission during authentication and account recovery. |
 
 ---
 
-### 6.3 Data Model Entity Relationships
+### 6.3 Relational & Document Schema Design
 
-```mermaid
-erDiagram
-    USER ||--o{ ORDER : places
-    USER ||--o{ DONATION : makes
-    USER ||--o{ PRODUCT : lists
-    USER ||--o{ POST : authors
-    USER ||--o{ STORY : publishes
-    USER ||--o{ BID : submits
-    
-    CHARITY ||--o{ PROJECT : manages
-    CHARITY ||--o{ DONATION : receives
-    PROJECT ||--o{ DONATION : funds
-    
-    PRODUCT ||--o{ ORDER_ITEM : contained_in
-    ORDER ||--|{ ORDER_ITEM : includes
-    
-    AUCTION ||--o{ BID : tracks
-    USER ||--o{ CONVERSATION : participates_in
-    CONVERSATION ||--|{ MESSAGE : contains
+The document schema establishes relationships between users, merchandise products, purchase orders, verified non-profits, campaigns, and donations:
 
-    USER {
-        string id
-        string username
-        string email
-        string role
-        int merchCoins
-        string donorTier
-    }
-    CHARITY {
-        string id
-        string name
-        string status
-        string verificationDoc
-        float latitude
-        float longitude
-    }
-    PROJECT {
-        string id
-        string title
-        int targetAmount
-        int collectedAmount
-        string status
-    }
-    DONATION {
-        string id
-        int amount
-        string timestamp
-    }
-    ORDER {
-        string id
-        float totalAmount
-        int coinsEarned
-        string paymentStatus
-    }
-```
+![Figure 8: Database Entity Relational Overview](./images/flowchart_er_model.svg)
+*Figure 8: Entity relationships illustrating document schemas and foreign-key references.*
 
 ---
 
-## 7. Security & Engineering Highlights
+## 7. Security Architecture & Concurrency Safeguards
 
-- **Dual-Token Authentication:** Short-lived access JWTs stored in memory combined with secure `HttpOnly`, `SameSite=Lax` refresh token cookies prevent credential harvesting.
-- **Atomic Operations & Race Condition Prevention:** All coin deductions, auction high-bidder assignments, and project goal updates utilize atomic database operations to prevent double-spending.
-- **Memory-Buffered Media Pipeline:** Uploads pass through Multer's in-memory storage buffer with a strict 2MB limit before being streamed to Cloudinary, ensuring zero malicious files are written to host disk storage.
-- **Defensive API Hardening:** Built-in rate limiting (`express-rate-limit`), security headers (`helmet`), parameter sanitization, and explicit CORS origin whitelisting.
-
----
-
-## 8. Testing & Quality Assurance
-
-The codebase adheres to rigorous testing methodologies spanning unit, integration, and security checks:
-
-```mermaid
-flowchart LR
-    Unit["🧪 Unit Tests\n(Component Logic & Util Helpers)"] --> Integration["🔄 Integration Tests\n(Supertest API Endpoints & Auth Guards)"]
-    Integration --> Concurrency["⚡ Concurrency Tests\n(Atomic Coin Deductions & Auction Races)"]
-    Concurrency --> CI["🚀 GitHub Actions CI\n(Linting, Typechecks & Test Suites)"]
-```
-
-- **Unit & Integration Testing:** Automated test suites using Jest and Supertest validating all major route groups (Auth, Marketplace, Donations, Auctions).
-- **Concurrency & Ledger Verification:** Automated scripts simulating parallel donation requests to ensure user coin balances never fall below zero.
-- **Continuous Integration (CI):** Every pull request to `main` or `dev` triggers GitHub Actions workflows enforcing linting standards, build correctness, and unit tests.
+* **Dual-Token Session Lifecycle:** Ephemeral 15-minute access tokens remain strictly in memory to resist Cross-Site Scripting (XSS). 7-day refresh tokens are isolated inside `HttpOnly`, `Secure`, `SameSite=Lax` cookies to prevent client-side exfiltration and CSRF exploitation.
+* **Atomic Concurrency Controls:** Coin deductions and auction bid adjustments utilize MongoDB atomic update operators (`$inc`, `$set`) with precondition filters (e.g., `merchCoins: { $gte: donationAmount }`), guaranteeing that coin balances cannot drop below zero under high concurrency.
+* **Defensive Gateway Hardening:** Enforces `helmet` HTTP headers, `express-rate-limit` rate limiters on sensitive endpoints, strict payload validation, and CORS domain whitelisting.
+* **In-Memory File Processing:** Uploaded statutory certificates and product media are inspected in memory buffers and streamed directly to Cloudinary, ensuring uninspected files are never written to the server's local file system.
 
 ---
 
-## 9. Conclusion & Future Roadmap
+## 8. Quality Assurance & Verification Methodology
 
-**Merch4Change** successfully proves that everyday consumer spending can be directly redirected into social progress through thoughtful UX, atomic token mechanics, and transparent non-profit verification.
+System reliability is enforced through multi-tier automated test suites:
 
-```mermaid
-flowchart LR
-    subgraph Milestone1["✅ Phase 1: MVP & Core Systems"]
-        M1["• Multi-Vendor Marketplace\n• Stripe Card Payments\n• Coin Donation Engine\n• Non-Profit Verification Portal"]
-    end
+![Figure 9: Quality Assurance Pipeline](./images/flowchart_testing_strategy.svg)
+*Figure 9: Quality assurance pyramid spanning unit tests, endpoint integration, concurrency checks, and continuous integration.*
 
-    subgraph Milestone2["🚀 Phase 2: Engagement & Social"]
-        M2["• Live Timed Auctions\n• Direct Messaging\n• 24h Expiring Stories\n• Donor Tiers & Leaderboards"]
-    end
-
-    subgraph Milestone3["🔮 Phase 3: Future Roadmap"]
-        M3["• Native iOS & Android Apps\n• Direct Fiat Charity Donations\n• Blockchain Audit Anchor\n• Automated Tax Receipts"]
-    end
-
-    Milestone1 --> Milestone2 --> Milestone3
-```
+* **Automated Unit & Integration Tests:** 205 automated test suites executed via the native Node.js test runner (`node --test`), verifying route handlers, security middleware, and helper utilities.
+* **Concurrency Verification:** Stress-testing scripts simulating concurrent donation disbursements and rapid bidding sequences to verify data consistency.
+* **Continuous Integration (CI):** Automated GitHub Actions workflows enforcing linting standards, build validity, and test suite execution on every pull request.
 
 ---
 
-## 10. Links & Resources
+## 9. Project Milestones & Strategic Roadmap
 
-- 🌐 **Live Application:** [merch4change.vercel.app](https://merch4change.vercel.app/){:target="_blank"}
-- 💻 **GitHub Repository:** [github.com/cepdnaclk/e23-co2060-Merch4Change](https://github.com/cepdnaclk/e23-co2060-Merch4Change){:target="_blank"}
-- 📚 **Developer Guide:** [DEVELOPER_GUIDE.md](https://github.com/cepdnaclk/e23-co2060-Merch4Change/blob/main/DEVELOPER_GUIDE.md){:target="_blank"}
-- 🧪 **Backend Testing Guide:** [code/Backend/TESTING.md](https://github.com/cepdnaclk/e23-co2060-Merch4Change/blob/main/code/Backend/TESTING.md){:target="_blank"}
-- 🏛️ **Department of Computer Engineering:** [ce.pdn.ac.lk](https://www.ce.pdn.ac.lk/){:target="_blank"}
-- 🎓 **Faculty of Engineering, University of Peradeniya:** [eng.pdn.ac.lk](https://eng.pdn.ac.lk/){:target="_blank"}
+![Figure 10: Implementation Milestones & Strategic Roadmap](./images/flowchart_roadmap.svg)
+*Figure 10: Phased project implementation roadmap from initial release to planned enterprise capabilities.*
+
+* **Phase 1: Core Systems (Completed):** Multi-vendor merchandise marketplace, Stripe card checkout, atomic coin donation engine, and charity compliance moderation portal.
+* **Phase 2: Social Engagement & Auctions (Completed):** Live timed bidding windows, real-time messaging, ephemeral 24-hour stories, tiered donor badges, and community leaderboards.
+* **Phase 3: Scale & Enterprise Governance (Planned):** Native mobile applications (iOS/Android), direct fiat charity contributions, blockchain-anchored audit ledgers, and automated tax deduction reporting.
+
+---
+
+## 10. References & Technical Resources
+
+* **Production Application:** [merch4change.vercel.app](https://merch4change.vercel.app/)
+* **Project Source Code:** [github.com/cepdnaclk/e23-co2060-Merch4Change](https://github.com/cepdnaclk/e23-co2060-Merch4Change)
+* **System Engineering Handbook:** [DEVELOPER_GUIDE.md](../DEVELOPER_GUIDE.md)
+* **Backend Verification Handbook:** [code/Backend/TESTING.md](../code/Backend/TESTING.md)
+* **Department of Computer Engineering:** [ce.pdn.ac.lk](https://www.ce.pdn.ac.lk/)
+* **Faculty of Engineering, University of Peradeniya:** [eng.pdn.ac.lk](https://eng.pdn.ac.lk/)
 
 ---
 
 <div align="center">
 
-Made with ❤️ by **Team Antigravity** · University of Peradeniya · E23 Batch  
-*CO2060 — Software Systems Design Project (2YP)*
+**Department of Computer Engineering · Faculty of Engineering · University of Peradeniya**  
+*CO2060 — Software Systems Design Project (2YP) · Academic Year 2025/2026*
 
 </div>
