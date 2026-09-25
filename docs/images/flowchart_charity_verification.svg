@@ -1,76 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 440" width="100%" height="100%" style="background-color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 440" width="100%" height="100%" style="background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8" />
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#111827" />
     </marker>
-    <marker id="arrow-indigo" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1 L 10 5 L 0 9 z" fill="#6366f1" />
-    </marker>
-    <marker id="arrow-emerald" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1 L 10 5 L 0 9 z" fill="#10b981" />
-    </marker>
-    <marker id="arrow-rose" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1 L 10 5 L 0 9 z" fill="#f43f5e" />
-    </marker>
-    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
-      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.25"/>
-    </filter>
-    <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#4f46e5" />
-      <stop offset="100%" stop-color="#3730a3" />
-    </linearGradient>
-    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1e293b" />
-      <stop offset="100%" stop-color="#0f172a" />
-    </linearGradient>
-    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#059669" />
-      <stop offset="100%" stop-color="#047857" />
-    </linearGradient>
-    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#d97706" />
-      <stop offset="100%" stop-color="#b45309" />
-    </linearGradient>
-    <linearGradient id="roseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#e11d48" />
-      <stop offset="100%" stop-color="#be123c" />
-    </linearGradient>
   </defs>
 
+  <!-- Canvas Outer Border -->
+  <rect x="1" y="1" width="898" height="438" rx="6" fill="#ffffff" stroke="#e5e7eb" stroke-width="1.5" />
+
   
-  <text x="450" y="35" text-anchor="middle" fill="#f8fafc" font-size="18" font-weight="700">Charity Compliance &amp; Administrative Verification</text>
+  <text x="450" y="38" text-anchor="middle" fill="#111827" font-size="16" font-weight="700">Figure 6: Non-Profit Compliance &amp; Verification Pipeline</text>
+  <line x1="40" y1="52" x2="860" y2="52" stroke="#e5e7eb" stroke-width="1"/>
 
-  <rect x="325" y="60" width="250" height="42" rx="8" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow)"/>
-  <text x="450" y="86" text-anchor="middle" fill="#93c5fd" font-size="13">Charity / NGO Account Created</text>
+  <rect x="315" y="70" width="270" height="42" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+  <text x="450" y="96" text-anchor="middle" fill="#111827" font-size="12">Charity Organization Onboarding Registration</text>
 
-  <path d="M 450 102 L 450 130" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M 450 112 L 450 140" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#arrow)"/>
 
-  <rect x="310" y="130" width="280" height="42" rx="8" fill="#1e293b" stroke="#8b5cf6" stroke-width="1.5" filter="url(#shadow)"/>
-  <text x="450" y="156" text-anchor="middle" fill="#c084fc" font-size="12">Upload Registration Proof &amp; Tax Documents</text>
+  <rect x="300" y="140" width="300" height="42" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+  <text x="450" y="166" text-anchor="middle" fill="#111827" font-size="12">Upload Registration Proof &amp; Tax Exemption PDF</text>
 
-  <path d="M 450 172 L 450 200" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M 450 182 L 450 210" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#arrow)"/>
 
-  <rect x="310" y="200" width="280" height="42" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5" filter="url(#shadow)"/>
-  <text x="450" y="226" text-anchor="middle" fill="#fbbf24" font-size="12">Enters Admin Moderation Review Queue</text>
+  <rect x="300" y="210" width="300" height="42" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+  <text x="450" y="236" text-anchor="middle" fill="#111827" font-size="12">Application Enqueued: status = 'pending'</text>
 
-  <path d="M 450 242 L 450 270" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M 450 252 L 450 280" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#arrow)"/>
 
   <!-- Decision -->
-  <polygon points="450,270 570,305 450,340 330,305" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
-  <text x="450" y="309" text-anchor="middle" fill="#fde68a" font-size="12" font-weight="600">Valid Non-Profit?</text>
+  <polygon points="450,280 570,315 450,350 330,315" fill="#f9fafb" stroke="#111827" stroke-width="1.5"/>
+  <text x="450" y="319" text-anchor="middle" fill="#111827" font-size="12" font-weight="600">Admin Audit Valid?</text>
 
   <!-- Rejected -->
-  <path d="M 330 305 L 180 305 L 180 360" fill="none" stroke="#f43f5e" stroke-width="2" marker-end="url(#arrow-rose)"/>
-  <text x="240" y="295" fill="#f43f5e" font-size="11">Rejected</text>
-  <rect x="70" y="360" width="220" height="45" rx="8" fill="#1e293b" stroke="#f43f5e" stroke-width="1.5"/>
-  <text x="180" y="382" text-anchor="middle" fill="#fda4af" font-size="12">Mark Status: Rejected</text>
-  <text x="180" y="396" text-anchor="middle" fill="#94a3b8" font-size="10">Send Re-application Feedback</text>
+  <path d="M 330 315 L 180 315 L 180 370" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="235" y="305" fill="#4b5563" font-size="11">Rejected</text>
+  <rect x="70" y="370" width="220" height="46" rx="4" fill="#ffffff" stroke="#111827" stroke-width="1.5"/>
+  <text x="180" y="391" text-anchor="middle" fill="#111827" font-size="12">Status: 'rejected'</text>
+  <text x="180" y="407" text-anchor="middle" fill="#4b5563" font-size="10">Email Reason Notes &amp; Resubmission Link</text>
 
   <!-- Approved -->
-  <path d="M 570 305 L 720 305 L 720 360" fill="none" stroke="#10b981" stroke-width="2" marker-end="url(#arrow-emerald)"/>
-  <text x="635" y="295" fill="#10b981" font-size="11">Approved</text>
-  <rect x="610" y="360" width="220" height="45" rx="8" fill="url(#emeraldGrad)" filter="url(#shadow)"/>
-  <text x="720" y="382" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="700">Status: Approved</text>
-  <text x="720" y="396" text-anchor="middle" fill="#d1fae5" font-size="10">Assign Verified Badge &amp; Unlock Rights</text>
+  <path d="M 570 315 L 720 315 L 720 370" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="645" y="305" fill="#4b5563" font-size="11">Approved</text>
+  <rect x="610" y="370" width="220" height="46" rx="4" fill="#f3f4f6" stroke="#111827" stroke-width="1.5"/>
+  <text x="720" y="391" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">Status: 'approved'</text>
+  <text x="720" y="407" text-anchor="middle" fill="#4b5563" font-size="10">Assign Verification Badge &amp; Unlock Projects</text>
 
 </svg>

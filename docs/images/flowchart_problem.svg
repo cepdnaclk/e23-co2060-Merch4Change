@@ -1,74 +1,49 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 390" width="100%" height="100%" style="background-color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 360" width="100%" height="100%" style="background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8" />
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#111827" />
     </marker>
-    <marker id="arrow-indigo" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1 L 10 5 L 0 9 z" fill="#6366f1" />
-    </marker>
-    <marker id="arrow-emerald" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1 L 10 5 L 0 9 z" fill="#10b981" />
-    </marker>
-    <marker id="arrow-rose" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1 L 10 5 L 0 9 z" fill="#f43f5e" />
-    </marker>
-    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
-      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.25"/>
-    </filter>
-    <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#4f46e5" />
-      <stop offset="100%" stop-color="#3730a3" />
-    </linearGradient>
-    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1e293b" />
-      <stop offset="100%" stop-color="#0f172a" />
-    </linearGradient>
-    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#059669" />
-      <stop offset="100%" stop-color="#047857" />
-    </linearGradient>
-    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#d97706" />
-      <stop offset="100%" stop-color="#b45309" />
-    </linearGradient>
-    <linearGradient id="roseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#e11d48" />
-      <stop offset="100%" stop-color="#be123c" />
-    </linearGradient>
   </defs>
 
+  <!-- Canvas Outer Border -->
+  <rect x="1" y="1" width="898" height="358" rx="6" fill="#ffffff" stroke="#e5e7eb" stroke-width="1.5" />
+
   
-  <text x="450" y="40" text-anchor="middle" fill="#f8fafc" font-size="20" font-weight="700">Problem Statement: The Philanthropic Friction & Trust Deficit</text>
-  
-  <!-- Left Nodes -->
-  <g transform="translate(60, 80)">
-    <rect width="250" height="70" rx="10" fill="#1e293b" stroke="#3b82f6" stroke-width="2" filter="url(#shadow)"/>
-    <text x="125" y="30" text-anchor="middle" fill="#60a5fa" font-size="14" font-weight="700">Conscious Shoppers</text>
-    <text x="125" y="50" text-anchor="middle" fill="#94a3b8" font-size="12">Lack unified social commerce platform</text>
+  <text x="450" y="38" text-anchor="middle" fill="#111827" font-size="16" font-weight="700">Figure 1: Architectural Problem Domain &amp; Market Deficits</text>
+  <line x1="40" y1="52" x2="860" y2="52" stroke="#e5e7eb" stroke-width="1"/>
+
+  <!-- Left: Deficit Cards -->
+  <g transform="translate(60, 75)">
+    <rect width="280" height="70" rx="4" fill="#f9fafb" stroke="#111827" stroke-width="1.5"/>
+    <text x="14" y="28" fill="#111827" font-size="13" font-weight="700">1. Conscious Consumers</text>
+    <text x="14" y="48" fill="#4b5563" font-size="11">Disconnected giving channels; friction in routine</text>
+    <text x="14" y="62" fill="#4b5563" font-size="11">philanthropic contributions during online purchases.</text>
   </g>
 
-  <g transform="translate(60, 180)">
-    <rect width="250" height="70" rx="10" fill="#1e293b" stroke="#8b5cf6" stroke-width="2" filter="url(#shadow)"/>
-    <text x="125" y="30" text-anchor="middle" fill="#c084fc" font-size="14" font-weight="700">Brands &amp; Creators</text>
-    <text x="125" y="50" text-anchor="middle" fill="#94a3b8" font-size="12">High barrier to prove authentic CSR impact</text>
+  <g transform="translate(60, 165)">
+    <rect width="280" height="70" rx="4" fill="#f9fafb" stroke="#111827" stroke-width="1.5"/>
+    <text x="14" y="28" fill="#111827" font-size="13" font-weight="700">2. Commercial Brands &amp; Creators</text>
+    <text x="14" y="48" fill="#4b5563" font-size="11">Absence of integrated corporate social responsibility</text>
+    <text x="14" y="62" fill="#4b5563" font-size="11">(CSR) tooling to prove direct charitable impact.</text>
   </g>
 
-  <g transform="translate(60, 280)">
-    <rect width="250" height="70" rx="10" fill="#1e293b" stroke="#10b981" stroke-width="2" filter="url(#shadow)"/>
-    <text x="125" y="30" text-anchor="middle" fill="#34d399" font-size="14" font-weight="700">Charities &amp; NGOs</text>
-    <text x="125" y="50" text-anchor="middle" fill="#94a3b8" font-size="12">High donor skepticism &amp; discovery barrier</text>
+  <g transform="translate(60, 255)">
+    <rect width="280" height="70" rx="4" fill="#f9fafb" stroke="#111827" stroke-width="1.5"/>
+    <text x="14" y="28" fill="#111827" font-size="13" font-weight="700">3. Non-Profit Organizations &amp; NGOs</text>
+    <text x="14" y="48" fill="#4b5563" font-size="11">Severe donor skepticism; lack of transparent,</text>
+    <text x="14" y="62" fill="#4b5563" font-size="11">verifiable statutory credentialing and allocation audits.</text>
   </g>
 
   <!-- Connectors -->
-  <path d="M 310 115 L 490 205" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
-  <path d="M 310 215 L 490 215" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
-  <path d="M 310 315 L 490 225" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+  <path d="M 340 110 L 510 190" fill="none" stroke="#111827" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+  <path d="M 340 200 L 510 200" fill="none" stroke="#111827" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+  <path d="M 340 290 L 510 210" fill="none" stroke="#111827" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
 
   <!-- Core Problem Node -->
-  <g transform="translate(500, 150)">
-    <polygon points="175,0 350,65 175,130 0,65" fill="#1e293b" stroke="#f43f5e" stroke-width="3" filter="url(#shadow)"/>
-    <text x="175" y="58" text-anchor="middle" fill="#fda4af" font-size="15" font-weight="700">Frictional Philanthropy</text>
-    <text x="175" y="78" text-anchor="middle" fill="#fda4af" font-size="15" font-weight="700">&amp; Trust Deficit</text>
+  <g transform="translate(520, 140)">
+    <polygon points="170,0 340,60 170,120 0,60" fill="#f3f4f6" stroke="#111827" stroke-width="2"/>
+    <text x="170" y="54" text-anchor="middle" fill="#111827" font-size="14" font-weight="700">Structural Market Deficit:</text>
+    <text x="170" y="74" text-anchor="middle" fill="#111827" font-size="13" font-weight="600">Philanthropic Friction &amp; Trust Asymmetry</text>
   </g>
 
 </svg>
