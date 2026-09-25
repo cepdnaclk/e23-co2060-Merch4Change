@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { vi } from "vitest";
 import PostsGrid from "../../src/components/Feed/PostsGrid";
 
@@ -13,7 +14,11 @@ describe("PostsGrid recommended feed", () => {
   it("keeps the existing placeholder post when recommendations are empty", async () => {
     getRecommendedPosts.mockResolvedValue({ data: { success: true, posts: [] } });
 
-    render(<PostsGrid />);
+    render(
+      <MemoryRouter>
+        <PostsGrid />
+      </MemoryRouter>
+    );
 
     await waitFor(() => {
       expect(screen.getByText("Zoe.Studio")).toBeInTheDocument();
@@ -38,7 +43,11 @@ describe("PostsGrid recommended feed", () => {
       },
     });
 
-    render(<PostsGrid />);
+    render(
+      <MemoryRouter>
+        <PostsGrid />
+      </MemoryRouter>
+    );
 
     await waitFor(() => {
       expect(screen.getByText("Ranked campaign update")).toBeInTheDocument();
