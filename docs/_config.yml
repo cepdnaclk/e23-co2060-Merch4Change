@@ -1,9 +1,9 @@
 # This theme is based on https://github.com/jekyll/minima
 # Please refer above link to know the available configurations
 
-title: ""
+title: "Merch4Change"
 remote_theme: cepdnaclk/eYY-project-theme
-description: ""
+description: "Merchandise for Meaningful Impact - An e-commerce platform empowering non-profits to sell merchandise and fund social causes."
 markdown: kramdown
 
 kramdown:
