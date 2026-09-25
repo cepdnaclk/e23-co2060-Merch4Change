@@ -8,7 +8,7 @@ title: Merch4Change
 
 <div align="center">
 
-# 🛍️ Merch4Change
+# Merch4Change
 
 ### *Shop with purpose. Give with every purchase.*
 
@@ -20,20 +20,20 @@ A multi-sided social commerce ecosystem bridging **conscious consumers**, **ethi
 [![Stripe](https://img.shields.io/badge/Stripe-Enabled-635BFF?logo=stripe&logoColor=white)](https://stripe.com/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/atlas)
 
-[🌐 Live Demo](https://merch4change.vercel.app/){:target="_blank" .btn}
-[📁 GitHub Repository](https://github.com/cepdnaclk/e23-co2060-Merch4Change){:target="_blank" .btn}
-[📘 Technical Documentation](https://github.com/cepdnaclk/e23-co2060-Merch4Change/tree/main/Documentation){:target="_blank" .btn}
+[Live Demo](https://merch4change.vercel.app/) · [GitHub Repository](https://github.com/cepdnaclk/e23-co2060-Merch4Change) · [Technical Documentation](https://github.com/cepdnaclk/e23-co2060-Merch4Change/tree/main/Documentation)
+
+<br/>
+
+![Merch4Change Cover](./images/cover_page.jpg)
 
 </div>
 
 ---
 
-## 👥 Team & Supervisors
+## Team
 
 **Department of Computer Engineering**, Faculty of Engineering, **University of Peradeniya**  
 *CO2060 — Software Systems Design Project (2YP) · Batch E23*
-
-### Project Team
 
 | eNumber | Name | Role | Email |
 |---|---|---|---|
@@ -42,34 +42,27 @@ A multi-sided social commerce ecosystem bridging **conscious consumers**, **ethi
 | **E/23/089** | M.A.S. Dulshara | Database Manager & Systems Engineer | [e23089@eng.pdn.ac.lk](mailto:e23089@eng.pdn.ac.lk) |
 | **E/23/050** | G.C. Damsiluni | Frontend Developer & UI/UX Designer | [e23050@eng.pdn.ac.lk](mailto:e23050@eng.pdn.ac.lk) |
 
-### Mentors & Supervisors
-
-| Name | Role | Contact |
-|---|---|---|
-| **R.A.J.C. Adhikari** | Technical Lead | [email@eng.pdn.ac.lk](mailto:email@eng.pdn.ac.lk) |
-| **M.N.A. Fikry** | Scrum Master | [email@eng.pdn.ac.lk](mailto:email@eng.pdn.ac.lk) |
-
 ---
 
-## 📌 Table of Contents
+## Table of Contents
 
-1. [Executive Summary & Problem Statement](#executive-summary--problem-statement)
-2. [Proposed Solution & Core Value Loop](#proposed-solution--core-value-loop)
-3. [Multi-Sided Stakeholder Roles](#multi-sided-stakeholder-roles)
-4. [Key Product Capabilities](#key-product-capabilities)
-5. [Process Workflows & System Flowcharts](#process-workflows--system-flowcharts)
+1. [Executive Summary & Problem Statement](#1-executive-summary--problem-statement)
+2. [Proposed Solution & Core Value Loop](#2-proposed-solution--core-value-loop)
+3. [Multi-Sided Stakeholder Roles](#3-multi-sided-stakeholder-roles)
+4. [Key Product Capabilities](#4-key-product-capabilities)
+5. [Process Workflows & System Flowcharts](#5-process-workflows--system-flowcharts)
    - [5.1 End-to-End User Impact Journey](#51-end-to-end-user-impact-journey)
    - [5.2 Coin Reward & Donation Engine](#52-coin-reward--donation-engine)
    - [5.3 Live Auction & Real-Time Bidding](#53-live-auction--real-time-bidding)
    - [5.4 Charity Verification & Compliance Pipeline](#54-charity-verification--compliance-pipeline)
-6. [System Architecture & Technology Stack](#system-architecture--technology-stack)
+6. [System Architecture & Technology Stack](#6-system-architecture--technology-stack)
    - [6.1 High-Level Architecture](#61-high-level-architecture)
    - [6.2 Technology Matrix](#62-technology-matrix)
    - [6.3 Data Model Entity Relationships](#63-data-model-entity-relationships)
-7. [Security & Engineering Highlights](#security--engineering-highlights)
-8. [Testing & Quality Assurance](#testing--quality-assurance)
-9. [Conclusion & Future Roadmap](#conclusion--future-roadmap)
-10. [Links & Resources](#links--resources)
+7. [Security & Engineering Highlights](#7-security--engineering-highlights)
+8. [Testing & Quality Assurance](#8-testing--quality-assurance)
+9. [Conclusion & Future Roadmap](#9-conclusion--future-roadmap)
+10. [Links & Resources](#10-links--resources)
 
 ---
 
@@ -82,12 +75,7 @@ In contemporary e-commerce and social advocacy, three critical challenges persis
 2. **Charity Trust & Visibility Deficit:** Grassroots charities and non-profit initiatives struggle with public discoverability and face high donor skepticism regarding fund transparency and verification.
 3. **Lack of Tangible CSR for Creators & Brands:** Brands and merchandise creators often want to express corporate social responsibility, yet lack unified platforms to show exactly how their product lines drive measurable social good.
 
-```mermaid
-flowchart LR
-    A["🛒 Shoppers\nLack unified social\ncommerce platform"] --- Problem{{"Frictional Philanthropy\n& Trust Deficit"}}
-    B["🏢 Brands / Creators\nHigh barrier to prove\nauthentic CSR impact"] --- Problem
-    C["🏛️ Charities & NGOs\nHigh donor skepticism\n& discovery barrier"] --- Problem
-```
+![Problem Statement](./images/flowchart_problem.svg)
 
 ### 1.2 The Opportunity
 By unifying **brand merchandise sales**, **instant micro-donation incentives**, and **rigorous non-profit verification**, **Merch4Change** creates a sustainable, self-reinforcing flywheel where commerce fuels philanthropy.
@@ -101,14 +89,7 @@ By unifying **brand merchandise sales**, **instant micro-donation incentives**, 
 - These coins can be directly donated to **admin-verified charities** and specific community development projects.
 - Donors earn tiered status badges (Bronze, Silver, Gold, Platinum, Diamond) and public recognition across leaderboards, community feeds, and profile showcases.
 
-```mermaid
-flowchart LR
-    A["🛍️ 1. Browse & Buy Merch\n(Stripe Checkout)"] --> B["🪙 2. Earn Merch Coins\n(1 Coin per $10 spent)"]
-    B --> C["❤️ 3. Donate to Causes\n(Verified Charities/Projects)"]
-    C --> D["🏆 4. Gain Badges & Rank\n(Leaderboards & Profiles)"]
-    D --> E["🌱 5. Inspire Community\n(Social Posts & Stories)"]
-    E --> A
-```
+![The Merch-to-Impact Core Value Loop](./images/flowchart_value_loop.svg)
 
 ---
 
@@ -127,24 +108,24 @@ The platform provides dedicated, tailored experiences for four distinct personas
 
 ## 4. Key Product Capabilities
 
-### 🛍️ Curated Multi-Vendor Marketplace
+### Curated Multi-Vendor Marketplace
 - **Dynamic Catalog:** Multi-brand merchandise catalog supporting filtering by category, price ranges, and vendor types.
 - **Fast Cart & Order Handling:** Seamless basket calculations, stock checks, and instant receipt generation.
 - **Stripe Integration:** Production-grade checkout sessions supporting secure global payments.
 
-### ⚡ Timed Auctions & Real-Time Bidding
+### Timed Auctions & Real-Time Bidding
 - **Limited Drops:** Exclusive charity auctions and rare creator items.
 - **Dynamic Bidding Engine:** Countdown timers, automated minimum increment validation, and instant high-bidder updates.
 
-### 🪙 Impact Coin Economy & Project Funding
+### Impact Coin Economy & Project Funding
 - **Atomic Micro-Donations:** Concurrency-safe coin donation processing directly to charities or targeted project campaigns.
 - **Progress Tracking:** Real-time goal meters showcasing community funding status.
 
-### 🛡️ Verified Non-Profit Governance & Mapping
+### Verified Non-Profit Governance & Mapping
 - **Documented Verification:** Charities must upload official tax and registration credentials for admin audit before raising funds.
 - **HQ Geolocation:** Interactive map powered by Leaflet and OpenStreetMap showing charity headquarters worldwide.
 
-### 💬 Social Community, Stories & Messaging
+### Social Community, Stories & Messaging
 - **Interactive Feed:** Rich multimedia posts with optimistic likes, threaded comments, and follower affinity ranking.
 - **24-Hour Stories:** Auto-expiring ephemeral updates and permanent profile highlights.
 - **Direct 1-on-1 Messaging:** Real-time messaging with unread badges and conversation management.
@@ -157,29 +138,7 @@ The platform provides dedicated, tailored experiences for four distinct personas
 
 The complete lifecycle from user onboarding to societal impact:
 
-```mermaid
-flowchart TD
-    Start(["Shopper Visits Platform"]) --> Register["Register & Verify Email via OTP"]
-    Register --> Browse["Explore Marketplace & Live Auctions"]
-    Browse --> BuyDecision{"Purchase Type?"}
-    
-    BuyDecision -- Fixed Price --> StripePay["Stripe Checkout Session"]
-    BuyDecision -- Timed Auction --> BidAction["Place Competitive Bid"]
-    BidAction --> WonAuction{"Won Auction?"}
-    WonAuction -- Yes --> StripePay
-    WonAuction -- No --> Browse
-    
-    StripePay --> PaymentSuccess{"Payment Confirmed?"}
-    PaymentSuccess -- No --> ErrorReceipt["Display Failure & Retry"]
-    PaymentSuccess -- Yes --> OrderCreated["Create Order & Issue Merch Coins"]
-    
-    OrderCreated --> ExploreCauses["Explore Verified Charities & Campaigns"]
-    ExploreCauses --> DonateCoins["Donate Merch Coins Atomically"]
-    DonateCoins --> UpdateProgress["Update Campaign Goal Meter"]
-    UpdateProgress --> BadgeAward["Calculate Donor Tier & Award Badges"]
-    BadgeAward --> ShareSocial["Share Milestone to Community Feed"]
-    ShareSocial --> End(["Impact Realized & Displayed"])
-```
+![End-to-End User Impact Journey](./images/flowchart_user_journey.svg)
 
 ---
 
@@ -187,30 +146,7 @@ flowchart TD
 
 Coins are disbursed upon verified purchases and donated with atomic database guarantees:
 
-```mermaid
-flowchart TD
-    subgraph Earning["Coin Generation"]
-        P1["Order Paid: $Total"] --> Calc["Calculate Coins: floor(Total / 10)"]
-        Calc --> CreditUser["Credit User Coin Balance"]
-    end
-
-    subgraph Donating["Coin Donation Execution"]
-        D1["User Selects Charity / Project & Coins"] --> CheckBal{"User Balance >= Donation Amount?"}
-        CheckBal -- No --> Insufficient["Return 400 Insufficient Coins"]
-        CheckBal -- Yes --> CheckCharity{"Charity Status == 'approved'?"}
-        CheckCharity -- No --> Unverified["Reject: Charity Not Verified"]
-        CheckCharity -- Yes --> AtomicBlock["Execute Atomic DB Transaction"]
-        
-        AtomicBlock --> Step1["Deduct Coins from User"]
-        AtomicBlock --> Step2["Increment Charity/Project Funds"]
-        AtomicBlock --> Step3["Insert Donation Ledger Record"]
-        
-        Step3 --> TierEval["Evaluate Cumulative Donor Tier"]
-        TierEval --> NotifyCharity["Dispatch Notification to Charity Admin"]
-    end
-
-    CreditUser -.-> D1
-```
+![Coin Reward and Atomic Donation Engine](./images/flowchart_coin_engine.svg)
 
 ---
 
@@ -218,24 +154,7 @@ flowchart TD
 
 The auction system guarantees fair increments, active window enforcement, and high-bidder tracking:
 
-```mermaid
-flowchart TD
-    A1["Creator/Charity Lists Limited Auction"] --> A2["Set Starting Price, End Time & Min Increment"]
-    A2 --> A3["Auction Becomes Active"]
-    
-    A3 --> B1["User Places Bid ($X)"]
-    B1 --> C1{"Auction Expired?"}
-    C1 -- Yes --> R1["Reject: Auction Has Concluded"]
-    C1 -- No --> C2{"$X >= Current Bid + Min Increment?"}
-    C2 -- No --> R2["Reject: Below Minimum Increment"]
-    C2 -- Yes --> SuccessBid["Record Bid & Set Current High Bidder"]
-    
-    SuccessBid --> OutbidNotice["Notify Previous High Bidder"]
-    OutbidNotice --> A3
-    
-    C1 -- Reached Deadline --> CloseAuction["Close Bidding Window"]
-    CloseAuction --> WinnerNotif["Notify Winner for Payment & Fulfillment"]
-```
+![Live Auction and Real-Time Bidding Window](./images/flowchart_auction_engine.svg)
 
 ---
 
@@ -243,21 +162,7 @@ flowchart TD
 
 To ensure absolute donor confidence, non-profits undergo strict administrative auditing:
 
-```mermaid
-flowchart TD
-    N1["Charity Creates Account"] --> N2["Upload Official Registration & Tax PDF Proofs"]
-    N2 --> N3["Account Tagged: status = 'pending'"]
-    N3 --> N4["Application Enters Admin Moderation Queue"]
-    
-    N4 --> AdminReview{"Admin Compliance Review"}
-    
-    AdminReview -- Missing/Invalid Documents --> RejectApp["Mark 'rejected' with Reason Notes"]
-    RejectApp --> NotifyOrg["Email Organization with Resubmission Link"]
-    
-    AdminReview -- Valid Non-Profit Entity --> ApproveApp["Mark 'approved' & Assign Green Badge"]
-    ApproveApp --> UnlockRights["Enable Project Campaigns & Coin Acceptance"]
-    UnlockRights --> PublicShowcase["Publish to Verified Directory & Map"]
-```
+![Charity Verification and Compliance Pipeline](./images/flowchart_charity_verification.svg)
 
 ---
 
@@ -267,49 +172,7 @@ flowchart TD
 
 **Merch4Change** is built on a clean three-tier full-stack architecture with modular services and strict middleware boundaries:
 
-```mermaid
-flowchart TD
-    subgraph Presentation["🖥️ Client Presentation Tier"]
-        ClientApp["React 19 Single Page App\n(Vite + Tailwind CSS)"]
-        UI_Components["Lucide Icons + Leaflet Maps"]
-        AuthContext["Auth Context & Token Interceptors"]
-    end
-
-    subgraph Gateway["🛡️ Gateway & Middleware Tier"]
-        Express["Express.js Server Engine"]
-        CorsHelmet["CORS & Helmet Security Headers"]
-        RateLimiter["express-rate-limit Defense"]
-        JWT_Guard["JWT Auth Guard (Dual-Token)"]
-        MulterMemory["Multer Memory Buffer"]
-    end
-
-    subgraph Domain["⚙️ Core Domain Services"]
-        S_Auth["Authentication & OTP Service"]
-        S_Market["Marketplace & Orders Service"]
-        S_Auction["Live Auction Bidding Service"]
-        S_Donate["Atomic Coin Donation Engine"]
-        S_Social["Community Posts & 24h Stories"]
-        S_Chat["Direct Messaging & Notifications"]
-        S_Admin["Charity Verification Queue"]
-    end
-
-    subgraph Data["💾 Persistence & External APIs"]
-        MongoDB[("MongoDB Atlas\n(Mongoose ODM)")]
-        Cloudinary["Cloudinary Media CDN"]
-        StripeAPI["Stripe Payment Gateway"]
-        MailAPI["Resend & Nodemailer SMTP"]
-        OSMTiles["OpenStreetMap Map Tiles"]
-    end
-
-    ClientApp --> Express
-    Express --> CorsHelmet --> RateLimiter --> JWT_Guard
-    JWT_Guard --> Domain
-    MulterMemory --> Cloudinary
-    Domain --> MongoDB
-    S_Market --> StripeAPI
-    S_Auth --> MailAPI
-    UI_Components -.-> OSMTiles
-```
+![System Architecture](./images/flowchart_architecture.svg)
 
 ---
 
@@ -330,61 +193,7 @@ flowchart TD
 
 ### 6.3 Data Model Entity Relationships
 
-```mermaid
-erDiagram
-    USER ||--o{ ORDER : places
-    USER ||--o{ DONATION : makes
-    USER ||--o{ PRODUCT : lists
-    USER ||--o{ POST : authors
-    USER ||--o{ STORY : publishes
-    USER ||--o{ BID : submits
-    
-    CHARITY ||--o{ PROJECT : manages
-    CHARITY ||--o{ DONATION : receives
-    PROJECT ||--o{ DONATION : funds
-    
-    PRODUCT ||--o{ ORDER_ITEM : contained_in
-    ORDER ||--|{ ORDER_ITEM : includes
-    
-    AUCTION ||--o{ BID : tracks
-    USER ||--o{ CONVERSATION : participates_in
-    CONVERSATION ||--|{ MESSAGE : contains
-
-    USER {
-        string id
-        string username
-        string email
-        string role
-        int merchCoins
-        string donorTier
-    }
-    CHARITY {
-        string id
-        string name
-        string status
-        string verificationDoc
-        float latitude
-        float longitude
-    }
-    PROJECT {
-        string id
-        string title
-        int targetAmount
-        int collectedAmount
-        string status
-    }
-    DONATION {
-        string id
-        int amount
-        string timestamp
-    }
-    ORDER {
-        string id
-        float totalAmount
-        int coinsEarned
-        string paymentStatus
-    }
-```
+![Database Entity Relationship Model](./images/flowchart_er_model.svg)
 
 ---
 
@@ -401,12 +210,7 @@ erDiagram
 
 The codebase adheres to rigorous testing methodologies spanning unit, integration, and security checks:
 
-```mermaid
-flowchart LR
-    Unit["🧪 Unit Tests\n(Component Logic & Util Helpers)"] --> Integration["🔄 Integration Tests\n(Supertest API Endpoints & Auth Guards)"]
-    Integration --> Concurrency["⚡ Concurrency Tests\n(Atomic Coin Deductions & Auction Races)"]
-    Concurrency --> CI["🚀 GitHub Actions CI\n(Linting, Typechecks & Test Suites)"]
-```
+![Quality Assurance and Testing Strategy](./images/flowchart_testing_strategy.svg)
 
 - **Unit & Integration Testing:** Automated test suites using Jest and Supertest validating all major route groups (Auth, Marketplace, Donations, Auctions).
 - **Concurrency & Ledger Verification:** Automated scripts simulating parallel donation requests to ensure user coin balances never fall below zero.
@@ -418,39 +222,24 @@ flowchart LR
 
 **Merch4Change** successfully proves that everyday consumer spending can be directly redirected into social progress through thoughtful UX, atomic token mechanics, and transparent non-profit verification.
 
-```mermaid
-flowchart LR
-    subgraph Milestone1["✅ Phase 1: MVP & Core Systems"]
-        M1["• Multi-Vendor Marketplace\n• Stripe Card Payments\n• Coin Donation Engine\n• Non-Profit Verification Portal"]
-    end
-
-    subgraph Milestone2["🚀 Phase 2: Engagement & Social"]
-        M2["• Live Timed Auctions\n• Direct Messaging\n• 24h Expiring Stories\n• Donor Tiers & Leaderboards"]
-    end
-
-    subgraph Milestone3["🔮 Phase 3: Future Roadmap"]
-        M3["• Native iOS & Android Apps\n• Direct Fiat Charity Donations\n• Blockchain Audit Anchor\n• Automated Tax Receipts"]
-    end
-
-    Milestone1 --> Milestone2 --> Milestone3
-```
+![Strategic Roadmap and Milestones](./images/flowchart_roadmap.svg)
 
 ---
 
 ## 10. Links & Resources
 
-- 🌐 **Live Application:** [merch4change.vercel.app](https://merch4change.vercel.app/){:target="_blank"}
-- 💻 **GitHub Repository:** [github.com/cepdnaclk/e23-co2060-Merch4Change](https://github.com/cepdnaclk/e23-co2060-Merch4Change){:target="_blank"}
-- 📚 **Developer Guide:** [DEVELOPER_GUIDE.md](https://github.com/cepdnaclk/e23-co2060-Merch4Change/blob/main/DEVELOPER_GUIDE.md){:target="_blank"}
-- 🧪 **Backend Testing Guide:** [code/Backend/TESTING.md](https://github.com/cepdnaclk/e23-co2060-Merch4Change/blob/main/code/Backend/TESTING.md){:target="_blank"}
-- 🏛️ **Department of Computer Engineering:** [ce.pdn.ac.lk](https://www.ce.pdn.ac.lk/){:target="_blank"}
-- 🎓 **Faculty of Engineering, University of Peradeniya:** [eng.pdn.ac.lk](https://eng.pdn.ac.lk/){:target="_blank"}
+- **Live Application:** [merch4change.vercel.app](https://merch4change.vercel.app/)
+- **GitHub Repository:** [github.com/cepdnaclk/e23-co2060-Merch4Change](https://github.com/cepdnaclk/e23-co2060-Merch4Change)
+- **Developer Guide:** [DEVELOPER_GUIDE.md](https://github.com/cepdnaclk/e23-co2060-Merch4Change/blob/main/DEVELOPER_GUIDE.md)
+- **Backend Testing Guide:** [code/Backend/TESTING.md](https://github.com/cepdnaclk/e23-co2060-Merch4Change/blob/main/code/Backend/TESTING.md)
+- **Department of Computer Engineering:** [ce.pdn.ac.lk](https://www.ce.pdn.ac.lk/)
+- **Faculty of Engineering, University of Peradeniya:** [eng.pdn.ac.lk](https://eng.pdn.ac.lk/)
 
 ---
 
 <div align="center">
 
-Made with ❤️ by **Team Antigravity** · University of Peradeniya · E23 Batch  
+Developed by **Team Antigravity** · University of Peradeniya · E23 Batch  
 *CO2060 — Software Systems Design Project (2YP)*
 
 </div>

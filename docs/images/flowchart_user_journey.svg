@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 580" width="100%" height="100%" style="background-color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8" />
+    </marker>
+    <marker id="arrow-indigo" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#6366f1" />
+    </marker>
+    <marker id="arrow-emerald" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#10b981" />
+    </marker>
+    <marker id="arrow-rose" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#f43f5e" />
+    </marker>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+    <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5" />
+      <stop offset="100%" stop-color="#3730a3" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d97706" />
+      <stop offset="100%" stop-color="#b45309" />
+    </linearGradient>
+    <linearGradient id="roseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e11d48" />
+      <stop offset="100%" stop-color="#be123c" />
+    </linearGradient>
+  </defs>
+
+  
+  <text x="450" y="35" text-anchor="middle" fill="#f8fafc" font-size="18" font-weight="700">End-to-End User Impact Journey</text>
+
+  <!-- Step 1 -->
+  <rect x="325" y="60" width="250" height="42" rx="21" fill="url(#primaryGrad)" filter="url(#shadow)"/>
+  <text x="450" y="86" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="600">Shopper Visits Platform &amp; OTP Sign Up</text>
+  
+  <path d="M 450 102 L 450 125" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Step 2 -->
+  <rect x="325" y="125" width="250" height="42" rx="8" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="450" y="151" text-anchor="middle" fill="#93c5fd" font-size="13">Explore Marketplace &amp; Live Drops</text>
+
+  <path d="M 450 167 L 450 190" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Decision: Purchase Type -->
+  <polygon points="450,190 560,225 450,260 340,225" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="450" y="229" text-anchor="middle" fill="#fde68a" font-size="12" font-weight="600">Purchase Type?</text>
+
+  <!-- Fixed Branch -->
+  <path d="M 340 225 L 200 225 L 200 270" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="260" y="215" fill="#94a3b8" font-size="11">Fixed Price</text>
+  <rect x="100" y="270" width="200" height="42" rx="8" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="200" y="296" text-anchor="middle" fill="#93c5fd" font-size="12">Direct Stripe Checkout</text>
+
+  <!-- Auction Branch -->
+  <path d="M 560 225 L 700 225 L 700 270" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="640" y="215" fill="#94a3b8" font-size="11">Timed Auction</text>
+  <rect x="600" y="270" width="200" height="42" rx="8" fill="#1e293b" stroke="#8b5cf6" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="700" y="296" text-anchor="middle" fill="#c084fc" font-size="12">Place Bid &amp; Win Auction</text>
+
+  <!-- Merge to Payment -->
+  <path d="M 200 312 L 200 345 L 430 345" fill="none" stroke="#94a3b8" stroke-width="2"/>
+  <path d="M 700 312 L 700 345 L 470 345" fill="none" stroke="#94a3b8" stroke-width="2"/>
+  <path d="M 450 345 L 450 370" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Payment Confirmed -->
+  <rect x="315" y="370" width="270" height="45" rx="8" fill="#1e293b" stroke="#10b981" stroke-width="2" filter="url(#shadow)"/>
+  <text x="450" y="392" text-anchor="middle" fill="#34d399" font-size="13" font-weight="600">Payment Confirmed via Stripe</text>
+  <text x="450" y="407" text-anchor="middle" fill="#a7f3d0" font-size="11">Order Created &amp; Merch Coins Credited</text>
+
+  <path d="M 450 415 L 450 440" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Donation -->
+  <rect x="315" y="440" width="270" height="45" rx="8" fill="#1e293b" stroke="#ec4899" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="450" y="462" text-anchor="middle" fill="#f472b6" font-size="13" font-weight="600">Donate Coins to Verified Project</text>
+  <text x="450" y="477" text-anchor="middle" fill="#fbcfe8" font-size="11">Atomic Ledger Update &amp; Progress Increment</text>
+
+  <path d="M 450 485 L 450 510" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Finish -->
+  <rect x="300" y="510" width="300" height="42" rx="21" fill="url(#emeraldGrad)" filter="url(#shadow)"/>
+  <text x="450" y="536" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="700">Donor Badge Awarded &amp; Feed Share</text>
+
+</svg>

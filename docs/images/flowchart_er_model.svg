@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 440" width="100%" height="100%" style="background-color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8" />
+    </marker>
+    <marker id="arrow-indigo" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#6366f1" />
+    </marker>
+    <marker id="arrow-emerald" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#10b981" />
+    </marker>
+    <marker id="arrow-rose" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#f43f5e" />
+    </marker>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+    <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5" />
+      <stop offset="100%" stop-color="#3730a3" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d97706" />
+      <stop offset="100%" stop-color="#b45309" />
+    </linearGradient>
+    <linearGradient id="roseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e11d48" />
+      <stop offset="100%" stop-color="#be123c" />
+    </linearGradient>
+  </defs>
+
+  
+  <text x="500" y="35" text-anchor="middle" fill="#f8fafc" font-size="18" font-weight="700">Database Entity Relationships Overview</text>
+
+  <!-- User Model -->
+  <g transform="translate(60, 70)">
+    <rect width="200" height="150" rx="8" fill="#1e293b" stroke="#3b82f6" stroke-width="2" filter="url(#shadow)"/>
+    <rect width="200" height="30" rx="8" fill="#3b82f6"/>
+    <text x="100" y="20" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="700">USER</text>
+    <text x="15" y="55" fill="#93c5fd" font-size="11">_id: ObjectId</text>
+    <text x="15" y="75" fill="#e2e8f0" font-size="11">username: String</text>
+    <text x="15" y="95" fill="#e2e8f0" font-size="11">email: String</text>
+    <text x="15" y="115" fill="#e2e8f0" font-size="11">role: enum</text>
+    <text x="15" y="135" fill="#fbbf24" font-size="11">merchCoins: Number</text>
+  </g>
+
+  <!-- Order Model -->
+  <g transform="translate(400, 70)">
+    <rect width="200" height="150" rx="8" fill="#1e293b" stroke="#10b981" stroke-width="2" filter="url(#shadow)"/>
+    <rect width="200" height="30" rx="8" fill="#10b981"/>
+    <text x="100" y="20" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="700">ORDER</text>
+    <text x="15" y="55" fill="#34d399" font-size="11">_id: ObjectId</text>
+    <text x="15" y="75" fill="#e2e8f0" font-size="11">userId: ObjectId (ref)</text>
+    <text x="15" y="95" fill="#e2e8f0" font-size="11">totalAmount: Number</text>
+    <text x="15" y="115" fill="#fbbf24" font-size="11">coinsEarned: Number</text>
+    <text x="15" y="135" fill="#e2e8f0" font-size="11">paymentStatus: String</text>
+  </g>
+
+  <!-- Donation Model -->
+  <g transform="translate(740, 70)">
+    <rect width="200" height="150" rx="8" fill="#1e293b" stroke="#ec4899" stroke-width="2" filter="url(#shadow)"/>
+    <rect width="200" height="30" rx="8" fill="#ec4899"/>
+    <text x="100" y="20" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="700">DONATION</text>
+    <text x="15" y="55" fill="#f472b6" font-size="11">_id: ObjectId</text>
+    <text x="15" y="75" fill="#e2e8f0" font-size="11">donorId: ObjectId (ref)</text>
+    <text x="15" y="95" fill="#e2e8f0" font-size="11">charityId: ObjectId</text>
+    <text x="15" y="115" fill="#e2e8f0" font-size="11">projectId: ObjectId</text>
+    <text x="15" y="135" fill="#fbbf24" font-size="11">amount: Number</text>
+  </g>
+
+  <!-- Charity Model -->
+  <g transform="translate(60, 270)">
+    <rect width="200" height="130" rx="8" fill="#1e293b" stroke="#8b5cf6" stroke-width="2" filter="url(#shadow)"/>
+    <rect width="200" height="30" rx="8" fill="#8b5cf6"/>
+    <text x="100" y="20" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="700">CHARITY</text>
+    <text x="15" y="55" fill="#c084fc" font-size="11">_id: ObjectId</text>
+    <text x="15" y="75" fill="#e2e8f0" font-size="11">name: String</text>
+    <text x="15" y="95" fill="#e2e8f0" font-size="11">status: enum (verified)</text>
+    <text x="15" y="115" fill="#e2e8f0" font-size="11">coordinates: [lat, lng]</text>
+  </g>
+
+  <!-- Project Model -->
+  <g transform="translate(400, 270)">
+    <rect width="200" height="130" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="2" filter="url(#shadow)"/>
+    <rect width="200" height="30" rx="8" fill="#f59e0b"/>
+    <text x="100" y="20" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="700">PROJECT</text>
+    <text x="15" y="55" fill="#fbbf24" font-size="11">_id: ObjectId</text>
+    <text x="15" y="75" fill="#e2e8f0" font-size="11">charityId: ObjectId</text>
+    <text x="15" y="95" fill="#e2e8f0" font-size="11">targetAmount: Number</text>
+    <text x="15" y="115" fill="#e2e8f0" font-size="11">collectedAmount: Number</text>
+  </g>
+
+  <!-- Auction Model -->
+  <g transform="translate(740, 270)">
+    <rect width="200" height="130" rx="8" fill="#1e293b" stroke="#06b6d4" stroke-width="2" filter="url(#shadow)"/>
+    <rect width="200" height="30" rx="8" fill="#06b6d4"/>
+    <text x="100" y="20" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="700">AUCTION</text>
+    <text x="15" y="55" fill="#67e8f9" font-size="11">_id: ObjectId</text>
+    <text x="15" y="75" fill="#e2e8f0" font-size="11">currentHighBid: Number</text>
+    <text x="15" y="95" fill="#e2e8f0" font-size="11">highBidderId: ObjectId</text>
+    <text x="15" y="115" fill="#e2e8f0" font-size="11">endTime: Date</text>
+  </g>
+
+  <!-- Connectors -->
+  <path d="M 260 145 L 400 145" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M 600 145 L 740 145" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M 260 335 L 400 335" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M 500 270 L 500 220" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+</svg>

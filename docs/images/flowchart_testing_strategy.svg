@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 190" width="100%" height="100%" style="background-color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8" />
+    </marker>
+    <marker id="arrow-indigo" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#6366f1" />
+    </marker>
+    <marker id="arrow-emerald" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#10b981" />
+    </marker>
+    <marker id="arrow-rose" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#f43f5e" />
+    </marker>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+    <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5" />
+      <stop offset="100%" stop-color="#3730a3" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d97706" />
+      <stop offset="100%" stop-color="#b45309" />
+    </linearGradient>
+    <linearGradient id="roseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e11d48" />
+      <stop offset="100%" stop-color="#be123c" />
+    </linearGradient>
+  </defs>
+
+  
+  <text x="500" y="35" text-anchor="middle" fill="#f8fafc" font-size="18" font-weight="700">Quality Assurance &amp; Verification Pipeline</text>
+
+  <g transform="translate(40, 70)">
+    <rect width="200" height="80" rx="10" fill="#1e293b" stroke="#3b82f6" stroke-width="2" filter="url(#shadow)"/>
+    <text x="100" y="35" text-anchor="middle" fill="#60a5fa" font-size="14" font-weight="700">Unit Tests</text>
+    <text x="100" y="55" text-anchor="middle" fill="#94a3b8" font-size="11">Logic, Token Utils</text>
+    <text x="100" y="70" text-anchor="middle" fill="#94a3b8" font-size="11">&amp; Payload Validators</text>
+  </g>
+
+  <path d="M 240 110 L 275 110" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <g transform="translate(280, 70)">
+    <rect width="200" height="80" rx="10" fill="#1e293b" stroke="#10b981" stroke-width="2" filter="url(#shadow)"/>
+    <text x="100" y="35" text-anchor="middle" fill="#34d399" font-size="14" font-weight="700">Integration Tests</text>
+    <text x="100" y="55" text-anchor="middle" fill="#94a3b8" font-size="11">API Route Endpoints</text>
+    <text x="100" y="70" text-anchor="middle" fill="#94a3b8" font-size="11">&amp; Auth Interceptors</text>
+  </g>
+
+  <path d="M 480 110 L 515 110" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <g transform="translate(520, 70)">
+    <rect width="200" height="80" rx="10" fill="#1e293b" stroke="#f59e0b" stroke-width="2" filter="url(#shadow)"/>
+    <text x="100" y="35" text-anchor="middle" fill="#fbbf24" font-size="14" font-weight="700">Concurrency Tests</text>
+    <text x="100" y="55" text-anchor="middle" fill="#94a3b8" font-size="11">Race Condition Defense</text>
+    <text x="100" y="70" text-anchor="middle" fill="#94a3b8" font-size="11">&amp; Atomic Coin Deductions</text>
+  </g>
+
+  <path d="M 720 110 L 755 110" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <g transform="translate(760, 70)">
+    <rect width="200" height="80" rx="10" fill="#1e293b" stroke="#8b5cf6" stroke-width="2" filter="url(#shadow)"/>
+    <text x="100" y="35" text-anchor="middle" fill="#c084fc" font-size="14" font-weight="700">GitHub Actions CI</text>
+    <text x="100" y="55" text-anchor="middle" fill="#94a3b8" font-size="11">Automated PR Linting,</text>
+    <text x="100" y="70" text-anchor="middle" fill="#94a3b8" font-size="11">Build &amp; Test Verification</text>
+  </g>
+
+</svg>

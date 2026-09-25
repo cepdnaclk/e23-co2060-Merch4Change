@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 260" width="100%" height="100%" style="background-color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8" />
+    </marker>
+    <marker id="arrow-indigo" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#6366f1" />
+    </marker>
+    <marker id="arrow-emerald" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#10b981" />
+    </marker>
+    <marker id="arrow-rose" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#f43f5e" />
+    </marker>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+    <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5" />
+      <stop offset="100%" stop-color="#3730a3" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d97706" />
+      <stop offset="100%" stop-color="#b45309" />
+    </linearGradient>
+    <linearGradient id="roseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e11d48" />
+      <stop offset="100%" stop-color="#be123c" />
+    </linearGradient>
+  </defs>
+
+  
+  <text x="500" y="40" text-anchor="middle" fill="#f8fafc" font-size="20" font-weight="700">The Merch-to-Impact Core Value Loop</text>
+  
+  <g transform="translate(30, 80)">
+    <rect width="160" height="90" rx="12" fill="#1e293b" stroke="#3b82f6" stroke-width="2" filter="url(#shadow)"/>
+    <text x="80" y="35" text-anchor="middle" fill="#60a5fa" font-size="13" font-weight="700">1. Browse &amp; Buy</text>
+    <text x="80" y="55" text-anchor="middle" fill="#94a3b8" font-size="11">Merchandise</text>
+    <text x="80" y="72" text-anchor="middle" fill="#94a3b8" font-size="11">(Stripe Checkout)</text>
+  </g>
+
+  <path d="M 190 125 L 225 125" fill="none" stroke="#6366f1" stroke-width="2" marker-end="url(#arrow-indigo)"/>
+
+  <g transform="translate(230, 80)">
+    <rect width="160" height="90" rx="12" fill="#1e293b" stroke="#f59e0b" stroke-width="2" filter="url(#shadow)"/>
+    <text x="80" y="35" text-anchor="middle" fill="#fbbf24" font-size="13" font-weight="700">2. Earn Coins</text>
+    <text x="80" y="55" text-anchor="middle" fill="#94a3b8" font-size="11">Merch Coins Reward</text>
+    <text x="80" y="72" text-anchor="middle" fill="#94a3b8" font-size="11">(1 Coin per $10)</text>
+  </g>
+
+  <path d="M 390 125 L 425 125" fill="none" stroke="#6366f1" stroke-width="2" marker-end="url(#arrow-indigo)"/>
+
+  <g transform="translate(430, 80)">
+    <rect width="160" height="90" rx="12" fill="#1e293b" stroke="#10b981" stroke-width="2" filter="url(#shadow)"/>
+    <text x="80" y="35" text-anchor="middle" fill="#34d399" font-size="13" font-weight="700">3. Donate Causes</text>
+    <text x="80" y="55" text-anchor="middle" fill="#94a3b8" font-size="11">Direct Micro-Donations</text>
+    <text x="80" y="72" text-anchor="middle" fill="#94a3b8" font-size="11">to Verified Charities</text>
+  </g>
+
+  <path d="M 590 125 L 625 125" fill="none" stroke="#6366f1" stroke-width="2" marker-end="url(#arrow-indigo)"/>
+
+  <g transform="translate(630, 80)">
+    <rect width="160" height="90" rx="12" fill="#1e293b" stroke="#8b5cf6" stroke-width="2" filter="url(#shadow)"/>
+    <text x="80" y="35" text-anchor="middle" fill="#c084fc" font-size="13" font-weight="700">4. Badges &amp; Rank</text>
+    <text x="80" y="55" text-anchor="middle" fill="#94a3b8" font-size="11">Bronze to Diamond</text>
+    <text x="80" y="72" text-anchor="middle" fill="#94a3b8" font-size="11">Public Leaderboard</text>
+  </g>
+
+  <path d="M 790 125 L 825 125" fill="none" stroke="#6366f1" stroke-width="2" marker-end="url(#arrow-indigo)"/>
+
+  <g transform="translate(830, 80)">
+    <rect width="140" height="90" rx="12" fill="#1e293b" stroke="#ec4899" stroke-width="2" filter="url(#shadow)"/>
+    <text x="70" y="35" text-anchor="middle" fill="#f472b6" font-size="13" font-weight="700">5. Community</text>
+    <text x="70" y="55" text-anchor="middle" fill="#94a3b8" font-size="11">Inspire via Posts,</text>
+    <text x="70" y="72" text-anchor="middle" fill="#94a3b8" font-size="11">Stories &amp; Highlights</text>
+  </g>
+
+  <!-- Return Loop Path -->
+  <path d="M 900 170 L 900 210 L 110 210 L 110 170" fill="none" stroke="#6366f1" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#arrow-indigo)"/>
+  <text x="500" y="230" text-anchor="middle" fill="#818cf8" font-size="12" font-weight="600">Continuous Self-Sustaining Impact Flywheel</text>
+
+</svg>

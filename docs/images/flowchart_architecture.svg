@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 530" width="100%" height="100%" style="background-color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8" />
+    </marker>
+    <marker id="arrow-indigo" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#6366f1" />
+    </marker>
+    <marker id="arrow-emerald" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#10b981" />
+    </marker>
+    <marker id="arrow-rose" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#f43f5e" />
+    </marker>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+    <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5" />
+      <stop offset="100%" stop-color="#3730a3" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d97706" />
+      <stop offset="100%" stop-color="#b45309" />
+    </linearGradient>
+    <linearGradient id="roseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e11d48" />
+      <stop offset="100%" stop-color="#be123c" />
+    </linearGradient>
+  </defs>
+
+  
+  <text x="500" y="35" text-anchor="middle" fill="#f8fafc" font-size="20" font-weight="700">Merch4Change Multi-Tier Architecture</text>
+
+  <!-- Tier 1: Client -->
+  <g transform="translate(40, 60)">
+    <rect width="920" height="85" rx="10" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="20" y="25" fill="#60a5fa" font-size="13" font-weight="700">Presentation Tier (Client SPA)</text>
+    <rect x="20" y="35" width="260" height="35" rx="6" fill="#0f172a" stroke="#475569"/>
+    <text x="150" y="57" text-anchor="middle" fill="#e2e8f0" font-size="11">React 19 + Vite + Tailwind CSS</text>
+    <rect x="310" y="35" width="260" height="35" rx="6" fill="#0f172a" stroke="#475569"/>
+    <text x="440" y="57" text-anchor="middle" fill="#e2e8f0" font-size="11">Leaflet Maps &amp; Lucide Icons</text>
+    <rect x="600" y="35" width="290" height="35" rx="6" fill="#0f172a" stroke="#475569"/>
+    <text x="745" y="57" text-anchor="middle" fill="#e2e8f0" font-size="11">Auth Context &amp; Axios Interceptors</text>
+  </g>
+
+  <path d="M 500 145 L 500 175" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Tier 2: Gateway -->
+  <g transform="translate(40, 175)">
+    <rect width="920" height="85" rx="10" fill="#1e293b" stroke="#8b5cf6" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="20" y="25" fill="#c084fc" font-size="13" font-weight="700">Gateway &amp; Security Middleware Tier</text>
+    <rect x="20" y="35" width="200" height="35" rx="6" fill="#0f172a" stroke="#475569"/>
+    <text x="120" y="57" text-anchor="middle" fill="#e2e8f0" font-size="11">Express REST API Gateway</text>
+    <rect x="240" y="35" width="200" height="35" rx="6" fill="#0f172a" stroke="#475569"/>
+    <text x="340" y="57" text-anchor="middle" fill="#e2e8f0" font-size="11">CORS &amp; Helmet Defense</text>
+    <rect x="460" y="35" width="210" height="35" rx="6" fill="#0f172a" stroke="#475569"/>
+    <text x="565" y="57" text-anchor="middle" fill="#e2e8f0" font-size="11">Dual JWT &amp; Cookie Auth Guard</text>
+    <rect x="690" y="35" width="200" height="35" rx="6" fill="#0f172a" stroke="#475569"/>
+    <text x="790" y="57" text-anchor="middle" fill="#e2e8f0" font-size="11">Multer Memory Stream (2MB)</text>
+  </g>
+
+  <path d="M 500 260 L 500 290" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Tier 3: Core Services -->
+  <g transform="translate(40, 290)">
+    <rect width="920" height="95" rx="10" fill="#1e293b" stroke="#10b981" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="20" y="25" fill="#34d399" font-size="13" font-weight="700">Core Domain Services Tier</text>
+    <rect x="20" y="35" width="135" height="45" rx="6" fill="#0f172a" stroke="#475569"/>
+    <text x="87" y="62" text-anchor="middle" fill="#e2e8f0" font-size="11">Auth &amp; OTP</text>
+    <rect x="170" y="35" width="135" height="45" rx="6" fill="#0f172a" stroke="#475569"/>
+    <text x="237" y="62" text-anchor="middle" fill="#e2e8f0" font-size="11">Catalog &amp; Shop</text>
+    <rect x="320" y="35" width="135" height="45" rx="6" fill="#0f172a" stroke="#475569"/>
+    <text x="387" y="62" text-anchor="middle" fill="#e2e8f0" font-size="11">Live Auctions</text>
+    <rect x="470" y="35" width="135" height="45" rx="6" fill="#0f172a" stroke="#475569"/>
+    <text x="537" y="62" text-anchor="middle" fill="#e2e8f0" font-size="11">Coin Donations</text>
+    <rect x="620" y="35" width="135" height="45" rx="6" fill="#0f172a" stroke="#475569"/>
+    <text x="687" y="62" text-anchor="middle" fill="#e2e8f0" font-size="11">Social &amp; Stories</text>
+    <rect x="770" y="35" width="135" height="45" rx="6" fill="#0f172a" stroke="#475569"/>
+    <text x="837" y="62" text-anchor="middle" fill="#e2e8f0" font-size="11">Admin Verify</text>
+  </g>
+
+  <path d="M 500 385 L 500 415" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Tier 4: Persistence -->
+  <g transform="translate(40, 415)">
+    <rect width="920" height="85" rx="10" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="20" y="25" fill="#fbbf24" font-size="13" font-weight="700">Data Persistence &amp; External Cloud APIs</text>
+    <rect x="20" y="35" width="200" height="35" rx="6" fill="#0f172a" stroke="#475569"/>
+    <text x="120" y="57" text-anchor="middle" fill="#e2e8f0" font-size="11">MongoDB Atlas (Mongoose)</text>
+    <rect x="250" y="35" width="200" height="35" rx="6" fill="#0f172a" stroke="#475569"/>
+    <text x="350" y="57" text-anchor="middle" fill="#e2e8f0" font-size="11">Cloudinary CDN</text>
+    <rect x="480" y="35" width="200" height="35" rx="6" fill="#0f172a" stroke="#475569"/>
+    <text x="580" y="57" text-anchor="middle" fill="#e2e8f0" font-size="11">Stripe Checkout API</text>
+    <rect x="710" y="35" width="190" height="35" rx="6" fill="#0f172a" stroke="#475569"/>
+    <text x="805" y="57" text-anchor="middle" fill="#e2e8f0" font-size="11">Resend / Nodemailer</text>
+  </g>
+
+</svg>

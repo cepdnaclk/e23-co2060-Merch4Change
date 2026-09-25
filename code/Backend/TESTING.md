@@ -1,10 +1,10 @@
-# 🧪 Backend Testing Guide
+# Backend Testing Guide
 
 The **Merch4Change** backend API uses Node.js's native test runner (`node --test`), delivering fast, zero-dependency test execution with built-in assertion utilities.
 
 ---
 
-## 🚀 Running Test Suites
+## Running Test Suites
 
 Execute test commands from the `code/Backend` directory:
 
@@ -39,7 +39,7 @@ node --test tests/unit/validators/profile.validator.test.js
 
 ---
 
-## 🗂️ Test Suite Organization
+## Test Suite Organization
 
 ```
 tests/
@@ -54,7 +54,7 @@ tests/
 
 ---
 
-## 💡 Notes for Developers
+## Notes for Developers
 
 - **Windows PowerShell Users**: If script execution policies restrict `npm`, run commands using `npm.cmd test` or pass commands directly to `node --test`.
 - **Environment Variables**: Tests run with `NODE_ENV=test`. Ensure your test configurations do not overwrite production database credentials.

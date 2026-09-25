@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 490" width="100%" height="100%" style="background-color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8" />
+    </marker>
+    <marker id="arrow-indigo" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#6366f1" />
+    </marker>
+    <marker id="arrow-emerald" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#10b981" />
+    </marker>
+    <marker id="arrow-rose" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#f43f5e" />
+    </marker>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+    <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5" />
+      <stop offset="100%" stop-color="#3730a3" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d97706" />
+      <stop offset="100%" stop-color="#b45309" />
+    </linearGradient>
+    <linearGradient id="roseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e11d48" />
+      <stop offset="100%" stop-color="#be123c" />
+    </linearGradient>
+  </defs>
+
+  
+  <text x="450" y="35" text-anchor="middle" fill="#f8fafc" font-size="18" font-weight="700">Live Auction &amp; Real-Time Bidding Window</text>
+
+  <rect x="300" y="60" width="300" height="42" rx="8" fill="#1e293b" stroke="#8b5cf6" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="450" y="86" text-anchor="middle" fill="#c084fc" font-size="13" font-weight="600">Auction Scheduled &amp; Countdown Started</text>
+
+  <path d="M 450 102 L 450 130" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="300" y="130" width="300" height="42" rx="8" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="450" y="156" text-anchor="middle" fill="#93c5fd" font-size="13">Shopper Submits Real-Time Bid ($X)</text>
+
+  <path d="M 450 172 L 450 200" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Decision: Expiry -->
+  <polygon points="450,200 570,235 450,270 330,235" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="450" y="239" text-anchor="middle" fill="#fde68a" font-size="12" font-weight="600">Auction Expired?</text>
+
+  <!-- Yes -> Reject -->
+  <path d="M 570 235 L 700 235 L 700 270" fill="none" stroke="#f43f5e" stroke-width="2" marker-end="url(#arrow-rose)"/>
+  <text x="640" y="225" fill="#f43f5e" font-size="11">Yes (Expired)</text>
+  <rect x="610" y="270" width="180" height="40" rx="8" fill="#1e293b" stroke="#f43f5e" stroke-width="1.5"/>
+  <text x="700" y="295" text-anchor="middle" fill="#fda4af" font-size="11">Reject Bid: Closed</text>
+
+  <!-- No -> Increment check -->
+  <path d="M 450 270 L 450 310" fill="none" stroke="#10b981" stroke-width="2" marker-end="url(#arrow-emerald)"/>
+  <text x="460" y="292" fill="#10b981" font-size="11">No</text>
+
+  <polygon points="450,310 580,345 450,380 320,345" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="450" y="342" text-anchor="middle" fill="#fde68a" font-size="11" font-weight="600">$X &gt;= Current High Bid</text>
+  <text x="450" y="356" text-anchor="middle" fill="#fde68a" font-size="11" font-weight="600">+ Min Increment?</text>
+
+  <!-- No increment -> Reject -->
+  <path d="M 320 345 L 200 345 L 200 390" fill="none" stroke="#f43f5e" stroke-width="2" marker-end="url(#arrow-rose)"/>
+  <text x="230" y="335" fill="#f43f5e" font-size="11">Below Increment</text>
+  <rect x="110" y="390" width="180" height="40" rx="8" fill="#1e293b" stroke="#f43f5e" stroke-width="1.5"/>
+  <text x="200" y="415" text-anchor="middle" fill="#fda4af" font-size="11">Reject: Increment Too Low</text>
+
+  <!-- Valid increment -> update -->
+  <path d="M 450 380 L 450 420" fill="none" stroke="#10b981" stroke-width="2" marker-end="url(#arrow-emerald)"/>
+  <text x="460" y="402" fill="#10b981" font-size="11">Valid Bid</text>
+
+  <rect x="290" y="420" width="320" height="45" rx="8" fill="url(#emeraldGrad)" filter="url(#shadow)"/>
+  <text x="450" y="442" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="700">Assign Current High Bidder</text>
+  <text x="450" y="457" text-anchor="middle" fill="#d1fae5" font-size="11">Notify Outbid User &amp; Broadcast Update</text>
+
+</svg>
