@@ -2,14 +2,9 @@
     "title": "Merch4Change",
     "team": [
         {
-            "name": "S.D.M.P. Sandanayake",
-            "email": "e23347@eng.pdn.ac.lk",
-            "eNumber": "E/23/347"
-        },
-        {
-            "name": "S.B.N.S. Samarawickrama",
-            "email": "e23343@eng.pdn.ac.lk",
-            "eNumber": "E/23/343"
+            "name": "G.C. Damsiluni",
+            "email": "e23050@eng.pdn.ac.lk",
+            "eNumber": "E/23/050"
         },
         {
             "name": "M.A.S. Dulshara",
@@ -17,9 +12,14 @@
             "eNumber": "E/23/089"
         },
         {
-            "name": "G.C. Damsiluni",
-            "email": "e23050@eng.pdn.ac.lk",
-            "eNumber": "E/23/050"
+            "name": "S.B.N.S. Samarawickrama",
+            "email": "e23343@eng.pdn.ac.lk",
+            "eNumber": "E/23/343"
+        },
+        {
+            "name": "S.D.M.P. Sandanayake",
+            "email": "e23347@eng.pdn.ac.lk",
+            "eNumber": "E/23/347"
         }
     ],
     "tags": ["Web", "Software Systems", "CO2060"],

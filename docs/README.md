@@ -37,10 +37,10 @@ A multi-sided social commerce ecosystem bridging **conscious consumers**, **ethi
 
 | eNumber | Name | Role | Email |
 |---|---|---|---|
-| **E/23/347** | S.D.M.P. Sandanayake | Team Leader & Full-Stack Developer | [e23347@eng.pdn.ac.lk](mailto:e23347@eng.pdn.ac.lk) |
-| **E/23/343** | S.B.N.S. Samarawickrama | Backend Developer & API Architect | [e23343@eng.pdn.ac.lk](mailto:e23343@eng.pdn.ac.lk) |
-| **E/23/089** | M.A.S. Dulshara | Database Manager & Systems Engineer | [e23089@eng.pdn.ac.lk](mailto:e23089@eng.pdn.ac.lk) |
 | **E/23/050** | G.C. Damsiluni | Frontend Developer & UI/UX Designer | [e23050@eng.pdn.ac.lk](mailto:e23050@eng.pdn.ac.lk) |
+| **E/23/089** | M.A.S. Dulshara | Database Manager & Systems Engineer | [e23089@eng.pdn.ac.lk](mailto:e23089@eng.pdn.ac.lk) |
+| **E/23/343** | S.B.N.S. Samarawickrama | Backend Developer & API Architect | [e23343@eng.pdn.ac.lk](mailto:e23343@eng.pdn.ac.lk) |
+| **E/23/347** | S.D.M.P. Sandanayake | Team Leader & Full-Stack Developer | [e23347@eng.pdn.ac.lk](mailto:e23347@eng.pdn.ac.lk) |
 
 ---
 

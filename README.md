@@ -502,14 +502,12 @@ Please follow the guidelines established in [DEVELOPER_GUIDE.md](./DEVELOPER_GUI
 
 **Team Antigravity** · Group 13 · Department of Computer Engineering · University of Peradeniya
 
-| Name | Role | Email |
-|---|---|---|
-| **R.A.J.C. Adhikari** | Tech Lead | |
-| **M.N.A. Fikry** | Scrum Master | |
-| **S.D.M.P. Sandanayake** | Team Leader | [e23347@eng.pdn.ac.lk](mailto:e23347@eng.pdn.ac.lk) |
-| **S.B.N.S. Samarawickrama** | Backend Developer | [e23343@eng.pdn.ac.lk](mailto:e23343@eng.pdn.ac.lk) |
-| **M.A.S. Dulshara** | Database Manager | [e23089@eng.pdn.ac.lk](mailto:e23089@eng.pdn.ac.lk) |
-| **G.C. Damsiluni** | Frontend Developer | [e23050@eng.pdn.ac.lk](mailto:e23050@eng.pdn.ac.lk) |
+| eNumber | Name | Role | Email |
+|---|---|---|---|
+| **E/23/050** | **G.C. Damsiluni** | Frontend Developer | [e23050@eng.pdn.ac.lk](mailto:e23050@eng.pdn.ac.lk) |
+| **E/23/089** | **M.A.S. Dulshara** | Database Manager | [e23089@eng.pdn.ac.lk](mailto:e23089@eng.pdn.ac.lk) |
+| **E/23/343** | **S.B.N.S. Samarawickrama** | Backend Developer | [e23343@eng.pdn.ac.lk](mailto:e23343@eng.pdn.ac.lk) |
+| **E/23/347** | **S.D.M.P. Sandanayake** | Team Leader | [e23347@eng.pdn.ac.lk](mailto:e23347@eng.pdn.ac.lk) |
 
 - **Institution:** Faculty of Engineering, University of Peradeniya, Sri Lanka
 - **Module:** CO2060 — 2nd Year Project (2YP)
