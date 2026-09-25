@@ -37,7 +37,7 @@ System process workflows, state engines, and domain relationships are formally m
 5. **Live Auction Bidding Engine:** [`flowchart_auction_engine.svg`](../../docs/images/flowchart_auction_engine.svg) — Countdown timers, minimum increments, and outbid dispatch.
 6. **Charity Verification Pipeline:** [`flowchart_charity_verification.svg`](../../docs/images/flowchart_charity_verification.svg) — Multi-stage administrative compliance audits.
 7. **Multi-Tier System Architecture:** [`flowchart_architecture.svg`](../../docs/images/flowchart_architecture.svg) — Presentation, Gateway, Service, and Data tiers.
-8. **Entity-Relationship Model:** [`flowchart_er_model.svg`](../../docs/images/flowchart_er_model.svg) — Document schemas, indexes, and referential keys.
+8. **NoSQL Document Architecture:** [`flowchart_er_model.svg`](../../docs/images/flowchart_er_model.svg) — MongoDB collection schemas, embedded document arrays, and normalized references.
 9. **Quality Assurance Strategy:** [`flowchart_testing_strategy.svg`](../../docs/images/flowchart_testing_strategy.svg) — Multi-tiered test execution and automated CI.
 10. **Strategic Implementation Roadmap:** [`flowchart_roadmap.svg`](../../docs/images/flowchart_roadmap.svg) — Milestone tracking from MVP to enterprise scale.
 
