@@ -238,6 +238,13 @@ e23-co2060-Merch4Change/
 Developed as a 2nd Year Project (**CO2060 — Software Systems Design Project**)  
 **Department of Computer Engineering · Faculty of Engineering · University of Peradeniya, Sri Lanka**
 
+### Project Leadership
+| Role | Name |
+|---|---|
+| **Tech Lead** | **R.A.J.C. Adhikari** |
+| **Scrum Master** | **M.N.A. Fikry** |
+
+### Development Team
 | eNumber | Name | Role | Email |
 |---|---|---|---|
 | **E/23/050** | **G.C. Damsiluni** | Frontend Developer & UI/UX Specialist | [e23050@eng.pdn.ac.lk](mailto:e23050@eng.pdn.ac.lk) |

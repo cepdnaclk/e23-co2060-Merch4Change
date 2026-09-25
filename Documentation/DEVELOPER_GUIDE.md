@@ -1174,6 +1174,13 @@ git commit -m "docs(api): document endpoint payloads for charity verification"
 
 ### Team Antigravity (Group 13)
 
+#### Project Leadership
+| Role | Name |
+|---|---|
+| **Tech Lead** | **R.A.J.C. Adhikari** |
+| **Scrum Master** | **M.N.A. Fikry** |
+
+#### Development Team
 | Registration No | Student Name | Project Role | Academic Email |
 |:---:|:---|:---|:---|
 | **E/23/050** | **G.C. Damsiluni** | Frontend Developer & UI/UX Specialist | [e23050@eng.pdn.ac.lk](mailto:e23050@eng.pdn.ac.lk) |

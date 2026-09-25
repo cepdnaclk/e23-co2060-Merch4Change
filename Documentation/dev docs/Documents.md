@@ -86,6 +86,13 @@ All services and endpoints conform to unified development standards:
 Developed for **CO2060 — Software Systems Design Project (2YP)**  
 **Department of Computer Engineering · Faculty of Engineering · University of Peradeniya, Sri Lanka**
 
+### Project Leadership
+| Role | Name |
+|---|---|
+| **Tech Lead** | **R.A.J.C. Adhikari** |
+| **Scrum Master** | **M.N.A. Fikry** |
+
+### Development Team
 | Registration No | Student Name | Project Role | Academic Email |
 |:---:|:---|:---|:---|
 | **E/23/050** | **G.C. Damsiluni** | Frontend Developer & UI/UX Specialist | [e23050@eng.pdn.ac.lk](mailto:e23050@eng.pdn.ac.lk) |
