@@ -1,9 +1,9 @@
 # This theme is based on https://github.com/jekyll/minima
 # Please refer above link to know the available configurations
 
-title: ""
+title: "Merch4Change"
 remote_theme: cepdnaclk/eYY-project-theme
-description: ""
+description: "A full-stack social merchandise and charity donation ecosystem where shopping turns into tangible charitable impact."
 markdown: kramdown
 
 kramdown:
@@ -11,3 +11,22 @@ kramdown:
   syntax_highlighter_opts:
     block:
       line_numbers: false
+
+team:
+  - name: "S.D.M.P. Sandanayake"
+    email: "e23347@eng.pdn.ac.lk"
+    eNumber: "E/23/347"
+  - name: "S.B.N.S. Samarawickrama"
+    email: "e23343@eng.pdn.ac.lk"
+    eNumber: "E/23/343"
+  - name: "M.A.S. Dulshara"
+    email: "e23089@eng.pdn.ac.lk"
+    eNumber: "E/23/089"
+  - name: "G.C. Damsiluni"
+    email: "e23050@eng.pdn.ac.lk"
+    eNumber: "E/23/050"
+
+tags:
+  - "Web"
+  - "Software Systems"
+  - "CO2060"

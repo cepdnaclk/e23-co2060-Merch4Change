@@ -13,7 +13,7 @@
 
 A modern full-stack web platform bridging **conscious shoppers**, **merchants & brands**, and **verified charities** — turning everyday merchandise shopping into tangible social impact via an in-app coin donation engine.
 
-**[🌐 Live Demo](https://e23-co2060-merch4-change-9mp9.vercel.app/)** · **[📚 Developer Docs](./Documentation/dev%20docs/Documents.md)** · **[🛠️ Developer Guide](./DEVELOPER_GUIDE.md)** · **[🧪 Testing Guide](./code/Backend/TESTING.md)** · **[🐛 Report Bug](https://github.com/cepdnaclk/e23-co2060-Merch4Change/issues)**
+**[🌐 Live Demo](https://merch4change.vercel.app/)** · **[📚 Developer Docs](./Documentation/dev%20docs/Documents.md)** · **[🛠️ Developer Guide](./DEVELOPER_GUIDE.md)** · **[🧪 Testing Guide](./code/Backend/TESTING.md)** · **[🐛 Report Bug](https://github.com/cepdnaclk/e23-co2060-Merch4Change/issues)**
 
 ---
 

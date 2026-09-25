@@ -1,32 +1,40 @@
 {
-    "team": [
-        {
-            "name": "Team Member Name 1",
-            "email": "email@eng.pdn.ac.lk",
-            "eNumber": "E/yy/xxx"
-        },
-        {
-            "name": "Team Member Name 2",
-            "email": "email@eng.pdn.ac.lk",
-            "eNumber": "E/yy/xxx"
-        },
-        {
-            "name": "Team Member Name 3",
-            "email": "email@eng.pdn.ac.lk",
-            "eNumber": "E/yy/xxx"
-        }
-    ],
-    "supervisors": [
-        {
-            "name": "Dr. Supervisor 1",
-            "email": "email@eng.pdn.ac.lk"
-        },
-        {
-            "name": "Supervisor 2",
-            "email": "email@eng.pdn.ac.lk"
-        }
-    ],
-    "tags": ["Web", "Software Systems", "CO2060"],
-    "image":"cover_page.jpg",
-    "thumbnail":"thumbnail.jpg"
+  "title": "Merch4Change",
+  "team": [
+    {
+      "name": "S.D.M.P. Sandanayake",
+      "email": "e23347@eng.pdn.ac.lk",
+      "eNumber": "E/23/347"
+    },
+    {
+      "name": "S.B.N.S. Samarawickrama",
+      "email": "e23343@eng.pdn.ac.lk",
+      "eNumber": "E/23/343"
+    },
+    {
+      "name": "M.A.S. Dulshara",
+      "email": "e23089@eng.pdn.ac.lk",
+      "eNumber": "E/23/089"
+    },
+    {
+      "name": "G.C. Damsiluni",
+      "email": "e23050@eng.pdn.ac.lk",
+      "eNumber": "E/23/050"
+    }
+  ],
+  "supervisors": [
+    {
+      "name": "R.A.J.C. Adhikari",
+      "email": "email@eng.pdn.ac.lk"
+    },
+    {
+      "name": "M.N.A. Fikry",
+      "email": "email@eng.pdn.ac.lk"
+    }
+  ],
+  "tags": [
+    "Web",
+    "Software Systems",
+    "CO2060"
+  ]
 }

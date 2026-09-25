@@ -1169,7 +1169,7 @@ git commit -m "docs(api): document endpoint payloads for charity verification"
 - **Institution**: Department of Computer Engineering, Faculty of Engineering, University of Peradeniya, Sri Lanka
 - **Course**: CO2060 — 2nd Year Project (2YP)
 - **Academic Batch**: E23
-- **Live Platform URL**: [https://e23-co2060-merch4-change-9mp9.vercel.app/](https://e23-co2060-merch4-change-9mp9.vercel.app/)
+- **Live Platform URL**: [https://merch4change.vercel.app/](https://merch4change.vercel.app/)
 - **Source Repository**: [https://github.com/cepdnaclk/e23-co2060-Merch4Change](https://github.com/cepdnaclk/e23-co2060-Merch4Change)
 
 ### Team Antigravity (Group 13)
