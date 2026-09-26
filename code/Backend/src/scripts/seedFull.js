@@ -518,6 +518,39 @@ const charityOrganizations = [
 // Section 3: Sustainable Merch Brands & Artisans (18 brands)
 const brandOrganizations = [
   {
+    orgName: "Showcase Demo Brand",
+    email: "showcase@merch4change.test",
+    country: "United States",
+    description: "A showcase brand providing premium products for demonstration purposes. We focus on sustainability and impact.",
+    logoUrl: "https://images.unsplash.com/photo-1563170351-b0e1e9bc920f?w=200",
+    products: [
+      {
+        name: "Demonstration Luxury Timepiece",
+        description: "An elegant timepiece for demonstration purposes. Every purchase helps fund clean water initiatives.",
+        price: 550,
+        stock: 15,
+        isLimitedEdition: true,
+        imageUrl: "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=600",
+      },
+      {
+        name: "Eco-Friendly Demo Backpack",
+        description: "A sustainable backpack for daily commutes, made from 100% recycled ocean plastics.",
+        price: 130,
+        stock: 50,
+        isLimitedEdition: false,
+        imageUrl: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600",
+      },
+      {
+        name: "Premium Charity Coffee Blend",
+        description: "A rich blend of organic arabica beans. 100% of proceeds go to rural education.",
+        price: 25,
+        stock: 100,
+        isLimitedEdition: false,
+        imageUrl: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=600",
+      }
+    ],
+  },
+  {
     orgName: "EcoWear Sustainable",
     email: "hello@ecowear.com",
     country: "Sweden",
@@ -835,6 +868,14 @@ const brandOrganizations = [
 
 // Section 4: High-Impact Donors & Philanthropists (22 users)
 const highImpactDonors = [
+  {
+    firstName: "Demo",
+    lastName: "Account",
+    userName: "demouser",
+    email: "demo@merch4change.test",
+    coinBalance: 50000,
+    profileImageUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200",
+  },
   {
     firstName: "Sarah",
     lastName: "Jenkins",
@@ -1936,14 +1977,15 @@ async function seedFull() {
 
     // --- Brand product launch / showcase posts (medium-high engagement) ---
     const brandPostData = [
-      { idx: 0, content: "♻️ Introducing our new Recycled Ocean Fleece Pullover — woven entirely from reclaimed ocean bottles! Soft, warm, and saving our seas one thread at a time. Now available in the marketplace. 🌊 #EcoWear #SustainableFashion", age: 3, images: ["https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=800", "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=600"] },
-      { idx: 1, content: "🏔️ The Alpine Expedition Storm Shell is here. 3-layer breathable, waterproof, and Fair Trade Certified. Built for the harshest conditions, made with the best intentions. #PatagoniaImpact", age: 12, images: ["https://images.unsplash.com/photo-1548883354-7622d03aca27?w=800"] },
-      { idx: 2, content: "✨ Hand-turned Tuscan leather meets solid brass closures. Our new briefcase collection is a love letter to Florentine craftsmanship. Limited edition — only 12 pieces available. #AuraArtisan", age: 24, images: ["https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800", "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=600"] },
-      { idx: 3, content: "🍃 Zero waste, zero compromise. The Mycelium Vegan Travel Pouch is made from mushroom leather with a biodegradable lining. The future of accessories is growing. 🍄 #TerraLiving", age: 42, images: ["https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=800"] },
-      { idx: 4, content: "☀️ Power your adventures with the sun! Our Modular Solar Commuter Backpack generates 15W fast charge while you explore. Laptop pocket, solar cells, and pure freedom. #SolsticeGear", age: 60, images: ["https://images.unsplash.com/photo-1622560480605-d83c853bc5c3?w=800"] },
-      { idx: 5, content: "🎋 The art of simplicity. Hand-carved Kyoto bamboo tea sets, cured in organic walnut oil by master craftspeople. A ceremony in every sip. 🍵 #NirvanaBamboo", age: 84, images: ["https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800", "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=600"] },
-      { idx: 6, content: "⌚ Introducing the Vanguard Terra Automatic Diver — 300m depth rating, recycled aerospace titanium, sapphire crystal. Luxury that respects the planet. Only 6 pieces remain. #VanguardWatches", age: 110, images: ["https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=800", "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=600"] },
-      { idx: 7, content: "🧶 From regenerative Merino farms in New Zealand to your wardrobe. The Cloud Merino Crewneck — traceable, sustainable, impossibly soft. 17.5 micron perfection. #NomadWoolen", age: 130, images: ["https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=800"] },
+      { idx: 0, content: "🚀 We are thrilled to launch our Showcase Demonstration collection! Featuring premium luxury timepieces and sustainable everyday gear. Every purchase directly impacts global initiatives. Thank you for your support! ✨ #ShowcaseImpact", age: 1, images: ["https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=800"] },
+      { idx: 1, content: "♻️ Introducing our new Recycled Ocean Fleece Pullover — woven entirely from reclaimed ocean bottles! Soft, warm, and saving our seas one thread at a time. Now available in the marketplace. 🌊 #EcoWear #SustainableFashion", age: 3, images: ["https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=800", "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=600"] },
+      { idx: 2, content: "🏔️ The Alpine Expedition Storm Shell is here. 3-layer breathable, waterproof, and Fair Trade Certified. Built for the harshest conditions, made with the best intentions. #PatagoniaImpact", age: 12, images: ["https://images.unsplash.com/photo-1548883354-7622d03aca27?w=800"] },
+      { idx: 3, content: "✨ Hand-turned Tuscan leather meets solid brass closures. Our new briefcase collection is a love letter to Florentine craftsmanship. Limited edition — only 12 pieces available. #AuraArtisan", age: 24, images: ["https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800", "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=600"] },
+      { idx: 4, content: "🍃 Zero waste, zero compromise. The Mycelium Vegan Travel Pouch is made from mushroom leather with a biodegradable lining. The future of accessories is growing. 🍄 #TerraLiving", age: 42, images: ["https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=800"] },
+      { idx: 5, content: "☀️ Power your adventures with the sun! Our Modular Solar Commuter Backpack generates 15W fast charge while you explore. Laptop pocket, solar cells, and pure freedom. #SolsticeGear", age: 60, images: ["https://images.unsplash.com/photo-1622560480605-d83c853bc5c3?w=800"] },
+      { idx: 6, content: "🎋 The art of simplicity. Hand-carved Kyoto bamboo tea sets, cured in organic walnut oil by master craftspeople. A ceremony in every sip. 🍵 #NirvanaBamboo", age: 84, images: ["https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800", "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=600"] },
+      { idx: 7, content: "⌚ Introducing the Vanguard Terra Automatic Diver — 300m depth rating, recycled aerospace titanium, sapphire crystal. Luxury that respects the planet. Only 6 pieces remain. #VanguardWatches", age: 110, images: ["https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=800", "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=600"] },
+      { idx: 8, content: "🧶 From regenerative Merino farms in New Zealand to your wardrobe. The Cloud Merino Crewneck — traceable, sustainable, impossibly soft. 17.5 micron perfection. #NomadWoolen", age: 130, images: ["https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=800"] },
     ];
 
     for (const bp of brandPostData) {
