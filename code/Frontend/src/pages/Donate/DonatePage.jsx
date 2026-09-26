@@ -527,6 +527,8 @@ export default function DonatePage() {
                     </form>
                   </div>
                 )}
+              </>
+            )}
 
           </div>
         </main>
