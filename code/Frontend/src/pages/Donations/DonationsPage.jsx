@@ -158,10 +158,6 @@ export default function DonationsPage() {
   const [stats, setStats] = useState({ totalDonated: 0, charityCount: 0 });
   const [query, setQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [modalOpen, setModalOpen] = useState(false);
-  const [prefilledCharityId, setPrefilledCharityId] = useState("");
-  const [prefilledCharityName, setPrefilledCharityName] = useState("");
-  const [prefilledProject, setPrefilledProject] = useState("");
   const [successMsg, setSuccessMsg] = useState(null);
   const [loading, setLoading] = useState(true);
 

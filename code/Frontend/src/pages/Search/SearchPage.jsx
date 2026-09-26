@@ -161,7 +161,6 @@ export default function SearchPage() {
     }
   }
 
-  const anyResults = results && (results.users?.length || results.charities?.length || results.projects?.length || results.products?.length);
   const anyVisibleResults = showUsers || showCharities || showProjects || showProducts;
 
   return (

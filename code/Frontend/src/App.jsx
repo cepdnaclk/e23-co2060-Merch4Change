@@ -31,7 +31,6 @@ import AdminRoute from "./components/AdminRoute/AdminRoute";
 import DonationsPage from "./pages/Donations/DonationsPage";
 import DonatePage from "./pages/Donate/DonatePage";
 import UnderConstruction from "./components/UnderConstruction/UnderConstruction";
-import NotificationDropDown from "./components/Notifications/NotificationDropDown";
 import { Analytics } from "@vercel/analytics/react";
 import { AuthProvider } from "./context/Context";
 import { ThemeProvider } from "./context/ThemeContext";

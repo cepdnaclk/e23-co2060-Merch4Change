@@ -3,7 +3,7 @@ import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Coins,
-  CreditCard,
+  
   Heart,
   ShieldCheck,
   Sparkles,
@@ -48,7 +48,6 @@ export default function DonatePage() {
   const [selectedProject, setSelectedProject] = useState(null);
 
   // Payment Mode: "coins" | "money"
-  const [paymentMode, setPaymentMode] = useState("coins");
 
   // Coin Form State
   const [coinAmount, setCoinAmount] = useState(100);
@@ -406,8 +405,7 @@ export default function DonatePage() {
                 <div className="donate-tabs-wrapper">
                   <button
                     type="button"
-                    onClick={() => setPaymentMode("coins")}
-                    className={`donate-tab-btn ${paymentMode === "coins" ? "active-tab" : ""}`}
+                    className="donate-tab-btn active-tab"
                   >
                     <Coins size={18} color="#D4820A" />
                     <span>Pay by Coins</span>
@@ -417,7 +415,7 @@ export default function DonatePage() {
                 </div>
 
                 {/* ── TAB 1: PAY BY COINS ── */}
-                {paymentMode === "coins" && (
+
                   <div className="donate-checkout-card">
                     <form onSubmit={handleCoinDonationSubmit}>
                       {/* Live Coin Balance Card */}
@@ -526,7 +524,6 @@ export default function DonatePage() {
                       )}
                     </form>
                   </div>
-                )}
               </>
             )}
 

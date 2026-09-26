@@ -1,5 +1,5 @@
 import React, { memo, useState, useEffect } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import "./Sidebar.css";
 import CreatePostModal from "../CreatePostModal/CreatePostModal";
 import BrandLogo from "../BrandLogo/BrandLogo";
@@ -12,22 +12,21 @@ import {
   Search,
   Bell,
   Store,
-  Layers,
-  BarChart2,
+  
+  
   Settings,
   Plus,
   Heart,
-  ShieldCheck,
+  
   ClipboardList,
   Trophy,
-  Users,
+  
   X,
 } from "lucide-react";
 
 function Sidebar({ profileData, setIsSidebarCollapsed, isSidebarCollapsed, onPostCreated }) {
   const [selectedOption, setSelectedOption] = useState(0);
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
-  const navigate = useNavigate();
   const { user: storedUser } = useAuth();
   const { t } = useI18n();
   const userRole = profileData?.role || storedUser?.role;

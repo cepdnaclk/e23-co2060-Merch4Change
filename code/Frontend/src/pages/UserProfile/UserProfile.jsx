@@ -11,7 +11,7 @@ import ProfileHighlights from "./ProfileHighlights/ProfileHighlights";
 import ProfileTabs from "./ProfileTabs/ProfileTabs";
 import PostGrid from "./PostGrid/PostGrid";
 import CustomerFootprint from "./Footprint/CustomerFootprint";
-import { MapContainer, TileLayer, CircleMarker, Popup, Marker } from "react-leaflet";
+import { MapContainer, TileLayer,  Popup, Marker } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { MapPin, X } from "lucide-react";
@@ -60,7 +60,6 @@ function UserProfile() {
   const [isProjectsLoading, setIsProjectsLoading] = useState(false);
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [hqPos, setHqPos] = useState(null);
-  const [donationModalOpen, setDonationModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState("");
   const profilePhotoInputRef = useRef(null);
   const coverPhotoInputRef = useRef(null);
@@ -68,33 +67,6 @@ function UserProfile() {
   const [products, setProducts] = useState([]);
   const [isProductsLoading, setIsProductsLoading] = useState(false);
   const [createProductModalOpen, setCreateProductModalOpen] = useState(false);
-  const [viewerCoins, setViewerCoins] = useState(0);
-
-  useEffect(() => {
-    if (!token) return;
-    apiClient.get("/api/v1/profile/me/coins")
-      .then((res) => {
-        if (res.data?.success && typeof res.data.data?.coinBalance === "number") {
-          setViewerCoins(res.data.data.coinBalance);
-        }
-      })
-      .catch(() => {});
-  }, [token]);
-
-  const handleDonationCommitted = (spentCoins, remainingCoins) => {
-    setViewerCoins((prev) => {
-      const next = typeof remainingCoins === "number" ? remainingCoins : Math.max(0, prev - spentCoins);
-      return next;
-    });
-    setProfileData((prev) => {
-      if (!prev) return prev;
-      return { 
-        ...prev, 
-        coinBalance: typeof remainingCoins === "number" ? remainingCoins : Math.max(0, (prev.coinBalance || 0) - spentCoins) 
-      };
-    });
-  };
-
   useEffect(() => {
     if (profileData?.accountType === "organization" && profileData?.country && !hqPos) {
       fetch(`https://nominatim.openstreetmap.org/search?country=${encodeURIComponent(profileData.country)}&format=json`)
