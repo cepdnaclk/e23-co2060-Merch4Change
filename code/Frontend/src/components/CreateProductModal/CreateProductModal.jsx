@@ -1,15 +1,26 @@
-import React, { useState, useRef } from "react";
-import { X, UploadCloud, Image as ImageIcon } from "lucide-react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
+import { X, UploadCloud } from "lucide-react";
 import "./CreateProductModal.css";
 import { createProduct } from "../../api/productsService";
+import { createAuction } from "../../api/auctionService";
 
-const CreateProductModal = ({ isOpen, onClose, onProductCreated }) => {
+const CreateProductModal = ({ isOpen, onClose, onProductCreated, initialListingType = "marketplace" }) => {
+  const [listingType, setListingType] = useState(initialListingType); // "marketplace" | "auction"
   const [productName, setProductName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
+  const [stock, setStock] = useState("1");
+  const [bidIncrement, setBidIncrement] = useState("10");
+  const [endTime, setEndTime] = useState("");
   const [images, setImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setListingType(initialListingType);
+    }
+  }, [isOpen, initialListingType]);
   
   const fileInputRef = useRef(null);
 
@@ -24,6 +35,7 @@ const CreateProductModal = ({ isOpen, onClose, onProductCreated }) => {
       }
       setImages((prev) => [...prev, ...filesArray]);
     }
+    e.target.value = "";
   };
 
   const removeImage = (indexToRemove) => {
@@ -38,24 +50,56 @@ const CreateProductModal = ({ isOpen, onClose, onProductCreated }) => {
       return;
     }
     
+    if (listingType === "auction" && !endTime) {
+      setError("Please provide an end time for the auction.");
+      return;
+    }
+
     setIsLoading(true);
     const formData = new FormData();
     formData.append("name", productName);
     formData.append("description", description);
     formData.append("price", price);
+    formData.append("stock", listingType === "auction" ? "1" : (stock || "1"));
     
     images.forEach((img) => {
       formData.append("images", img);
     });
 
     try {
+      // Create product first
       const res = await createProduct(formData);
       if (res.data?.success) {
+        const newProduct = res.data.product;
+        
+        // If it's an auction, create the auction record too
+        if (listingType === "auction") {
+          const auctionData = {
+            productId: newProduct._id,
+            startPrice: Number(price),
+            bidIncrement: Number(bidIncrement || 10),
+            startTime: new Date().toISOString(),
+            endTime: new Date(endTime).toISOString()
+          };
+          
+          const auctionRes = await createAuction(auctionData);
+          if (!auctionRes.data?.success) {
+             setError("Product created, but failed to create auction: " + (auctionRes.data?.message || "Unknown error"));
+             setIsLoading(false);
+             return;
+          }
+        }
+
+        // Success for both cases
         setProductName("");
         setDescription("");
         setPrice("");
+        setStock("1");
+        setBidIncrement("10");
+        setEndTime("");
         setImages([]);
-        onProductCreated(res.data.product);
+        setListingType("marketplace");
+        if (onProductCreated) onProductCreated(newProduct);
         onClose();
       } else {
         setError(res.data?.message || "Failed to create product");
@@ -72,7 +116,7 @@ const CreateProductModal = ({ isOpen, onClose, onProductCreated }) => {
     <div className="cprod-overlay" onClick={onClose}>
       <div className="cprod-modal" onClick={(e) => e.stopPropagation()}>
         <div className="cprod-header">
-          <h2>Create New Product</h2>
+          <h2>Create New Listing</h2>
           <button className="cprod-close-btn" onClick={onClose}>
             <X size={24} />
           </button>
@@ -81,6 +125,32 @@ const CreateProductModal = ({ isOpen, onClose, onProductCreated }) => {
         <form className="cprod-form" onSubmit={handleSubmit}>
           {error && <div className="cprod-error">{error}</div>}
           
+          <div className="cprod-field">
+            <label>Listing Type *</label>
+            <div style={{ display: "flex", gap: "15px", marginTop: "5px" }}>
+              <label style={{ fontWeight: "normal", display: "flex", alignItems: "center", gap: "5px" }}>
+                <input 
+                  type="radio" 
+                  name="listingType" 
+                  value="marketplace" 
+                  checked={listingType === "marketplace"} 
+                  onChange={(e) => setListingType(e.target.value)} 
+                />
+                Direct Sale (Marketplace)
+              </label>
+              <label style={{ fontWeight: "normal", display: "flex", alignItems: "center", gap: "5px" }}>
+                <input 
+                  type="radio" 
+                  name="listingType" 
+                  value="auction" 
+                  checked={listingType === "auction"} 
+                  onChange={(e) => setListingType(e.target.value)} 
+                />
+                Auction
+              </label>
+            </div>
+          </div>
+
           <div className="cprod-field">
             <label>Product Name *</label>
             <input 
@@ -93,7 +163,7 @@ const CreateProductModal = ({ isOpen, onClose, onProductCreated }) => {
           </div>
 
           <div className="cprod-field">
-            <label>Price (LKR) *</label>
+            <label>{listingType === "auction" ? "Starting Bid (LKR) *" : "Price (LKR) *"}</label>
             <input 
               type="number" 
               placeholder="e.g. 5000" 
@@ -103,6 +173,46 @@ const CreateProductModal = ({ isOpen, onClose, onProductCreated }) => {
               min="0"
             />
           </div>
+
+          {listingType === "marketplace" && (
+            <div className="cprod-field">
+              <label>Stock Quantity *</label>
+              <input 
+                type="number" 
+                placeholder="e.g. 10" 
+                value={stock}
+                onChange={(e) => setStock(e.target.value)}
+                disabled={isLoading}
+                min="1"
+              />
+            </div>
+          )}
+
+          {listingType === "auction" && (
+            <>
+              <div className="cprod-field">
+                <label>Bid Increment (LKR) *</label>
+                <input 
+                  type="number" 
+                  placeholder="e.g. 100" 
+                  value={bidIncrement}
+                  onChange={(e) => setBidIncrement(e.target.value)}
+                  disabled={isLoading}
+                  min="1"
+                />
+              </div>
+              <div className="cprod-field">
+                <label>Auction End Time *</label>
+                <input 
+                  type="datetime-local" 
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  disabled={isLoading}
+                  min={new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
+                />
+              </div>
+            </>
+          )}
 
           <div className="cprod-field">
             <label>Description *</label>
@@ -136,19 +246,22 @@ const CreateProductModal = ({ isOpen, onClose, onProductCreated }) => {
             
             {images.length > 0 && (
               <div className="cprod-image-previews">
-                {images.map((img, idx) => (
-                  <div className="cprod-preview-item" key={idx}>
-                    <img src={URL.createObjectURL(img)} alt={`Preview ${idx}`} />
-                    <button 
-                      type="button" 
-                      className="cprod-remove-img" 
-                      onClick={() => removeImage(idx)}
-                      disabled={isLoading}
-                    >
-                      <X size={14} />
-                    </button>
-                  </div>
-                ))}
+                {images.map((img, idx) => {
+                  const previewUrl = URL.createObjectURL(img);
+                  return (
+                    <div className="cprod-preview-item" key={idx}>
+                      <img src={previewUrl} alt={`Preview ${idx}`} onLoad={() => URL.revokeObjectURL(previewUrl)} />
+                      <button 
+                        type="button" 
+                        className="cprod-remove-img" 
+                        onClick={() => removeImage(idx)}
+                        disabled={isLoading}
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -157,8 +270,8 @@ const CreateProductModal = ({ isOpen, onClose, onProductCreated }) => {
             <button type="button" className="cprod-cancel-btn" onClick={onClose} disabled={isLoading}>
               Cancel
             </button>
-            <button type="submit" className="cprod-submit-btn" disabled={isLoading || !productName || !price || !description}>
-              {isLoading ? "Creating..." : "Create Product"}
+            <button type="submit" className="cprod-submit-btn" disabled={isLoading || !productName || !price || !description || (listingType === "auction" && !endTime)}>
+              {isLoading ? "Creating..." : (listingType === "auction" ? "Create Auction" : "Create Product")}
             </button>
           </div>
         </form>

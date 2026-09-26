@@ -60,13 +60,13 @@ function UserProfile() {
   const [isProjectsLoading, setIsProjectsLoading] = useState(false);
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [hqPos, setHqPos] = useState(null);
-  const [selectedProject, setSelectedProject] = useState("");
   const profilePhotoInputRef = useRef(null);
   const coverPhotoInputRef = useRef(null);
   
   const [products, setProducts] = useState([]);
   const [isProductsLoading, setIsProductsLoading] = useState(false);
   const [createProductModalOpen, setCreateProductModalOpen] = useState(false);
+  const [createProductModalType, setCreateProductModalType] = useState('marketplace');
   useEffect(() => {
     if (profileData?.accountType === "organization" && profileData?.country && !hqPos) {
       fetch(`https://nominatim.openstreetmap.org/search?country=${encodeURIComponent(profileData.country)}&format=json`)
@@ -124,6 +124,7 @@ function UserProfile() {
     const endpoint = isFetchingMe ? "/api/v1/profile/me" : `/api/v1/profile/${username}`;
 
     setProfileData(null);
+    setActiveTab("POSTS");
     apiClient.get(endpoint)
       .then(async (res) => {
         const data = res.data;
@@ -506,12 +507,24 @@ function UserProfile() {
             {activeTab === 'PRODUCTS' && profileData?.accountType !== 'organization' && (
               <div className="products-section" style={{ padding: '2rem 0' }}>
                 {isOwnProfile && (
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginBottom: '20px' }}>
                     <button 
                       className="up-edit-btn up-edit-btn--primary" 
-                      onClick={() => setCreateProductModalOpen(true)}
+                      onClick={() => {
+                        setCreateProductModalType('marketplace');
+                        setCreateProductModalOpen(true);
+                      }}
                     >
                       + Add Product
+                    </button>
+                    <button 
+                      className="up-edit-btn up-edit-btn--primary" 
+                      onClick={() => {
+                        setCreateProductModalType('auction');
+                        setCreateProductModalOpen(true);
+                      }}
+                    >
+                      + Add Auction
                     </button>
                   </div>
                 )}
@@ -551,8 +564,9 @@ function UserProfile() {
                 
                 <CreateProductModal 
                   isOpen={createProductModalOpen} 
+                  initialListingType={createProductModalType}
                   onClose={() => setCreateProductModalOpen(false)} 
-                  onProductCreated={(newProd) => setProducts([newProd, ...products])}
+                  onProductCreated={(newProd) => setProducts((prev) => [newProd, ...prev])}
                 />
               </div>
             )}

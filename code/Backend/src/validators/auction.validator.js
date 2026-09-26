@@ -28,22 +28,32 @@ export const isStarted = (startTime) => {
 
 // validate the bid
 export const validBid = async (auction, amount, userId) => {
-  // check acution is statred?
-  const isActive = auction.status === "active" ? true : false;
+  // check auction is active?
+  const isActive = auction.status === "active";
 
-  // check is auction ended?
+  // check is auction ended? Ensure Date comparison
   const now = new Date();
-  const isNotExpired = auction.endTime > now ? true : false;
+  const isNotExpired = new Date(auction.endTime) > now;
 
   // validate bid amount
-  const newVal = auction.currentPrice + auction.bidIncrement;
-  const isAmount = amount >= newVal ? true : false;
+  // For the first bid (no current bidder), allow bids >= currentPrice (startPrice)
+  // For subsequent bids, require >= currentPrice + bidIncrement
+  let isAmount;
+  if (!auction.currentBidder) {
+    isAmount = amount >= auction.currentPrice;
+  } else {
+    const newVal = auction.currentPrice + auction.bidIncrement;
+    isAmount = amount >= newVal;
+  }
 
-  // validate bidder have enough coins
+  // validate bidder has enough coins (guard against deleted user)
   const user = await User.findById(userId);
-  const userBalance = user.coinBalance;
+  if (!user) {
+    return { isActive, isNotExpired, isAmount, isUserHaveCoin: false };
+  }
+  const userBalance = user.coinBalance || 0;
 
-  const isUserHaveCoin = userBalance >= amount ? true : false;
+  const isUserHaveCoin = userBalance >= amount;
 
   return { isActive, isNotExpired, isAmount, isUserHaveCoin };
 };
