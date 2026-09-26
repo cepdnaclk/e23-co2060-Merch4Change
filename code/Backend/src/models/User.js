@@ -57,6 +57,11 @@ const userSchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
+    fiatBalance: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
     isActive: {
       type: Boolean,
       default: true,

@@ -32,11 +32,16 @@ const projectSchema = new mongoose.Schema(
       min: 0,
       default: 0,
     },
-    status: {
+status: {
       type: String,
       required: true,
       trim: true,
     },
+    imageUrl: {
+      type: String,
+      trim: true,
+      default: ""
+    }
   },
   {
     timestamps: { createdAt: true, updatedAt: false },

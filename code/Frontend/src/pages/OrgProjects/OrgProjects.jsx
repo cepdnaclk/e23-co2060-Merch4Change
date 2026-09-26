@@ -136,8 +136,8 @@ const OrgProjects = () => {
               
               <div className="org-project-progress">
                 <div className="org-project-stats">
-                  <span>LKR {project.collectedAmount.toLocaleString()} raised</span>
-                  <span>of LKR {project.goalAmount.toLocaleString()}</span>
+                  <span>USD {project.collectedAmount.toLocaleString()} raised</span>
+                  <span>of USD {project.goalAmount.toLocaleString()}</span>
                 </div>
                 <div className="org-project-bar">
                   <div 
@@ -192,7 +192,7 @@ const OrgProjects = () => {
               </div>
               
               <div className="org-form-group">
-                <label>Goal Amount (LKR)</label>
+                <label>Goal Amount (USD)</label>
                 <input 
                   type="number" 
                   min="1"

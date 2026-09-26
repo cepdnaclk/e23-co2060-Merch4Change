@@ -35,13 +35,13 @@ export default function SearchResultItem({ item, category, query }) {
     secondary = item.email ? `${item.email} • ${item.role}` : `${item.role}`;
   } else if (category === "charities") {
     primary = item.name;
-    secondary = `${item.userName ? `@${item.userName} • ` : ""}LKR ${item.totalRaised || 0}`;
+    secondary = `${item.userName ? `@${item.userName} • ` : ""}USD ${item.totalRaised || 0}`;
   } else if (category === "projects") {
     primary = item.name;
     secondary = `${item.charityName} • ${item.progress || 0}%`;
   } else if (category === "products") {
     primary = item.name;
-    secondary = `LKR ${item.price} • ${item.vendor || ""}`;
+    secondary = `USD ${item.price} • ${item.vendor || ""}`;
   } else if (category === "pages") {
     primary = item.title;
     secondary = item.desc || "";

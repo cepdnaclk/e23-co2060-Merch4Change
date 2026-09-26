@@ -252,7 +252,7 @@ export default function AllDonorsPage() {
                   </div>
                   <div>
                     <div className="all-donors-stat-val">
-                      LKR {(data?.totalImpactValue || (data?.totalCoinsRaised || 0) * 10).toLocaleString()}
+                      USD {(data?.totalImpactValue || (data?.totalCoinsRaised || 0) * 10).toLocaleString()}
                     </div>
                     <div className="all-donors-stat-label">Real Impact Created</div>
                   </div>
@@ -288,7 +288,7 @@ export default function AllDonorsPage() {
                       </h3>
                       <p>
                         You've contributed{" "}
-                        <strong>{currentUserDonation.totalCoinsDonated.toLocaleString()} Coins</strong> (≈ LKR{" "}
+                        <strong>{currentUserDonation.totalCoinsDonated.toLocaleString()} Coins</strong> (≈ USD{" "}
                         {(currentUserDonation.totalCoinsDonated * 10).toLocaleString()}) across{" "}
                         <strong>{currentUserDonation.donationsCount} contribution{currentUserDonation.donationsCount === 1 ? "" : "s"}</strong>.
                       </p>
@@ -505,10 +505,10 @@ export default function AllDonorsPage() {
                           </span>
                         </div>
 
-                        {/* Impact LKR */}
+                        {/* Impact USD */}
                         <div className="col-impact">
                           <span className="donor-impact-val">
-                            LKR {((donor.totalCoinsDonated || 0) * 10).toLocaleString()}
+                            USD {((donor.totalCoinsDonated || 0) * 10).toLocaleString()}
                           </span>
                         </div>
 

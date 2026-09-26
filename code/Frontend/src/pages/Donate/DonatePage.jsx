@@ -390,7 +390,7 @@ export default function DonatePage() {
                     <div className="donate-progress-container">
                       <div className="donate-progress-labels">
                         <span>
-                          <strong>LKR {collectedAmt.toLocaleString()}</strong> raised of LKR {goalAmt.toLocaleString()} goal
+                          <strong>USD {collectedAmt.toLocaleString()}</strong> raised of USD {goalAmt.toLocaleString()} goal
                         </span>
                         <strong style={{ color: "#D4820A" }}>{progressPercent}% Funded</strong>
                       </div>
@@ -485,7 +485,7 @@ export default function DonatePage() {
                         </div>
                         <div className="donate-breakdown-row">
                           <span>Est. Real-world Value:</span>
-                          <span>≈ LKR {(coinAmount * 10).toLocaleString()} value</span>
+                          <span>≈ USD {(coinAmount * 10).toLocaleString()} value</span>
                         </div>
                         <div className="donate-breakdown-row">
                           <span>Remaining Balance:</span>

@@ -105,7 +105,7 @@ export default function TopCustomers({ username, sellerName, isOrganization }) {
             <p>
               {isDonorMode
                 ? `${(data?.totalCoinsRaised || 0).toLocaleString()} Coins`
-                : `LKR ${(data?.totalRevenueFromCustomers || 0).toLocaleString()}`}
+                : `USD ${(data?.totalRevenueFromCustomers || 0).toLocaleString()}`}
             </p>
           </div>
         </div>
@@ -124,7 +124,7 @@ export default function TopCustomers({ username, sellerName, isOrganization }) {
             <h5>{isDonorMode ? "Est. Real Impact" : "Coins Generated"}</h5>
             <p>
               {isDonorMode
-                ? `≈ LKR ${(data?.totalImpactValue || (data?.totalCoinsRaised || 0) * 10).toLocaleString()}`
+                ? `≈ USD ${(data?.totalImpactValue || (data?.totalCoinsRaised || 0) * 10).toLocaleString()}`
                 : `${Math.floor((data?.totalRevenueFromCustomers || 0) / 10).toLocaleString()} Coins`}
             </p>
           </div>
@@ -168,11 +168,11 @@ export default function TopCustomers({ username, sellerName, isOrganization }) {
                 <div className="tc-metric-amount">
                   {isDonorMode
                     ? `${(supporter.totalCoinsDonated || supporter.totalSpent || 0).toLocaleString()} Coins`
-                    : `LKR ${(supporter.totalSpent || 0).toLocaleString()}`}
+                    : `USD ${(supporter.totalSpent || 0).toLocaleString()}`}
                 </div>
                 <div className="tc-metric-sub">
                   {isDonorMode
-                    ? `${supporter.donationsCount || supporter.ordersCount || 1} donation${(supporter.donationsCount || supporter.ordersCount) === 1 ? "" : "s"} (≈ LKR ${((supporter.totalCoinsDonated || supporter.totalSpent || 0) * 10).toLocaleString()})`
+                    ? `${supporter.donationsCount || supporter.ordersCount || 1} donation${(supporter.donationsCount || supporter.ordersCount) === 1 ? "" : "s"} (≈ USD ${((supporter.totalCoinsDonated || supporter.totalSpent || 0) * 10).toLocaleString()})`
                     : `${supporter.ordersCount} order${supporter.ordersCount === 1 ? "" : "s"} (${supporter.itemsCount} items)`}
                 </div>
               </div>
@@ -236,7 +236,7 @@ export default function TopCustomers({ username, sellerName, isOrganization }) {
                     <div className="tc-cell-metric-main">
                       {isDonorMode
                         ? `${(supporter.totalCoinsDonated || supporter.totalSpent || 0).toLocaleString()} Coins`
-                        : `LKR ${(supporter.totalSpent || 0).toLocaleString()}`}
+                        : `USD ${(supporter.totalSpent || 0).toLocaleString()}`}
                     </div>
                     <div className="tc-cell-metric-sub">
                       {isDonorMode

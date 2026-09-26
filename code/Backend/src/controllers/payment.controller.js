@@ -1,3 +1,4 @@
+import User from "../models/User.js";
 import Order from "../models/Order.js";
 import {
   constructWebhookEvent,
@@ -40,7 +41,13 @@ export const handleStripeWebhook = asyncHandler(async (req, res) => {
       const session = event.data.object;
       const orderId = session.client_reference_id || session.metadata?.orderId;
 
-      if (orderId) {
+      if (session.metadata?.type === "topup") {
+        const userId = session.metadata.userId;
+        const amount = Number(session.metadata.amount);
+        if (userId && amount) {
+          await User.findByIdAndUpdate(userId, { $inc: { fiatBalance: amount } });
+        }
+      } else if (orderId) {
         await fulfillPaidOrder(orderId, {
           paymentIntentId: session.payment_intent,
           paymentGateway: "stripe",
@@ -113,5 +120,45 @@ export const verifyPaymentSession = asyncHandler(async (req, res) => {
     status: order.status,
     paymentStatus: order.paymentStatus,
     coinsEarned: order.coinsEarned,
+  });
+});
+import env from "../config/env.js";
+import { getStripeClient } from "../services/stripe.service.js";
+
+export const createTopupSession = asyncHandler(async (req, res) => {
+  const { amount } = req.body;
+  if (!amount || amount <= 0) {
+    throw new AppError("Invalid topup amount", 400, "VALIDATION_ERROR");
+  }
+
+  const stripe = getStripeClient();
+  const successUrl = `${env.frontendUrl}/topup/success?session_id={CHECKOUT_SESSION_ID}`;
+  const cancelUrl = `${env.frontendUrl}/topup/cancel`;
+
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ["card"],
+    mode: "payment",
+    line_items: [
+      {
+        price_data: {
+          currency: "usd",
+          product_data: { name: "Auction Top-up" },
+          unit_amount: Math.round(Number(amount) * 100),
+        },
+        quantity: 1,
+      },
+    ],
+    customer_email: req.user.email,
+    metadata: {
+      type: "topup",
+      userId: req.user._id.toString(),
+      amount: amount.toString(),
+    },
+    success_url: successUrl,
+    cancel_url: cancelUrl,
+  });
+
+  return successResponse(res, 200, "Topup session created", {
+    checkoutUrl: session.url,
   });
 });

@@ -1,7 +1,9 @@
 import { Router } from "express";
+import protect from "../middlewares/auth.js";
 import {
   handleStripeWebhook,
   verifyPaymentSession,
+  createTopupSession,
 } from "../controllers/payment.controller.js";
 
 const router = Router();
@@ -13,3 +15,6 @@ router.post("/webhook", handleStripeWebhook);
 router.get("/verify-session/:sessionId", verifyPaymentSession);
 
 export default router;
+
+// Topup endpoint
+router.post("/topup/create-session", protect, createTopupSession);

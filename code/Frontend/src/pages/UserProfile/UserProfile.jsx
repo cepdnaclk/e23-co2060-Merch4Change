@@ -431,7 +431,7 @@ function UserProfile() {
                 </button>
                 <div style={{ flex: 1, textAlign: 'center', fontWeight: 'bold' }}>
                   <span style={{ color: 'var(--primary-color)' }}>
-                    LKR {(orgProjects.reduce((acc, p) => acc + (p.collectedAmount || 0), 0)).toLocaleString()}
+                    USD {(orgProjects.reduce((acc, p) => acc + (p.collectedAmount || 0), 0)).toLocaleString()}
                   </span>
                   <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginLeft: '0.5rem' }}>Total Impact</span>
                 </div>
@@ -547,7 +547,7 @@ function UserProfile() {
                           <h3>{product.name}</h3>
                           <p className="project-desc">{product.description}</p>
                           <div style={{ marginTop: '10px', fontWeight: 'bold', color: '#4a24e1', fontSize: '1.2rem' }}>
-                            LKR {product.price?.toLocaleString()}
+                            USD {product.price?.toLocaleString()}
                           </div>
                         </div>
                       </div>
@@ -589,7 +589,7 @@ function UserProfile() {
                     orgProjects.map((project) => (
                       <div key={project.id} className="project-card premium-card">
                         <div className="project-image">
-                          <img src={`https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=80`} alt={project.title} />
+                          <img src={project.imageUrl || `https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=80`} alt={project.title} />
                           <div className="project-tag">Active</div>
                         </div>
                         <div className="project-body">

@@ -191,44 +191,45 @@ export const checkout = asyncHandler(async (req, res) => {
   }
 
   const coinsEarned = Math.floor(totalAmount / 10);
-  const isStripeConfigured = Boolean(env.stripeSecretKey);
+
+  if (!env.stripeSecretKey) {
+    for (const item of decrementedProducts) {
+      await Product.findByIdAndUpdate(item.productId, { $inc: { stock: item.quantity } });
+    }
+    throw new AppError("Payment gateway is not configured on this server.", 500, "SERVER_ERROR");
+  }
 
   const order = await Order.create({
     userId: req.user._id,
     items: orderItems,
     currency: "USD",
     totalAmount,
-    status: isStripeConfigured ? "pending" : "paid",
-    paymentStatus: isStripeConfigured ? "pending" : "paid",
-    paymentGateway: isStripeConfigured ? "stripe" : "none",
+    status: "pending",
+    paymentStatus: "pending",
+    paymentGateway: "stripe",
     coinsEarned,
   });
 
   let checkoutUrl = null;
   let sessionId = null;
 
-  if (isStripeConfigured) {
-    try {
-      const session = await createCheckoutSession({
-        orderId: order._id,
-        items: orderItems,
-        customerEmail: req.user.email,
-      });
-      order.stripeSessionId = session.id;
-      await order.save();
-      checkoutUrl = session.url;
-      sessionId = session.id;
-    } catch (sessionError) {
-      // Roll back order and restore stock if session creation fails
-      for (const item of decrementedProducts) {
-        await Product.findByIdAndUpdate(item.productId, { $inc: { stock: item.quantity } });
-      }
-      await Order.findByIdAndDelete(order._id);
-      throw sessionError;
+  try {
+    const session = await createCheckoutSession({
+      orderId: order._id,
+      items: orderItems,
+      customerEmail: req.user.email,
+    });
+    order.stripeSessionId = session.id;
+    await order.save();
+    checkoutUrl = session.url;
+    sessionId = session.id;
+  } catch (sessionError) {
+    // Roll back order and restore stock if session creation fails
+    for (const item of decrementedProducts) {
+      await Product.findByIdAndUpdate(item.productId, { $inc: { stock: item.quantity } });
     }
-  } else {
-    // Development fallback without Stripe key: immediately fulfill order
-    await fulfillPaidOrder(order._id, { paymentGateway: "none" });
+    await Order.findByIdAndDelete(order._id);
+    throw sessionError;
   }
 
   return successResponse(res, 201, "Checkout initialized successfully.", {
