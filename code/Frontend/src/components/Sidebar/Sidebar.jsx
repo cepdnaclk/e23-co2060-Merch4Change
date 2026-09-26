@@ -132,26 +132,6 @@ function Sidebar({ profileData, setIsSidebarCollapsed, isSidebarCollapsed, onPos
         >
           <div className="lum-nav-icon"><Store size={20} /></div> <span className="lum-nav-text">{t("nav.marketplace")}</span>
         </NavLink>
-        {userAccountType !== "organization" && (
-          <div
-            className={selectedOption === 3 ? "lum-nav-item active" : "lum-nav-item"}
-            onClick={() => {
-              handleSelectOption(3);
-              navigate("/under-construction");
-            }}
-          >
-            <div className="lum-nav-icon"><Layers size={20} /></div> <span className="lum-nav-text">{t("nav.collections")}</span>
-          </div>
-        )}
-        <div
-          className={selectedOption === 4 ? "lum-nav-item active" : "lum-nav-item"}
-          onClick={() => {
-            handleSelectOption(4);
-            navigate("/under-construction");
-          }}
-        >
-          <div className="lum-nav-icon"><BarChart2 size={20} /></div> <span className="lum-nav-text">{t("nav.analytics")}</span>
-        </div>
         <NavLink
           to="/donations"
           className={({ isActive }) => (isActive ? "lum-nav-item active" : "lum-nav-item")}
