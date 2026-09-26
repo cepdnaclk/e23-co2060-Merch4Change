@@ -132,8 +132,8 @@ export const createTopupSession = asyncHandler(async (req, res) => {
   }
 
   const stripe = getStripeClient();
-  const successUrl = \/topup/success?session_id={CHECKOUT_SESSION_ID};
-  const cancelUrl = \/topup/cancel;
+  const successUrl = `${env.frontendUrl}/topup/success?session_id={CHECKOUT_SESSION_ID}`;
+  const cancelUrl = `${env.frontendUrl}/topup/cancel`;
 
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
