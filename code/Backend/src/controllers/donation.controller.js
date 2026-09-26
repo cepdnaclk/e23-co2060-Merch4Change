@@ -156,6 +156,7 @@ export const createDonation = asyncHandler(async (req, res) => {
   return successResponse(res, 201, "Donation successful.", {
     donation,
     coinBalance: updatedUser.coinBalance,
+    receiptUrl: `/api/v1/donations/${donation._id}/receipt`
   });
 });
 
@@ -370,4 +371,65 @@ export const listDonationProjects = asyncHandler(async (req, res) => {
       status: project.status,
     })),
   });
+});
+
+/**
+ * GET /api/v1/donations/:id/receipt
+ * Generate an HTML receipt for a specific donation
+ */
+export const downloadReceipt = asyncHandler(async (req, res) => {
+  const donation = await Donation.findOne({
+    _id: req.params.id,
+    donorUserId: req.user._id,
+  }).populate("charityId", "publicName").populate("charityProjectId", "title");
+
+  if (!donation) {
+    throw new AppError("Donation not found.", 404, "DONATION_NOT_FOUND");
+  }
+
+  const charityName = donation.charityId?.publicName || "Verified Charity";
+  const projectName = donation.charityProjectId?.title || "General Fund";
+  const amount = donation.coinAmount;
+  const date = donation.createdAt.toDateString();
+  const donorName = `${req.user.firstName} ${req.user.lastName}`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <title>Donation Receipt - ${donation._id}</title>
+      <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #333; }
+        .receipt-container { max-width: 600px; margin: 0 auto; border: 1px solid #ddd; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 15px; margin-bottom: 30px; }
+        .detail { margin-bottom: 15px; font-size: 16px; }
+        .label { font-weight: bold; width: 150px; display: inline-block; color: #7f8c8d; }
+        .amount { font-size: 24px; font-weight: bold; color: #27ae60; text-align: center; margin: 30px 0; background: #f9f9f9; padding: 15px; border-radius: 5px; border-left: 5px solid #27ae60; }
+        .footer { text-align: center; font-style: italic; color: #95a5a6; margin-top: 40px; font-size: 14px; border-top: 1px solid #eee; padding-top: 20px; }
+      </style>
+    </head>
+    <body>
+      <div class="receipt-container">
+        <h1>Donation Receipt</h1>
+        <div class="detail"><span class="label">Receipt ID:</span> ${donation._id}</div>
+        <div class="detail"><span class="label">Date:</span> ${date}</div>
+        <div class="detail"><span class="label">Donor:</span> ${donorName}</div>
+        <div class="detail"><span class="label">Email:</span> ${req.user.email}</div>
+        <div class="detail"><span class="label">Charity:</span> ${charityName}</div>
+        <div class="detail"><span class="label">Project:</span> ${projectName}</div>
+        
+        <div class="amount">Amount Donated: ${amount} Coins</div>
+        
+        <div class="footer">
+          Thank you for your generous support! Your contribution makes a real difference.<br>
+          <strong>Merch4Change</strong>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+  
+  res.setHeader("Content-type", "text/html");
+  res.send(html);
 });
