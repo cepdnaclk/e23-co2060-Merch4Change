@@ -10,6 +10,7 @@ import ProfileHeader from "./ProfileHeader/ProfileHeader";
 import ProfileHighlights from "./ProfileHighlights/ProfileHighlights";
 import ProfileTabs from "./ProfileTabs/ProfileTabs";
 import PostGrid from "./PostGrid/PostGrid";
+import CustomerFootprint from "./Footprint/CustomerFootprint";
 import { MapContainer, TileLayer, CircleMarker, Popup, Marker } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -85,10 +86,12 @@ function UserProfile() {
       const next = typeof remainingCoins === "number" ? remainingCoins : Math.max(0, prev - spentCoins);
       return next;
     });
-    // Also if viewing own profile, update profileData.coinBalance
     setProfileData((prev) => {
       if (!prev) return prev;
-      return { ...prev, coinBalance: typeof remainingCoins === "number" ? remainingCoins : Math.max(0, (prev.coinBalance || 0) - spentCoins) };
+      return { 
+        ...prev, 
+        coinBalance: typeof remainingCoins === "number" ? remainingCoins : Math.max(0, (prev.coinBalance || 0) - spentCoins) 
+      };
     });
   };
 
@@ -100,7 +103,7 @@ function UserProfile() {
           if (data && data.length > 0) {
             setHqPos([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
           } else {
-            setHqPos([46.2044, 6.1432]); // Default fallback
+            setHqPos([46.2044, 6.1432]);
           }
         })
         .catch(err => {
@@ -139,7 +142,6 @@ function UserProfile() {
     }
   }, [token, username, currentUser?.userName]);
 
-  // 2. Fetch viewed profile data based on route username parameter
   useEffect(() => {
     if (!token) {
       setLoadError(true);
@@ -221,7 +223,6 @@ function UserProfile() {
     navigate(`/messaging?userId=${profileData._id}`);
   };
 
-
   const handleEditClick = () => {
     setEditForm(buildEditForm(profileData || {}));
     setIsEditing(true);
@@ -271,7 +272,6 @@ function UserProfile() {
         onBusy: setUploadingProfilePhoto,
       });
     } catch (error) {
-      // eslint-disable-next-line no-alert
       alert(error.message || "Unable to upload profile photo");
     }
   };
@@ -286,7 +286,6 @@ function UserProfile() {
         onBusy: setUploadingCoverPhoto,
       });
     } catch (error) {
-      // eslint-disable-next-line no-alert
       alert(error.message || "Unable to upload cover photo");
     }
   };
@@ -324,7 +323,6 @@ function UserProfile() {
         loadPosts();
       }
     } catch (error) {
-      // eslint-disable-next-line no-alert
       alert(error.message || "Unable to save profile");
     } finally {
       setSavingProfile(false);
@@ -349,7 +347,6 @@ function UserProfile() {
       setPosts((currentPosts) => currentPosts.filter((item) => (item.id || item._id) !== postId));
       await refreshProfile();
     } catch (error) {
-      // eslint-disable-next-line no-alert
       alert(error.message || "Unable to delete post");
     }
   };
@@ -381,6 +378,11 @@ function UserProfile() {
   const isOrganization = profileData?.accountType === "organization";
   const verificationStatus = profileData?.verificationStatus || "unsubmitted";
 
+  // Tab definitions: organizations show organization-specific tabs; regular users/customers show footprint
+  const profileTabs = isOrganization 
+    ? ['POSTS', 'PROJECTS', 'TOP DONORS'] 
+    : ['POSTS', 'PRODUCTS', 'FOOTPRINT', 'TOP CUSTOMERS'];
+
   return (
     <div className={`luminous-app ${isSidebarCollapsed ? "sidebar-collapsed" : ""}`}>
       <TopNavbar
@@ -399,7 +401,17 @@ function UserProfile() {
         <main className="lum-main-content" style={{ padding: 0 }}>
           <div className="up-constrained-section">
             {isOrganization && isOwnProfile && verificationStatus !== "verified" && (
-              <div className={`org-verify-banner org-verify-banner--${verificationStatus}`} style={{ margin: "20px 20px 0 20px", borderRadius: "12px", padding: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div 
+                className={`org-verify-banner org-verify-banner--${verificationStatus}`} 
+                style={{ 
+                  margin: "20px 20px 0 20px", 
+                  borderRadius: "12px", 
+                  padding: "16px", 
+                  display: "flex", 
+                  justifyContent: "space-between", 
+                  alignItems: "center" 
+                }}
+              >
                 <div>
                   <strong>
                     {verificationStatus === "pending" && "Your verification is under review."}
@@ -445,7 +457,9 @@ function UserProfile() {
                   View Impact Map
                 </button>
                 <div style={{ flex: 1, textAlign: 'center', fontWeight: 'bold' }}>
-                  <span style={{ color: 'var(--primary-color)' }}>LKR {(orgProjects.reduce((acc, p) => acc + (p.collectedAmount || 0), 0)).toLocaleString()}</span>
+                  <span style={{ color: 'var(--primary-color)' }}>
+                    LKR {(orgProjects.reduce((acc, p) => acc + (p.collectedAmount || 0), 0)).toLocaleString()}
+                  </span>
                   <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginLeft: '0.5rem' }}>Total Impact</span>
                 </div>
               </div>
@@ -472,7 +486,7 @@ function UserProfile() {
                   <div className="up-edit-card up-edit-fields">
                     <div className="up-edit-card-title">Profile details</div>
                     <label className="up-edit-field">
-                       <span>Username</span>
+                      <span>Username</span>
                       <input value={editForm.userName} onChange={handleFieldChange("userName")} />
                     </label>
                     <label className="up-edit-field">
@@ -508,7 +522,7 @@ function UserProfile() {
             <ProfileTabs 
               activeTab={activeTab} 
               onTabChange={setActiveTab} 
-              tabs={isOrganization ? ['POSTS', 'PROJECTS', 'TOP DONORS'] : ['POSTS', 'PRODUCTS', 'TOP CUSTOMERS']}
+              tabs={profileTabs}
             />
           </div>
           
@@ -565,9 +579,16 @@ function UserProfile() {
                 
                 <CreateProductModal 
                   isOpen={createProductModalOpen} 
-                  onClose={() => setCreateProductModalOpen(false)}
+                  onClose={() => setCreateProductModalOpen(false)} 
                   onProductCreated={(newProd) => setProducts([newProd, ...products])}
                 />
+              </div>
+            )}
+
+            {/* Impact Footprint tab content */}
+            {activeTab === 'FOOTPRINT' && (
+              <div className="footprint-section" style={{ padding: '1rem 0' }}>
+                <CustomerFootprint userId={profileData?._id || profileData?.id || currentUser?._id} />
               </div>
             )}
 
