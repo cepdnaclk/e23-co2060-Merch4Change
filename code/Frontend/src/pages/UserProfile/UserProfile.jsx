@@ -60,7 +60,6 @@ function UserProfile() {
   const [isProjectsLoading, setIsProjectsLoading] = useState(false);
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [hqPos, setHqPos] = useState(null);
-  const [selectedProject, setSelectedProject] = useState("");
   const profilePhotoInputRef = useRef(null);
   const coverPhotoInputRef = useRef(null);
   
@@ -125,6 +124,7 @@ function UserProfile() {
     const endpoint = isFetchingMe ? "/api/v1/profile/me" : `/api/v1/profile/${username}`;
 
     setProfileData(null);
+    setActiveTab("POSTS");
     apiClient.get(endpoint)
       .then(async (res) => {
         const data = res.data;
@@ -566,7 +566,7 @@ function UserProfile() {
                   isOpen={createProductModalOpen} 
                   initialListingType={createProductModalType}
                   onClose={() => setCreateProductModalOpen(false)} 
-                  onProductCreated={(newProd) => setProducts([newProd, ...products])}
+                  onProductCreated={(newProd) => setProducts((prev) => [newProd, ...prev])}
                 />
               </div>
             )}
