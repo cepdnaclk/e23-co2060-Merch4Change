@@ -102,7 +102,7 @@ export default function AuctionDetailPage() {
         setTimeLeft(formatTimeLeft(auc.endTime));
 
         const prod = auc.productId || {};
-        const cover = (prod.images && prod.images[0]) || prod.imageUrl || "";
+        const cover = (auc.images && auc.images[0]) || auc.imageUrl || (prod.images && prod.images[0]) || prod.imageUrl || "";
         setSelectedImg((prev) => prev || cover);
 
         const minNext = auc.currentPrice + (auc.bidIncrement || 5);
@@ -232,7 +232,7 @@ export default function AuctionDetailPage() {
   const product = auction?.productId || {};
   const imagesList = Array.from(
     new Set(
-      [...(product.images || []), product.imageUrl].filter(Boolean)
+      [...(auction?.images || []), auction?.imageUrl, ...(product.images || []), product.imageUrl].filter(Boolean)
     )
   );
 

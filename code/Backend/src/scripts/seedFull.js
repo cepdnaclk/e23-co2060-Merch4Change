@@ -872,7 +872,7 @@ const highImpactDonors = [
     firstName: "Demo",
     lastName: "Account",
     userName: "demouser",
-    email: "demo@merch4change.test",
+    email: "  ",
     coinBalance: 50000,
     profileImageUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200",
   },

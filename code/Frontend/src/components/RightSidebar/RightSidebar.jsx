@@ -300,7 +300,7 @@ function LiveCommunityAuctionsSection() {
       <div className="rs-auctions-list">
         {displayedAuctions.map((auction) => {
           const product = auction.productId || {};
-          const imageSrc = (product.images && product.images[0]) || test;
+          const imageSrc = (auction.images && auction.images[0]) || auction.imageUrl || (product.images && product.images[0]) || test;
           const timeLeft = formatTimeLeft(auction.endTime);
 
           return (

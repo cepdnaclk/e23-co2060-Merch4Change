@@ -12,7 +12,7 @@ import {
 // POST api/auctions
 export const createAuction = async (req, res) => {
   try {
-    const { productId, startPrice, bidIncrement, startTime, endTime } =
+    const { productId, startPrice, bidIncrement, startTime, endTime, images, imageUrl } =
       req.body;
 
     // validate productId
@@ -69,6 +69,8 @@ export const createAuction = async (req, res) => {
       createdBy: req.user._id,
       status: status,
       bidIncrement: bidIncrement || undefined,
+      images: images || [],
+      imageUrl: imageUrl || "",
     });
 
     res.status(201).json({ success: true, auction });

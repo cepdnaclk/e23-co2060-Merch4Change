@@ -49,6 +49,14 @@ const auctionSchema = new mongoose.Schema(
       default: 10,
       min: 1,
     },
+    images: {
+      type: [String],
+      default: [],
+    },
+    imageUrl: {
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true,

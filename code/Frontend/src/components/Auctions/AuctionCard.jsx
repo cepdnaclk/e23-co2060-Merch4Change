@@ -44,9 +44,9 @@ function AuctionCardBase({ auction, onOpenBidModal, navigate }) {
     >
       {/* Image container */}
       <div className="relative aspect-square w-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
-        {product.images && product.images[0] ? (
+        {(auction.images && auction.images[0]) || auction.imageUrl || (product.images && product.images[0]) ? (
           <img
-            src={product.images[0]}
+            src={(auction.images && auction.images[0]) || auction.imageUrl || product.images[0]}
             alt={product.name || "Auction item"}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
