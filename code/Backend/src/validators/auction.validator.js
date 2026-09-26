@@ -51,9 +51,9 @@ export const validBid = async (auction, amount, userId) => {
   if (!user) {
     return { isActive, isNotExpired, isAmount, isUserHaveCoin: false };
   }
-  const userBalance = user.coinBalance || 0;
+  const userBalance = user.fiatBalance || 0;
 
-  const isUserHaveCoin = userBalance >= amount;
+  const isUserHaveFiat = userBalance >= amount;
 
-  return { isActive, isNotExpired, isAmount, isUserHaveCoin };
+  return { isActive, isNotExpired, isAmount, isUserHaveFiat };
 };

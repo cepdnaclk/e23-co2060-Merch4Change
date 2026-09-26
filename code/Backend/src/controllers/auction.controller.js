@@ -110,7 +110,7 @@ export const placeBid = async (req, res) => {
         .json({ success: false, message: "You cannot bid on your own auction" });
     }
 
-    const { isActive, isNotExpired, isAmount, isUserHaveCoin } = await validBid(
+    const { isActive, isNotExpired, isAmount, isUserHaveFiat } = await validBid(
       auction,
       amount,
       userId,
@@ -131,7 +131,7 @@ export const placeBid = async (req, res) => {
         .status(400)
         .json({ success: false, message: "invalid amount" });
     }
-    if (!isUserHaveCoin) {
+    if (!isUserHaveFiat) {
       return res
         .status(400)
         .json({
@@ -147,7 +147,7 @@ export const placeBid = async (req, res) => {
     if (prevBidder && lastBid) {
       // Refund the previous bidder's coins
       await User.findByIdAndUpdate(prevBidder, {
-        $inc: { coinBalance: lastBid.amount },
+        $inc: { fiatBalance: lastBid.amount },
       });
 
       // Notify previous bidder if someone else outbid them
@@ -169,7 +169,7 @@ export const placeBid = async (req, res) => {
 
     // 3. Deduct coins from the new bidder
     await User.findByIdAndUpdate(userId, {
-      $inc: { coinBalance: -amount },
+      $inc: { fiatBalance: -amount },
     });
 
     // 4. Update the auction leading price and bidder
