@@ -1324,35 +1324,59 @@ const shoppersAndBidders = [
   },
 ];
 
+// Helper: upsert a User by email — inserts only if the email doesn't exist yet.
+// Returns the existing or newly created document.
+async function upsertUser(data) {
+  const existing = await User.findOne({ email: data.email });
+  if (existing) return existing;
+  return User.create(data);
+}
+
+// Helper: upsert an OrganizationProfile by userId — skip if already exists.
+async function upsertOrgProfile(data) {
+  const existing = await OrganizationProfile.findOne({ userId: data.userId });
+  if (existing) return existing;
+  return OrganizationProfile.create(data);
+}
+
+// Helper: upsert a Charity by ownerUserId — skip if already exists.
+async function upsertCharity(data) {
+  const existing = await Charity.findOne({ ownerUserId: data.ownerUserId });
+  if (existing) return existing;
+  return Charity.create(data);
+}
+
+// Helper: upsert a Brand by ownerUserId — skip if already exists.
+async function upsertBrand(data) {
+  const existing = await Brand.findOne({ ownerUserId: data.ownerUserId });
+  if (existing) return existing;
+  return Brand.create(data);
+}
+
+// Helper: upsert a Product by name + brandId — skip if already exists.
+async function upsertProduct(data) {
+  const existing = await Product.findOne({ name: data.name, brandId: data.brandId });
+  if (existing) return existing;
+  return Product.create(data);
+}
+
+// Helper: upsert a Project by title + charityId — skip if already exists.
+async function upsertProject(data) {
+  const existing = await Project.findOne({ title: data.title, charityId: data.charityId });
+  if (existing) return existing;
+  return Project.create(data);
+}
+
 async function seedFull() {
   try {
     console.log(`Connecting to MongoDB at ${MONGO_URI}...`);
     await mongoose.connect(MONGO_URI);
     console.log("Connected to MongoDB.");
 
-    // ── STEP 1: DROP DATABASE FROM SCRATCH ────────────────────────
-    console.log("🗑️ Dropping database from scratch...");
-    try {
-      await mongoose.connection.db.dropDatabase();
-      console.log("✅ Database dropped cleanly from scratch.");
-    } catch (dropErr) {
-      console.log("Drop database warning, wiping collections manually:", dropErr.message);
-      await Promise.all([
-        User.deleteMany({}),
-        OrganizationProfile.deleteMany({}),
-        Brand.deleteMany({}),
-        Charity.deleteMany({}),
-        Product.deleteMany({}),
-        Project.deleteMany({}),
-        Donation.deleteMany({}),
-        Order.deleteMany({}),
-        CoinTransaction.deleteMany({}),
-        Auction.deleteMany({}),
-        Bid.deleteMany({}),
-        Follow.deleteMany({}),
-        Post.deleteMany({}),
-      ]);
-    }
+    // ── STEP 1: PRESERVE EXISTING DATA ────────────────────────────
+    // The seed will only INSERT new documents. Existing collections and
+    // documents are left completely untouched.
+    console.log("ℹ️  Skipping database wipe — existing documents will be preserved.");
 
     const standardPassword = await bcrypt.hash("Password123!", 10);
 
@@ -1360,7 +1384,7 @@ async function seedFull() {
     console.log("👑 Seeding Section 1: Platform Administrators & Compliance (5 users)...");
     const createdAdmins = [];
     for (const adm of staffAdmins) {
-      const u = await User.create({
+      const u = await upsertUser({
         firstName: adm.firstName,
         lastName: adm.lastName,
         userName: adm.userName,
@@ -1383,7 +1407,7 @@ async function seedFull() {
     const createdProjects = [];
 
     for (const cData of charityOrganizations) {
-      const charUser = await User.create({
+      const charUser = await upsertUser({
         firstName: cData.orgName,
         lastName: "Charity",
         userName: cData.orgName.toLowerCase().replace(/[^a-z0-9]/g, ""),
@@ -1396,7 +1420,7 @@ async function seedFull() {
       });
       createdCharityUsers.push(charUser);
 
-      await OrganizationProfile.create({
+      await upsertOrgProfile({
         userId: charUser._id,
         orgName: cData.orgName,
         phone: "+1-800-456-7890",
@@ -1404,7 +1428,7 @@ async function seedFull() {
         website: `https://www.${charUser.userName}.org`,
       });
 
-      const charity = await Charity.create({
+      const charity = await upsertCharity({
         ownerUserId: charUser._id,
         publicName: cData.orgName,
         category: cData.category,
@@ -1417,7 +1441,7 @@ async function seedFull() {
 
       // Seed unique projects for this charity
       for (const p of cData.projects) {
-        const proj = await Project.create({
+        const proj = await upsertProject({
           charityId: charity._id,
           title: p.title,
           description: p.description,
@@ -1439,7 +1463,7 @@ async function seedFull() {
     const createdProducts = [];
 
     for (const bData of brandOrganizations) {
-      const brandUser = await User.create({
+      const brandUser = await upsertUser({
         firstName: bData.orgName,
         lastName: "Brand",
         userName: bData.orgName.toLowerCase().replace(/[^a-z0-9]/g, ""),
@@ -1452,7 +1476,7 @@ async function seedFull() {
       });
       createdBrandUsers.push(brandUser);
 
-      await OrganizationProfile.create({
+      await upsertOrgProfile({
         userId: brandUser._id,
         orgName: bData.orgName,
         phone: "+1-888-789-0123",
@@ -1460,7 +1484,7 @@ async function seedFull() {
         website: `https://www.${brandUser.userName}.com`,
       });
 
-      const brand = await Brand.create({
+      const brand = await upsertBrand({
         ownerUserId: brandUser._id,
         brandName: bData.orgName,
         description: bData.description,
@@ -1470,7 +1494,7 @@ async function seedFull() {
       createdBrandDocs.push(brand);
 
       for (const prod of bData.products) {
-        const p = await Product.create({
+        const p = await upsertProduct({
           ...prod,
           brandId: brand._id,
           ownerUserId: brandUser._id,
@@ -1485,7 +1509,7 @@ async function seedFull() {
     for (let i = 0; i < originalLuxuryProducts.length; i++) {
       const lux = originalLuxuryProducts[i];
       const assignedBrand = createdBrandDocs[i % createdBrandDocs.length];
-      const p = await Product.create({
+      const p = await upsertProduct({
         ...lux,
         brandId: assignedBrand._id,
         ownerUserId: assignedBrand.ownerUserId,
@@ -1503,7 +1527,7 @@ async function seedFull() {
     console.log("💎 Seeding Section 4: High-Impact Donors & Philanthropists (22 users)...");
     const createdDonors = [];
     for (const d of highImpactDonors) {
-      const u = await User.create({
+      const u = await upsertUser({
         firstName: d.firstName,
         lastName: d.lastName,
         userName: d.userName,
@@ -1523,7 +1547,7 @@ async function seedFull() {
     console.log("🌱 Seeding Section 5: Community Leaders, Activists & Volunteers (20 users)...");
     const createdCommunity = [];
     for (const c of communityLeaders) {
-      const u = await User.create({
+      const u = await upsertUser({
         firstName: c.firstName,
         lastName: c.lastName,
         userName: c.userName,
@@ -1543,7 +1567,7 @@ async function seedFull() {
     console.log("🛒 Seeding Section 6: Marketplace Shoppers, Collectors & Bidders (18 users)...");
     const createdShoppers = [];
     for (const s of shoppersAndBidders) {
-      const u = await User.create({
+      const u = await upsertUser({
         firstName: s.firstName,
         lastName: s.lastName,
         userName: s.userName,
@@ -1589,6 +1613,14 @@ async function seedFull() {
       const charity = createdCharityDocs[tier.donorIdx % createdCharityDocs.length];
       const project = createdProjects[tier.donorIdx % createdProjects.length];
 
+      // Skip if this donation seed already exists
+      const existingDonation = await Donation.findOne({
+        donorUserId: donor._id,
+        charityProjectId: project._id,
+        coinAmount: tier.coins,
+      });
+      if (existingDonation) continue;
+
       const donation = await Donation.create({
         donorUserId: donor._id,
         charityId: charity._id,
@@ -1620,6 +1652,13 @@ async function seedFull() {
       const totalAmount = product.price * qty;
       const coinsEarned = Math.floor(totalAmount / 10);
 
+      // Skip if an order for this buyer + product already exists
+      const existingOrder = await Order.findOne({
+        userId: buyer._id,
+        "items.productId": product._id,
+      });
+      if (existingOrder) continue;
+
       await Order.create({
         userId: buyer._id,
         items: [
@@ -1650,136 +1689,92 @@ async function seedFull() {
     const now = new Date();
 
     // Auction 1: Live High-Stakes Auction
-    const auc1 = await Auction.create({
-      productId: createdProducts[0]._id,
-      startPrice: 500,
-      currentPrice: 850,
-      currentBidder: createdDonors[0]._id,
-      startTime: new Date(now.getTime() - 4 * 60 * 60 * 1000), // started 4h ago
-      endTime: new Date(now.getTime() + 48 * 60 * 60 * 1000), // ends in 2 days
-      createdBy: createdCharityUsers[0]._id,
-      status: "active",
-      bidIncrement: 25,
-    });
-
-    await Bid.create({
-      auctionId: auc1._id,
-      userId: createdShoppers[1]._id,
-      amount: 600,
-      status: "outbid",
-      createdAt: new Date(now.getTime() - 3 * 60 * 60 * 1000),
-    });
-    await Bid.create({
-      auctionId: auc1._id,
-      userId: createdShoppers[0]._id,
-      amount: 750,
-      status: "outbid",
-      createdAt: new Date(now.getTime() - 2 * 60 * 60 * 1000),
-    });
-    await Bid.create({
-      auctionId: auc1._id,
-      userId: createdDonors[0]._id,
-      amount: 850,
-      status: "active",
-      createdAt: new Date(now.getTime() - 30 * 60 * 1000),
-    });
+    let auc1 = await Auction.findOne({ productId: createdProducts[0]._id });
+    if (!auc1) {
+      auc1 = await Auction.create({
+        productId: createdProducts[0]._id,
+        startPrice: 500,
+        currentPrice: 850,
+        currentBidder: createdDonors[0]._id,
+        startTime: new Date(now.getTime() - 4 * 60 * 60 * 1000),
+        endTime: new Date(now.getTime() + 48 * 60 * 60 * 1000),
+        createdBy: createdCharityUsers[0]._id,
+        status: "active",
+        bidIncrement: 25,
+      });
+      await Bid.create({ auctionId: auc1._id, userId: createdShoppers[1]._id, amount: 600, status: "outbid", createdAt: new Date(now.getTime() - 3 * 60 * 60 * 1000) });
+      await Bid.create({ auctionId: auc1._id, userId: createdShoppers[0]._id, amount: 750, status: "outbid", createdAt: new Date(now.getTime() - 2 * 60 * 60 * 1000) });
+      await Bid.create({ auctionId: auc1._id, userId: createdDonors[0]._id, amount: 850, status: "active", createdAt: new Date(now.getTime() - 30 * 60 * 1000) });
+    }
 
     // Auction 2: Live Celebrity Collab
-    const auc2 = await Auction.create({
-      productId: createdProducts[1]._id,
-      startPrice: 1000,
-      currentPrice: 1400,
-      currentBidder: createdShoppers[5]._id,
-      startTime: new Date(now.getTime() - 2 * 60 * 60 * 1000),
-      endTime: new Date(now.getTime() + 24 * 60 * 60 * 1000),
-      createdBy: createdCharityUsers[1]._id,
-      status: "active",
-      bidIncrement: 50,
-    });
-
-    await Bid.create({
-      auctionId: auc2._id,
-      userId: createdDonors[3]._id,
-      amount: 1100,
-      status: "outbid",
-      createdAt: new Date(now.getTime() - 90 * 60 * 1000),
-    });
-    await Bid.create({
-      auctionId: auc2._id,
-      userId: createdShoppers[5]._id,
-      amount: 1400,
-      status: "active",
-      createdAt: new Date(now.getTime() - 15 * 60 * 1000),
-    });
+    let auc2 = await Auction.findOne({ productId: createdProducts[1]._id });
+    if (!auc2) {
+      auc2 = await Auction.create({
+        productId: createdProducts[1]._id,
+        startPrice: 1000,
+        currentPrice: 1400,
+        currentBidder: createdShoppers[5]._id,
+        startTime: new Date(now.getTime() - 2 * 60 * 60 * 1000),
+        endTime: new Date(now.getTime() + 24 * 60 * 60 * 1000),
+        createdBy: createdCharityUsers[1]._id,
+        status: "active",
+        bidIncrement: 50,
+      });
+      await Bid.create({ auctionId: auc2._id, userId: createdDonors[3]._id, amount: 1100, status: "outbid", createdAt: new Date(now.getTime() - 90 * 60 * 1000) });
+      await Bid.create({ auctionId: auc2._id, userId: createdShoppers[5]._id, amount: 1400, status: "active", createdAt: new Date(now.getTime() - 15 * 60 * 1000) });
+    }
 
     // Auction 3: Live Artisan Drop
-    const auc3 = await Auction.create({
-      productId: createdProducts[2]._id,
-      startPrice: 300,
-      currentPrice: 425,
-      currentBidder: createdDonors[1]._id,
-      startTime: new Date(now.getTime() - 1 * 60 * 60 * 1000),
-      endTime: new Date(now.getTime() + 36 * 60 * 60 * 1000),
-      createdBy: createdCharityUsers[2]._id,
-      status: "active",
-      bidIncrement: 25,
-    });
-
-    await Bid.create({
-      auctionId: auc3._id,
-      userId: createdCommunity[2]._id,
-      amount: 350,
-      status: "outbid",
-      createdAt: new Date(now.getTime() - 45 * 60 * 1000),
-    });
-    await Bid.create({
-      auctionId: auc3._id,
-      userId: createdDonors[1]._id,
-      amount: 425,
-      status: "active",
-      createdAt: new Date(now.getTime() - 10 * 60 * 1000),
-    });
+    let auc3 = await Auction.findOne({ productId: createdProducts[2]._id });
+    if (!auc3) {
+      auc3 = await Auction.create({
+        productId: createdProducts[2]._id,
+        startPrice: 300,
+        currentPrice: 425,
+        currentBidder: createdDonors[1]._id,
+        startTime: new Date(now.getTime() - 1 * 60 * 60 * 1000),
+        endTime: new Date(now.getTime() + 36 * 60 * 60 * 1000),
+        createdBy: createdCharityUsers[2]._id,
+        status: "active",
+        bidIncrement: 25,
+      });
+      await Bid.create({ auctionId: auc3._id, userId: createdCommunity[2]._id, amount: 350, status: "outbid", createdAt: new Date(now.getTime() - 45 * 60 * 1000) });
+      await Bid.create({ auctionId: auc3._id, userId: createdDonors[1]._id, amount: 425, status: "active", createdAt: new Date(now.getTime() - 10 * 60 * 1000) });
+    }
 
     // Auction 4: Upcoming Scheduled Drop
-    await Auction.create({
-      productId: createdProducts[3]._id,
-      startPrice: 750,
-      currentPrice: 750,
-      currentBidder: null,
-      startTime: new Date(now.getTime() + 8 * 60 * 60 * 1000), // starts in 8h
-      endTime: new Date(now.getTime() + 72 * 60 * 60 * 1000),
-      createdBy: createdCharityUsers[3]._id,
-      status: "scheduled",
-      bidIncrement: 50,
-    });
+    if (!(await Auction.findOne({ productId: createdProducts[3]._id }))) {
+      await Auction.create({
+        productId: createdProducts[3]._id,
+        startPrice: 750,
+        currentPrice: 750,
+        currentBidder: null,
+        startTime: new Date(now.getTime() + 8 * 60 * 60 * 1000),
+        endTime: new Date(now.getTime() + 72 * 60 * 60 * 1000),
+        createdBy: createdCharityUsers[3]._id,
+        status: "scheduled",
+        bidIncrement: 50,
+      });
+    }
 
     // Auction 5: Concluded Auction
-    const aucEnded = await Auction.create({
-      productId: createdProducts[4]._id,
-      startPrice: 400,
-      currentPrice: 950,
-      currentBidder: createdDonors[2]._id,
-      startTime: new Date(now.getTime() - 72 * 60 * 60 * 1000),
-      endTime: new Date(now.getTime() - 2 * 60 * 60 * 1000), // ended 2h ago
-      createdBy: createdCharityUsers[4]._id,
-      status: "ended",
-      bidIncrement: 25,
-    });
-
-    await Bid.create({
-      auctionId: aucEnded._id,
-      userId: createdShoppers[2]._id,
-      amount: 700,
-      status: "outbid",
-      createdAt: new Date(now.getTime() - 20 * 60 * 60 * 1000),
-    });
-    await Bid.create({
-      auctionId: aucEnded._id,
-      userId: createdDonors[2]._id,
-      amount: 950,
-      status: "won",
-      createdAt: new Date(now.getTime() - 5 * 60 * 60 * 1000),
-    });
+    let aucEnded = await Auction.findOne({ productId: createdProducts[4]._id });
+    if (!aucEnded) {
+      aucEnded = await Auction.create({
+        productId: createdProducts[4]._id,
+        startPrice: 400,
+        currentPrice: 950,
+        currentBidder: createdDonors[2]._id,
+        startTime: new Date(now.getTime() - 72 * 60 * 60 * 1000),
+        endTime: new Date(now.getTime() - 2 * 60 * 60 * 1000),
+        createdBy: createdCharityUsers[4]._id,
+        status: "ended",
+        bidIncrement: 25,
+      });
+      await Bid.create({ auctionId: aucEnded._id, userId: createdShoppers[2]._id, amount: 700, status: "outbid", createdAt: new Date(now.getTime() - 20 * 60 * 60 * 1000) });
+      await Bid.create({ auctionId: aucEnded._id, userId: createdDonors[2]._id, amount: 950, status: "won", createdAt: new Date(now.getTime() - 5 * 60 * 60 * 1000) });
+    }
 
     console.log("✅ Seeded 5 live, scheduled, and concluded charity auctions with multi-bid leaderboards.");
 
@@ -1839,27 +1834,36 @@ async function seedFull() {
       }
     }
 
-    // Batch insert follows (bypass hooks for speed, update counts manually)
-    await Follow.insertMany(uniqueFollows);
-
-    // Update follower/following counts
-    const followerCounts = {};
-    const followingCounts = {};
-    for (const f of uniqueFollows) {
-      const ferId = String(f.followerId);
-      const fingId = String(f.followingId);
-      followingCounts[ferId] = (followingCounts[ferId] || 0) + 1;
-      followerCounts[fingId] = (followerCounts[fingId] || 0) + 1;
+    // Filter out follow pairs that already exist in the database
+    const newFollows = [];
+    for (const pair of uniqueFollows) {
+      const exists = await Follow.findOne({ followerId: pair.followerId, followingId: pair.followingId });
+      if (!exists) newFollows.push(pair);
     }
 
-    for (const [userId, count] of Object.entries(followingCounts)) {
-      await User.findByIdAndUpdate(userId, { $inc: { followingCount: count } });
-    }
-    for (const [userId, count] of Object.entries(followerCounts)) {
-      await User.findByIdAndUpdate(userId, { $inc: { followersCount: count } });
+    if (newFollows.length > 0) {
+      // Batch insert new follows (bypass hooks for speed, update counts manually)
+      await Follow.insertMany(newFollows, { ordered: false });
+
+      // Update follower/following counts only for new follows
+      const followerCounts = {};
+      const followingCounts = {};
+      for (const f of newFollows) {
+        const ferId = String(f.followerId);
+        const fingId = String(f.followingId);
+        followingCounts[ferId] = (followingCounts[ferId] || 0) + 1;
+        followerCounts[fingId] = (followerCounts[fingId] || 0) + 1;
+      }
+
+      for (const [userId, count] of Object.entries(followingCounts)) {
+        await User.findByIdAndUpdate(userId, { $inc: { followingCount: count } });
+      }
+      for (const [userId, count] of Object.entries(followerCounts)) {
+        await User.findByIdAndUpdate(userId, { $inc: { followersCount: count } });
+      }
     }
 
-    console.log(`✅ Seeded ${uniqueFollows.length} follow relationships.`);
+    console.log(`✅ Seeded ${newFollows.length} new follow relationships (${uniqueFollows.length - newFollows.length} already existed).`);
 
     // ── STEP 12: SEED POSTS FOR RECOMMENDATION ENGINE ─────────────
     console.log("📝 Seeding posts with varied engagement for recommendation engine...");
@@ -1914,6 +1918,10 @@ async function seedFull() {
         });
       }
 
+      // Skip if a post with this exact content already exists
+      const existingPost = await Post.findOne({ userId: authorUser._id, content: cp.content });
+      if (existingPost) { createdPosts.push(existingPost); continue; }
+
       const post = await Post.create({
         userId: authorUser._id,
         content: cp.content,
@@ -1964,6 +1972,10 @@ async function seedFull() {
           createdAt: hoursAgo(bp.age - 2),
         });
       }
+
+      // Skip if a post with this exact content already exists
+      const existingBrandPost = await Post.findOne({ userId: authorUser._id, content: bp.content });
+      if (existingBrandPost) { createdPosts.push(existingBrandPost); continue; }
 
       const post = await Post.create({
         userId: authorUser._id,
@@ -2029,6 +2041,10 @@ async function seedFull() {
         });
       }
 
+      // Skip if a post with this exact content already exists
+      const existingPersonalPost = await Post.findOne({ userId: authorUser._id, content: pp.content });
+      if (existingPersonalPost) { createdPosts.push(existingPersonalPost); continue; }
+
       const post = await Post.create({
         userId: authorUser._id,
         content: pp.content,
@@ -2063,6 +2079,10 @@ async function seedFull() {
         likers.push(createdDonors[(fp.idx + k) % createdDonors.length]._id);
       }
 
+      // Skip if a post with this exact content already exists
+      const existingFreshPost = await Post.findOne({ userId: authorUser._id, content: fp.content });
+      if (existingFreshPost) { createdPosts.push(existingFreshPost); continue; }
+
       const post = await Post.create({
         userId: authorUser._id,
         content: fp.content,
@@ -2074,13 +2094,10 @@ async function seedFull() {
       createdPosts.push(post);
     }
 
-    // Update postsCount for all post authors
-    const postCountMap = {};
-    for (const p of createdPosts) {
-      const uid = String(p.userId);
-      postCountMap[uid] = (postCountMap[uid] || 0) + 1;
-    }
-    for (const [userId, count] of Object.entries(postCountMap)) {
+    // Update postsCount for all post authors based on current DB state
+    const allAuthorIds = [...new Set(createdPosts.map(p => String(p.userId)))];
+    for (const userId of allAuthorIds) {
+      const count = await Post.countDocuments({ userId });
       await User.findByIdAndUpdate(userId, { postsCount: count });
     }
 
