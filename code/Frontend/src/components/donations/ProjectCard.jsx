@@ -68,7 +68,7 @@ function ProjectCard({ title, description, goalAmount, collectedAmount, userCont
           className="flex justify-between items-center"
           style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "12px", color: "#6B6560" }}
         >
-          <span>LKR {collectedAmount.toLocaleString()} raised</span>
+          <span>USD {collectedAmount.toLocaleString()} raised</span>
           <span>{progressPercent}%</span>
         </div>
 
@@ -91,7 +91,7 @@ function ProjectCard({ title, description, goalAmount, collectedAmount, userCont
           className="flex justify-between items-center"
           style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", color: "#6B6560" }}
         >
-          <span>Goal: LKR {goalAmount.toLocaleString()}</span>
+          <span>Goal: USD {goalAmount.toLocaleString()}</span>
           <span>Ends Dec 2026</span>
         </div>
       </div>
@@ -109,7 +109,7 @@ function ProjectCard({ title, description, goalAmount, collectedAmount, userCont
             fontWeight: 500,
           }}
         >
-          Your contribution: LKR {userContribution.toLocaleString()}
+          Your contribution: USD {userContribution.toLocaleString()}
         </span>
         <button
           onClick={onDonateMore}

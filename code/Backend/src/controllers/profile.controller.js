@@ -654,7 +654,7 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
           isVerified: u.isVerified || false,
           totalCoinsDonated: item.totalCoinsDonated,
           donationsCount: item.donationsCount,
-          impactValueLkr: item.totalCoinsDonated * 10,
+          impactValueUsd: item.totalCoinsDonated * 10,
           lastDonatedAt: item.lastDonatedAt,
           firstDonatedAt: item.firstDonatedAt,
           recentDonations: item.history,

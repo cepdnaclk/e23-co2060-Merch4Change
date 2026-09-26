@@ -171,7 +171,7 @@ export default function CustomerFootprint({ userId }) {
                                 x{item.quantity || 1}
                               </span>
                               <span className="item-price">
-                                {order.currency || "LKR"}{" "}
+                                {order.currency || "USD"}{" "}
                                 {(
                                   Number(item.unitPrice || 0) *
                                   Number(item.quantity || 1)
@@ -188,7 +188,7 @@ export default function CustomerFootprint({ userId }) {
                       <div className="order-total-row">
                         <span>Total Paid:</span>
                         <strong>
-                          {order.currency || "LKR"}{" "}
+                          {order.currency || "USD"}{" "}
                           {totalAmount.toLocaleString(undefined, {
                             minimumFractionDigits: 2,
                           })}

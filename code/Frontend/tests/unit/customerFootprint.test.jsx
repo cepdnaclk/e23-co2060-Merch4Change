@@ -54,7 +54,7 @@ describe("CustomerFootprint Unit Tests", () => {
       status: "paid",
       createdAt: "2026-09-25T10:00:00Z",
       totalAmount: 3200,
-      currency: "LKR",
+      currency: "USD",
       coinsEarned: 320,
       items: [
         {
@@ -85,8 +85,8 @@ describe("CustomerFootprint Unit Tests", () => {
     const withinCard = within(orderCard);
 
     expect(withinCard.getByText("x1")).toBeInTheDocument();
-    expect(withinCard.getByText("LKR 3,200")).toBeInTheDocument();
-    expect(withinCard.getByText("LKR 3,200.00")).toBeInTheDocument();
+    expect(withinCard.getByText("USD 3,200")).toBeInTheDocument();
+    expect(withinCard.getByText("USD 3,200.00")).toBeInTheDocument();
     expect(withinCard.getByText("320")).toBeInTheDocument(); // coins earned
     
     // Check summary grid correctly counts the order and coins

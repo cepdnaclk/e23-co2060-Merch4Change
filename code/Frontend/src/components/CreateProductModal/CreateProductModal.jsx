@@ -163,7 +163,7 @@ const CreateProductModal = ({ isOpen, onClose, onProductCreated, initialListingT
           </div>
 
           <div className="cprod-field">
-            <label>{listingType === "auction" ? "Starting Bid (LKR) *" : "Price (LKR) *"}</label>
+            <label>{listingType === "auction" ? "Starting Bid (USD) *" : "Price (USD) *"}</label>
             <input 
               type="number" 
               placeholder="e.g. 5000" 
@@ -191,7 +191,7 @@ const CreateProductModal = ({ isOpen, onClose, onProductCreated, initialListingT
           {listingType === "auction" && (
             <>
               <div className="cprod-field">
-                <label>Bid Increment (LKR) *</label>
+                <label>Bid Increment (USD) *</label>
                 <input 
                   type="number" 
                   placeholder="e.g. 100" 

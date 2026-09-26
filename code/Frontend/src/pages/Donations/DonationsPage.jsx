@@ -69,7 +69,7 @@ const mapProjectCard = (project) => ({
 });
 
 const pct = (r, g) => Math.round((r / g) * 100);
-const lkrM = (n) => n >= 1000000 ? `LKR ${(n / 1000000).toFixed(1)}M` : `LKR ${n.toLocaleString()}`;
+const usdM = (n) => n >= 1000000 ? `USD ${(n / 1000000).toFixed(1)}M` : `USD ${n.toLocaleString()}`;
 
 function CharityCard({ c, onSelect }) {
   const [hov, setHov] = useState(false);
@@ -85,7 +85,7 @@ function CharityCard({ c, onSelect }) {
         </span>
         <div style={{ position: "absolute", bottom: "14px", left: "14px", right: "14px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", fontFamily: "'DM Sans',sans-serif", fontSize: "12px", color: "rgba(255,255,255,0.9)", marginBottom: "6px" }}>
-            <span>{lkrM(c.raised)} raised</span><span style={{ fontWeight: 600, color: "#FDE68A" }}>{c.percent}%</span>
+            <span>{usdM(c.raised)} raised</span><span style={{ fontWeight: 600, color: "#FDE68A" }}>{c.percent}%</span>
           </div>
           <div style={{ height: "5px", background: "rgba(255,255,255,0.3)", borderRadius: "4px" }}>
             <div style={{ height: "100%", width: `${c.percent}%`, background: "#FDE68A", borderRadius: "4px" }} />
@@ -130,7 +130,7 @@ function ProjectCard({ p, onDonate }) {
             <div style={{ width: `${progress}%`, height: "100%", background: "linear-gradient(90deg, #D4820A, #f59e0b)", borderRadius: "4px" }} />
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", fontFamily: "'DM Sans',sans-serif", fontSize: "12px" }}>
-            <span style={{ color: "#6B6560" }}>{lkrM(p.raised)} raised of {lkrM(p.goal)}</span>
+            <span style={{ color: "#6B6560" }}>{usdM(p.raised)} raised of {usdM(p.goal)}</span>
             <span style={{ color: "#D4820A", fontWeight: 600 }}>{progress}%</span>
           </div>
         </div>

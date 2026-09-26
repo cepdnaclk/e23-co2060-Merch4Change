@@ -119,7 +119,7 @@ export const getOrgProfileByUsername = asyncHandler(async (req, res) => {
       totalRaised,
       totalGoal,
       donationsCount: donations.length,
-      impactValueLkr: totalRaised * 10,
+      impactValueUsd: totalRaised * 10,
     },
     projects: projects.map((p) => ({
       id: p._id,
