@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import Donation from "../models/Donation.js";
 import User from "../models/User.js";
 import Charity from "../models/Charity.js";

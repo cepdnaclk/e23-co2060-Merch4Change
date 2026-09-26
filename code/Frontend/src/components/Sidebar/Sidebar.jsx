@@ -1,5 +1,5 @@
 import React, { memo, useState, useEffect } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import "./Sidebar.css";
 import CreatePostModal from "../CreatePostModal/CreatePostModal";
 import BrandLogo from "../BrandLogo/BrandLogo";
@@ -12,22 +12,21 @@ import {
   Search,
   Bell,
   Store,
-  Layers,
-  BarChart2,
+  
+  
   Settings,
   Plus,
   Heart,
-  ShieldCheck,
+  
   ClipboardList,
   Trophy,
-  Users,
+  
   X,
 } from "lucide-react";
 
 function Sidebar({ profileData, setIsSidebarCollapsed, isSidebarCollapsed, onPostCreated }) {
   const [selectedOption, setSelectedOption] = useState(0);
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
-  const navigate = useNavigate();
   const { user: storedUser } = useAuth();
   const { t } = useI18n();
   const userRole = profileData?.role || storedUser?.role;
@@ -132,26 +131,6 @@ function Sidebar({ profileData, setIsSidebarCollapsed, isSidebarCollapsed, onPos
         >
           <div className="lum-nav-icon"><Store size={20} /></div> <span className="lum-nav-text">{t("nav.marketplace")}</span>
         </NavLink>
-        {userAccountType !== "organization" && (
-          <div
-            className={selectedOption === 3 ? "lum-nav-item active" : "lum-nav-item"}
-            onClick={() => {
-              handleSelectOption(3);
-              navigate("/under-construction");
-            }}
-          >
-            <div className="lum-nav-icon"><Layers size={20} /></div> <span className="lum-nav-text">{t("nav.collections")}</span>
-          </div>
-        )}
-        <div
-          className={selectedOption === 4 ? "lum-nav-item active" : "lum-nav-item"}
-          onClick={() => {
-            handleSelectOption(4);
-            navigate("/under-construction");
-          }}
-        >
-          <div className="lum-nav-icon"><BarChart2 size={20} /></div> <span className="lum-nav-text">{t("nav.analytics")}</span>
-        </div>
         <NavLink
           to="/donations"
           className={({ isActive }) => (isActive ? "lum-nav-item active" : "lum-nav-item")}

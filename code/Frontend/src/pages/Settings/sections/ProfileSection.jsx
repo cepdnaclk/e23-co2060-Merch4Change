@@ -134,11 +134,7 @@ function ProfileSection({ profileData = {}, onUpdate = () => {} }) {
       const form = new FormData();
       form.append("avatar", file);
 
-      const res = await apiClient.put("/api/v1/settings/profile", form, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const res = await apiClient.put("/api/v1/settings/profile", form);
 
       const data = res.data;
       if (!data?.success) throw new Error(data?.message || "Failed to upload image");

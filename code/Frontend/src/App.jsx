@@ -31,7 +31,6 @@ import AdminRoute from "./components/AdminRoute/AdminRoute";
 import DonationsPage from "./pages/Donations/DonationsPage";
 import DonatePage from "./pages/Donate/DonatePage";
 import UnderConstruction from "./components/UnderConstruction/UnderConstruction";
-import NotificationDropDown from "./components/Notifications/NotificationDropDown";
 import { Analytics } from "@vercel/analytics/react";
 import { AuthProvider } from "./context/Context";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -44,6 +43,7 @@ import AllDonorsPage from "./pages/AllDonors/AllDonorsPage";
 import LeaderboardPage from "./pages/Leaderboard/LeaderboardPage";
 import OrderSuccessPage from "./pages/Order/OrderSuccessPage";
 import OrderCancelPage from "./pages/Order/OrderCancelPage";
+import CookieConsent from "./components/CookieConsent/CookieConsent";
 
 function App() {
   return (
@@ -112,6 +112,7 @@ function App() {
               {/* Fallback */}
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
+            <CookieConsent />
             <Analytics />
           </Router>
         </div>

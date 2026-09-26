@@ -7,6 +7,7 @@ import {
   getDonationStats,
   listCharities,
   listDonationProjects,
+  downloadReceipt,
 } from "../controllers/donation.controller.js";
 import AppError from "../utils/appError.js";
 
@@ -34,5 +35,6 @@ router.get("/my/stats", protect, getDonationStats);
 router.get("/charities", listCharities);
 router.get("/projects", listDonationProjects);
 router.post("/", protect, donationRateLimiter, createDonation);
+router.get("/:id/receipt", protect, downloadReceipt);
 
 export default router;

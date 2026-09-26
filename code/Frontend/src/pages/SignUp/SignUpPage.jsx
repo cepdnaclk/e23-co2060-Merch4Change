@@ -19,27 +19,27 @@ const LEFT_HEADLINES = {
 const TESTIMONIALS = [
   {
     text: "The core mission of Merch4Change was never just to sell products; it was to turn every commercial 'buy' into a social 'give'.",
-    initials: "MP",
-    name: "Malith Sandanayake",
-    role: "Team Lead"
+    initials: "TD",
+    name: "Team Developers",
+    role: "Merch4Change"
   },
   {
     text: "As an NGO, this platform has opened up entirely new funding streams for us without any upfront costs.",
-    initials: "JD",
-    name: "James Davies",
-    role: "NGO Director"
+    initials: "TD",
+    name: "Team Developers",
+    role: "Merch4Change"
   },
   {
     text: "I love the exclusive drops. Knowing my purchases help real people makes the items even more special.",
-    initials: "ML",
-    name: "Mia Lin",
-    role: "Verified Buyer"
+    initials: "TD",
+    name: "Team Developers",
+    role: "Merch4Change"
   },
   {
     text: "We integrated our brand in minutes. It's the most seamless way to handle corporate social responsibility.",
-    initials: "AP",
-    name: "Alex Patel",
-    role: "Brand Partner"
+    initials: "TD",
+    name: "Team Developers",
+    role: "Merch4Change"
   }
 ];
 

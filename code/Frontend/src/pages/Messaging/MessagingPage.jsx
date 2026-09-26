@@ -192,20 +192,6 @@ function MessagingPage() {
     };
   }, [activeContact, loadContacts]);
 
-  const handleTabChange = useCallback(
-    (tab) => {
-      if (tab === "marketplace") {
-        navigate("/marketplace");
-        return;
-      }
-
-      if (tab === "feed") {
-        navigate("/home?tab=feed");
-      }
-    },
-    [navigate],
-  );
-
   const handleSearchClick = useCallback(() => {
     navigate("/search");
   }, [navigate]);

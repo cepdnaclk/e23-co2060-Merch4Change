@@ -66,11 +66,11 @@ export default function SearchDropdown({ query, results, open, onClose }) {
     }
     else if (category === "charities") {
       if (item.userName) navigate(`/profile/${item.userName}`);
-      else navigate("/under-construction");
+      else navigate("/donations");
     }
     else if (category === "projects") {
       if (item.charityUserName) navigate(`/profile/${item.charityUserName}/projects`);
-      else navigate("/under-construction");
+      else navigate("/donations");
     }
     else if (category === "products") navigate("/marketplace");
     else if (category === "pages") navigate(item.path);

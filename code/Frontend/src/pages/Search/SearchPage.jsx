@@ -104,11 +104,11 @@ export default function SearchPage() {
     }
     else if (category === "charities") {
       if (item.userName) navigate(`/profile/${item.userName}`);
-      else navigate("/under-construction");
+      else navigate("/donations");
     }
     else if (category === "projects") {
       if (item.charityUserName) navigate(`/profile/${item.charityUserName}/projects`);
-      else navigate("/under-construction");
+      else navigate("/donations");
     }
     else if (category === "products") navigate("/marketplace");
   }
@@ -161,7 +161,6 @@ export default function SearchPage() {
     }
   }
 
-  const anyResults = results && (results.users?.length || results.charities?.length || results.projects?.length || results.products?.length);
   const anyVisibleResults = showUsers || showCharities || showProjects || showProducts;
 
   return (

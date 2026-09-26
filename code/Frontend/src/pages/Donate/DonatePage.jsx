@@ -3,7 +3,7 @@ import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Coins,
-  CreditCard,
+  
   Heart,
   ShieldCheck,
   Sparkles,
@@ -48,7 +48,6 @@ export default function DonatePage() {
   const [selectedProject, setSelectedProject] = useState(null);
 
   // Payment Mode: "coins" | "money"
-  const [paymentMode, setPaymentMode] = useState("coins");
 
   // Coin Form State
   const [coinAmount, setCoinAmount] = useState(100);
@@ -406,27 +405,17 @@ export default function DonatePage() {
                 <div className="donate-tabs-wrapper">
                   <button
                     type="button"
-                    onClick={() => setPaymentMode("coins")}
-                    className={`donate-tab-btn ${paymentMode === "coins" ? "active-tab" : ""}`}
+                    className="donate-tab-btn active-tab"
                   >
                     <Coins size={18} color="#D4820A" />
                     <span>Pay by Coins</span>
                     <span className="donate-tab-tag donate-tab-tag-active">Active</span>
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMode("money")}
-                    className={`donate-tab-btn ${paymentMode === "money" ? "active-tab" : ""}`}
-                  >
-                    <CreditCard size={18} color="#6B6560" />
-                    <span>Pay by Money</span>
-                    <span className="donate-tab-tag donate-tab-tag-construction">Under Construction 🚧</span>
-                  </button>
                 </div>
 
                 {/* ── TAB 1: PAY BY COINS ── */}
-                {paymentMode === "coins" && (
+
                   <div className="donate-checkout-card">
                     <form onSubmit={handleCoinDonationSubmit}>
                       {/* Live Coin Balance Card */}
@@ -535,66 +524,6 @@ export default function DonatePage() {
                       )}
                     </form>
                   </div>
-                )}
-
-                {/* ── TAB 2: PAY BY MONEY (UNDER CONSTRUCTION) ── */}
-                {paymentMode === "money" && (
-                  <div className="construction-card">
-                    <div className="construction-icon-wrap">
-                      <CreditCard size={36} color="#D4820A" />
-                    </div>
-                    <h3 className="construction-title">Direct Currency Giving Coming Soon</h3>
-                    <p className="construction-desc">
-                      We are currently establishing verified low-fee fiat payment rails with institutional bank partners (Credit/Debit cards, Apple Pay, Google Pay, and direct wire transfer) for <strong>{selectedProject?.title || "our initiatives"}</strong>.
-                    </p>
-
-                    <div className="construction-gateways-row">
-                      <div className="gateway-badge">
-                        <span>💳 Visa / Mastercard</span>
-                        <span style={{ fontSize: "10px", background: "#FEF3DC", padding: "2px 6px", borderRadius: "4px" }}>In Review</span>
-                      </div>
-                      <div className="gateway-badge">
-                        <span>📱 Apple &amp; Google Pay</span>
-                        <span style={{ fontSize: "10px", background: "#FEF3DC", padding: "2px 6px", borderRadius: "4px" }}>Integration</span>
-                      </div>
-                      <div className="gateway-badge">
-                        <span>🏦 Bank Transfer</span>
-                        <span style={{ fontSize: "10px", background: "#FEF3DC", padding: "2px 6px", borderRadius: "4px" }}>Planned</span>
-                      </div>
-                    </div>
-
-                    <div style={{ background: "#FAF7F2", border: "1px solid #E2DAD0", borderRadius: "16px", padding: "24px", maxWidth: "480px", margin: "0 auto 28px", textAlign: "left" }}>
-                      <h4 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "17px", color: "#1A1A1A", margin: "0 0 8px" }}>
-                        Why not donate with Impact Coins today?
-                      </h4>
-                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "#6B6560", lineHeight: 1.6, margin: 0 }}>
-                        Every purchase you make on Merch4Change earns you 100% redeemable Impact Coins that transfer directly to verified causes with 0 platform fees.
-                      </p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMode("coins")}
-                      style={{
-                        background: "#0D6B5E",
-                        color: "#FFFFFF",
-                        padding: "14px 28px",
-                        borderRadius: "14px",
-                        border: "none",
-                        fontFamily: "'DM Sans', sans-serif",
-                        fontSize: "15px",
-                        fontWeight: 600,
-                        cursor: "pointer",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
-                    >
-                      <Coins size={18} />
-                      <span>Switch to Pay with Impact Coins</span>
-                    </button>
-                  </div>
-                )}
               </>
             )}
 

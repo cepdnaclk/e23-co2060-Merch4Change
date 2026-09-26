@@ -1,21 +1,17 @@
 import apiClient from "./apiClient";
 
 export const uploadStory = async (formData) => {
-  const response = await apiClient.post("/api/v1/stories", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  const response = await apiClient.post("/api/v1/stories", formData);
   return response.data;
 };
 
 export const getStories = async () => {
-  const response = await apiClient.get("/api/v1/stories");
+  const response = await apiClient.get(`/api/v1/stories?t=${Date.now()}`);
   return response.data;
 };
 
 export const getUserCollections = async (username) => {
-  const response = await apiClient.get(`/api/v1/collections/${username}`);
+  const response = await apiClient.get(`/api/v1/collections/${username}?t=${Date.now()}`);
   return response.data;
 };
 
