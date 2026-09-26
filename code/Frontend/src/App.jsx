@@ -43,6 +43,8 @@ import AllDonorsPage from "./pages/AllDonors/AllDonorsPage";
 import LeaderboardPage from "./pages/Leaderboard/LeaderboardPage";
 import OrderSuccessPage from "./pages/Order/OrderSuccessPage";
 import OrderCancelPage from "./pages/Order/OrderCancelPage";
+import TopupPage from "./pages/Topup/TopupPage";
+import TopupSuccessPage from "./pages/Topup/TopupSuccessPage";
 import CookieConsent from "./components/CookieConsent/CookieConsent";
 
 function App() {
@@ -82,6 +84,8 @@ function App() {
               <Route path="/marketplace/product/:id" element={<ProductDetailPage />} />
               <Route path="/product/:id" element={<ProductDetailPage />} />
               <Route path="/marketplace/auction/:id" element={<AuctionDetailPage />} />
+                <Route path="/topup" element={<TopupPage />} />
+                <Route path="/topup/success" element={<TopupSuccessPage />} />
               <Route path="/auctions/:id" element={<AuctionDetailPage />} />
               <Route path="/orders/success" element={<ProtectedRoute><OrderSuccessPage /></ProtectedRoute>} />
               <Route path="/orders/cancel" element={<ProtectedRoute><OrderCancelPage /></ProtectedRoute>} />

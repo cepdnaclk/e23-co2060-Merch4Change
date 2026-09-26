@@ -128,6 +128,24 @@ export default function Marketplace() {
       {/* Flash banner */}
       <FlashBanner />
 
+      {/* Top up banner */}
+      <div className="flex flex-col sm:flex-row items-center justify-between bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800/30 rounded-2xl p-4 sm:p-5 mb-6 shadow-sm">
+        <div className="flex-1 mb-3 sm:mb-0 text-center sm:text-left">
+          <h3 className="text-lg font-bold text-green-800 dark:text-green-400 flex items-center justify-center sm:justify-start gap-2 mb-1">
+            <span className="text-xl">💰</span> Real Money Live Auctions
+          </h3>
+          <p className="text-sm text-green-700 dark:text-green-500/80 max-w-lg">
+            Bid on exclusive luxury drops using your fiat balance. Top up now to make sure you're ready when the hammer falls!
+          </p>
+        </div>
+        <button
+          onClick={() => window.location.href = '/topup'}
+          className="whitespace-nowrap px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl shadow-sm transition-all transform hover:scale-105"
+        >
+          Top up for auctions
+        </button>
+      </div>
+
       {/* Filter bar */}
       <FilterBar filter={filter} onFilterChange={setFilter} filters={FILTERS} />
 
