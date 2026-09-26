@@ -204,10 +204,10 @@ function LoginPage() {
               "Merch4Change helped us raise over $12,000 for our local shelter — and the products practically sold themselves."
             </p>
             <div className="login-testimonial-author">
-              <div className="login-avatar">SR</div>
+              <div className="login-avatar">TD</div>
               <div>
-                <div className="login-author-name">Sarah R.</div>
-                <div className="login-author-role">NGO Founder, Colombo</div>
+                <div className="login-author-name">Team Developers</div>
+                <div className="login-author-role">Merch4Change</div>
               </div>
             </div>
           </div>

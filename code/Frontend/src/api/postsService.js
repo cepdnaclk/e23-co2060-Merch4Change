@@ -9,11 +9,7 @@ const PREFIX = "/api/v1/posts";
  * - images: up to 5 File objects
  */
 export const createPost = (formData) => {
-  return apiClient.post(`${PREFIX}/`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  return apiClient.post(`${PREFIX}/`, formData);
 };
 
 export const getFeedPosts = () => {

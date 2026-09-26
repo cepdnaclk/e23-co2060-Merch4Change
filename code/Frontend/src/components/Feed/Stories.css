@@ -72,6 +72,11 @@
   font-size: 12px;
   font-weight: 600;
   color: #1a1a1a;
+  max-width: 74px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .story-img-container {
   width: 64px;

@@ -14,6 +14,7 @@ import Auction from "../models/Auction.js";
 import Bid from "../models/Bid.js";
 import Follow from "../models/Follow.js";
 import Post from "../models/Post.js";
+import Story from "../models/Story.js";
 
 dotenv.config();
 
@@ -2103,6 +2104,35 @@ async function seedFull() {
 
     console.log(`✅ Seeded ${createdPosts.length} posts with varied engagement levels for recommendation engine.`);
 
+    // --- 9. Seed Stories ---
+    console.log("Seeding Stories...");
+    await Story.deleteMany({});
+    const storyData = [
+      { userArr: "charities", idx: 0, image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600", age: 2 },
+      { userArr: "charities", idx: 1, image: "https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=600", age: 5 },
+      { userArr: "brands", idx: 0, image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=600", age: 1 },
+      { userArr: "brands", idx: 2, image: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=600", age: 3 },
+      { userArr: "donors", idx: 0, image: "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=600", age: 4 },
+      { userArr: "community", idx: 0, image: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=600", age: 6 },
+    ];
+    
+    const createdStories = [];
+    for (const sd of storyData) {
+      let authorUser;
+      if (sd.userArr === "charities") authorUser = createdCharityUsers[sd.idx % createdCharityUsers.length];
+      else if (sd.userArr === "brands") authorUser = createdBrandUsers[sd.idx % createdBrandUsers.length];
+      else if (sd.userArr === "donors") authorUser = createdDonors[sd.idx % createdDonors.length];
+      else authorUser = createdCommunity[sd.idx % createdCommunity.length];
+      
+      const story = await Story.create({
+        userId: authorUser._id,
+        image: sd.image,
+        createdAt: hoursAgo(sd.age),
+      });
+      createdStories.push(story);
+    }
+    console.log(`✅ Seeded ${createdStories.length} stories.`);
+
     await mongoose.disconnect();
     console.log("\n========================================================");
     console.log("🚀 FULL SEEDING COMPLETED SUCCESSFULLY!");
@@ -2113,6 +2143,7 @@ async function seedFull() {
     console.log(`✨ Total Merchandise Products: ${createdProducts.length}`);
     console.log(`✨ Total Follow Relationships: ${uniqueFollows.length}`);
     console.log(`✨ Total Posts: ${createdPosts.length}`);
+    console.log(`✨ Total Stories: ${createdStories.length}`);
     console.log("========================================================\n");
   } catch (err) {
     console.error("Seeding error in seedFull:", err);
