@@ -29,11 +29,24 @@ export const createAuction = async (req, res) => {
         .json({ success: false, message: "Product is not found!" });
     }
 
+    // validate startPrice and bidIncrement
+    if (!startPrice || !Number.isFinite(Number(startPrice)) || Number(startPrice) < 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Valid positive start price is required." });
+    }
+
+    if (bidIncrement !== undefined && (!Number.isFinite(Number(bidIncrement)) || Number(bidIncrement) < 1)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Bid increment must be a positive number." });
+    }
+
     // validate start time and end time
     const isValidDate = validateTime(startTime, endTime);
     if (!isValidDate) {
       return res
-        .status(404)
+        .status(400)
         .json({ success: false, message: "Invalid time inputs" });
     }
 
@@ -71,11 +84,28 @@ export const placeBid = async (req, res) => {
     const { amount } = req.body;
     const userId = req.user._id;
 
-    const auction = await Auction.findById(id);
+    // Validate ObjectId format
+    const mongoose = (await import("mongoose")).default;
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ success: false, message: "Invalid auction ID format" });
+    }
+
+    const auction = await Auction.findById(id).populate("productId");
     if (!auction) {
       return res
         .status(404)
         .json({ success: false, message: "Auction is not found!" });
+    }
+
+    // Auto-settle if auction has started or ended
+    await settleAuctionIfEnded(auction);
+
+    // Prevent auction creator from bidding on own auction
+    const creatorId = auction.createdBy?._id || auction.createdBy;
+    if (creatorId && creatorId.toString() === userId.toString()) {
+      return res
+        .status(403)
+        .json({ success: false, message: "You cannot bid on your own auction" });
     }
 
     const { isActive, isNotExpired, isAmount, isUserHaveCoin } = await validBid(
@@ -104,7 +134,7 @@ export const placeBid = async (req, res) => {
         .status(400)
         .json({
           success: false,
-          message: "User dont have enough coint balance",
+          message: "User doesn't have enough coin balance",
         });
     }
 
@@ -184,7 +214,10 @@ const settleAuctionIfEnded = async (auction) => {
         isRead: false,
       });
 
-      if (auction.createdBy && auction.createdBy.toString() !== auction.currentBidder.toString()) {
+      const bidderId = auction.currentBidder?._id || auction.currentBidder;
+      const creatorId = auction.createdBy?._id || auction.createdBy;
+
+      if (bidderId && creatorId && creatorId.toString() !== bidderId.toString()) {
         await Notification.create({
           userId: auction.createdBy,
           type: "bet",
