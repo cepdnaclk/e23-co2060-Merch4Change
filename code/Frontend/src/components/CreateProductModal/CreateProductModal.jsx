@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { X, UploadCloud } from "lucide-react";
 import "./CreateProductModal.css";
 import { createProduct } from "../../api/productsService";
@@ -9,13 +9,14 @@ const CreateProductModal = ({ isOpen, onClose, onProductCreated, initialListingT
   const [productName, setProductName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
+  const [stock, setStock] = useState("1");
   const [bidIncrement, setBidIncrement] = useState("10");
   const [endTime, setEndTime] = useState("");
   const [images, setImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen) {
       setListingType(initialListingType);
     }
@@ -34,6 +35,7 @@ const CreateProductModal = ({ isOpen, onClose, onProductCreated, initialListingT
       }
       setImages((prev) => [...prev, ...filesArray]);
     }
+    e.target.value = "";
   };
 
   const removeImage = (indexToRemove) => {
@@ -58,6 +60,7 @@ const CreateProductModal = ({ isOpen, onClose, onProductCreated, initialListingT
     formData.append("name", productName);
     formData.append("description", description);
     formData.append("price", price);
+    formData.append("stock", listingType === "auction" ? "1" : (stock || "1"));
     
     images.forEach((img) => {
       formData.append("images", img);
@@ -91,6 +94,7 @@ const CreateProductModal = ({ isOpen, onClose, onProductCreated, initialListingT
         setProductName("");
         setDescription("");
         setPrice("");
+        setStock("1");
         setBidIncrement("10");
         setEndTime("");
         setImages([]);
@@ -170,6 +174,20 @@ const CreateProductModal = ({ isOpen, onClose, onProductCreated, initialListingT
             />
           </div>
 
+          {listingType === "marketplace" && (
+            <div className="cprod-field">
+              <label>Stock Quantity *</label>
+              <input 
+                type="number" 
+                placeholder="e.g. 10" 
+                value={stock}
+                onChange={(e) => setStock(e.target.value)}
+                disabled={isLoading}
+                min="1"
+              />
+            </div>
+          )}
+
           {listingType === "auction" && (
             <>
               <div className="cprod-field">
@@ -190,7 +208,7 @@ const CreateProductModal = ({ isOpen, onClose, onProductCreated, initialListingT
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
                   disabled={isLoading}
-                  min={new Date().toISOString().slice(0, 16)}
+                  min={new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
                 />
               </div>
             </>
@@ -228,19 +246,22 @@ const CreateProductModal = ({ isOpen, onClose, onProductCreated, initialListingT
             
             {images.length > 0 && (
               <div className="cprod-image-previews">
-                {images.map((img, idx) => (
-                  <div className="cprod-preview-item" key={idx}>
-                    <img src={URL.createObjectURL(img)} alt={`Preview ${idx}`} />
-                    <button 
-                      type="button" 
-                      className="cprod-remove-img" 
-                      onClick={() => removeImage(idx)}
-                      disabled={isLoading}
-                    >
-                      <X size={14} />
-                    </button>
-                  </div>
-                ))}
+                {images.map((img, idx) => {
+                  const previewUrl = URL.createObjectURL(img);
+                  return (
+                    <div className="cprod-preview-item" key={idx}>
+                      <img src={previewUrl} alt={`Preview ${idx}`} onLoad={() => URL.revokeObjectURL(previewUrl)} />
+                      <button 
+                        type="button" 
+                        className="cprod-remove-img" 
+                        onClick={() => removeImage(idx)}
+                        disabled={isLoading}
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
