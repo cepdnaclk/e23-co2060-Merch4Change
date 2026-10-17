@@ -263,7 +263,11 @@ export const getDonationStats = asyncHandler(async (req, res) => {
         userContribution: d.coinAmount,
       });
     } else {
-      projectsMap.get(projectId).userContribution += d.coinAmount;
+      const entry = projectsMap.get(projectId);
+      entry.userContribution += d.coinAmount;
+      if (!proj) {
+        entry.collectedAmount += d.coinAmount;
+      }
     }
   }
 
@@ -320,7 +324,7 @@ export const listCharities = asyncHandler(async (req, res) => {
   const enriched = charities.map((c) => {
     const dInfo = donationMap.get(c._id.toString());
     const pInfo = projectMap.get(c._id.toString());
-    const totalRaised = dInfo?.totalRaised || pInfo?.totalCollected || 0;
+    const totalRaised = Math.max(dInfo?.totalRaised || 0, pInfo?.totalCollected || 0);
     const totalGoal = pInfo?.totalGoal || 10000;
     const percent =
       totalGoal > 0

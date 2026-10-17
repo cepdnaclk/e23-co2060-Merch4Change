@@ -110,7 +110,7 @@ const buildConversationSummary = (
   name: getDisplayName(otherUser),
   initials: getInitials(getDisplayName(otherUser)),
   type: getContactType(otherUser),
-  online: Boolean(otherUser.isActive),
+  online: otherUser.showActivityStatus !== false && Boolean(otherUser.isActive),
   time: formatRelativeTime(conversation.lastMessageAt),
   unread: unreadCount,
   preview: conversation.lastMessageText || "Start a conversation",
@@ -125,7 +125,7 @@ const getConversationForCurrentUser = async (conversationId, currentUserId) => {
 
   const conversation = await Conversation.findById(conversationId).populate(
     "participants",
-    "firstName lastName userName accountType isActive",
+    "firstName lastName userName accountType isActive showActivityStatus",
   );
 
   if (!conversation) {
@@ -184,7 +184,7 @@ const buildContactList = async (currentUser) => {
     .sort({ lastMessageAt: -1, updatedAt: -1 })
     .populate(
       "participants",
-      "firstName lastName userName accountType isActive",
+      "firstName lastName userName accountType isActive showActivityStatus",
     );
 
   const unreadCountMap = await buildUnreadCountMap(
@@ -236,7 +236,7 @@ export const getConversations = asyncHandler(async (req, res) => {
     .sort({ lastMessageAt: -1, updatedAt: -1 })
     .populate(
       "participants",
-      "firstName lastName userName accountType isActive",
+      "firstName lastName userName accountType isActive showActivityStatus",
     );
 
   const unreadCountMap = await buildUnreadCountMap(
@@ -291,7 +291,7 @@ export const createConversation = asyncHandler(async (req, res) => {
   }
 
   const participant = await User.findById(participantUserId).select(
-    "firstName lastName userName accountType isActive allowMessageRequests",
+    "firstName lastName userName accountType isActive showActivityStatus allowMessageRequests",
   );
   if (!participant) {
     throw new AppError("Participant not found.", 404, "USER_NOT_FOUND");
@@ -334,9 +334,10 @@ export const getConversationThread = asyncHandler(async (req, res) => {
   );
 
   const limit = Math.min(100, Math.max(1, Number.parseInt(req.query.limit, 10) || 50));
-  const messages = await Message.find({ conversationId: conversation._id })
-    .sort({ createdAt: 1 })
+  const newestMessages = await Message.find({ conversationId: conversation._id })
+    .sort({ createdAt: -1 })
     .limit(limit);
+  const messages = [...newestMessages].reverse();
   const otherUser = conversation.participants.find(
     (participant) => String(participant._id) !== String(req.user._id),
   );
@@ -418,6 +419,13 @@ export const markConversationRead = asyncHandler(async (req, res) => {
     req.params.conversationId,
     req.user._id,
   );
+
+  if (req.user.hideReadReceipts) {
+    return successResponse(res, 200, "Conversation marked as read.", {
+      matchedCount: 0,
+      modifiedCount: 0,
+    });
+  }
 
   const result = await Message.updateMany(
     {
