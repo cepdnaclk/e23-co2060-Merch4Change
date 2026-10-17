@@ -39,6 +39,26 @@ const normalizeKnownErrors = (err) => {
     };
   }
 
+  // Invalid ObjectId / type cast error
+  if (err.name === "CastError") {
+    return {
+      statusCode: 400,
+      errorCode: "VALIDATION_ERROR",
+      message: `Invalid ${err.path || "ID"} format.`,
+      details: err.path ? { field: err.path } : null,
+    };
+  }
+
+  // Multer file upload error (e.g. LIMIT_FILE_SIZE)
+  if (err.name === "MulterError") {
+    return {
+      statusCode: 400,
+      errorCode: "UPLOAD_ERROR",
+      message: err.message || "File upload error.",
+      details: err.field ? { field: err.field } : null,
+    };
+  }
+
   return null;
 };
 

@@ -1,5 +1,5 @@
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const usernamePattern = /^[a-zA-Z0-9._]+$/;
+const usernamePattern = /^[a-zA-Z0-9._-]+$/;
 const passwordStrongPattern = /^(?=.*[A-Za-z])(?=.*\d).+$/;
 const urlPattern = /^https?:\/\/.+/i;
 

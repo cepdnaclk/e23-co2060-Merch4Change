@@ -28,8 +28,11 @@ function PostsGrid() {
         }
       }
 
-      const fetchedPosts = res?.data?.posts || [];
-      const more = res?.data?.pagination?.hasMore ?? (fetchedPosts.length >= 10);
+      const fetchedPosts = res?.data?.data?.posts || res?.data?.posts || [];
+      const more =
+        res?.data?.hasMore ??
+        res?.data?.pagination?.hasMore ??
+        fetchedPosts.length >= 10;
 
       setHasMore(Boolean(more));
       setPage(pageToLoad);

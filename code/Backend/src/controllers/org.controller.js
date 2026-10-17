@@ -14,7 +14,13 @@ import escapeRegex from "../utils/escapeRegex.js";
 export const getOrgProfileByUsername = asyncHandler(async (req, res) => {
   const { username } = req.params;
 
-  const cleanParam = decodeURIComponent(username || "").trim();
+  const cleanParam = (() => {
+    try {
+      return decodeURIComponent(username || "").trim();
+    } catch {
+      return String(username || "").trim();
+    }
+  })();
   const escapedParam = escapeRegex(cleanParam);
   const alphanumericOnly = cleanParam.toLowerCase().replace(/[^a-z0-9]/g, "");
   const fuzzyPattern = escapedParam.replace(/[-_]/g, "[\\s\\-_]*");

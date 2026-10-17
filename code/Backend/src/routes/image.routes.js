@@ -138,6 +138,7 @@ router.post("/user/:id", protect, upload.single("image"), async (req, res) => {
     res
       .status(200)
       .json({
+        success: true,
         message: "Profile image uploaded successfully",
         profileImageUrl: user.profileImageUrl,
       });
@@ -199,6 +200,7 @@ router.post(
       await user.save();
 
       res.status(200).json({
+        success: true,
         message: "Cover image uploaded successfully",
         coverImageUrl: user.coverImageUrl,
       });

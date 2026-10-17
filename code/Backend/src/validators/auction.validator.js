@@ -38,22 +38,26 @@ export const validBid = async (auction, amount, userId) => {
   // validate bid amount
   // For the first bid (no current bidder), allow bids >= currentPrice (startPrice)
   // For subsequent bids, require >= currentPrice + bidIncrement
-  let isAmount;
-  if (!auction.currentBidder) {
-    isAmount = amount >= auction.currentPrice;
-  } else {
-    const newVal = auction.currentPrice + auction.bidIncrement;
-    isAmount = amount >= newVal;
+  const numericAmount = Number(amount);
+  const minIncrement = Number(auction.bidIncrement) > 0 ? Number(auction.bidIncrement) : 5;
+  let isAmount = false;
+  if (Number.isFinite(numericAmount)) {
+    if (!auction.currentBidder) {
+      isAmount = numericAmount >= Number(auction.currentPrice);
+    } else {
+      const newVal = Number(auction.currentPrice) + minIncrement;
+      isAmount = numericAmount >= newVal;
+    }
   }
 
-  // validate bidder has enough coins (guard against deleted user)
+  // validate bidder has enough balance (guard against deleted user)
   const user = await User.findById(userId);
   if (!user) {
-    return { isActive, isNotExpired, isAmount, isUserHaveCoin: false };
+    return { isActive, isNotExpired, isAmount, isUserHaveFiat: false };
   }
-  const userBalance = user.fiatBalance || 0;
+  const userBalance = Number(user.fiatBalance || 0);
 
-  const isUserHaveFiat = userBalance >= amount;
+  const isUserHaveFiat = isAmount && userBalance >= numericAmount;
 
   return { isActive, isNotExpired, isAmount, isUserHaveFiat };
 };

@@ -16,7 +16,7 @@ export const createMockResponse = () => {
       this.cookies[name] = { value, options };
       return this;
     },
-    clearCookie(name, options) {
+    clearCookie(name, _options) {
       delete this.cookies[name];
       return this;
     },

@@ -12,9 +12,9 @@ const router = Router();
 router.post("/webhook", handleStripeWebhook);
 
 // Verification endpoint called by Frontend success page to confirm order payment
-router.get("/verify-session/:sessionId", verifyPaymentSession);
-
-export default router;
+router.get("/verify-session/:sessionId", protect, verifyPaymentSession);
 
 // Topup endpoint
 router.post("/topup/create-session", protect, createTopupSession);
+
+export default router;

@@ -24,7 +24,13 @@ const followSchema = new mongoose.Schema(
 followSchema.index({ followerId: 1, followingId: 1 }, { unique: true });
 
 // Middleware: Update User Stats on Follow
+followSchema.pre("save", function (next) {
+  this.$locals.wasNew = this.isNew;
+  next();
+});
+
 followSchema.post("save", async function () {
+  if (!this.$locals?.wasNew) return;
   const User = mongoose.model("User");
   // The person who followed gains 1 'following'
   await User.findByIdAndUpdate(this.followerId, {

@@ -13,21 +13,38 @@ export default function CharityReview() {
   const [acting, setActing] = useState(false);
 
   useEffect(() => {
-    adminGetCharity(id).then((response) => setCharity(response?.data?.charity));
+    adminGetCharity(id)
+      .then((response) => setCharity(response?.data?.charity))
+      .catch((err) => {
+        setError(
+          err.response?.data?.message ||
+            err.message ||
+            "Failed to load charity application.",
+        );
+      });
   }, [id]);
 
   const approve = async () => {
     setActing(true);
     setError("");
-    const response = await adminApprove(id);
-    setActing(false);
+    try {
+      const response = await adminApprove(id);
 
-    if (!response.success) {
-      setError(response?.message || "Failed to approve charity.");
-      return;
+      if (!response?.success) {
+        setError(response?.message || "Failed to approve charity.");
+        return;
+      }
+
+      navigate("/admin/charities");
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to approve charity.",
+      );
+    } finally {
+      setActing(false);
     }
-
-    navigate("/admin/charities");
   };
 
   const reject = async () => {
@@ -38,15 +55,24 @@ export default function CharityReview() {
 
     setActing(true);
     setError("");
-    const response = await adminReject(id, reason);
-    setActing(false);
+    try {
+      const response = await adminReject(id, reason);
 
-    if (!response.success) {
-      setError(response?.message || "Failed to reject charity.");
-      return;
+      if (!response?.success) {
+        setError(response?.message || "Failed to reject charity.");
+        return;
+      }
+
+      navigate("/admin/charities");
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to reject charity.",
+      );
+    } finally {
+      setActing(false);
     }
-
-    navigate("/admin/charities");
   };
 
   if (!charity) {
@@ -82,11 +108,22 @@ export default function CharityReview() {
           <h3>Proof documents</h3>
           {charity.proofDocuments?.length ? (
             <ul className="charity-review-docs">
-              {charity.proofDocuments.map((doc, index) => (
-                <li key={`${doc.label}-${index}`}>
-                  <a href={doc.url} target="_blank" rel="noreferrer noopener">{doc.label}</a>
-                </li>
-              ))}
+              {charity.proofDocuments.map((doc, index) => {
+                const rawUrl = String(doc?.url || "").trim();
+                const isSafeUrl =
+                  rawUrl.startsWith("https://") ||
+                  rawUrl.startsWith("http://") ||
+                  rawUrl.startsWith("/uploads/");
+                return (
+                  <li key={`${doc.label}-${index}`}>
+                    {isSafeUrl ? (
+                      <a href={rawUrl} target="_blank" rel="noreferrer noopener">{doc.label}</a>
+                    ) : (
+                      <span>{doc.label} (invalid URL)</span>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           ) : (
             <p className="charity-empty-state">No documents submitted.</p>

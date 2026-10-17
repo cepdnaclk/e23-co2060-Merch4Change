@@ -83,7 +83,7 @@ function ProfileSection({ profileData = {}, onUpdate = () => {} }) {
     if (e) e.preventDefault();
     setSaving(true);
     try {
-      const parts = fullName.trim().split(" ");
+      const parts = fullName.trim().split(/\s+/).filter(Boolean);
       const firstName = parts.shift() || "";
       const lastName = parts.join(" ") || "";
 
@@ -91,7 +91,7 @@ function ProfileSection({ profileData = {}, onUpdate = () => {} }) {
       // OTP-verified flow below, never through this general save.
       const body = {
         firstName,
-        lastName,
+        ...(lastName ? { lastName } : {}),
         name: fullName.trim(),
         userName,
         profileBio: bio,

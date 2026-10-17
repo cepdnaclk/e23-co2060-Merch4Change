@@ -81,7 +81,7 @@ function Post({ post, onOpen }) {
     try {
       const res = await likePost(post.id || post._id);
       if (res.data?.success) {
-        setLocalLikes(res.data.likes || []);
+        setLocalLikes(res.data?.data?.likes || res.data?.likes || []);
       }
     } catch (err) {
       console.error("Error liking post:", err);

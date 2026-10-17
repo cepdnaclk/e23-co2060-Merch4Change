@@ -1,3 +1,4 @@
+import Brand from "../models/Brand.js";
 import Product from "../models/Product.js";
 import { uploadBufferToCloudinary } from "../utils/uploadToCloudinary.js";
 import escapeRegex from "../utils/escapeRegex.js";
@@ -32,12 +33,27 @@ export const createProduct = async (req, res) => {
       images = uploads.map((upload) => upload.secure_url); // Extract secure_url
     }
 
+    let brand = await Brand.findOne({ ownerUserId: req.user._id });
+    if (!brand) {
+      const label =
+        (req.user.userName && String(req.user.userName).trim()) ||
+        req.user.firstName ||
+        "Store";
+      const brandName =
+        label.length >= 2 ? label : `Store ${String(req.user._id).slice(-8)}`;
+      brand = await Brand.create({
+        ownerUserId: req.user._id,
+        brandName,
+      });
+    }
+
     const product = await Product.create({
       name,
       price: parsedPrice,
       description,
       stock,
       images,
+      brandId: brand?._id,
       ownerUserId: req.user._id,
     });
 
@@ -50,7 +66,13 @@ export const createProduct = async (req, res) => {
 export const getUserProducts = async (req, res) => {
   try {
     const { username } = req.params;
-    const cleanParam = decodeURIComponent(username || "").trim();
+    let rawDecoded = username || "";
+    try {
+      rawDecoded = decodeURIComponent(rawDecoded);
+    } catch {
+      // Fall back to raw param if malformed URI encoding
+    }
+    const cleanParam = rawDecoded.trim();
     const escapedParam = escapeRegex(cleanParam);
     const alphanumericOnly = cleanParam.toLowerCase().replace(/[^a-z0-9]/g, "");
     const fuzzyPattern = escapedParam.replace(/[-_]/g, "[\\s\\-_]*");
@@ -74,9 +96,9 @@ export const getUserProducts = async (req, res) => {
       const Brand = (await import("../models/Brand.js")).default;
       const brand = await Brand.findOne({
         $or: [
-          { brandName: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
+          { brandName: { $regex: new RegExp(`^${escapedParam}$`, "i") } },
           { brandName: { $regex: fuzzyRegex } },
-          { slug: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
+          { slug: { $regex: new RegExp(`^${escapedParam}$`, "i") } },
           ...(mongoose.isValidObjectId(cleanParam)
             ? [{ _id: cleanParam }, { ownerUserId: cleanParam }]
             : []),

@@ -7,15 +7,23 @@ import API_BASE from "../utils/apiUrl";
 // without needing React hooks.
 let _accessToken = null;
 let _logoutCallback = null; // AuthContext registers its logout() here
+let _tokenChangeCallback = null; // AuthContext registers setAccessToken here
 
 export const setAccessToken = (token) => {
   _accessToken = token;
+  if (typeof _tokenChangeCallback === "function") {
+    _tokenChangeCallback(token);
+  }
 };
 
 export const getAccessToken = () => _accessToken;
 
 export const setLogoutCallback = (fn) => {
   _logoutCallback = fn;
+};
+
+export const setTokenChangeCallback = (fn) => {
+  _tokenChangeCallback = fn;
 };
 
 // ── Axios instance ───────────────────────────────────────────────────
@@ -96,6 +104,9 @@ apiClient.interceptors.response.use(
       }
 
       _accessToken = newToken;
+      if (typeof _tokenChangeCallback === "function") {
+        _tokenChangeCallback(newToken);
+      }
       processQueue(null, newToken);
 
       originalRequest.headers.Authorization = `Bearer ${newToken}`;

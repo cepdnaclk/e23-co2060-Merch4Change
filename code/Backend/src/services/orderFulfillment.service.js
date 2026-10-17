@@ -18,27 +18,39 @@ import { logInfo, logError } from "../utils/logger.js";
  * @returns {Promise<Order|null>}
  */
 export const fulfillPaidOrder = async (orderId, details = {}) => {
-  const order = await Order.findById(orderId);
-  if (!order) {
+  const existingOrder = await Order.findById(orderId);
+  if (!existingOrder) {
     logError("Order fulfillment skipped: Order not found", null, { orderId });
     return null;
   }
 
   // Idempotency check: don't double credit coins or double notify
-  if (order.status === "paid") {
+  if (existingOrder.status === "paid") {
     logInfo("Order fulfillment skipped: Already marked as paid", { orderId });
-    return order;
+    return existingOrder;
   }
 
-  order.status = "paid";
-  order.paymentStatus = "paid";
+  const updateFields = {
+    status: "paid",
+    paymentStatus: "paid",
+  };
   if (details.paymentGateway) {
-    order.paymentGateway = details.paymentGateway;
+    updateFields.paymentGateway = details.paymentGateway;
   }
   if (details.paymentIntentId) {
-    order.stripePaymentIntentId = details.paymentIntentId;
+    updateFields.stripePaymentIntentId = details.paymentIntentId;
   }
-  await order.save();
+
+  const order = await Order.findOneAndUpdate(
+    { _id: orderId, status: { $ne: "paid" } },
+    { $set: updateFields },
+    { new: true },
+  );
+
+  if (!order) {
+    logInfo("Order fulfillment skipped: Concurrent fulfillment already completed", { orderId });
+    return Order.findById(orderId);
+  }
 
   // Credit buyer coins
   if (order.coinsEarned > 0 && order.userId) {
@@ -113,21 +125,27 @@ export const fulfillPaidOrder = async (orderId, details = {}) => {
  * @returns {Promise<Order|null>}
  */
 export const cancelFailedOrder = async (orderId, reason = "payment_failed") => {
-  const order = await Order.findById(orderId);
-  if (!order || order.status !== "pending") {
-    return order;
+  const order = await Order.findOneAndUpdate(
+    { _id: orderId, status: "pending" },
+    {
+      $set: {
+        status: "cancelled",
+        paymentStatus: "failed",
+      },
+    },
+    { new: true },
+  );
+
+  if (!order) {
+    return Order.findById(orderId);
   }
 
-  // Restore inventory
+  // Restore inventory once after atomic status transition succeeds
   for (const item of order.items) {
     await Product.findByIdAndUpdate(item.productId, {
       $inc: { stock: item.quantity },
     });
   }
-
-  order.status = "cancelled";
-  order.paymentStatus = "failed";
-  await order.save();
 
   logInfo("Order cancelled and inventory restored", {
     orderId: order._id,
