@@ -387,18 +387,28 @@ export const downloadReceipt = asyncHandler(async (req, res) => {
     throw new AppError("Donation not found.", 404, "DONATION_NOT_FOUND");
   }
 
-  const charityName = donation.charityId?.publicName || "Verified Charity";
-  const projectName = donation.charityProjectId?.title || "General Fund";
-  const amount = donation.coinAmount;
-  const date = donation.createdAt.toDateString();
-  const donorName = `${req.user.firstName} ${req.user.lastName}`;
+  const escapeHtml = (value) =>
+    String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+
+  const charityName = escapeHtml(donation.charityId?.publicName || "Verified Charity");
+  const projectName = escapeHtml(donation.charityProjectId?.title || "General Fund");
+  const amount = escapeHtml(donation.coinAmount);
+  const date = escapeHtml(donation.createdAt.toDateString());
+  const donorName = escapeHtml(`${req.user.firstName || ""} ${req.user.lastName || ""}`.trim());
+  const donorEmail = escapeHtml(req.user.email);
+  const receiptId = escapeHtml(donation._id);
 
   const html = `
     <!DOCTYPE html>
     <html lang="en">
     <head>
       <meta charset="UTF-8">
-      <title>Donation Receipt - ${donation._id}</title>
+      <title>Donation Receipt - ${receiptId}</title>
       <style>
         body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #333; }
         .receipt-container { max-width: 600px; margin: 0 auto; border: 1px solid #ddd; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
@@ -412,10 +422,10 @@ export const downloadReceipt = asyncHandler(async (req, res) => {
     <body>
       <div class="receipt-container">
         <h1>Donation Receipt</h1>
-        <div class="detail"><span class="label">Receipt ID:</span> ${donation._id}</div>
+        <div class="detail"><span class="label">Receipt ID:</span> ${receiptId}</div>
         <div class="detail"><span class="label">Date:</span> ${date}</div>
         <div class="detail"><span class="label">Donor:</span> ${donorName}</div>
-        <div class="detail"><span class="label">Email:</span> ${req.user.email}</div>
+        <div class="detail"><span class="label">Email:</span> ${donorEmail}</div>
         <div class="detail"><span class="label">Charity:</span> ${charityName}</div>
         <div class="detail"><span class="label">Project:</span> ${projectName}</div>
         
@@ -430,6 +440,7 @@ export const downloadReceipt = asyncHandler(async (req, res) => {
     </html>
   `;
   
-  res.setHeader("Content-type", "text/html");
+  res.setHeader("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'");
+  res.setHeader("Content-type", "text/html; charset=utf-8");
   res.send(html);
 });

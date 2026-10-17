@@ -82,11 +82,22 @@ export default function CharityReview() {
           <h3>Proof documents</h3>
           {charity.proofDocuments?.length ? (
             <ul className="charity-review-docs">
-              {charity.proofDocuments.map((doc, index) => (
-                <li key={`${doc.label}-${index}`}>
-                  <a href={doc.url} target="_blank" rel="noreferrer noopener">{doc.label}</a>
-                </li>
-              ))}
+              {charity.proofDocuments.map((doc, index) => {
+                const rawUrl = String(doc?.url || "").trim();
+                const isSafeUrl =
+                  rawUrl.startsWith("https://") ||
+                  rawUrl.startsWith("http://") ||
+                  rawUrl.startsWith("/uploads/");
+                return (
+                  <li key={`${doc.label}-${index}`}>
+                    {isSafeUrl ? (
+                      <a href={rawUrl} target="_blank" rel="noreferrer noopener">{doc.label}</a>
+                    ) : (
+                      <span>{doc.label} (invalid URL)</span>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           ) : (
             <p className="charity-empty-state">No documents submitted.</p>
