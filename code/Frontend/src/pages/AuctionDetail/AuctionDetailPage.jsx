@@ -106,7 +106,7 @@ export default function AuctionDetailPage() {
         setSelectedImg((prev) => prev || cover);
 
         const minNext = auc.currentPrice + (auc.bidIncrement || 5);
-        setBidAmount((prev) => (!prev ? String(minNext) : prev));
+        setBidAmount((prev) => (!prev || Number(prev) < minNext ? String(minNext) : prev));
       } else if (auctionRes.status === "fulfilled" && !auctionRes.value?.success) {
         setError(auctionRes.value.message || "Auction not found.");
       } else {

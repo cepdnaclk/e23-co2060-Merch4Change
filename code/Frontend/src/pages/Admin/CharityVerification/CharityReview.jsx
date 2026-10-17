@@ -13,21 +13,38 @@ export default function CharityReview() {
   const [acting, setActing] = useState(false);
 
   useEffect(() => {
-    adminGetCharity(id).then((response) => setCharity(response?.data?.charity));
+    adminGetCharity(id)
+      .then((response) => setCharity(response?.data?.charity))
+      .catch((err) => {
+        setError(
+          err.response?.data?.message ||
+            err.message ||
+            "Failed to load charity application.",
+        );
+      });
   }, [id]);
 
   const approve = async () => {
     setActing(true);
     setError("");
-    const response = await adminApprove(id);
-    setActing(false);
+    try {
+      const response = await adminApprove(id);
 
-    if (!response.success) {
-      setError(response?.message || "Failed to approve charity.");
-      return;
+      if (!response?.success) {
+        setError(response?.message || "Failed to approve charity.");
+        return;
+      }
+
+      navigate("/admin/charities");
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to approve charity.",
+      );
+    } finally {
+      setActing(false);
     }
-
-    navigate("/admin/charities");
   };
 
   const reject = async () => {
@@ -38,15 +55,24 @@ export default function CharityReview() {
 
     setActing(true);
     setError("");
-    const response = await adminReject(id, reason);
-    setActing(false);
+    try {
+      const response = await adminReject(id, reason);
 
-    if (!response.success) {
-      setError(response?.message || "Failed to reject charity.");
-      return;
+      if (!response?.success) {
+        setError(response?.message || "Failed to reject charity.");
+        return;
+      }
+
+      navigate("/admin/charities");
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to reject charity.",
+      );
+    } finally {
+      setActing(false);
     }
-
-    navigate("/admin/charities");
   };
 
   if (!charity) {

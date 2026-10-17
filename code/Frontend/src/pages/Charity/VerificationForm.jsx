@@ -72,21 +72,34 @@ export default function VerificationForm() {
     if (!file) return;
     setUploadingIndex(index);
     setMsg("");
-    const response = await uploadProofDocument(file, form.proofDocuments[index]?.label);
-    setUploadingIndex(null);
+    try {
+      const response = await uploadProofDocument(
+        file,
+        form.proofDocuments[index]?.label,
+      );
 
-    if (!response.success) {
-      setMsg(response.message || "Failed to upload document.");
+      if (!response?.success) {
+        setMsg(response?.message || "Failed to upload document.");
+        setMsgType("error");
+        return;
+      }
+
+      const docs = [...form.proofDocuments];
+      docs[index] = {
+        label: response.data.label || docs[index]?.label || "Document",
+        url: response.data.url,
+      };
+      setForm((prev) => ({ ...prev, proofDocuments: docs }));
+    } catch (err) {
+      setMsg(
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to upload document.",
+      );
       setMsgType("error");
-      return;
+    } finally {
+      setUploadingIndex(null);
     }
-
-    const docs = [...form.proofDocuments];
-    docs[index] = {
-      label: response.data.label || docs[index]?.label || "Document",
-      url: response.data.url,
-    };
-    setForm((prev) => ({ ...prev, proofDocuments: docs }));
   };
 
   const onSubmit = async (event) => {
@@ -97,18 +110,33 @@ export default function VerificationForm() {
     setMsg("");
     setMsgType("");
 
-    const res = await submitCharityVerification(form);
-    setSubmitting(false);
+    try {
+      const res = await submitCharityVerification(form);
 
-    if (res.success) {
-      setStatus("pending");
-      setMsg("Submitted successfully. An admin will review your application.");
-      setMsgType("success");
-      return;
+      if (res?.success) {
+        setStatus("pending");
+        setMsg("Submitted successfully. An admin will review your application.");
+        setMsgType("success");
+        return;
+      }
+
+      setMsg(
+        res?.message ||
+          res?.error?.message ||
+          "Failed to submit verification.",
+      );
+      setMsgType("error");
+    } catch (err) {
+      setMsg(
+        err.response?.data?.message ||
+          err.response?.data?.error?.message ||
+          err.message ||
+          "Failed to submit verification.",
+      );
+      setMsgType("error");
+    } finally {
+      setSubmitting(false);
     }
-
-    setMsg(res?.message || res?.error?.message || "Failed to submit verification.");
-    setMsgType("error");
   };
 
   if (loading) {
