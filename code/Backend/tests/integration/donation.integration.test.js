@@ -4,7 +4,6 @@ import app from "../../src/app.js";
 import User from "../../src/models/User.js";
 import Charity from "../../src/models/Charity.js";
 import Project from "../../src/models/Project.js";
-import Donation from "../../src/models/Donation.js";
 import CoinTransaction from "../../src/models/CoinTransaction.js";
 import jwt from "jsonwebtoken";
 import env from "../../src/config/env.js";

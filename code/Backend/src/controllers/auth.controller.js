@@ -339,7 +339,7 @@ export const verifyLoginOtp = asyncHandler(async (req, res) => {
   let decoded;
   try {
     decoded = jwt.verify(twoFactorToken, env.jwtSecret);
-  } catch (error) {
+  } catch {
     throw new AppError(
       "Verification session expired. Please log in again.",
       401,
@@ -419,7 +419,7 @@ export const resendLoginOtp = asyncHandler(async (req, res) => {
   let decoded;
   try {
     decoded = jwt.verify(twoFactorToken, env.jwtSecret);
-  } catch (error) {
+  } catch {
     throw new AppError(
       "Verification session expired. Please log in again.",
       401,
@@ -492,7 +492,7 @@ export const refresh = asyncHandler(async (req, res) => {
   let decoded;
   try {
     decoded = jwt.verify(incomingRefreshToken, env.jwtRefreshSecret);
-  } catch (error) {
+  } catch {
     throw new AppError(
       "Invalid or expired refresh token.",
       401,

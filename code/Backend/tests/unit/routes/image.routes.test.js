@@ -17,7 +17,7 @@ const brandId = new mongoose.Types.ObjectId();
 const startServer = async (t) => {
   const app = express();
   app.use("/api/v1/images", imageRoutes);
-  app.use((err, req, res, next) => {
+  app.use((err, req, res, _next) => {
     res.status(err.statusCode || 500).json({ code: err.code });
   });
   const server = await new Promise((resolve) => {

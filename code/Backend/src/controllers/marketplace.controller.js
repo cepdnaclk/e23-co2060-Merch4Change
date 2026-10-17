@@ -5,10 +5,7 @@ import Notification from "../models/Notification.js";
 import mongoose from "mongoose";
 import env from "../config/env.js";
 import { createCheckoutSession } from "../services/stripe.service.js";
-import {
-  fulfillPaidOrder,
-  cancelFailedOrder,
-} from "../services/orderFulfillment.service.js";
+import { cancelFailedOrder } from "../services/orderFulfillment.service.js";
 import AppError from "../utils/appError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { successResponse } from "../utils/apiResponse.js";
