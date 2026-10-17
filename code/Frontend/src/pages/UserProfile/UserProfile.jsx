@@ -225,7 +225,7 @@ function UserProfile() {
 
       const response = await apiClient.post(endpoint, formData);
       const data = response.data;
-      if (!data.success) {
+      if (data?.success === false) {
         throw new Error(data?.message || "Failed to upload image");
       }
 
@@ -349,7 +349,12 @@ function UserProfile() {
   }
 
   const isOrganization = profileData?.accountType === "organization";
-  const verificationStatus = profileData?.verificationStatus || "unsubmitted";
+  const verificationStatus =
+    profileData?.charity?.verificationStatus ||
+    profileData?.verificationStatus ||
+    (profileData?.isVerified ? "verified" : "unsubmitted");
+  const rejectionReason =
+    profileData?.charity?.rejectionReason || profileData?.rejectionReason || "";
 
   // Tab definitions: organizations show organization-specific tabs; regular users/customers show footprint
   const profileTabs = isOrganization 
@@ -391,8 +396,8 @@ function UserProfile() {
                     {verificationStatus === "rejected" && "Your verification was rejected."}
                     {verificationStatus === "unsubmitted" && "Complete verification to receive donations."}
                   </strong>
-                  {verificationStatus === "rejected" && profileData.rejectionReason && (
-                    <p style={{ margin: "4px 0 0" }}>{profileData.rejectionReason}</p>
+                  {verificationStatus === "rejected" && rejectionReason && (
+                    <p style={{ margin: "4px 0 0" }}>{rejectionReason}</p>
                   )}
                 </div>
                 <button type="button" className="btn btn-primary" onClick={() => navigate("/charity/verify")}>
@@ -414,7 +419,7 @@ function UserProfile() {
               isOrganization={isOrganization}
               projectsCount={orgProjects?.length ?? profileData?.projectsCount ?? 0}
               verificationStatus={verificationStatus}
-              onDonateClick={() => navigate(`/donate?charityId=${profileData?.charityId || profileData?.id || ""}&charityName=${encodeURIComponent(profileData?.firstName || profileData?.userName || "")}`)}
+              onDonateClick={() => navigate(`/donate?charityId=${profileData?.charity?._id || profileData?.charityId || profileData?._id || profileData?.id || ""}&charityName=${encodeURIComponent(profileData?.charity?.publicName || profileData?.firstName || profileData?.userName || "")}`)}
               onViewCustomersClick={() => setActiveTab(isOrganization ? 'TOP DONORS' : 'TOP CUSTOMERS')}
               badges={[]}
             />
