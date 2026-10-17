@@ -1,3 +1,4 @@
+import Brand from "../models/Brand.js";
 import Product from "../models/Product.js";
 import { uploadBufferToCloudinary } from "../utils/uploadToCloudinary.js";
 import escapeRegex from "../utils/escapeRegex.js";
@@ -32,12 +33,27 @@ export const createProduct = async (req, res) => {
       images = uploads.map((upload) => upload.secure_url); // Extract secure_url
     }
 
+    let brand = await Brand.findOne({ ownerUserId: req.user._id });
+    if (!brand) {
+      const label =
+        (req.user.userName && String(req.user.userName).trim()) ||
+        req.user.firstName ||
+        "Store";
+      const brandName =
+        label.length >= 2 ? label : `Store ${String(req.user._id).slice(-8)}`;
+      brand = await Brand.create({
+        ownerUserId: req.user._id,
+        brandName,
+      });
+    }
+
     const product = await Product.create({
       name,
       price: parsedPrice,
       description,
       stock,
       images,
+      brandId: brand?._id,
       ownerUserId: req.user._id,
     });
 

@@ -5,7 +5,10 @@ import Notification from "../models/Notification.js";
 import mongoose from "mongoose";
 import env from "../config/env.js";
 import { createCheckoutSession } from "../services/stripe.service.js";
-import { fulfillPaidOrder } from "../services/orderFulfillment.service.js";
+import {
+  fulfillPaidOrder,
+  cancelFailedOrder,
+} from "../services/orderFulfillment.service.js";
 import AppError from "../utils/appError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { successResponse } from "../utils/apiResponse.js";
@@ -307,10 +310,19 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
   for (const item of order.items) {
     const product = await Product.findById(item.productId);
     if (product) {
-      const brand = await Brand.findById(product.brandId);
-      if (brand && String(brand.ownerUserId) === String(req.user._id)) {
+      if (
+        product.ownerUserId &&
+        String(product.ownerUserId) === String(req.user._id)
+      ) {
         isSeller = true;
         break;
+      }
+      if (product.brandId) {
+        const brand = await Brand.findById(product.brandId);
+        if (brand && String(brand.ownerUserId) === String(req.user._id)) {
+          isSeller = true;
+          break;
+        }
       }
     }
   }
@@ -322,14 +334,35 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     throw new AppError("You do not have permission to update this order.", 403, "FORBIDDEN");
   }
 
-  // Restrict buyer capabilities: buyers may only cancel an order that is still pending or paid
+  // Restrict buyer capabilities: buyers may only cancel an order that is still pending
   if (isBuyer && !isSeller && !isAdmin) {
     if (status !== "cancelled") {
       throw new AppError("Buyers are only permitted to cancel their orders.", 403, "FORBIDDEN");
     }
-    if (!["pending", "paid"].includes(order.status)) {
+    if (order.status !== "pending") {
       throw new AppError(
-        "Orders that are already shipped, completed, or cancelled cannot be modified.",
+        "Only pending orders can be cancelled directly by the buyer.",
+        400,
+        "INVALID_ORDER_STATE",
+      );
+    }
+  }
+
+  // Prevent sellers from marking unpaid orders as paid/shipped/completed
+  if (isSeller && !isAdmin) {
+    if (status === "paid" && order.paymentStatus !== "paid") {
+      throw new AppError(
+        "Cannot manually mark an unpaid order as paid.",
+        400,
+        "INVALID_ORDER_STATE",
+      );
+    }
+    if (
+      ["shipped", "completed"].includes(status) &&
+      order.paymentStatus !== "paid"
+    ) {
+      throw new AppError(
+        "Cannot ship or complete an order before payment is confirmed.",
         400,
         "INVALID_ORDER_STATE",
       );
@@ -337,8 +370,15 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
   }
 
   const oldStatus = order.status;
-  order.status = status;
-  await order.save();
+
+  if (status === "cancelled" && oldStatus === "pending") {
+    await cancelFailedOrder(order._id, "order_cancelled");
+    order.status = "cancelled";
+    order.paymentStatus = "failed";
+  } else {
+    order.status = status;
+    await order.save();
+  }
 
   if (status === "completed" && oldStatus !== "completed") {
     // Notify buyer
@@ -361,14 +401,14 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     for (const item of order.items) {
       const product = await Product.findById(item.productId);
       if (product) {
-        const brand = await Brand.findById(product.brandId);
-        if (
-          brand &&
-          brand.ownerUserId &&
-          mongoose.Types.ObjectId.isValid(brand.ownerUserId)
-        ) {
+        let sellerUserId = product.ownerUserId;
+        if (!sellerUserId && product.brandId) {
+          const brand = await Brand.findById(product.brandId);
+          sellerUserId = brand?.ownerUserId;
+        }
+        if (sellerUserId && mongoose.Types.ObjectId.isValid(sellerUserId)) {
           await Notification.create({
-            userId: brand.ownerUserId,
+            userId: sellerUserId,
             type: "order",
             message: `Order #${order._id.toString().substring(18)} for "${product.name}" with ${buyerName} has been successfully completed.`,
             isRead: false,
