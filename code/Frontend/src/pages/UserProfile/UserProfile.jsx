@@ -356,10 +356,10 @@ function UserProfile() {
   const rejectionReason =
     profileData?.charity?.rejectionReason || profileData?.rejectionReason || "";
 
-  // Tab definitions: organizations show organization-specific tabs; regular users/customers show footprint
+  // Tab definitions: organizations show organization-specific tabs; regular users/customers show footprint on their own profile
   const profileTabs = isOrganization 
     ? ['POSTS', 'PROJECTS', 'TOP DONORS'] 
-    : ['POSTS', 'PRODUCTS', 'FOOTPRINT', 'TOP CUSTOMERS'];
+    : ['POSTS', 'PRODUCTS', ...(isOwnProfile ? ['FOOTPRINT'] : []), 'TOP CUSTOMERS'];
 
   return (
     <div className={`luminous-app ${isSidebarCollapsed ? "sidebar-collapsed" : ""}`}>
@@ -480,8 +480,8 @@ function UserProfile() {
                       <input value={editForm.userLink} onChange={handleFieldChange("userLink")} />
                     </label>
                     <label className="up-edit-field">
-                      <span>Email</span>
-                      <input type="email" value={editForm.email} onChange={handleFieldChange("email")} />
+                      <span>Email (change in Settings)</span>
+                      <input type="email" value={editForm.email} readOnly disabled />
                     </label>
                     <div className="up-edit-actions">
                       <button className="up-edit-btn up-edit-btn--ghost" type="button" onClick={handleCancelEdit} disabled={savingProfile}>

@@ -11,10 +11,10 @@ export function useSearch() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
 
-  // Reset page when query changes
-  useEffect(() => {
+  const handleSetQuery = (nextQuery) => {
     setPage(1);
-  }, [query]);
+    setQuery(nextQuery);
+  };
 
   useEffect(() => {
     if (query.length < 2) {
@@ -73,5 +73,5 @@ export function useSearch() {
     }
   };
 
-  return { query, setQuery, results, loading, error, open, setOpen, hasMore, loadMore };
+  return { query, setQuery: handleSetQuery, results, loading, error, open, setOpen, hasMore, loadMore };
 }
