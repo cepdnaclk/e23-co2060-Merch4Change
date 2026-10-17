@@ -41,7 +41,11 @@ function PostViewer({ post, onClose }) {
 
   if (!post) return null;
 
-  const isLiked = localLikes.includes(currentUser?._id);
+  const currentUserId = currentUser?._id || currentUser?.id;
+  const isLiked =
+    Array.isArray(localLikes) &&
+    Boolean(currentUserId) &&
+    localLikes.some((id) => String(id?._id || id) === String(currentUserId));
 
 
   const images = post.images && post.images.length > 0 ? post.images : (post.imageUrl ? [post.imageUrl] : []);
@@ -64,7 +68,7 @@ function PostViewer({ post, onClose }) {
     try {
       const res = await likePost(post.id || post._id);
       if (res.data?.success) {
-        setLocalLikes(res.data.likes);
+        setLocalLikes(res.data?.data?.likes || res.data?.likes || []);
       }
     } catch (err) {
       console.error('Error liking post:', err);
@@ -80,7 +84,7 @@ function PostViewer({ post, onClose }) {
     try {
       const res = await commentOnPost(post.id || post._id, commentText);
       if (res.data?.success) {
-        setLocalComments(res.data.comments);
+        setLocalComments(res.data?.data?.comments || res.data?.comments || []);
         setCommentText('');
       }
     } catch (err) {

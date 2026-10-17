@@ -50,7 +50,9 @@ const CreatePostModal = ({ isOpen, onClose, onSuccess }) => {
       if (response.data?.success || response.status === 201) {
         setContent("");
         setImages([]);
-        if (onSuccess) onSuccess(response.data?.post || response.data);
+        const createdPost =
+          response.data?.data?.post || response.data?.post || response.data;
+        if (onSuccess) onSuccess(createdPost);
         onClose();
       }
     } catch (err) {
