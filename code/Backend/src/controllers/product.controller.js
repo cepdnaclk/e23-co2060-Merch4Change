@@ -66,7 +66,13 @@ export const createProduct = async (req, res) => {
 export const getUserProducts = async (req, res) => {
   try {
     const { username } = req.params;
-    const cleanParam = decodeURIComponent(username || "").trim();
+    let rawDecoded = username || "";
+    try {
+      rawDecoded = decodeURIComponent(rawDecoded);
+    } catch {
+      // Fall back to raw param if malformed URI encoding
+    }
+    const cleanParam = rawDecoded.trim();
     const escapedParam = escapeRegex(cleanParam);
     const alphanumericOnly = cleanParam.toLowerCase().replace(/[^a-z0-9]/g, "");
     const fuzzyPattern = escapedParam.replace(/[-_]/g, "[\\s\\-_]*");
@@ -90,9 +96,9 @@ export const getUserProducts = async (req, res) => {
       const Brand = (await import("../models/Brand.js")).default;
       const brand = await Brand.findOne({
         $or: [
-          { brandName: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
+          { brandName: { $regex: new RegExp(`^${escapedParam}$`, "i") } },
           { brandName: { $regex: fuzzyRegex } },
-          { slug: { $regex: new RegExp(`^${cleanParam}$`, "i") } },
+          { slug: { $regex: new RegExp(`^${escapedParam}$`, "i") } },
           ...(mongoose.isValidObjectId(cleanParam)
             ? [{ _id: cleanParam }, { ownerUserId: cleanParam }]
             : []),
