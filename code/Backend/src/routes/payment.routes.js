@@ -5,6 +5,7 @@ import {
   verifyPaymentSession,
   createTopupSession,
 } from "../controllers/payment.controller.js";
+import protect from "../middlewares/auth.js";
 
 const router = Router();
 
@@ -12,7 +13,7 @@ const router = Router();
 router.post("/webhook", handleStripeWebhook);
 
 // Verification endpoint called by Frontend success page to confirm order payment
-router.get("/verify-session/:sessionId", verifyPaymentSession);
+router.get("/verify-session/:sessionId", protect, verifyPaymentSession);
 
 export default router;
 
