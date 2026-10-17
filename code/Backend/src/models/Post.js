@@ -39,10 +39,17 @@ const postSchema = new mongoose.Schema(
   },
 );
 
-// Middleware: Increment count when post is created
+// Middleware: Increment count only when a new post is created
+postSchema.pre("save", function (next) {
+  this.$locals.wasNew = this.isNew;
+  next();
+});
+
 postSchema.post("save", async function () {
-  const User = mongoose.model("User");
-  await User.findByIdAndUpdate(this.userId, { $inc: { postsCount: 1 } });
+  if (this.$locals?.wasNew) {
+    const User = mongoose.model("User");
+    await User.findByIdAndUpdate(this.userId, { $inc: { postsCount: 1 } });
+  }
 });
 
 // Middleware: Decrement count when post is deleted
