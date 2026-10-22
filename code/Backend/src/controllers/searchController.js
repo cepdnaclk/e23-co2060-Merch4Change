@@ -189,11 +189,19 @@ export const searchAll = asyncHandler(async (req, res) => {
     });
   }
 
+  // maskEmail: partially hides email address to reduce PII exposure in search results.
+  // e.g. "john.doe@example.com" → "j***@example.com"
+  const maskEmail = (email) => {
+    if (!email || !email.includes("@")) return "";
+    const [user, domain] = email.split("@");
+    return `${user[0] || ""}***@${domain}`;
+  };
+
   // shape results
   const shapedUsers = (users || []).map((u) => ({
     id: String(u._id),
     userName: u.userName,
-    email: isAdmin ? u.email : "",
+    email: isAdmin ? maskEmail(u.email) : "",
     role: u.role,
     firstName: u.firstName,
     lastName: u.lastName,
@@ -203,7 +211,7 @@ export const searchAll = asyncHandler(async (req, res) => {
     id: String(c._id),
     name: c.publicName,
     userName: charityOwnerMap[String(c._id)] || "",
-    contactEmail: c.contactEmail,
+    contactEmail: maskEmail(c.contactEmail),
     website: c.website,
     totalRaised: charityTotals[String(c._id)] || 0,
   }));
