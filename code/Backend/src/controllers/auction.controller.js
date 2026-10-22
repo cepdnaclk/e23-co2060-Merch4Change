@@ -70,6 +70,13 @@ export const createAuction = async (req, res) => {
       });
     }
 
+    // validate startPrice and bidIncrement
+    if (!startPrice || !Number.isFinite(Number(startPrice)) || Number(startPrice) < 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Valid positive start price is required." });
+    }
+
     // validate start time and end time
     const isValidDate = validateTime(startTime, endTime);
     if (!isValidDate) {

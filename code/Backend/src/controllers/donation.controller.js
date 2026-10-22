@@ -378,6 +378,20 @@ export const listDonationProjects = asyncHandler(async (req, res) => {
 });
 
 /**
+ * Escape user-controlled data for safe embedding in HTML.
+ * Replaces <, >, &, ", ' with their HTML entities to prevent stored XSS.
+ */
+const escapeHtml = (value) => {
+  const str = String(value ?? "");
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;");
+};
+
+/**
  * GET /api/v1/donations/:id/receipt
  * Generate an HTML receipt for a specific donation
  */
@@ -391,18 +405,12 @@ export const downloadReceipt = asyncHandler(async (req, res) => {
     throw new AppError("Donation not found.", 404, "DONATION_NOT_FOUND");
   }
 
-  const escapeHtml = (value) =>
-    String(value ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;");
-
+  // All fields below are user-controlled and must be HTML-escaped
+  // to prevent stored XSS when the receipt is viewed.
   const charityName = escapeHtml(donation.charityId?.publicName || "Verified Charity");
   const projectName = escapeHtml(donation.charityProjectId?.title || "General Fund");
   const amount = escapeHtml(donation.coinAmount);
-  const date = escapeHtml(donation.createdAt.toDateString());
+  const date = escapeHtml(donation.createdAt?.toDateString() || "Unknown");
   const donorName = escapeHtml(`${req.user.firstName || ""} ${req.user.lastName || ""}`.trim());
   const donorEmail = escapeHtml(req.user.email);
   const receiptId = escapeHtml(donation._id);
@@ -432,9 +440,9 @@ export const downloadReceipt = asyncHandler(async (req, res) => {
         <div class="detail"><span class="label">Email:</span> ${donorEmail}</div>
         <div class="detail"><span class="label">Charity:</span> ${charityName}</div>
         <div class="detail"><span class="label">Project:</span> ${projectName}</div>
-        
+
         <div class="amount">Amount Donated: ${amount} Coins</div>
-        
+
         <div class="footer">
           Thank you for your generous support! Your contribution makes a real difference.<br>
           <strong>Merch4Change</strong>
@@ -443,7 +451,7 @@ export const downloadReceipt = asyncHandler(async (req, res) => {
     </body>
     </html>
   `;
-  
+
   res.setHeader("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'");
   res.setHeader("Content-type", "text/html; charset=utf-8");
   res.send(html);

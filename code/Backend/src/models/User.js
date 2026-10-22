@@ -118,6 +118,14 @@ const userSchema = new mongoose.Schema(
     userLink: {
       type: String,
       default: "",
+      validate: {
+        validator: (v) => {
+          if (!v) return true;
+          const lower = String(v).toLowerCase().trim();
+          return !/^((javascript|data|vbscript):)/.test(lower);
+        },
+        message: "userLink contains a disallowed URL scheme",
+      },
     },
 
     // ===== PENDING EMAIL CHANGE (OTP re-verification) =====
