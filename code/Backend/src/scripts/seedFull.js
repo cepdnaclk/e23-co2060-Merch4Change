@@ -1393,10 +1393,17 @@ const shoppersAndBidders = [
 // Helper: upsert a User by email — inserts only if the email doesn't exist yet.
 // Returns the existing or newly created document.
 async function upsertUser(data) {
-  const existing = await User.findOne({ email: data.email });
-  if (existing) return existing;
-  return User.create(data);
-}
+    const existing = await User.findOne({ email: data.email });
+    if (existing) {
+      if (data.email === "demo@merch4change.test" || data.fiatBalance !== undefined || data.coinBalance !== undefined) {
+        if (data.fiatBalance !== undefined) existing.fiatBalance = data.fiatBalance;
+        if (data.coinBalance !== undefined) existing.coinBalance = data.coinBalance;
+        await existing.save();
+      }
+      return existing;
+    }
+    return User.create(data);
+  }
 
 // Helper: upsert an OrganizationProfile by userId — skip if already exists.
 async function upsertOrgProfile(data) {
@@ -1460,6 +1467,7 @@ async function seedFull() {
         role: "admin",
         isVerified: true,
         coinBalance: 5000,
+          fiatBalance: adm.fiatBalance || 0,
         profileImageUrl: adm.profileImageUrl,
       });
       createdAdmins.push(u);
@@ -1603,6 +1611,7 @@ async function seedFull() {
         accountType: "individual",
         role: "user",
         coinBalance: d.coinBalance,
+          fiatBalance: d.fiatBalance || 0,
         isVerified: true,
         profileImageUrl: d.profileImageUrl,
       });
@@ -1623,6 +1632,7 @@ async function seedFull() {
         accountType: "individual",
         role: "user",
         coinBalance: c.coinBalance,
+          fiatBalance: c.fiatBalance || 0,
         isVerified: false,
         profileImageUrl: c.profileImageUrl,
       });
@@ -1643,6 +1653,7 @@ async function seedFull() {
         accountType: "individual",
         role: "user",
         coinBalance: s.coinBalance,
+          fiatBalance: s.fiatBalance || 0,
         isVerified: false,
         profileImageUrl: s.profileImageUrl,
       });

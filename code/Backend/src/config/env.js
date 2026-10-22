@@ -32,7 +32,7 @@ const env = {
     (process.env.NODE_ENV === "production"
       ? ""
       : "dev-refresh-secret-change-me"),
-  jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || "60d",
+  jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || "30d",
   backendLogMaxSizeBytes:
     Number(process.env.BACKEND_LOG_MAX_SIZE_BYTES) || 5242880,
   apiRateLimitWindowMs:
