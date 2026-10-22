@@ -29,6 +29,17 @@ export const createAuction = async (req, res) => {
         .json({ success: false, message: "Product is not found!" });
     }
 
+    // Only the product owner or an admin can create an auction for it
+    if (
+      String(product.ownerUserId) !== String(req.user._id) &&
+      req.user.role !== "admin"
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "You do not have permission to auction this product.",
+      });
+    }
+
     // validate startPrice and bidIncrement
     if (!startPrice || !Number.isFinite(Number(startPrice)) || Number(startPrice) < 0) {
       return res
