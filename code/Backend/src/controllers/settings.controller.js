@@ -176,6 +176,7 @@ export const requestEmailChange = asyncHandler(async (req, res) => {
 
   const otpCode = crypto.randomInt(100000, 1000000).toString();
 
+  user.pendingEmail = normalizedNewEmail;
   user.pendingEmailOtp = crypto
     .createHash("sha256")
     .update(otpCode)

@@ -9,7 +9,7 @@ import { successResponse } from "../utils/apiResponse.js";
 export const listCharitiesForReview = asyncHandler(async (req, res) => {
   const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
   const limit = Math.min(50, Math.max(1, Number.parseInt(req.query.limit, 10) || 20));
-  const validStatuses = ["pending", "verified", "rejected"];
+  const validStatuses = ["pending", "verified", "rejected", "unsubmitted"];
   const status = validStatuses.includes(req.query.status) ? req.query.status : "pending";
   const skip = (page - 1) * limit;
 
@@ -92,6 +92,10 @@ export const rejectCharity = asyncHandler(async (req, res) => {
   charity.verifiedAt = null;
   charity.verifiedByUserId = req.user._id;
   await charity.save();
+
+  await User.findByIdAndUpdate(charity.ownerUserId, {
+    $set: { role: "brand", isVerified: false },
+  });
 
   await Notification.create({
     userId: charity.ownerUserId,

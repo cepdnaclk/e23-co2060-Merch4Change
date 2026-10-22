@@ -1,4 +1,5 @@
 import multer from "multer";
+import AppError from "../utils/appError.js";
 
 const ALLOWED_DOCUMENT_MIMES = [
   "image/jpeg",
@@ -15,6 +16,12 @@ export const charityDocumentUpload = multer({
       cb(null, true);
       return;
     }
-    cb(new Error("Only JPEG, PNG, WEBP, and PDF files are allowed."));
+    cb(
+      new AppError(
+        "Only JPEG, PNG, WEBP, and PDF files are allowed.",
+        400,
+        "INVALID_FILE_TYPE",
+      ),
+    );
   },
 });

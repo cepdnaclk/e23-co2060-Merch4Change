@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 import "./Sidebar.css";
 import CreatePostModal from "../CreatePostModal/CreatePostModal";
 import BrandLogo from "../BrandLogo/BrandLogo";
+import defaultUserAvatar from "../../assets/user.svg";
 import { useAuth } from "../../context/Context";
 import { fetchNotifications } from "../../services/notificationService";
 import { useI18n } from "../../i18n/I18nContext";
@@ -183,7 +184,7 @@ function Sidebar({ profileData, setIsSidebarCollapsed, isSidebarCollapsed, onPos
         <NavLink to="/profile/me" className="lum-sidebar-profile-link" onClick={closeMobileSidebar}>
           <div className="lum-nav-icon">
             <img 
-              src={profileData?.profileImageUrl || storedUser?.profileImageUrl || "/src/assets/user.svg"} 
+              src={profileData?.profileImageUrl || storedUser?.profileImageUrl || defaultUserAvatar} 
               alt="Profile" 
               className="lum-sidebar-profile-img"
             />

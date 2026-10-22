@@ -1,4 +1,5 @@
 import multer from "multer";
+import AppError from "../utils/appError.js";
 
 const storage = multer.memoryStorage();
 
@@ -11,7 +12,14 @@ export const upload = multer({
     if (ALLOWED_IMAGE_MIMES.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error("Only JPEG, PNG, WEBP, and GIF images are allowed"), false);
+      cb(
+        new AppError(
+          "Only JPEG, PNG, WEBP, and GIF images are allowed",
+          400,
+          "INVALID_FILE_TYPE",
+        ),
+        false,
+      );
     }
   },
 });

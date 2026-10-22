@@ -107,7 +107,13 @@ export const updateMe = asyncHandler(async (req, res) => {
 export const getProfileByUsername = asyncHandler(async (req, res) => {
   const { username } = req.params;
 
-  const cleanParam = decodeURIComponent(username || "").trim();
+  const cleanParam = (() => {
+    try {
+      return decodeURIComponent(username || "").trim();
+    } catch {
+      return String(username || "").trim();
+    }
+  })();
   const escapedParam = escapeRegex(cleanParam);
   const alphanumericOnly = cleanParam.toLowerCase().replace(/[^a-z0-9]/g, "");
   const fuzzyPattern = escapedParam.replace(/[-_]/g, "[\\s\\-_]*");
@@ -244,11 +250,6 @@ export const followUser = asyncHandler(async (req, res) => {
   });
 
   if (mongoose.connection?.readyState === 1) {
-    await User.findByIdAndUpdate(userToFollow._id, {
-      $inc: { followersCount: 1 },
-    });
-    await User.findByIdAndUpdate(req.user._id, { $inc: { followingCount: 1 } });
-
     if (mongoose.Types.ObjectId.isValid(userToFollow._id)) {
       const followerName =
         req.user.firstName && req.user.lastName
@@ -282,19 +283,10 @@ export const unfollowUser = asyncHandler(async (req, res) => {
     throw new AppError("User not found.", 404, "USER_NOT_FOUND");
   }
 
-  const deleted = await Follow.findOneAndDelete({
+  await Follow.findOneAndDelete({
     followerId: req.user._id,
     followingId: userToUnfollow._id,
   });
-
-  if (deleted && mongoose.connection?.readyState === 1) {
-    await User.findByIdAndUpdate(userToUnfollow._id, {
-      $inc: { followersCount: -1 },
-    });
-    await User.findByIdAndUpdate(req.user._id, {
-      $inc: { followingCount: -1 },
-    });
-  }
 
   return successResponse(res, 200, "Successfully unfollowed user.", {
     isFollowing: false,
@@ -347,7 +339,13 @@ export const getTopCustomers = asyncHandler(async (req, res) => {
   const { username } = req.params;
 
   let targetUser = null;
-  const cleanParam = decodeURIComponent(username || "").trim();
+  const cleanParam = (() => {
+    try {
+      return decodeURIComponent(username || "").trim();
+    } catch {
+      return String(username || "").trim();
+    }
+  })();
   const escapedParam = escapeRegex(cleanParam);
   const alphanumericOnly = cleanParam.toLowerCase().replace(/[^a-z0-9]/g, "");
   const fuzzyPattern = escapedParam.replace(/[-_]/g, "[\\s\\-_]*");

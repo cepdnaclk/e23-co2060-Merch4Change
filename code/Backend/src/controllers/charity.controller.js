@@ -136,7 +136,7 @@ export const listVerifiedCharities = asyncHandler(async (req, res) => {
   const enrichedItems = items.map((c) => {
     const dInfo = donationMap.get(c._id.toString());
     const pInfo = projectMap.get(c._id.toString());
-    const totalRaised = dInfo?.totalRaised || pInfo?.totalCollected || 0;
+    const totalRaised = Math.max(dInfo?.totalRaised || 0, pInfo?.totalCollected || 0);
     const totalGoal = pInfo?.totalGoal || 10000;
     const percent =
       totalGoal > 0

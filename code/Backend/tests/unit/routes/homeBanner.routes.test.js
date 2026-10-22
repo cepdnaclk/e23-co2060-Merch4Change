@@ -12,7 +12,7 @@ import bannerRoutes from "../../../src/routes/homeBanner.routes.js";
 const startServer = async (t) => {
   const app = express();
   app.use("/api/v1/home-banners", bannerRoutes);
-  app.use((err, req, res, next) => {
+  app.use((err, req, res, _next) => {
     res.status(err.statusCode || 500).json({ code: err.code });
   });
   const server = await new Promise((resolve) => {

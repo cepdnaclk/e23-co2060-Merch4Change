@@ -75,8 +75,8 @@ export default function SearchPage() {
 
   useEffect(() => {
     if (recentSearches.length === 0) {
-      // Fetch some generic results to use as random suggestions
-      searchAll("a")
+      // Fetch some generic results to use as random suggestions (min 2 chars required by backend)
+      searchAll("an")
         .then((res) => {
           if (res.data?.data?.results?.users) {
             const users = res.data.data.results.users;
@@ -110,7 +110,10 @@ export default function SearchPage() {
       if (item.charityUserName) navigate(`/profile/${item.charityUserName}/projects`);
       else navigate("/donations");
     }
-    else if (category === "products") navigate("/marketplace");
+    else if (category === "products") {
+      if (item.id || item._id) navigate(`/marketplace/product/${item.id || item._id}`);
+      else navigate("/marketplace");
+    }
   }
 
   const showUsers = (filter === "all" || filter === "users") && results?.users?.length > 0;

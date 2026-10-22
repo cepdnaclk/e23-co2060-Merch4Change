@@ -1,5 +1,6 @@
 import Auction from "../models/Auction.js";
 import Bid from "../models/Bid.js";
+import Brand from "../models/Brand.js";
 import Product from "../models/Product.js";
 import Notification from "../models/Notification.js";
 import User from "../models/User.js";
@@ -22,6 +23,26 @@ export const createAuction = async (req, res) => {
         .json({ success: false, message: "No productId has passed." });
     }
 
+    const numericStartPrice = Number(startPrice);
+    if (!Number.isFinite(numericStartPrice) || numericStartPrice <= 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid startPrice." });
+    }
+
+    const numericBidIncrement =
+      bidIncrement !== undefined && bidIncrement !== null && bidIncrement !== ""
+        ? Number(bidIncrement)
+        : undefined;
+    if (
+      numericBidIncrement !== undefined &&
+      (!Number.isFinite(numericBidIncrement) || numericBidIncrement <= 0)
+    ) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid bidIncrement." });
+    }
+
     const product = await Product.findById(productId);
     if (!product) {
       return res
@@ -29,14 +50,23 @@ export const createAuction = async (req, res) => {
         .json({ success: false, message: "Product is not found!" });
     }
 
-    // Only the product owner or an admin can create an auction for it
-    if (
-      String(product.ownerUserId) !== String(req.user._id) &&
-      req.user.role !== "admin"
-    ) {
+    // Verify ownership (ownerUserId, brand owner, or admin)
+    const isAdmin = req.user?.role === "admin";
+    const isDirectOwner =
+      product.ownerUserId &&
+      String(product.ownerUserId) === String(req.user._id);
+    let isBrandOwner = false;
+    if (!isAdmin && !isDirectOwner && product.brandId) {
+      const brand = await Brand.findById(product.brandId);
+      isBrandOwner =
+        Boolean(brand?.ownerUserId) &&
+        String(brand.ownerUserId) === String(req.user._id);
+    }
+
+    if (!isAdmin && !isDirectOwner && !isBrandOwner) {
       return res.status(403).json({
         success: false,
-        message: "You do not have permission to auction this product.",
+        message: "You are not authorized to auction this product.",
       });
     }
 
@@ -45,12 +75,6 @@ export const createAuction = async (req, res) => {
       return res
         .status(400)
         .json({ success: false, message: "Valid positive start price is required." });
-    }
-
-    if (bidIncrement !== undefined && (!Number.isFinite(Number(bidIncrement)) || Number(bidIncrement) < 1)) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Bid increment must be a positive number." });
     }
 
     // validate start time and end time
@@ -63,23 +87,18 @@ export const createAuction = async (req, res) => {
 
     // check is started
     const hasStarted = isStarted(startTime);
-    let status = null;
-    if (!hasStarted) {
-      status = "scheduled";
-    } else {
-      status = "active";
-    }
+    const status = hasStarted ? "active" : "scheduled";
 
     const auction = await Auction.create({
       productId: productId,
-      startPrice: startPrice,
-      currentPrice: startPrice,
+      startPrice: numericStartPrice,
+      currentPrice: numericStartPrice,
       currentBidder: null,
       startTime: startTime,
       endTime: endTime,
       createdBy: req.user._id,
       status: status,
-      bidIncrement: bidIncrement || undefined,
+      bidIncrement: numericBidIncrement,
       images: images || [],
       imageUrl: imageUrl || "",
     });
@@ -94,7 +113,7 @@ export const createAuction = async (req, res) => {
 export const placeBid = async (req, res) => {
   try {
     const { id } = req.params;
-    const { amount } = req.body;
+    const numericAmount = Number(req.body?.amount);
     const userId = req.user._id;
 
     // Validate ObjectId format
@@ -110,20 +129,30 @@ export const placeBid = async (req, res) => {
         .json({ success: false, message: "Auction is not found!" });
     }
 
-    // Auto-settle if auction has started or ended
+    // Transition scheduled -> active or active -> ended if time threshold passed
     await settleAuctionIfEnded(auction);
 
-    // Prevent auction creator from bidding on own auction
     const creatorId = auction.createdBy?._id || auction.createdBy;
-    if (creatorId && creatorId.toString() === userId.toString()) {
-      return res
-        .status(403)
-        .json({ success: false, message: "You cannot bid on your own auction" });
+    if (creatorId && String(creatorId) === String(userId)) {
+      return res.status(403).json({
+        success: false,
+        message: "You cannot bid on your own auction",
+      });
+    }
+
+    if (
+      auction.currentBidder &&
+      String(auction.currentBidder) === String(userId)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "You are already the highest bidder.",
+      });
     }
 
     const { isActive, isNotExpired, isAmount, isUserHaveFiat } = await validBid(
       auction,
-      amount,
+      numericAmount,
       userId,
     );
 
@@ -151,52 +180,85 @@ export const placeBid = async (req, res) => {
         });
     }
 
-    const prevBidder = auction.currentBidder;
+    // 1. Atomically deduct balance from the new bidder first
+    const deductedUser = await User.findOneAndUpdate(
+      { _id: userId, fiatBalance: { $gte: numericAmount } },
+      { $inc: { fiatBalance: -numericAmount } },
+      { new: true },
+    );
 
-    // 1. If there was a previous leading bidder, refund their coins and notify them if outbid
-    const lastBid = await Bid.findOne({ auctionId: id, status: "active" }).sort({ createdAt: -1 });
-    if (prevBidder && lastBid) {
-      // Refund the previous bidder's coins
-      await User.findByIdAndUpdate(prevBidder, {
-        $inc: { fiatBalance: lastBid.amount },
+    if (!deductedUser) {
+      return res.status(400).json({
+        success: false,
+        message: "User doesn't have enough coin balance",
+      });
+    }
+
+    // 2. Atomically update auction only if currentPrice and active status haven't changed
+    const updatedAuction = await Auction.findOneAndUpdate(
+      {
+        _id: id,
+        status: "active",
+        endTime: { $gt: new Date() },
+        currentPrice: auction.currentPrice,
+      },
+      {
+        $set: {
+          currentPrice: numericAmount,
+          currentBidder: userId,
+        },
+      },
+      { new: true },
+    );
+
+    if (!updatedAuction) {
+      // Roll back deduction if another bid beat us or auction ended
+      await User.findByIdAndUpdate(userId, {
+        $inc: { fiatBalance: numericAmount },
+      });
+      return res.status(409).json({
+        success: false,
+        message: "Auction price was just updated by another bidder. Please try again.",
+      });
+    }
+
+    // 3. Atomically mark the previous active bid as outbid and refund that bidder once
+    const prevActiveBid = await Bid.findOneAndUpdate(
+      { auctionId: id, status: "active" },
+      { $set: { status: "outbid" } },
+      { sort: { createdAt: -1 } },
+    );
+
+    if (prevActiveBid) {
+      await User.findByIdAndUpdate(prevActiveBid.userId, {
+        $inc: { fiatBalance: prevActiveBid.amount },
       });
 
-      // Notify previous bidder if someone else outbid them
-      if (prevBidder.toString() !== userId.toString()) {
+      // Ensure any remaining stale active bids are marked outbid
+      await Bid.updateMany(
+        { auctionId: id, status: "active" },
+        { $set: { status: "outbid" } },
+      );
+
+      if (String(prevActiveBid.userId) !== String(userId)) {
         await Notification.create({
-          userId: prevBidder,
+          userId: prevActiveBid.userId,
           type: "bet",
-          message: `You have been outbid! The current highest bid is now $${amount}`,
+          message: `You have been outbid! The current highest bid is now $${numericAmount}`,
           isRead: false,
         });
       }
     }
 
-    // 2. Mark previous active bids for this auction as outbid
-    await Bid.updateMany(
-      { auctionId: id, status: "active" },
-      { $set: { status: "outbid" } }
-    );
-
-    // 3. Deduct coins from the new bidder
-    await User.findByIdAndUpdate(userId, {
-      $inc: { fiatBalance: -amount },
-    });
-
-    // 4. Update the auction leading price and bidder
-    auction.currentPrice = amount;
-    auction.currentBidder = userId;
-    await auction.save();
-
-    // 5. Create the new active bid record
+    // 4. Create the new active bid record
     const bid = await Bid.create({
       auctionId: id,
       userId: userId,
-      amount: amount,
+      amount: numericAmount,
       status: "active",
     });
 
-    return res.status(201).json({ success: true, auction, bid });
+    return res.status(201).json({ success: true, auction: updatedAuction, bid });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -205,12 +267,28 @@ export const placeBid = async (req, res) => {
 // Helper to settle auctions whose deadline passed or start time arrived
 const settleAuctionIfEnded = async (auction) => {
   const now = new Date();
-  if (auction.status === "scheduled" && new Date(auction.startTime) <= now) {
+  if (
+    auction.status === "scheduled" &&
+    new Date(auction.startTime) <= now &&
+    new Date(auction.endTime) > now
+  ) {
     auction.status = "active";
-    await auction.save();
-  } else if (auction.status === "active" && new Date(auction.endTime) <= now) {
+    if (typeof auction.save === "function") {
+      await auction.save();
+    }
+  } else if (
+    (auction.status === "active" || auction.status === "scheduled") &&
+    new Date(auction.endTime) <= now
+  ) {
+    const claimed = await Auction.findOneAndUpdate(
+      { _id: auction._id, status: { $in: ["active", "scheduled"] } },
+      { $set: { status: "ended" } },
+      { new: true },
+    );
     auction.status = "ended";
-    await auction.save();
+    if (!claimed) {
+      return auction;
+    }
 
     if (auction.currentBidder) {
       await Bid.findOneAndUpdate(
@@ -343,7 +421,7 @@ export const getAuction = async (req, res) => {
 
     const auction = await Auction.findById(id)
       .populate("productId")
-      .populate("currentBidder", "userName firstName lastName avatar")
+      .populate("currentBidder", "userName firstName lastName avatar avatarUrl profileImageUrl")
       .populate("createdBy", "userName firstName lastName");
 
     if (!auction) {

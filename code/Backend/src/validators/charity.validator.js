@@ -7,6 +7,17 @@ const CHARITY_CATEGORIES = [
   "other",
 ];
 
+const isSafeDocumentUrl = (rawUrl) => {
+  if (!rawUrl) return false;
+  if (rawUrl.startsWith("/uploads/")) return true;
+  try {
+    const parsed = new URL(rawUrl);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+};
+
 const normalizeProofDocuments = (proofDocuments) => {
   if (!Array.isArray(proofDocuments)) {
     return [];
@@ -17,7 +28,7 @@ const normalizeProofDocuments = (proofDocuments) => {
       label: String(doc?.label ?? "").trim(),
       url: String(doc?.url ?? "").trim(),
     }))
-    .filter((doc) => doc.label && doc.url);
+    .filter((doc) => doc.label && isSafeDocumentUrl(doc.url));
 };
 
 export const validateCharityVerificationBody = (payload = {}) => {

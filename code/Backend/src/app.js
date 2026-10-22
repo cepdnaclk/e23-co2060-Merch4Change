@@ -61,8 +61,14 @@ const isOriginAllowed = (origin) => {
   const cleanOrigin = origin.replace(/\/+$/, "");
   if (configuredOrigins.has(cleanOrigin)) return true;
   try {
-    const { hostname } = new URL(cleanOrigin);
-    if (hostname.endsWith(".vercel.app") || hostname === "localhost" || hostname === "127.0.0.1") {
+    const { protocol, hostname } = new URL(cleanOrigin);
+    if (
+      protocol === "https:" &&
+      /^merch4change(-[a-z0-9-]+)?\.vercel\.app$/i.test(hostname)
+    ) {
+      return true;
+    }
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
       return true;
     }
   } catch {

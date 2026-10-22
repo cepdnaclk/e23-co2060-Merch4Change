@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
-import { setAccessToken as syncTokenToApiClient, setLogoutCallback } from "../api/apiClient";
+import { setAccessToken as syncTokenToApiClient, setLogoutCallback, setTokenChangeCallback } from "../api/apiClient";
 import API_BASE from "../utils/apiUrl";
 
 interface User {
@@ -48,9 +48,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         syncTokenToApiClient(accessToken);
     }, [accessToken]);
 
-    // Register logout callback so apiClient can trigger logout on refresh failure
+    // Register logout and token-change callbacks so apiClient can sync silent refreshes
     useEffect(() => {
         setLogoutCallback(logout);
+        setTokenChangeCallback((newToken: string | null) => {
+            setAccessToken((prev) => (prev !== newToken ? newToken : prev));
+        });
+        return () => {
+            setTokenChangeCallback(null);
+        };
     }, [logout]);
 
     useEffect(() => {

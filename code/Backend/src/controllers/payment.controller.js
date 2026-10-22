@@ -96,8 +96,20 @@ export const verifyPaymentSession = asyncHandler(async (req, res) => {
 
   let order = await Order.findOne({ stripeSessionId: sessionId });
 
+  if (!order) {
+    throw new AppError("Order not found for this checkout session.", 404, "ORDER_NOT_FOUND");
+  }
+
+  if (
+    req.user &&
+    req.user.role !== "admin" &&
+    String(order.userId) !== String(req.user._id)
+  ) {
+    throw new AppError("You do not have access to this order.", 403, "FORBIDDEN");
+  }
+
   // If order is still pending, check live session status from Stripe directly
-  if (order && order.status === "pending") {
+  if (order.status === "pending") {
     try {
       const session = await retrieveCheckoutSession(sessionId);
       if (session && session.payment_status === "paid") {
@@ -109,10 +121,6 @@ export const verifyPaymentSession = asyncHandler(async (req, res) => {
     } catch (err) {
       logError("Failed to retrieve live session status from Stripe", err, { sessionId });
     }
-  }
-
-  if (!order) {
-    throw new AppError("Order not found for this checkout session.", 404, "ORDER_NOT_FOUND");
   }
 
   return successResponse(res, 200, "Session status retrieved.", {
