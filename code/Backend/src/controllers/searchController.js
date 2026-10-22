@@ -16,15 +16,22 @@ export const searchAll = asyncHandler(async (req, res) => {
   const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 8));
   const skip = (page - 1) * limit;
 
-  if (q.length < 2)
+  // Sanitize query: enforce length limits and strip non-alphanumeric chars
+  // (except spaces, @, #, -, _, .) to prevent regex injection / ReDoS.
+  if (q.length > 100)
+    throw new AppError("Query must not exceed 100 characters.", 400, "VALIDATION_ERROR");
+
+  const normalizedQuery = q.replace(/^[#@]+/, "").trim();
+  const cleanedQuery = normalizedQuery
+    ? String(normalizedQuery).replace(/[^a-zA-Z0-9\s@#\-_.]/g, "")
+    : q;
+
+  if (cleanedQuery.length < 2)
     throw new AppError(
       "Query must be at least 2 characters.",
       400,
       "VALIDATION_ERROR",
     );
-
-  const normalizedQuery = q.replace(/^[#@]+/, "").trim();
-  const cleanedQuery = normalizedQuery || q;
 
   const createFuzzyRegex = (str) => {
     if (str.length < 3) return new RegExp(escapeRegex(str), "i");
